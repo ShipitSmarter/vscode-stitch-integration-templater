@@ -11,7 +11,7 @@
   ],
   "activationEvents": [
     "onCommand:mypanel.start",
-    "onCommand:mypanel.startPowerShellScript1"
+    "onCommand:mypanel.startPowerShellScript"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -21,14 +21,14 @@
         "title": "Start dashboard"
       },
       {
-        "command": "mypanel.startPowerShellScript1",
+        "command": "mypanel.startPowerShellScript",
         "title": "MyPanel: Run PowerShell script"
       }
     ],
     "menus": {
       "explorer/context": [
         {
-          "command": "mypanel.startPowerShellScript1"
+          "command": "mypanel.startPowerShellScript"
         }
       ]
     }
