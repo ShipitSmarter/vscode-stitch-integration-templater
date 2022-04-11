@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as Uri from 'vscode-uri';
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
@@ -16,14 +15,20 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 			);
 
-			// And set its HTML content
-			panel.webview.html = getMyWebviewContent(panel.webview, context);
 
-			// Get path to script on disk
+			// And set its HTML content
+			getMyWebviewContent(panel.webview, context).then(html =>panel.webview.html = html);
+
+			// Get path to script in extension folder
 			let scriptPath = vscode.Uri.file(
 				path.join(context.extensionPath, 'scripts', 'script.ps1')
 			);
 			// let scriptPath = Uri.URI.file(context.asAbsolutePath(path.join('scripts', 'script.ps1')));
+
+			// Get path to script on disk
+			//const workspaceScriptPath = vscode.workspace.findFiles('**/scripts/functions.ps1');
+			//let functionsPath = getFile('**/scripts/functions.ps1');
+			let functionsPath: string;
 
 			// Pre-allocate terminal and terminalExists
 			let terminal: vscode.Terminal;
@@ -60,11 +65,10 @@ export function activate(context: vscode.ExtensionContext) {
 						case 'executeScript':
 							vscode.window.showErrorMessage('Executing script with user arguments');
 
-							var henk : string = scriptPath.toString();
+							var scriptPathEscaped : string = scriptPath.toString();
 							// text to send: dot-source script and add arguments
-							var sendText: string = `. ${Uri.URI.parse(henk).fsPath} -message ${message.text}`;
+							var sendText: string = `. ${vscode.Uri.parse(scriptPathEscaped).fsPath} -message ${message.text}`;
 
-							var joop: string = '';
 							if (terminalExists) {
 								// if terminal exists and has not exited: re-use
 								terminal.sendText(sendText);
@@ -73,6 +77,23 @@ export function activate(context: vscode.ExtensionContext) {
 								terminal = startScript('','',sendText);
 							}
 							break;
+
+							case 'setFunctionsPath':
+								functionsPath = message.text;
+								break;
+							case 'findAndExecuteScript':
+								vscode.window.showErrorMessage('Dot-Source functions file and execute script');
+	
+								if (terminalExists) {
+									// if terminal exists and has not exited: re-use
+									terminal.sendText(`. ${functionsPath}`);
+								} else {
+									// else: open new terminal
+									terminal = startScript('','',`. ${functionsPath}`);
+								}
+
+								terminal.sendText(message.text);
+								break;
 					}
 
 					return;
@@ -120,10 +141,19 @@ function startScript (fileName ?: string , filePath ?: string , command ?: strin
 	};
 	
 	return terminal;
+
 }
 
-function getMyWebviewContent(webview: vscode.Webview, context: any): string {
+async function getFile(matchString: string): Promise<string> {
+	let functionsFiles = await vscode.workspace.findFiles(matchString);
+	const outFile = functionsFiles[0].fsPath.replace(/\\/g, '/');
+	return outFile;
+}
+
+async function getMyWebviewContent(webview: vscode.Webview, context: any): Promise<string> {
 	let html: string = ``;
+
+	const functionsPath = await getFile('**/scripts/functions.ps1');
 
 	const myStyle = webview.asWebviewUri(vscode.Uri.joinPath(
 		context.extensionUri, 'media', 'style.css'));   // <--- 'media' is the folder where the .css file is stored
@@ -159,13 +189,26 @@ function getMyWebviewContent(webview: vscode.Webview, context: any): string {
 					<h1>...</h1>
 				</div>
 				<div>
-					<h2>Enter arguments for existing script</h2>
+					<h2>Enter arguments for existing script in extension folder</h2>
 				</div>
 				<div>
 					<input type="text" maxlength="512" id="ScriptArguments" class="searchField"/>
 				</div>
 				<div>
 					<button class="button-34" role="button" onclick="executeScript()" id="executeScript">Execute Script</button>
+				</div>
+
+				<div class="main"> 
+					<h1>...</h1>
+				</div>
+				<div>
+					<h2>Enter arguments for existing script in workspace</h2>
+				</div>
+				<div>
+					<input type="text" maxlength="512" id="FindScriptArguments" class="searchField"/>
+				</div>
+				<div>
+					<button class="button-34" role="button" onclick="findAndExecuteScript()" id="findAndExecuteScript">Execute Script</button>
 				</div>
 				
 
@@ -186,6 +229,13 @@ function getMyWebviewContent(webview: vscode.Webview, context: any): string {
 						}
 					});
 
+					var FindScriptArgumentsField = document.getElementById('FindScriptArguments');
+					FindScriptArgumentsField.addEventListener("keydown", function (e) {
+						if (e.key === "Enter") {  
+							findAndExecuteScript();
+						}
+					});
+
 					function startScript(){
 						vscodeApi.postMessage({command: "startScript", text: "Start Selected Script"});
 				  	};
@@ -197,6 +247,11 @@ function getMyWebviewContent(webview: vscode.Webview, context: any): string {
 					function executeScript() {
 						vscodeApi.postMessage({command: "executeScript", text: ScriptArgumentsField.value});
 					};
+
+					function findAndExecuteScript() {
+						vscodeApi.postMessage({command: "setFunctionsPath", text: "${functionsPath}"});
+						vscodeApi.postMessage({command: "findAndExecuteScript", text: FindScriptArgumentsField.value});
+					}
 
 					
 				</script>
