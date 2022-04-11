@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as Uri from 'vscode-uri';
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
@@ -17,6 +19,13 @@ export function activate(context: vscode.ExtensionContext) {
 			// And set its HTML content
 			panel.webview.html = getMyWebviewContent(panel.webview, context);
 
+			// Get path to script on disk
+			let scriptPath = vscode.Uri.file(
+				path.join(context.extensionPath, 'scripts', 'script.ps1')
+			);
+			// let scriptPath = Uri.URI.file(context.asAbsolutePath(path.join('scripts', 'script.ps1')));
+
+			// Pre-allocate terminal and terminalExists
 			let terminal: vscode.Terminal;
 			let terminalExists: boolean;
 
@@ -35,6 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
 								vscode.window.showErrorMessage('Script already started!');
 							}
 							break;
+
 						case 'executeCommand':
 							vscode.window.showErrorMessage('Executing user input command');
 
@@ -44,6 +54,23 @@ export function activate(context: vscode.ExtensionContext) {
 							} else {
 								// else: open new terminal
 								terminal = startScript('','',message.text);
+							}
+							break;
+
+						case 'executeScript':
+							vscode.window.showErrorMessage('Executing script with user arguments');
+
+							var henk : string = scriptPath.toString();
+							// text to send: dot-source script and add arguments
+							var sendText: string = `. ${Uri.URI.parse(henk).fsPath} -message ${message.text}`;
+
+							var joop: string = '';
+							if (terminalExists) {
+								// if terminal exists and has not exited: re-use
+								terminal.sendText(sendText);
+							} else {
+								// else: open new terminal
+								terminal = startScript('','',sendText);
 							}
 							break;
 					}
@@ -109,32 +136,69 @@ function getMyWebviewContent(webview: vscode.Webview, context: any): string {
 				<link href="${myStyle}" rel="stylesheet" />   
 			</head>
 			<body>
-				<button class="button-34" role="button" onclick="startScript()" id="startScript">Start script</button>
+				<div>
+					<h2>Open new terminal</h2>
+				</div>
+				<div>
+					<button class="button-34" role="button" onclick="startScript()" id="startScript">Start script</button>
+				</div>
 				<div class="main"> 
 					<h1>...</h1>
+				</div>
+				<div>
+					<h2>Enter PowerShell command and execute</h2>
 				</div>
 				<div>
 					<input type="text" maxlength="512" id="ScriptCommand" class="searchField"/>
 				</div>
 				<div>
+					<button class="button-34" role="button" onclick="executeCommand()" id="executeCommand">Execute Command</button>
+				</div>
+
+				<div class="main"> 
+					<h1>...</h1>
 				</div>
 				<div>
-					<button class="button-34" role="button" onclick="executeCommand()" id="executeCommand">Execute Command</button>
+					<h2>Enter arguments for existing script</h2>
+				</div>
+				<div>
+					<input type="text" maxlength="512" id="ScriptArguments" class="searchField"/>
+				</div>
+				<div>
+					<button class="button-34" role="button" onclick="executeScript()" id="executeScript">Execute Script</button>
 				</div>
 				
 
 				<script>
 					const vscodeApi = acquireVsCodeApi(); 
-					var ScriptCommand = '';
+
+					var ScriptCommandField =  document.getElementById('ScriptCommand');
+					ScriptCommandField.addEventListener("keydown", function (e) {
+						if (e.key === "Enter") {  
+							executeCommand();
+						}
+					});
+
+					var ScriptArgumentsField = document.getElementById('ScriptArguments');
+					ScriptArgumentsField.addEventListener("keydown", function (e) {
+						if (e.key === "Enter") {  
+							executeScript();
+						}
+					});
 
 					function startScript(){
 						vscodeApi.postMessage({command: "startScript", text: "Start Selected Script"});
 				  	};
 
 					function executeCommand() {
-						ScriptCommand = document.getElementById('ScriptCommand').value;
-						vscodeApi.postMessage({command: "executeCommand", text: ScriptCommand});
+						vscodeApi.postMessage({command: "executeCommand", text: ScriptCommandField.value});
 					};
+
+					function executeScript() {
+						vscodeApi.postMessage({command: "executeScript", text: ScriptArgumentsField.value});
+					};
+
+					
 				</script>
 			</body>
 		</html>
