@@ -15,7 +15,6 @@ export function activate(context: vscode.ExtensionContext) {
 					}
 			);
 
-
 			// And set its HTML content
 			getMyWebviewContent(panel.webview, context).then(html =>panel.webview.html = html);
 
@@ -29,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 			//const workspaceScriptPath = vscode.workspace.findFiles('**/scripts/functions.ps1');
 			//let functionsPath = getFile('**/scripts/functions.ps1');
 			let functionsPath: string;
+			getFile('**/scripts/functions.ps1').then(outFile => functionsPath = outFile);
 
 			// Pre-allocate terminal and terminalExists
 			let terminal: vscode.Terminal;
@@ -78,9 +78,6 @@ export function activate(context: vscode.ExtensionContext) {
 							}
 							break;
 
-							case 'setFunctionsPath':
-								functionsPath = message.text;
-								break;
 							case 'findAndExecuteScript':
 								vscode.window.showErrorMessage('Dot-Source functions file and execute script');
 	
@@ -152,8 +149,6 @@ async function getFile(matchString: string): Promise<string> {
 
 async function getMyWebviewContent(webview: vscode.Webview, context: any): Promise<string> {
 	let html: string = ``;
-
-	const functionsPath = await getFile('**/scripts/functions.ps1');
 
 	const myStyle = webview.asWebviewUri(vscode.Uri.joinPath(
 		context.extensionUri, 'media', 'style.css'));   // <--- 'media' is the folder where the .css file is stored
@@ -249,7 +244,6 @@ async function getMyWebviewContent(webview: vscode.Webview, context: any): Promi
 					};
 
 					function findAndExecuteScript() {
-						vscodeApi.postMessage({command: "setFunctionsPath", text: "${functionsPath}"});
 						vscodeApi.postMessage({command: "findAndExecuteScript", text: FindScriptArgumentsField.value});
 					}
 
