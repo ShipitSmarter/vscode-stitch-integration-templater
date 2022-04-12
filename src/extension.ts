@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
@@ -122,6 +123,12 @@ export function activate(context: vscode.ExtensionContext) {
 			startScript(fileName, filePath);
 		})
 	);
+
+	const helloCommand = vscode.commands.registerCommand("mypanel.createIntegration", () => {
+		CreateIntegrationPanel.render(context.extensionUri);
+	  });
+	
+	context.subscriptions.push(helloCommand);
 }
 
 function startScript (fileName ?: string , filePath ?: string , command ?: string) : vscode.Terminal {
@@ -197,7 +204,6 @@ function stepInputs(nofSteps:number): string {
 }
 
 async function getMySimpleWebviewContent(webview: vscode.Webview, context: any, nofSteps:number): Promise<string> {
-	let html: string = ``;
 
 	const myStyle = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'style.css'));   // <--- 'media' is the folder where the .css file is stored
 	const scriptURI = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'scripts', 'main.js')); 
@@ -205,7 +211,7 @@ async function getMySimpleWebviewContent(webview: vscode.Webview, context: any, 
 	let stepIntputFields = stepInputs(nofSteps);
 
 	// construct your HTML code
-	html += `
+	let html =  /*html*/`
 		<!DOCTYPE html>
 		<html>
 			<head>
