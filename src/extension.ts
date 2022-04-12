@@ -16,25 +16,14 @@ export function activate(context: vscode.ExtensionContext) {
 			);
 
 			// And set its HTML content
-
 			const updateWebview = (nofSteps: number) => {
 				getMySimpleWebviewContent(panel.webview, context, nofSteps).then(html =>panel.webview.html = html);   // <--- HTML
 			};
 
-			// getMyWebviewContent(panel.webview, context).then(html =>panel.webview.html = html);
-			// getMySimpleWebviewContent(panel.webview, context).then(html =>panel.webview.html = html);
-
+			// generate initial WebView content
 			updateWebview(0);
 
-			// Get path to script in extension folder
-			let scriptPath = vscode.Uri.file(
-				path.join(context.extensionPath, 'scripts', 'script.ps1')
-			);
-			// let scriptPath = Uri.URI.file(context.asAbsolutePath(path.join('scripts', 'script.ps1')));
-
-			// Get path to script on disk
-			//const workspaceScriptPath = vscode.workspace.findFiles('**/scripts/functions.ps1');
-			//let functionsPath = getFile('**/scripts/functions.ps1');
+			// Get path to script in workspace
 			let functionsPath: string;
 			getFile('**/scripts/functions.ps1').then(outFile => functionsPath = outFile);
 
@@ -70,21 +59,22 @@ export function activate(context: vscode.ExtensionContext) {
 							}
 							break;
 
-						// case 'executeScript':
-						// 	vscode.window.showErrorMessage('Executing script with user arguments');
+						case 'executeScript':
+							vscode.window.showErrorMessage('Executing script with user arguments');
 
-						// 	var scriptPathEscaped : string = scriptPath.toString();
-						// 	// text to send: dot-source script and add arguments
-						// 	var sendText: string = `. ${vscode.Uri.parse(scriptPathEscaped).fsPath} -message ${message.text}`;
+							
+							// text to send: dot-source script and add arguments
+							let scriptPath = getExtensionFile(context,'scripts','script.ps1');
+							var sendText: string = `. ${scriptPath} -message ${message.text}`;
 
-						// 	if (terminalExists) {
-						// 		// if terminal exists and has not exited: re-use
-						// 		terminal.sendText(sendText);
-						// 	} else {
-						// 		// else: open new terminal
-						// 		terminal = startScript('','',sendText);
-						// 	}
-						// 	break;
+							if (terminalExists) {
+								// if terminal exists and has not exited: re-use
+								terminal.sendText(sendText);
+							} else {
+								// else: open new terminal
+								terminal = startScript('','',sendText);
+							}
+							break;
 
 						case 'findAndExecuteScript':
 							vscode.window.showErrorMessage('Dot-Source functions file and execute script');
@@ -155,9 +145,23 @@ function startScript (fileName ?: string , filePath ?: string , command ?: strin
 }
 
 async function getFile(matchString: string): Promise<string> {
+	// get path to file in workspace
 	let functionsFiles = await vscode.workspace.findFiles(matchString);
 	const outFile = functionsFiles[0].fsPath.replace(/\\/g, '/');
 	return outFile;
+}
+
+function getExtensionFile(context: vscode.ExtensionContext, folder: string, file: string): string {
+	// get path to file in extension folder
+	let fileRawPath = vscode.Uri.file(
+		path.join(context.extensionPath, folder, file)
+	);
+
+	let filePathEscaped : string = fileRawPath.toString();
+
+	let filePath = vscode.Uri.parse(filePathEscaped).fsPath;
+
+	return filePath;
 }
 
 function stepInputs(nofSteps:number): string {
@@ -210,144 +214,33 @@ async function getMySimpleWebviewContent(webview: vscode.Webview, context: any, 
 			</head>
 			<body>
 				<div>
-					<h2>Open new terminal</h2>
+					<h2>PowerShell</h2>
 				</div>
-				<div>
-					<button class="button-34" role="button" onclick="startScript()" id="startScript">Start script</button>
-				</div>
+				<label for="startScript">Open new terminal</label>
+				<input type="submit" onclick="startScript()" id="startScript" value="Open terminal and start default script">
 
-				<!-- <div class="main"> 
-					<h1>...</h1>
-				</div>
-				<div>
-					<h2>Enter PowerShell command and execute</h2>
-				</div>
-				<div>
-					<input type="text" maxlength="512" id="ScriptCommand" class="searchField"/>
-				</div>
-				<div>
-					<button class="button-34" role="button" onclick="executeCommand()" id="executeCommand">Execute Command</button>
-				</div> -->
+				<label for="ScriptCommand">Enter PowerShell command and execute</label>
+				<input type="text" id="ScriptCommand" placeholder="Enter PowerShell command...">
+				<input type="submit" onclick="executeCommand()" id="executeCommand" value="Execute Command">
 
-				<div class="main"> 
-					<h1>...</h1>
-				</div>
-				<div>
-					<h2>Enter arguments for existing script in workspace</h2>
-				</div>
-				<div>
-					<input type="text" maxlength="512" id="FindScriptArguments" class="searchField"/>
-				</div>
-				<div>
-					<button class="button-34" role="button" onclick="findAndExecuteScript()" id="findAndExecuteScript">Execute Script</button>
-				</div>
+				<label for="ScriptArguments">Load script.ps1 from extension folder and execute with arguments</label>
+				<input type="text" id="ScriptArguments" placeholder="Enter arguments for script.ps1 ...">
+				<input type="submit" onclick="executeScript()" id="executeScript" value="Execute Script with arguments">
 
-
-				<div class="main"> 
-					<h1>...</h1>
-				</div>
-
-					<label for="fname">Number of steps</label>
-					<input type="text" id="nofSteps" name="firstname" placeholder="Needs integer...">
-
-					<input type="submit" onclick="updateNofSteps()" id="updateNofSteps" value="Update">
-					${stepIntputFields}
-			</body>
-		</html>
-	`;
-	// -----------------------
-	return html;
-}
-
-async function getMyWebviewContent(webview: vscode.Webview, context: any): Promise<string> {
-	let html: string = ``;
-
-	const myStyle = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'style.css'));   // <--- 'media' is the folder where the .css file is stored
-
-	// construct your HTML code
-	html += `
-		<!DOCTYPE html>
-		<html>
-			<head>
-				<link href="${myStyle}" rel="stylesheet" />   
-			</head>
-			<body>
-				<div>
-					<h2>Open new terminal</h2>
-				</div>
-				<div>
-					<button class="button-34" role="button" onclick="startScript()" id="startScript">Start script</button>
-				</div>
-				<div class="main"> 
-					<h1>...</h1>
-				</div>
-				<div>
-					<h2>Enter PowerShell command and execute</h2>
-				</div>
-				<div>
-					<input type="text" maxlength="512" id="ScriptCommand" class="searchField"/>
-				</div>
-				<div>
-					<button class="button-34" role="button" onclick="executeCommand()" id="executeCommand">Execute Command</button>
-				</div>
-
-				<div class="main"> 
-					<h1>...</h1>
-				</div>
-				<div>
-					<h2>Enter arguments for existing script in extension folder</h2>
-				</div>
-				<div>
-					<input type="text" maxlength="512" id="ScriptArguments" class="searchField"/>
-				</div>
-				<div>
-					<button class="button-34" role="button" onclick="executeScript()" id="executeScript">Execute Script</button>
-				</div>
-
-				<div class="main"> 
-					<h1>...</h1>
-				</div>
-				<div>
-					<h2>Enter arguments for existing script in workspace</h2>
-				</div>
-				<div>
-					<input type="text" maxlength="512" id="FindScriptArguments" class="searchField"/>
-				</div>
-				<div>
-					<button class="button-34" role="button" onclick="findAndExecuteScript()" id="findAndExecuteScript">Execute Script</button>
-				</div>
+				<label for="FindScriptArguments">Load functions.ps1 from workspace and execute command</label>
+				<input type="text" id="FindScriptArguments" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ...">
+				<input type="submit" onclick="findAndExecuteScript()" id="findAndExecuteScript" value="Execute Script">
 				
 
-				<script>
-					const vscodeApi = acquireVsCodeApi(); 
+				<div class="main"> 
+					<h1>Flexible fields</h1>
+				</div>
 
-					var ScriptCommandField =  document.getElementById('ScriptCommand');
-					// ScriptCommandField.addEventListener("keydown", function (e) {
-					// 	if (e.key === "Enter") {  
-					// 		executeCommand();
-					// 	}
-					// });
-					var ScriptArgumentsField = document.getElementById('ScriptArguments');
-					var FindScriptArgumentsField = document.getElementById('FindScriptArguments');
-
-					function startScript(){
-						vscodeApi.postMessage({command: "startScript", text: "Start Selected Script"});
-				  	};
-
-					function executeCommand() {
-						vscodeApi.postMessage({command: "executeCommand", text: ScriptCommandField.value});
-					};
-
-					function executeScript() {
-						vscodeApi.postMessage({command: "executeScript", text: ScriptArgumentsField.value});
-					};
-
-					function findAndExecuteScript() {
-						vscodeApi.postMessage({command: "findAndExecuteScript", text: FindScriptArgumentsField.value});
-					}
-
-					
-				</script>
+				<label for="fname">Number of steps</label>
+				<input type="text" id="nofSteps" name="firstname" placeholder="Needs integer...">
+				<input type="submit" onclick="updateNofSteps()" id="updateNofSteps" value="Update">
+				
+				${stepIntputFields}
 			</body>
 		</html>
 	`;

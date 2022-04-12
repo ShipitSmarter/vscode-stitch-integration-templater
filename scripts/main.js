@@ -32,6 +32,10 @@ const executeCommand = () =>{
     vscodeApi.postMessage({ command: "executeCommand", text: document.getElementById('ScriptCommand').value });
 };
 
+const executeScript = () =>{
+    vscodeApi.postMessage({ command: "executeScript", text: document.getElementById('ScriptArguments').value });
+};
+
 const findAndExecuteScript = () => {
     vscodeApi.postMessage({ command: "findAndExecuteScript", text: document.getElementById('FindScriptArguments').value });
 };
