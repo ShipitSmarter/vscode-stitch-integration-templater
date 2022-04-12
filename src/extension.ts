@@ -16,8 +16,15 @@ export function activate(context: vscode.ExtensionContext) {
 			);
 
 			// And set its HTML content
+
+			const updateWebview = (nofSteps: number) => {
+				getMySimpleWebviewContent(panel.webview, context, nofSteps).then(html =>panel.webview.html = html);   // <--- HTML
+			};
+
 			// getMyWebviewContent(panel.webview, context).then(html =>panel.webview.html = html);
-			getMySimpleWebviewContent(panel.webview, context).then(html =>panel.webview.html = html);
+			// getMySimpleWebviewContent(panel.webview, context).then(html =>panel.webview.html = html);
+
+			updateWebview(0);
 
 			// Get path to script in extension folder
 			let scriptPath = vscode.Uri.file(
@@ -79,19 +86,24 @@ export function activate(context: vscode.ExtensionContext) {
 						// 	}
 						// 	break;
 
-						// case 'findAndExecuteScript':
-						// 	vscode.window.showErrorMessage('Dot-Source functions file and execute script');
+						case 'findAndExecuteScript':
+							vscode.window.showErrorMessage('Dot-Source functions file and execute script');
 
-						// 	if (terminalExists) {
-						// 		// if terminal exists and has not exited: re-use
-						// 		terminal.sendText(`. ${functionsPath}`);
-						// 	} else {
-						// 		// else: open new terminal
-						// 		terminal = startScript('','',`. ${functionsPath}`);
-						// 	}
+							if (terminalExists) {
+								// if terminal exists and has not exited: re-use
+								terminal.sendText(`. ${functionsPath}`);
+							} else {
+								// else: open new terminal
+								terminal = startScript('','',`. ${functionsPath}`);
+							}
 
-						// 	terminal.sendText(message.text);
-						// 	break;
+							terminal.sendText(message.text);
+							break;
+
+						case 'updateNofSteps':
+							vscode.window.showErrorMessage(`Updated number of step input fields to ${message.text}`);
+							updateWebview(message.text);
+							break;
 					}
 
 					return;
@@ -148,11 +160,45 @@ async function getFile(matchString: string): Promise<string> {
 	return outFile;
 }
 
-async function getMySimpleWebviewContent(webview: vscode.Webview, context: any): Promise<string> {
+function stepInputs(nofSteps:number): string {
+	let html: string = ``;
+
+	for (let step = 1; step <= nofSteps; step++) {
+		let after = '';
+		switch (step) {
+			case 1 :
+				after = 'st';
+				break;
+			case 2 :
+				after = 'nd';
+				break;
+			case 3 :
+				after = 'rd';
+				break;
+			default:
+				after = 'th';
+				break;
+		}
+
+		html += `
+		<label for="inputStep${step}">Step ${step}</label>
+		<input type="text" maxlength="512" id="inputStep${step}" placeholder="${step + after} step name...">
+		`;
+	  }
+
+	// Example on reading file
+	// let document = await vscode.workspace.openTextDocument(element.path);
+	// document.getText();
+	return html;
+}
+
+async function getMySimpleWebviewContent(webview: vscode.Webview, context: any, nofSteps:number): Promise<string> {
 	let html: string = ``;
 
 	const myStyle = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'media', 'style.css'));   // <--- 'media' is the folder where the .css file is stored
 	const scriptURI = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'scripts', 'main.js')); 
+
+	let stepIntputFields = stepInputs(nofSteps);
 
 	// construct your HTML code
 	html += `
@@ -169,7 +215,8 @@ async function getMySimpleWebviewContent(webview: vscode.Webview, context: any):
 				<div>
 					<button class="button-34" role="button" onclick="startScript()" id="startScript">Start script</button>
 				</div>
-				<div class="main"> 
+
+				<!-- <div class="main"> 
 					<h1>...</h1>
 				</div>
 				<div>
@@ -180,7 +227,31 @@ async function getMySimpleWebviewContent(webview: vscode.Webview, context: any):
 				</div>
 				<div>
 					<button class="button-34" role="button" onclick="executeCommand()" id="executeCommand">Execute Command</button>
+				</div> -->
+
+				<div class="main"> 
+					<h1>...</h1>
 				</div>
+				<div>
+					<h2>Enter arguments for existing script in workspace</h2>
+				</div>
+				<div>
+					<input type="text" maxlength="512" id="FindScriptArguments" class="searchField"/>
+				</div>
+				<div>
+					<button class="button-34" role="button" onclick="findAndExecuteScript()" id="findAndExecuteScript">Execute Script</button>
+				</div>
+
+
+				<div class="main"> 
+					<h1>...</h1>
+				</div>
+
+					<label for="fname">Number of steps</label>
+					<input type="text" id="nofSteps" name="firstname" placeholder="Needs integer...">
+
+					<input type="submit" onclick="updateNofSteps()" id="updateNofSteps" value="Update">
+					${stepIntputFields}
 			</body>
 		</html>
 	`;
