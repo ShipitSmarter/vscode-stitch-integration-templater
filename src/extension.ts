@@ -23,9 +23,9 @@ export function activate(context: vscode.ExtensionContext) {
 			// generate initial WebView content
 			updateWebview(0);
 
-			// Get path to script in workspace
+			// Get path to functions.ps1 file in workspace
 			let functionsPath: string;
-			getFile('**/scripts/functions.ps1').then(outFile => functionsPath = outFile);
+			getWorkspaceFile('**/scripts/functions.ps1').then(outFile => functionsPath = outFile);
 
 			// Pre-allocate terminal and terminalExists
 			let terminal: vscode.Terminal;
@@ -144,7 +144,7 @@ function startScript (fileName ?: string , filePath ?: string , command ?: strin
 
 }
 
-async function getFile(matchString: string): Promise<string> {
+async function getWorkspaceFile(matchString: string): Promise<string> {
 	// get path to file in workspace
 	let functionsFiles = await vscode.workspace.findFiles(matchString);
 	const outFile = functionsFiles[0].fsPath.replace(/\\/g, '/');
