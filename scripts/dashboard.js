@@ -9,6 +9,9 @@ function main() {
 
   const stepsButton = document.getElementById("oldsteps");
   stepsButton.addEventListener("click", updateNofSteps);
+
+  const startScriptButton = document.getElementById("startscript");
+  startScriptButton.addEventListener("click",startScript);
 }
 
 function handleHowdyClick() {
@@ -22,5 +25,12 @@ function updateNofSteps () {
   vscodeApi.postMessage({ 
     command: "updateNofSteps", 
     text: document.getElementById("nofsteps").value
+  });
+}
+
+function startScript () {
+  vscodeApi.postMessage({ 
+    command: "startScript", 
+    text: "Start Selected Script" 
   });
 }

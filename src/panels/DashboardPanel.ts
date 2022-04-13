@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getExtensionFile } from "../utilities/functions";
+import { getUri, getWorkspaceFile, getExtensionFile , startScript} from "../utilities/functions";
 
 export class DashboardPanel {
   // PROPERTIES
@@ -39,10 +39,21 @@ export class DashboardPanel {
 
   // message listener
   private _setWebviewMessageListener(extensionUri: vscode.Uri, webview: vscode.Webview) {
+    // Pre-allocate terminal and terminalExists
+    let terminal: vscode.Terminal;
+    let terminalExists: boolean;
+
     webview.onDidReceiveMessage(
       (message: any) => {
         const command = message.command;
         const text = message.text;
+
+        // Get path to functions.ps1 file in workspace
+        let functionsPath: string;
+        getWorkspaceFile('**/scripts/functions.ps1').then(outFile => functionsPath = outFile);
+
+        // check if terminal exists and is still alive
+        terminalExists = (terminal && !(terminal.exitStatus));
 
         switch (command) {
           case "hello":
@@ -51,6 +62,14 @@ export class DashboardPanel {
         case 'updateNofSteps':
             vscode.window.showInformationMessage(`Updated number of step input fields to ${text}`);
             this._updateWebview(extensionUri, text);
+            break;
+        case 'startScript':
+            if (!terminalExists) {
+                vscode.window.showErrorMessage(message.text);
+                terminal = startScript('','',`Write-Host 'Hello World!'`);
+            } else {
+                vscode.window.showInformationMessage('Script already started!');
+            }
             break;
         }
       },
@@ -124,7 +143,7 @@ export class DashboardPanel {
 					<h2>PowerShell</h2>
 				</div>
 				<label for="startScript">Open new terminal</label>
-				<input type="submit" onclick="startScript()" id="startScript" value="Open terminal and start default script">
+				<input type="submit" id="startscript" value="Open terminal and start default script">
 
 				<label for="ScriptCommand">Enter PowerShell command and execute</label>
 				<input type="text" id="ScriptCommand" placeholder="Enter PowerShell command...">

@@ -1,4 +1,4 @@
-import { Uri, Webview, workspace , ExtensionContext} from "vscode";
+import { Uri, Webview, workspace , ExtensionContext, window, Terminal} from "vscode";
 import * as path from "path";
 
 export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) {
@@ -23,4 +23,23 @@ export function getExtensionFile(context: ExtensionContext, folder: string, file
 	let filePath = Uri.parse(filePathEscaped).fsPath;
 
 	return filePath;
+}
+
+export function startScript (fileName ?: string , filePath ?: string , command ?: string) : Terminal {
+	let terminal = window.createTerminal('bram');
+	terminal.show();
+	//terminal.sendText('Get-Location');
+	if (filePath && filePath !== '') {
+		terminal.sendText(`cd ${filePath}`);
+	};
+	
+	if (fileName && fileName !== '') {
+		terminal.sendText(`./${fileName}`);
+	};
+
+	if (command && command !== '') {
+		terminal.sendText(command);
+	};
+	
+	return terminal;
 }
