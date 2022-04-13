@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
+import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
@@ -124,8 +125,16 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	const helloCommand = vscode.commands.registerCommand("mypanel.createIntegration", () => {
+	// create integration panel
+	const createIntegrationCommand = vscode.commands.registerCommand("mypanel.createIntegration", () => {
 		CreateIntegrationPanel.render(context.extensionUri);
+	  });
+	
+	context.subscriptions.push(createIntegrationCommand);
+
+	// hello world panel (for reference)
+	const helloCommand = vscode.commands.registerCommand("mypanel.helloWorld", () => {
+		HelloWorldPanel.render(context.extensionUri);
 	  });
 	
 	context.subscriptions.push(helloCommand);

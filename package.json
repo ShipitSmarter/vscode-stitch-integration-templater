@@ -12,7 +12,8 @@
   "activationEvents": [
     "onCommand:mypanel.start",
     "onCommand:mypanel.startPowerShellScript",
-    "onCommand:mypanel.createIntegration"
+    "onCommand:mypanel.createIntegration",
+    "onCommand:mypanel.helloWorld"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -28,6 +29,10 @@
       {
         "command": "mypanel.createIntegration",
         "title": "MyPanel: Open panel to create new integration"
+      },
+      {
+        "command": "mypanel.helloWorld",
+        "title": "MyPanel: Open Hello World panel"
       }
     ],
     "menus": {
