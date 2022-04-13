@@ -3,10 +3,11 @@ import * as path from 'path';
 import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
 import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 import { getUri, getWorkspaceFile, getExtensionFile } from "./utilities/functions";
+import { DashboardPanel } from "./panels/DashboardPanel";
 
 export function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(
-		vscode.commands.registerCommand('mypanel.start', () => {
+
+	const oldDashboardCommand = vscode.commands.registerCommand('mypanel.start', () => {
 			// Create and show panel
 			const panel = vscode.window.createWebviewPanel(
 				'mypanel',  // <--- identifier
@@ -104,11 +105,11 @@ export function activate(context: vscode.ExtensionContext) {
 				undefined,
 				context.subscriptions
 			);
-		})
-	);
+	});
+	context.subscriptions.push(oldDashboardCommand);
 
 	// create dashboard panel
-	const dashboardCommand = vscode.commands.registerCommand('mypanel.startPowerShellScript', (uri, files) => {
+	const powershellScriptCommand = vscode.commands.registerCommand('mypanel.startPowerShellScript', (uri, files) => {
 			let fileName = '';
 			let filePath = '';
 
@@ -123,6 +124,13 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			startScript(fileName, filePath);
+	});
+	
+	context.subscriptions.push(powershellScriptCommand);
+
+	// dashboard panel new style
+	const dashboardCommand = vscode.commands.registerCommand("mypanel.dashboard", () => {
+		DashboardPanel.render(context.extensionUri, 0);
 	});
 	
 	context.subscriptions.push(dashboardCommand);

@@ -11,6 +11,7 @@
   ],
   "activationEvents": [
     "onCommand:mypanel.start",
+    "onCommand:mypanel.dashboard",
     "onCommand:mypanel.startPowerShellScript",
     "onCommand:mypanel.createIntegration",
     "onCommand:mypanel.helloWorld"
@@ -20,7 +21,11 @@
     "commands": [
       {
         "command": "mypanel.start",
-        "title": "MyPanel: Start dashboard"
+        "title": "MyPanel: Start old dashboard"
+      },
+      {
+        "command": "mypanel.dashboard",
+        "title": "MyPanel: Start new dashboard"
       },
       {
         "command": "mypanel.startPowerShellScript",
