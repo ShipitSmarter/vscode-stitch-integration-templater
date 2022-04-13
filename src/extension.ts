@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
 import { HelloWorldPanel } from "./panels/HelloWorldPanel";
+import { getUri, getWorkspaceFile, getExtensionFile } from "./utilities/functions";
 
 export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(
@@ -106,8 +107,8 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
-	context.subscriptions.push(
-		vscode.commands.registerCommand('mypanel.startPowerShellScript', (uri, files) => {
+	// create dashboard panel
+	const dashboardCommand = vscode.commands.registerCommand('mypanel.startPowerShellScript', (uri, files) => {
 			let fileName = '';
 			let filePath = '';
 
@@ -122,8 +123,9 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 
 			startScript(fileName, filePath);
-		})
-	);
+	});
+	
+	context.subscriptions.push(dashboardCommand);
 
 	// create integration panel
 	const createIntegrationCommand = vscode.commands.registerCommand("mypanel.createIntegration", () => {
@@ -158,26 +160,6 @@ function startScript (fileName ?: string , filePath ?: string , command ?: strin
 	
 	return terminal;
 
-}
-
-async function getWorkspaceFile(matchString: string): Promise<string> {
-	// get path to file in workspace
-	let functionsFiles = await vscode.workspace.findFiles(matchString);
-	const outFile = functionsFiles[0].fsPath.replace(/\\/g, '/');
-	return outFile;
-}
-
-function getExtensionFile(context: vscode.ExtensionContext, folder: string, file: string): string {
-	// get path to file in extension folder
-	let fileRawPath = vscode.Uri.file(
-		path.join(context.extensionPath, folder, file)
-	);
-
-	let filePathEscaped : string = fileRawPath.toString();
-
-	let filePath = vscode.Uri.parse(filePathEscaped).fsPath;
-
-	return filePath;
 }
 
 function stepInputs(nofSteps:number): string {
