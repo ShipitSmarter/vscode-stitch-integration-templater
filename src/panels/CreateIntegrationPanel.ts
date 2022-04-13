@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri } from "../utilities/getUri";
+import { getUri } from "../utilities/functions";
 
 export class CreateIntegrationPanel {
   // PROPERTIES
