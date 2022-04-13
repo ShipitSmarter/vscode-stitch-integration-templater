@@ -12,7 +12,7 @@ export class DashboardPanel {
     this._panel = panel;
 
     this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri, nofSteps);
-    this._setWebviewMessageListener(this._panel.webview);
+    this._setWebviewMessageListener(extensionUri, this._panel.webview);
 
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
@@ -38,7 +38,7 @@ export class DashboardPanel {
   }
 
   // message listener
-  private _setWebviewMessageListener(webview: vscode.Webview) {
+  private _setWebviewMessageListener(extensionUri: vscode.Uri, webview: vscode.Webview) {
     webview.onDidReceiveMessage(
       (message: any) => {
         const command = message.command;
@@ -47,13 +47,50 @@ export class DashboardPanel {
         switch (command) {
           case "hello":
             vscode.window.showInformationMessage(text);
-            return;
+            break;
+        case 'updateNofSteps':
+            vscode.window.showInformationMessage(`Updated number of step input fields to ${text}`);
+            this._updateWebview(extensionUri, text);
+            break;
         }
       },
       undefined,
       this._disposables
     );
   }
+
+  // make additional html for step fields
+  private _stepInputs(nofSteps:number): string {
+	let html: string = ``;
+
+	for (let step = 1; step <= nofSteps; step++) {
+		let after = '';
+		switch (step) {
+			case 1 :
+				after = 'st';
+				break;
+			case 2 :
+				after = 'nd';
+				break;
+			case 3 :
+				after = 'rd';
+				break;
+			default:
+				after = 'th';
+				break;
+		}
+
+		html += /*html*/`
+		<label for="inputStep${step}">Step ${step}</label>
+		<input type="text" maxlength="512" id="inputStep${step}" placeholder="${step + after} step name...">
+		`;
+	  }
+
+	// Example on reading file
+	// let document = await vscode.workspace.openTextDocument(element.path);
+	// document.getText();
+	return html;
+}
 
   // determine content
   private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, nofSteps: number) {
@@ -67,6 +104,8 @@ export class DashboardPanel {
 
     const mainUri = getUri(webview, extensionUri, ["scripts", "dashboard.js"]);
     const myStyle = getUri(webview, extensionUri, ['media', 'style.css']);
+
+    const stepIntputFields = this._stepInputs(nofSteps);
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
     let html =  /*html*/`
@@ -105,15 +144,19 @@ export class DashboardPanel {
 				</div>
 
 				<label for="fname">Number of steps</label>
-				<input type="text" id="nofSteps" name="firstname" placeholder="Needs integer...">
-				<input type="submit" onclick="updateNofSteps()" id="updateNofSteps" value="Update">
+				<input type="text" id="nofsteps" name="firstname" placeholder="Needs integer...">
+				<input type="submit" id="oldsteps" value="Update">
+
+                <vscode-button id="howdy">Howdy!</vscode-button>
 				
+                ${stepIntputFields}
 			</body>
 		</html>
 	`;
 	// -----------------------
 	return html;
   }
+
 
   // dispose
   public dispose() {

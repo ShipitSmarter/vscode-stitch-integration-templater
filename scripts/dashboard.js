@@ -3,8 +3,12 @@ const vscodeApi = acquireVsCodeApi();
 window.addEventListener("load", main);
 
 function main() {
+  // button onclick event listeners
   const howdyButton = document.getElementById("howdy");
   howdyButton.addEventListener("click", handleHowdyClick);
+
+  const stepsButton = document.getElementById("oldsteps");
+  stepsButton.addEventListener("click", updateNofSteps);
 }
 
 function handleHowdyClick() {
@@ -14,22 +18,9 @@ function handleHowdyClick() {
   });
 }
 
-const startScript = () => {
-    vscodeApi.postMessage({ command: "startScript", text: "Start Selected Script" });
-};
-
-const executeCommand = () =>{
-    vscodeApi.postMessage({ command: "executeCommand", text: document.getElementById('ScriptCommand').value });
-};
-
-const executeScript = () =>{
-    vscodeApi.postMessage({ command: "executeScript", text: document.getElementById('ScriptArguments').value });
-};
-
-const findAndExecuteScript = () => {
-    vscodeApi.postMessage({ command: "findAndExecuteScript", text: document.getElementById('FindScriptArguments').value });
-};
-
-const updateNofSteps = () => {
-    vscodeApi.postMessage({ command: "updateNofSteps", text: document.getElementById('nofSteps').value });
-};
+function updateNofSteps () {
+  vscodeApi.postMessage({ 
+    command: "updateNofSteps", 
+    text: document.getElementById("nofsteps").value
+  });
+}
