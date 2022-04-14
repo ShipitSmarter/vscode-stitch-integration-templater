@@ -8,11 +8,11 @@ export class DashboardPanel {
   private _disposables: vscode.Disposable[] = [];
 
   // constructor
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     this._panel = panel;
 
     this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri, nofSteps);
-    this._setWebviewMessageListener(extensionUri, this._panel.webview);
+    this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
 
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
@@ -20,7 +20,7 @@ export class DashboardPanel {
 
   // METHODS
   // initial rendering
-  public static render(extensionUri: vscode.Uri, nofSteps: number) {
+  public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     if (DashboardPanel.currentPanel) {
       DashboardPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
@@ -28,7 +28,7 @@ export class DashboardPanel {
         enableScripts: true
       });
 
-      DashboardPanel.currentPanel = new DashboardPanel(panel, extensionUri, nofSteps);
+      DashboardPanel.currentPanel = new DashboardPanel(panel, extensionUri, nofSteps, context);
     }
   }
 
@@ -38,7 +38,7 @@ export class DashboardPanel {
   }
 
   // message listener
-  private _setWebviewMessageListener(extensionUri: vscode.Uri, webview: vscode.Webview) {
+  private _setWebviewMessageListener(extensionUri: vscode.Uri, webview: vscode.Webview, context: vscode.ExtensionContext) {
     // Pre-allocate terminal and terminalExists
     let terminal: vscode.Terminal;
     let terminalExists: boolean;
@@ -65,12 +65,55 @@ export class DashboardPanel {
             break;
         case 'startScript':
             if (!terminalExists) {
-                vscode.window.showErrorMessage(message.text);
+                vscode.window.showInformationMessage(text);
                 terminal = startScript('','',`Write-Host 'Hello World!'`);
             } else {
                 vscode.window.showInformationMessage('Script already started!');
             }
             break;
+
+        case 'executecommand':
+            vscode.window.showInformationMessage('Executing user input command');
+
+            if (terminalExists) {
+                // if terminal exists and has not exited: re-use
+                terminal.sendText(text);
+            } else {
+                // else: open new terminal
+                terminal = startScript('','',text);
+            }
+            break;
+
+        case 'executescript':
+            vscode.window.showInformationMessage('Executing script with user arguments');
+
+            
+            // text to send: dot-source script and add arguments
+            let scriptPath = getExtensionFile(context,'scripts','script.ps1');
+            var sendText: string = `. ${scriptPath} -message ${text}`;
+
+            if (terminalExists) {
+                // if terminal exists and has not exited: re-use
+                terminal.sendText(sendText);
+            } else {
+                // else: open new terminal
+                terminal = startScript('','',sendText);
+            }
+            break;
+
+        // case 'findAndExecuteScript':
+        //     vscode.window.showInformationMessage('Dot-Source functions file and execute script');
+
+        //     if (terminalExists) {
+        //         // if terminal exists and has not exited: re-use
+        //         terminal.sendText(`. ${functionsPath}`);
+        //     } else {
+        //         // else: open new terminal
+        //         terminal = startScript('','',`. ${functionsPath}`);
+        //     }
+
+        //     terminal.sendText(message.text);
+        //     break;
         }
       },
       undefined,
@@ -142,16 +185,16 @@ export class DashboardPanel {
 				<div>
 					<h2>PowerShell</h2>
 				</div>
-				<label for="startScript">Open new terminal</label>
+				<label for="startscript">Open new terminal</label>
 				<input type="submit" id="startscript" value="Open terminal and start default script">
 
-				<label for="ScriptCommand">Enter PowerShell command and execute</label>
-				<input type="text" id="ScriptCommand" placeholder="Enter PowerShell command...">
-				<input type="submit" onclick="executeCommand()" id="executeCommand" value="Execute Command">
+				<label for="scriptcommand">Enter PowerShell command and execute</label>
+				<input type="text" id="scriptcommand" placeholder="Enter PowerShell command...">
+				<input type="submit" id="executecommand" value="Execute Command">
 
-				<label for="ScriptArguments">Load script.ps1 from extension folder and execute with arguments</label>
-				<input type="text" id="ScriptArguments" placeholder="Enter arguments for script.ps1 ...">
-				<input type="submit" onclick="executeScript()" id="executeScript" value="Execute Script with arguments">
+				<label for="scriptarguments">Load script.ps1 from extension folder and execute with arguments</label>
+				<input type="text" id="scriptarguments" placeholder="Enter arguments for script.ps1 ...">
+				<input type="submit" id="executescript" value="Execute Script with arguments">
 
 				<label for="FindScriptArguments">Load functions.ps1 from workspace and execute command</label>
 				<input type="text" id="FindScriptArguments" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ...">
@@ -165,8 +208,6 @@ export class DashboardPanel {
 				<label for="fname">Number of steps</label>
 				<input type="text" id="nofsteps" name="firstname" placeholder="Needs integer...">
 				<input type="submit" id="oldsteps" value="Update">
-
-                <vscode-button id="howdy">Howdy!</vscode-button>
 				
                 ${stepIntputFields}
 			</body>

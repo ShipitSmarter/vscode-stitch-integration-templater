@@ -4,21 +4,17 @@ window.addEventListener("load", main);
 
 function main() {
   // button onclick event listeners
-  const howdyButton = document.getElementById("howdy");
-  howdyButton.addEventListener("click", handleHowdyClick);
-
   const stepsButton = document.getElementById("oldsteps");
   stepsButton.addEventListener("click", updateNofSteps);
 
   const startScriptButton = document.getElementById("startscript");
   startScriptButton.addEventListener("click",startScript);
-}
 
-function handleHowdyClick() {
-  vscodeApi.postMessage({
-    command: "hello",
-    text: "Hey there partner! 🤠",
-  });
+  const executeCommandButton = document.getElementById("executecommand");
+  executeCommandButton.addEventListener("click",executeCommand);
+
+  const executeScriptButton = document.getElementById("executescript");
+  executeScriptButton.addEventListener("click",executeScript);
 }
 
 function updateNofSteps () {
@@ -32,5 +28,19 @@ function startScript () {
   vscodeApi.postMessage({ 
     command: "startScript", 
     text: "Start Selected Script" 
+  });
+}
+
+function executeCommand () {
+  vscodeApi.postMessage({ 
+    command: "executecommand", 
+    text:  document.getElementById('scriptcommand').value 
+  });
+}
+
+function executeScript () {
+  vscodeApi.postMessage({ 
+    command: "executescript", 
+    text:  document.getElementById('scriptarguments').value 
   });
 }

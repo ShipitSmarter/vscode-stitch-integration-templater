@@ -130,7 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// dashboard panel new style
 	const dashboardCommand = vscode.commands.registerCommand("mypanel.dashboard", () => {
-		DashboardPanel.render(context.extensionUri, 0);
+		DashboardPanel.render(context.extensionUri, 0, context);
 	});
 	
 	context.subscriptions.push(dashboardCommand);
