@@ -5,11 +5,15 @@ export class DashboardPanel {
   // PROPERTIES
   public static currentPanel: DashboardPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
+
   private _disposables: vscode.Disposable[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     this._panel = panel;
+
+    // getWorkspaceFile('**/scripts/functions.ps1').then(outFile => that._functionsPath = outFile);
+    //this._functionsPath = await getWorkspaceFile('**/scripts/functions.ps1');
 
     this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri, nofSteps);
     this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
@@ -47,10 +51,6 @@ export class DashboardPanel {
       (message: any) => {
         const command = message.command;
         const text = message.text;
-
-        // Get path to functions.ps1 file in workspace
-        let functionsPath: string;
-        getWorkspaceFile('**/scripts/functions.ps1').then(outFile => functionsPath = outFile);
 
         // check if terminal exists and is still alive
         terminalExists = (terminal && !(terminal.exitStatus));
@@ -101,19 +101,23 @@ export class DashboardPanel {
             }
             break;
 
-        // case 'findAndExecuteScript':
-        //     vscode.window.showInformationMessage('Dot-Source functions file and execute script');
+        case 'executewithfunctions':
+            vscode.window.showInformationMessage('Dot-Source functions file and execute script');
 
-        //     if (terminalExists) {
-        //         // if terminal exists and has not exited: re-use
-        //         terminal.sendText(`. ${functionsPath}`);
-        //     } else {
-        //         // else: open new terminal
-        //         terminal = startScript('','',`. ${functionsPath}`);
-        //     }
+            getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
+                if (terminalExists) {
+                    // if terminal exists and has not exited: re-use
+                    terminal.sendText(`. ${functionsPath}`);
+                } else {
+                    // else: open new terminal
+                    terminal = startScript('','',`. ${functionsPath}`);
+                }
+    
+                terminal.sendText(message.text);
+            });
 
-        //     terminal.sendText(message.text);
-        //     break;
+            
+            break;
         }
       },
       undefined,
@@ -196,9 +200,9 @@ export class DashboardPanel {
 				<input type="text" id="scriptarguments" placeholder="Enter arguments for script.ps1 ...">
 				<input type="submit" id="executescript" value="Execute Script with arguments">
 
-				<label for="FindScriptArguments">Load functions.ps1 from workspace and execute command</label>
-				<input type="text" id="FindScriptArguments" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ...">
-				<input type="submit" onclick="findAndExecuteScript()" id="findAndExecuteScript" value="Execute Script">
+				<label for="functionsarguments">Load functions.ps1 from workspace and execute command</label>
+				<input type="text" id="functionsarguments" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ...">
+				<input type="submit" id="executewithfunctions" value="Execute Script">
 				
 
 				<div class="main"> 

@@ -15,6 +15,9 @@ function main() {
 
   const executeScriptButton = document.getElementById("executescript");
   executeScriptButton.addEventListener("click",executeScript);
+
+  const executeWithFunctionsButton = document.getElementById("executewithfunctions");
+  executeWithFunctionsButton.addEventListener("click",executeWithFunctions);
 }
 
 function updateNofSteps () {
@@ -42,5 +45,12 @@ function executeScript () {
   vscodeApi.postMessage({ 
     command: "executescript", 
     text:  document.getElementById('scriptarguments').value 
+  });
+}
+
+function executeWithFunctions () {
+  vscodeApi.postMessage({ 
+    command: "executewithfunctions", 
+    text:  document.getElementById('functionsarguments').value 
   });
 }
