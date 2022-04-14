@@ -3,7 +3,7 @@ import * as path from 'path';
 import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
 import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 import { getUri, getWorkspaceFile, getExtensionFile } from "./utilities/functions";
-import { DashboardPanel, DashboardPanel } from "./panels/DashboardPanel";
+import { DashboardPanel } from "./panels/DashboardPanel";
 
 export function activate(context: vscode.ExtensionContext) {
 

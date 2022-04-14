@@ -12,9 +12,6 @@ export class DashboardPanel {
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     this._panel = panel;
 
-    // getWorkspaceFile('**/scripts/functions.ps1').then(outFile => that._functionsPath = outFile);
-    //this._functionsPath = await getWorkspaceFile('**/scripts/functions.ps1');
-
     this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri, nofSteps);
     this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
 
@@ -87,7 +84,6 @@ export class DashboardPanel {
         case 'executescript':
             vscode.window.showInformationMessage('Executing script with user arguments');
 
-            
             // text to send: dot-source script and add arguments
             let scriptPath = getExtensionFile(context,'scripts','script.ps1');
             var sendText: string = `. ${scriptPath} -message ${text}`;
@@ -104,6 +100,7 @@ export class DashboardPanel {
         case 'executewithfunctions':
             vscode.window.showInformationMessage('Dot-Source functions file and execute script');
 
+            // getWorkspaceFile is async -> all following steps must be executed within the 'then'
             getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
                 if (terminalExists) {
                     // if terminal exists and has not exited: re-use
