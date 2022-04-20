@@ -144,7 +144,9 @@ export class NewDashboardPanel {
 		}
 
 		html += /*html*/`
-    <vscode-text-field id="inputStep${step}" placeholder="${step + after} step name...">Step ${step}</vscode-text-field>
+    <section class="component-example">
+      <vscode-text-field id="inputStep${step}" placeholder="${step + after} step name...">Step ${step}</vscode-text-field>
+      </section>
 		`;
 	  }
 
@@ -166,7 +168,7 @@ export class NewDashboardPanel {
 
     const mainUri = getUri(webview, extensionUri, ["scripts", "dashboard.js"]);
     // const myStyle = getUri(webview, extensionUri, ['media', 'style.css']);
-    const myStyle = getUri(webview, extensionUri, ["media", "create-integration-style.css"]);
+    const myStyle = getUri(webview, extensionUri, ["media", "newdashboard.css"]);
 
     const stepIntputFields = this._stepInputs(nofSteps);
 
@@ -207,9 +209,8 @@ export class NewDashboardPanel {
               <vscode-button id="oldsteps" appearance="primary">Update</vscode-button>
             </section>
 
-            <section class="component-example">
               ${stepIntputFields}
-            </section>
+              
           </section>
 
           <section class="component-container">
@@ -221,17 +222,23 @@ export class NewDashboardPanel {
 
             <section class="component-example">
               <vscode-text-area id="scriptcommand" placeholder="Enter PowerShell command..." rows="3" cols="30" resize="vertical">Enter PowerShell command and execute</vscode-text-area>
-              <vscode-button id="executecommand" appearance="primary">Execute Command</vscode-button>
+              <div>
+                <vscode-button id="executecommand" appearance="primary">Execute Command</vscode-button>
+              </div>
             </section>
 
             <section class="component-example">
               <vscode-text-area id="scriptarguments" placeholder="Enter arguments for script.ps1 ..." rows="3" cols="30" resize="vertical">Load script.ps1 from extension folder and execute with arguments</vscode-text-area>
-              <vscode-button id="executescript" appearance="primary">Execute extension script with arguments</vscode-button>
+              <div>
+                <vscode-button id="executescript" appearance="primary">Execute extension script with arguments</vscode-button>
+                </div>
             </section>
 
             <section class="component-example">
               <vscode-text-area id="functionsarguments" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ..." rows="3" cols="30" resize="vertical">Load functions.ps1 from workspace and execute command</vscode-text-area>
-              <vscode-button id="executewithfunctions" appearance="primary">Execute Script</vscode-button>
+              <div>
+                <vscode-button id="executewithfunctions" appearance="primary">Execute Script</vscode-button>
+                </div>
             </section>
           </section>
           
