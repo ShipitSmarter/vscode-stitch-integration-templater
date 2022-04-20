@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 import { getUri, getWorkspaceFile, getExtensionFile , startScript} from "../utilities/functions";
 
-export class CreateIntegrationPanel {
+export class NewDashboardPanel {
   // PROPERTIES
-  public static currentPanel: CreateIntegrationPanel | undefined;
+  public static currentPanel: NewDashboardPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
 
   private _disposables: vscode.Disposable[] = [];
@@ -22,14 +22,14 @@ export class CreateIntegrationPanel {
   // METHODS
   // initial rendering
   public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
-    if (CreateIntegrationPanel.currentPanel) {
-      CreateIntegrationPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
+    if (NewDashboardPanel.currentPanel) {
+      NewDashboardPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("createintegration", "Create Integration", vscode.ViewColumn.Two, {
+      const panel = vscode.window.createWebviewPanel("dashboard", "My Dashboard", vscode.ViewColumn.Two, {
         enableScripts: true
       });
 
-      CreateIntegrationPanel.currentPanel = new CreateIntegrationPanel(panel, extensionUri, nofSteps, context);
+      NewDashboardPanel.currentPanel = new NewDashboardPanel(panel, extensionUri, nofSteps, context);
     }
   }
 
@@ -144,8 +144,7 @@ export class CreateIntegrationPanel {
 		}
 
 		html += /*html*/`
-		<label for="inputStep${step}">Step ${step}</label>
-		<input type="text" maxlength="512" id="inputStep${step}" placeholder="${step + after} step name...">
+    <vscode-text-field id="inputStep${step}" placeholder="${step + after} step name...">Step ${step}</vscode-text-field>
 		`;
 	  }
 
@@ -165,8 +164,10 @@ export class CreateIntegrationPanel {
         "toolkit.js", // A toolkit.min.js file is also available
     ]);
 
-    const mainUri = getUri(webview, extensionUri, ["scripts", "create-integration.js"]);
-    const styleUri = getUri(webview, extensionUri, ["media", "create-integration-style.css"]);
+    const mainUri = getUri(webview, extensionUri, ["scripts", "dashboard.js"]);
+    // const myStyle = getUri(webview, extensionUri, ['media', 'style.css']);
+    const myStyle = getUri(webview, extensionUri, ["media", "create-integration-style.css"]);
+
     const stepIntputFields = this._stepInputs(nofSteps);
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
@@ -174,42 +175,67 @@ export class CreateIntegrationPanel {
 		<!DOCTYPE html>
 		<html>
 			<head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script type="module" src="${toolkitUri}"></script>
-        <script type="module" src="${mainUri}"></script>
-        <link rel="stylesheet" href="${styleUri}">
-        <title>My Dashboard!</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <script type="module" src="${toolkitUri}"></script>
+                <script type="module" src="${mainUri}"></script>
+                <title>My Dashboard!</title>
+				<link href="${myStyle}" rel="stylesheet" /> 
 			</head>
 			<body>
 				<div>
-					<h2>PowerShell</h2>
+					<h1>New Dashboard - Webview-UI style</h1>
 				</div>
-				<label for="startscript">Open new terminal</label>
-				<input type="submit" id="startscript" value="Open terminal and start default script">
+        <section class="component-row">
+          <section class="component-container">
+            <h2>Flexible fields</h2>
+            <section class="component-example">
+              <p>Number of steps</p>
+              <vscode-dropdown id="nofsteps" position="below">
+                <vscode-option>1</vscode-option>
+                <vscode-option>2</vscode-option>
+                <vscode-option>3</vscode-option>
+                <vscode-option>4</vscode-option>
+                <vscode-option>5</vscode-option>
+                <vscode-option>6</vscode-option>
+                <vscode-option>7</vscode-option>
+                <vscode-option>8</vscode-option>
+                <vscode-option>9</vscode-option>
+                <vscode-option>10</vscode-option>
+              </vscode-dropdown>
 
-				<label for="scriptcommand">Enter PowerShell command and execute</label>
-				<input type="text" id="scriptcommand" placeholder="Enter PowerShell command...">
-				<input type="submit" id="executecommand" value="Execute Command">
+              <vscode-button id="oldsteps" appearance="primary">Update</vscode-button>
+            </section>
 
-				<label for="scriptarguments">Load script.ps1 from extension folder and execute with arguments</label>
-				<input type="text" id="scriptarguments" placeholder="Enter arguments for script.ps1 ...">
-				<input type="submit" id="executescript" value="Execute Script with arguments">
+            <section class="component-example">
+              ${stepIntputFields}
+            </section>
+          </section>
 
-				<label for="functionsarguments">Load functions.ps1 from workspace and execute command</label>
-				<input type="text" id="functionsarguments" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ...">
-				<input type="submit" id="executewithfunctions" value="Execute Script">
-				
+          <section class="component-container">
+            <h2>Powershell</h2>
+            <section class="component-example">
+              <p>Open new terminal</p>
+              <vscode-button id="startscript" appearance="primary">Open terminal and start default script</vscode-button>
+            </section>
 
-				<div class="main"> 
-					<h1>Flexible fields</h1>
-				</div>
+            <section class="component-example">
+              <vscode-text-area id="scriptcommand" placeholder="Enter PowerShell command..." rows="3" cols="30" resize="vertical">Enter PowerShell command and execute</vscode-text-area>
+              <vscode-button id="executecommand" appearance="primary">Execute Command</vscode-button>
+            </section>
 
-				<label for="fname">Number of steps</label>
-				<input type="text" id="nofsteps" name="firstname" placeholder="Needs integer...">
-				<input type="submit" id="oldsteps" value="Update">
-				
-                ${stepIntputFields}
+            <section class="component-example">
+              <vscode-text-area id="scriptarguments" placeholder="Enter arguments for script.ps1 ..." rows="3" cols="30" resize="vertical">Load script.ps1 from extension folder and execute with arguments</vscode-text-area>
+              <vscode-button id="executescript" appearance="primary">Execute extension script with arguments</vscode-button>
+            </section>
+
+            <section class="component-example">
+              <vscode-text-area id="functionsarguments" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ..." rows="3" cols="30" resize="vertical">Load functions.ps1 from workspace and execute command</vscode-text-area>
+              <vscode-button id="executewithfunctions" appearance="primary">Execute Script</vscode-button>
+            </section>
+          </section>
+          
+        </section>
 			</body>
 		</html>
 	`;
@@ -220,7 +246,7 @@ export class CreateIntegrationPanel {
 
   // dispose
   public dispose() {
-    CreateIntegrationPanel.currentPanel = undefined;
+    NewDashboardPanel.currentPanel = undefined;
 
     this._panel.dispose();
 

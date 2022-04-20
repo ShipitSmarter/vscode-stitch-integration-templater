@@ -11,6 +11,7 @@
   ],
   "activationEvents": [
     "onCommand:mypanel.dashboard",
+    "onCommand:mypanel.newdashboard",
     "onCommand:mypanel.startPowerShellScript",
     "onCommand:mypanel.createIntegration",
     "onCommand:mypanel.helloWorld"
@@ -20,7 +21,11 @@
     "commands": [
       {
         "command": "mypanel.dashboard",
-        "title": "MyPanel: Start new dashboard"
+        "title": "MyPanel: Start dashboard"
+      },
+      {
+        "command": "mypanel.newdashboard",
+        "title": "MyPanel: Start new webview-ui dashboard"
       },
       {
         "command": "mypanel.startPowerShellScript",

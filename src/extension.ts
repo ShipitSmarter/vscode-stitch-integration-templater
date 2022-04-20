@@ -3,6 +3,7 @@ import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
 import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 import { startScript } from "./utilities/functions";
 import { DashboardPanel } from "./panels/DashboardPanel";
+import { NewDashboardPanel } from "./panels/NewDashboardPanel";
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -26,16 +27,23 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(powershellScriptCommand);
 
-	// dashboard panel new style
+	// dashboard panel
 	const dashboardCommand = vscode.commands.registerCommand("mypanel.dashboard", () => {
 		DashboardPanel.render(context.extensionUri, 0, context);
 	});
 	
 	context.subscriptions.push(dashboardCommand);
 
+	// dashboard panel VSCode webview-ui style
+	const NewDashboardCommand = vscode.commands.registerCommand("mypanel.newdashboard", () => {
+		NewDashboardPanel.render(context.extensionUri, 0, context);
+	});
+	
+	context.subscriptions.push(NewDashboardCommand);
+
 	// create integration panel
 	const createIntegrationCommand = vscode.commands.registerCommand("mypanel.createIntegration", () => {
-		CreateIntegrationPanel.render(context.extensionUri);
+		CreateIntegrationPanel.render(context.extensionUri, 0, context);
 	  });
 	
 	context.subscriptions.push(createIntegrationCommand);
