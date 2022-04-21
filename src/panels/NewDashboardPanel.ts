@@ -114,7 +114,7 @@ export class NewDashboardPanel {
             }
             break;
 
-         case 'executewithfunctions':
+          case 'executewithfunctions':
             vscode.window.showInformationMessage('Dot-Source functions file and execute script');
 
             // getWorkspaceFile is async -> all following steps must be executed within the 'then'
@@ -134,6 +134,10 @@ export class NewDashboardPanel {
           case "savefieldvalue":
             let indexValue = message.text.split('|');
             this._fieldValues[indexValue[0]] = indexValue[1];
+            break;
+          case "saveflexfieldvalue":
+            let flexIndexValue = message.text.split('|');
+            this._flexFieldValues[flexIndexValue[0]] = flexIndexValue[1];
             break;
         }
       },
@@ -165,10 +169,10 @@ export class NewDashboardPanel {
 
 		html += /*html*/`
     <section class="component-example">
-      <vscode-text-field id="inputStep${step}" placeholder="${step + after} step name...">Step ${step}</vscode-text-field>
+      <vscode-text-field id="inputStep${step}" indexflex="${step}" class="flexfield" placeholder="${step + after} step name...">Step ${step}</vscode-text-field>
       </section>
 		`;
-	  }
+	}
 
 	// Example on reading file
 	// let document = await vscode.workspace.openTextDocument(element.path);
@@ -274,6 +278,16 @@ export class NewDashboardPanel {
       if (values[index] !== undefined) {
         let indexString = 'index="' + index + '"';
         let newString = indexString + ' value="' + values[index] + '"';
+        html = html.replace(indexString,newString);
+      }
+    }
+
+    // update flexfield values
+    let flexValues = this._flexFieldValues;
+    for (let index = 0; index < flexValues.length; index++) {
+      if (flexValues[index] !== undefined ) {
+        let indexString = 'indexflex="' + index + '"';
+        let newString = indexString + ' value="' + flexValues[index] + '"';
         html = html.replace(indexString,newString);
       }
     }

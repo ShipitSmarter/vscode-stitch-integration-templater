@@ -18,6 +18,14 @@ function main() {
 
   const executeWithFunctionsButton = document.getElementById("executewithfunctions");
   executeWithFunctionsButton.addEventListener("click",executeWithFunctions);
+
+  // save field entries
+
+   // save flexfield entries
+  const flexFields = document.getElementsByClassName("flexfield");
+  for (const flexField of flexFields) {
+    flexField.addEventListener("keyup",saveFlexFieldValues);
+  }
 }
 
 function saveFieldValue(index, value) {
@@ -26,6 +34,17 @@ function saveFieldValue(index, value) {
     command: "savefieldvalue", 
     text:  textString
   });
+}
+
+function saveFlexFieldValues () {
+  const flexFields = document.getElementsByClassName("flexfield");
+  for (const flexField of flexFields) {
+    let textString = flexField.getAttribute('indexflex') + '|' + flexField.value;
+    vscodeApi.postMessage({ 
+      command: "saveflexfieldvalue", 
+      text:  textString
+    });
+  }
 }
 
 function updateNofSteps () {
