@@ -5,15 +5,33 @@ export class NewDashboardPanel {
   // PROPERTIES
   public static currentPanel: NewDashboardPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
-
   private _disposables: vscode.Disposable[] = [];
+  private _fieldValues: String[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     this._panel = panel;
 
+    // set content
     this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri, nofSteps);
+
+    // set message listener
     this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
+
+    // set ondidchangeviewstate
+    this._panel.onDidChangeViewState( e => {
+        const panel = e.webviewPanel;
+        let isVisible = panel.visible;
+        // let nofSteps: Number = this._fieldValues[0] ?? 0;
+
+        if (isVisible) {
+          // this._updateWebview(extensionUri,nofSteps));
+        }
+
+      },
+      null,
+      context.subscriptions
+    );
 
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
@@ -56,11 +74,11 @@ export class NewDashboardPanel {
           case "hello":
             vscode.window.showInformationMessage(text);
             break;
-        case 'updateNofSteps':
+          case 'updateNofSteps':
             vscode.window.showInformationMessage(`Updated number of step input fields to ${text}`);
             this._updateWebview(extensionUri, text);
             break;
-        case 'startScript':
+          case 'startScript':
             if (!terminalExists) {
                 vscode.window.showInformationMessage(text);
                 terminal = startScript('','',`Write-Host 'Hello World!'`);
@@ -69,7 +87,7 @@ export class NewDashboardPanel {
             }
             break;
 
-        case 'executecommand':
+          case 'executecommand':
             vscode.window.showInformationMessage('Executing user input command');
 
             if (terminalExists) {
@@ -81,7 +99,7 @@ export class NewDashboardPanel {
             }
             break;
 
-        case 'executescript':
+          case 'executescript':
             vscode.window.showInformationMessage('Executing script with user arguments');
 
             // text to send: dot-source script and add arguments
@@ -97,7 +115,7 @@ export class NewDashboardPanel {
             }
             break;
 
-        case 'executewithfunctions':
+         case 'executewithfunctions':
             vscode.window.showInformationMessage('Dot-Source functions file and execute script');
 
             // getWorkspaceFile is async -> all following steps must be executed within the 'then'
@@ -113,7 +131,11 @@ export class NewDashboardPanel {
                 terminal.sendText(message.text);
             });
 
-            
+            break;
+          case "savefieldvalue":
+            let indexValue = message.text.split('|');
+            this._fieldValues[indexValue[0]] = indexValue[1];
+            let henk = '';
             break;
         }
       },
@@ -166,7 +188,7 @@ export class NewDashboardPanel {
         "toolkit.js", // A toolkit.min.js file is also available
     ]);
 
-    const mainUri = getUri(webview, extensionUri, ["scripts", "dashboard.js"]);
+    const mainUri = getUri(webview, extensionUri, ["scripts", "newdashboard.js"]);
     // const myStyle = getUri(webview, extensionUri, ['media', 'style.css']);
     const myStyle = getUri(webview, extensionUri, ["media", "newdashboard.css"]);
 
@@ -193,7 +215,7 @@ export class NewDashboardPanel {
             <h2>Flexible fields</h2>
             <section class="component-example">
               <p>Number of steps</p>
-              <vscode-dropdown id="nofsteps" position="below">
+              <vscode-dropdown id="nofsteps" index="0" position="below">
                 <vscode-option>1</vscode-option>
                 <vscode-option>2</vscode-option>
                 <vscode-option>3</vscode-option>
@@ -221,21 +243,21 @@ export class NewDashboardPanel {
             </section>
 
             <section class="component-example">
-              <vscode-text-area id="scriptcommand" placeholder="Enter PowerShell command..." rows="3" cols="30" resize="vertical">Enter PowerShell command and execute</vscode-text-area>
+              <vscode-text-area id="scriptcommand" index="1" placeholder="Enter PowerShell command..." rows="3" cols="30" resize="vertical" value="">Enter PowerShell command and execute</vscode-text-area>
               <div>
                 <vscode-button id="executecommand" appearance="primary">Execute Command</vscode-button>
               </div>
             </section>
 
             <section class="component-example">
-              <vscode-text-area id="scriptarguments" placeholder="Enter arguments for script.ps1 ..." rows="3" cols="30" resize="vertical">Load script.ps1 from extension folder and execute with arguments</vscode-text-area>
+              <vscode-text-area id="scriptarguments" index="2" placeholder="Enter arguments for script.ps1 ..." rows="3" cols="30" resize="vertical">Load script.ps1 from extension folder and execute with arguments</vscode-text-area>
               <div>
                 <vscode-button id="executescript" appearance="primary">Execute extension script with arguments</vscode-button>
                 </div>
             </section>
 
             <section class="component-example">
-              <vscode-text-area id="functionsarguments" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ..." rows="3" cols="30" resize="vertical">Load functions.ps1 from workspace and execute command</vscode-text-area>
+              <vscode-text-area id="functionsarguments" index="3" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ..." rows="3" cols="30" resize="vertical">Load functions.ps1 from workspace and execute command</vscode-text-area>
               <div>
                 <vscode-button id="executewithfunctions" appearance="primary">Execute Script</vscode-button>
                 </div>
@@ -245,9 +267,20 @@ export class NewDashboardPanel {
         </section>
 			</body>
 		</html>
-	`;
-	// -----------------------
-	return html;
+	  `;
+
+    // update field values
+    let values = this._fieldValues;
+    let henk = '';
+    for (let index = 0; index < values.length; index++) {
+      if (values[index] !== undefined) {
+        let indexString = 'index="' + index + '"';
+        let newString = indexString + ' value="' + values[index] + '"';
+        html = html.replace(indexString,newString);
+      }
+    }
+
+    return html;
   }
 
 
