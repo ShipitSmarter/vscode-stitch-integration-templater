@@ -13,7 +13,7 @@ export class NewDashboardPanel {
     this._panel = panel;
 
     // set content
-    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri, nofSteps);
+    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
 
     // set message listener
     this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
@@ -22,12 +22,10 @@ export class NewDashboardPanel {
     this._panel.onDidChangeViewState( e => {
         const panel = e.webviewPanel;
         let isVisible = panel.visible;
-        // let nofSteps: Number = this._fieldValues[0] ?? 0;
 
         if (isVisible) {
-          // this._updateWebview(extensionUri,nofSteps));
+          this._updateWebview(extensionUri);
         }
-
       },
       null,
       context.subscriptions
@@ -52,8 +50,8 @@ export class NewDashboardPanel {
   }
 
   // update number of step fields
-  private _updateWebview(extensionUri: vscode.Uri, nofSteps: number) {
-    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri, nofSteps);
+  private _updateWebview(extensionUri: vscode.Uri) {
+    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
   }
 
   // message listener
@@ -76,7 +74,7 @@ export class NewDashboardPanel {
             break;
           case 'updateNofSteps':
             vscode.window.showInformationMessage(`Updated number of step input fields to ${text}`);
-            this._updateWebview(extensionUri, text);
+            this._updateWebview(extensionUri);
             break;
           case 'startScript':
             if (!terminalExists) {
@@ -135,7 +133,6 @@ export class NewDashboardPanel {
           case "savefieldvalue":
             let indexValue = message.text.split('|');
             this._fieldValues[indexValue[0]] = indexValue[1];
-            let henk = '';
             break;
         }
       },
@@ -179,7 +176,7 @@ export class NewDashboardPanel {
 }
 
   // determine content
-  private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri, nofSteps: number) {
+  private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     const toolkitUri = getUri(webview, extensionUri, [
         "node_modules",
         "@vscode",
@@ -191,7 +188,8 @@ export class NewDashboardPanel {
     const mainUri = getUri(webview, extensionUri, ["scripts", "newdashboard.js"]);
     // const myStyle = getUri(webview, extensionUri, ['media', 'style.css']);
     const myStyle = getUri(webview, extensionUri, ["media", "newdashboard.css"]);
-
+    let nofStepsString: String = this._fieldValues[0];
+    let nofSteps: number = +nofStepsString;
     const stepIntputFields = this._stepInputs(nofSteps);
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
@@ -271,7 +269,6 @@ export class NewDashboardPanel {
 
     // update field values
     let values = this._fieldValues;
-    let henk = '';
     for (let index = 0; index < values.length; index++) {
       if (values[index] !== undefined) {
         let indexString = 'index="' + index + '"';
