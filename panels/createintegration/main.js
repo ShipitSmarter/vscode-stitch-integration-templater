@@ -20,36 +20,32 @@ function main() {
   executeWithFunctionsButton.addEventListener("click",executeWithFunctions);
 
   // save field entries
+  document.getElementById("nofsteps").addEventListener("change",saveFieldValue);
+  document.getElementById("scriptcommand").addEventListener("keyup",saveFieldValue);
+  document.getElementById("scriptarguments").addEventListener("keyup",saveFieldValue);
+  document.getElementById("functionsarguments").addEventListener("keyup",saveFieldValue);
 
    // save flexfield entries
   const flexFields = document.getElementsByClassName("flexfield");
   for (const flexField of flexFields) {
-    flexField.addEventListener("keyup",saveFlexFieldValues);
+    flexField.addEventListener("keyup",saveFlexFieldValue);
   }
 }
 
-function saveFieldValue(index, value) {
-  let textString = index + '|' + value;
-  vscodeApi.postMessage({ 
-    command: "savefieldvalue", 
-    text:  textString
-  });
+function saveFieldValue(event) {
+  const field = event.target;
+  let textString = field.getAttribute('index') + '|' + field.value;
+  vscodeApi.postMessage({ command: "savefieldvalue", text:  textString });
 }
 
-function saveFlexFieldValues () {
-  const flexFields = document.getElementsByClassName("flexfield");
-  for (const flexField of flexFields) {
-    let textString = flexField.getAttribute('indexflex') + '|' + flexField.value;
-    vscodeApi.postMessage({ 
-      command: "saveflexfieldvalue", 
-      text:  textString
-    });
-  }
+function saveFlexFieldValue(event) {
+  const flexField = event.target;
+  let textString = flexField.getAttribute('indexflex') + '|' + flexField.value;
+  vscodeApi.postMessage({ command: "saveflexfieldvalue", text:  textString });
 }
 
 function updateNofSteps () {
   let nofStepsField = document.getElementById("nofsteps");
-  saveFieldValue(nofStepsField.getAttribute('index'),nofStepsField.value);
   vscodeApi.postMessage({ 
     command: "updateNofSteps", 
     text: nofStepsField.value
@@ -65,7 +61,6 @@ function startScript () {
 
 function executeCommand () {
   let executeCommandField = document.getElementById("scriptcommand");
-  saveFieldValue(executeCommandField.getAttribute('index'),executeCommandField.value);
   vscodeApi.postMessage({ 
     command: "executecommand", 
     text:  executeCommandField.value 
@@ -74,7 +69,6 @@ function executeCommand () {
 
 function executeScript () {
   let executeScriptField = document.getElementById('scriptarguments');
-  saveFieldValue(executeScriptField.getAttribute('index'),executeScriptField.value);
   vscodeApi.postMessage({ 
     command: "executescript", 
     text:  executeScriptField.value 
@@ -83,7 +77,6 @@ function executeScript () {
 
 function executeWithFunctions () {
   let executeWithFunctionsField = document.getElementById('functionsarguments');
-  saveFieldValue(executeWithFunctionsField.getAttribute('index'),executeWithFunctionsField.value);
   vscodeApi.postMessage({ 
     command: "executewithfunctions", 
     text: executeWithFunctionsField.value 

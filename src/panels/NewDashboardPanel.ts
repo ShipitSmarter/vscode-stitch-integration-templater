@@ -42,7 +42,7 @@ export class NewDashboardPanel {
     if (NewDashboardPanel.currentPanel) {
       NewDashboardPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("dashboard", "My Dashboard", vscode.ViewColumn.Two, {
+      const panel = vscode.window.createWebviewPanel("new-dashboard", "My New Dashboard", vscode.ViewColumn.Two, {
         enableScripts: true
       });
 
