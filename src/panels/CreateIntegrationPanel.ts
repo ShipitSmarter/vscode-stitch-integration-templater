@@ -7,7 +7,7 @@ export class CreateIntegrationPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: String[] = [];
-  private _flexFieldValues: String[] = [];
+  private _stepFieldValues: String[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -70,48 +70,9 @@ export class CreateIntegrationPanel {
         terminalExists = (terminal && !(terminal.exitStatus));
 
         switch (command) {
-          case "hello":
-            vscode.window.showInformationMessage(text);
-            break;
-          case 'updateNofSteps':
+          case 'updatenofsteps':
             vscode.window.showInformationMessage(`Updated number of step input fields to ${text}`);
             this._updateWebview(extensionUri);
-            break;
-          case 'startScript':
-            if (!terminalExists) {
-                vscode.window.showInformationMessage(text);
-                terminal = startScript('','',`Write-Host 'Hello World!'`);
-            } else {
-                vscode.window.showInformationMessage('Script already started!');
-            }
-            break;
-
-          case 'executecommand':
-            vscode.window.showInformationMessage('Executing user input command');
-
-            if (terminalExists) {
-                // if terminal exists and has not exited: re-use
-                terminal.sendText(text);
-            } else {
-                // else: open new terminal
-                terminal = startScript('','',text);
-            }
-            break;
-
-          case 'executescript':
-            vscode.window.showInformationMessage('Executing script with user arguments');
-
-            // text to send: dot-source script and add arguments
-            let scriptPath = getExtensionFile(context,'scripts','script.ps1');
-            var sendText: string = `. ${scriptPath} -message ${text}`;
-
-            if (terminalExists) {
-                // if terminal exists and has not exited: re-use
-                terminal.sendText(sendText);
-            } else {
-                // else: open new terminal
-                terminal = startScript('','',sendText);
-            }
             break;
 
           case 'executewithfunctions':
@@ -135,9 +96,9 @@ export class CreateIntegrationPanel {
             let indexValue = message.text.split('|');
             this._fieldValues[indexValue[0]] = indexValue[1];
             break;
-          case "saveflexfieldvalue":
-            let flexIndexValue = message.text.split('|');
-            this._flexFieldValues[flexIndexValue[0]] = flexIndexValue[1];
+          case "savestepfieldvalue":
+            let stepIndexValue = message.text.split('|');
+            this._stepFieldValues[stepIndexValue[0]] = stepIndexValue[1];
             break;
         }
       },
@@ -146,39 +107,45 @@ export class CreateIntegrationPanel {
     );
   }
 
+
+  private _nth(num:number): string {
+    let after:string = '';
+    switch (num) {
+      case 1 :
+        after = 'st';
+        break;
+      case 2 :
+        after = 'nd';
+        break;
+      case 3 :
+        after = 'rd';
+        break;
+      default:
+        after = 'th';
+        break;
+    }
+    return after;
+  }
+
   // make additional html for step fields
   private _stepInputs(nofSteps:number): string {
-	let html: string = ``;
+    let html: string = ``;
 
-	for (let step = 1; step <= nofSteps; step++) {
-		let after = '';
-		switch (step) {
-			case 1 :
-				after = 'st';
-				break;
-			case 2 :
-				after = 'nd';
-				break;
-			case 3 :
-				after = 'rd';
-				break;
-			default:
-				after = 'th';
-				break;
-		}
+    for (let step = 1; step <= nofSteps; step++) {
+      html += /*html*/`
+        <section class="component-example">
+          <vscode-text-field id="stepname${step}" indexstep="${step}" class="stepfield" placeholder="${step + this._nth(step)} step name...">Step ${step} name</vscode-text-field>
+          <vscode-text-field id="testurl${step}" indexstep="${step+10}" class="stepfield" placeholder="https://test-dpd.com/booking">Carrier TEST Url</vscode-text-field>
+          <vscode-text-field id="produrl${step}" indexstep="${step+20}" class="stepfield" placeholder="https://prod-dpd.com/booking">Carrier PROD Url</vscode-text-field>
+        </section>
+      `;
+    }
 
-		html += /*html*/`
-    <section class="component-example">
-      <vscode-text-field id="inputStep${step}" indexflex="${step}" class="flexfield" placeholder="${step + after} step name...">Step ${step}</vscode-text-field>
-      </section>
-		`;
-	}
-
-	// Example on reading file
-	// let document = await vscode.workspace.openTextDocument(element.path);
-	// document.getText();
-	return html;
-}
+    // Example on reading file
+    // let document = await vscode.workspace.openTextDocument(element.path);
+    // document.getText();
+    return html;
+  }
 
   // determine content
   private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
@@ -192,7 +159,7 @@ export class CreateIntegrationPanel {
 
     const mainUri = getUri(webview, extensionUri, ["panels","createintegration", "main.js"]);
     const styleUri = getUri(webview, extensionUri, ["panels","createintegration", "style.css"]);
-    let nofStepsString: String = this._fieldValues[0];
+    let nofStepsString: String = this._fieldValues[5];
     let nofSteps: number = +nofStepsString;
     const stepIntputFields = this._stepInputs(nofSteps);
 
@@ -210,63 +177,71 @@ export class CreateIntegrationPanel {
 			</head>
 			<body>
 				<div>
-					<h1>New Dashboard - Webview-UI style</h1>
+					<h1>Create module integration</h1>
 				</div>
         <section class="component-row">
-          <section class="component-container">
-            <h2>Flexible fields</h2>
-            <section class="component-example">
-              <p>Number of steps</p>
-              <vscode-dropdown id="nofsteps" index="0" position="below">
-                <vscode-option>1</vscode-option>
-                <vscode-option>2</vscode-option>
-                <vscode-option>3</vscode-option>
-                <vscode-option>4</vscode-option>
-                <vscode-option>5</vscode-option>
-                <vscode-option>6</vscode-option>
-                <vscode-option>7</vscode-option>
-                <vscode-option>8</vscode-option>
-                <vscode-option>9</vscode-option>
-                <vscode-option>10</vscode-option>
-              </vscode-dropdown>
 
-              <vscode-button id="oldsteps" appearance="primary">Update</vscode-button>
+          <section class="component-example">
+            <section class="component-container">
+              <h2>Carrier</h2>
+
+              <section class="component-example">
+                <p>Folder structure:    <b>carrier / api-name / module</b></p>
+                <vscode-text-field id="carriername" class="field" index="0" placeholder="carrier" size="5"></vscode-text-field>
+                /
+                <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
+                /
+                <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
+                  <vscode-option>booking</vscode-option>
+                  <vscode-option>tracking</vscode-option>
+                  <vscode-option>cancel</vscode-option>
+                  <vscode-option>pickup</vscode-option>
+                  <vscode-option>pickup-cancel</vscode-option>
+                </vscode-dropdown>
+              </section>
+
+              <section class="component-example">
+                <vscode-text-field id="carriercode" class="field" index="3" placeholder="DPD">SiS CarrierCode</vscode-text-field>
+              </section>
+
+              <section class="component-example">
+                <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+              </section>
             </section>
+
+            <section class="component-container">
+              <h2>Steps</h2>
+
+              <section class="component-example">
+                <p>Number of steps</p>
+                <vscode-dropdown id="nofsteps" class="dropdown" index="5" position="below">
+                  <vscode-option>1</vscode-option>
+                  <vscode-option>2</vscode-option>
+                  <vscode-option>3</vscode-option>
+                  <vscode-option>4</vscode-option>
+                  <vscode-option>5</vscode-option>
+                  <vscode-option>6</vscode-option>
+                  <vscode-option>7</vscode-option>
+                  <vscode-option>8</vscode-option>
+                  <vscode-option>9</vscode-option>
+                  <vscode-option>10</vscode-option>
+                </vscode-dropdown>
+
+                <vscode-button id="updatesteps" appearance="primary">Update</vscode-button>
+              </section>
 
               ${stepIntputFields}
-              
-          </section>
-
-          <section class="component-container">
-            <h2>Powershell</h2>
-            <section class="component-example">
-              <p>Open new terminal</p>
-              <vscode-button id="startscript" appearance="primary">Open terminal and start default script</vscode-button>
-            </section>
-
-            <section class="component-example">
-              <vscode-text-area id="scriptcommand" index="1" placeholder="Enter PowerShell command..." rows="3" cols="30" resize="vertical" value="">Enter PowerShell command and execute</vscode-text-area>
-              <div>
-                <vscode-button id="executecommand" appearance="primary">Execute Command</vscode-button>
-              </div>
-            </section>
-
-            <section class="component-example">
-              <vscode-text-area id="scriptarguments" index="2" placeholder="Enter arguments for script.ps1 ..." rows="3" cols="30" resize="vertical">Load script.ps1 from extension folder and execute with arguments</vscode-text-area>
-              <div>
-                <vscode-button id="executescript" appearance="primary">Execute extension script with arguments</vscode-button>
-                </div>
-            </section>
-
-            <section class="component-example">
-              <vscode-text-area id="functionsarguments" index="3" placeholder="Enter PowerShell command and use loaded functions from functions.ps1 ..." rows="3" cols="30" resize="vertical">Load functions.ps1 from workspace and execute command</vscode-text-area>
-              <div>
-                <vscode-button id="executewithfunctions" appearance="primary">Execute Script</vscode-button>
-                </div>
             </section>
           </section>
-          
+
+          <section class="component-example">
+            <section class="component-container">
+            <h2>Scenarios</h2>
+
+            </section>
+          </section>
         </section>
+
 			</body>
 		</html>
 	  `;
@@ -281,12 +256,12 @@ export class CreateIntegrationPanel {
       }
     }
 
-    // update flexfield values
-    let flexValues = this._flexFieldValues;
-    for (let index = 0; index < flexValues.length; index++) {
-      if (flexValues[index] !== undefined ) {
-        let indexString = 'indexflex="' + index + '"';
-        let newString = indexString + ' value="' + flexValues[index] + '"';
+    // update stepfield values
+    let stepValues = this._stepFieldValues;
+    for (let index = 0; index < stepValues.length; index++) {
+      if (stepValues[index] !== undefined ) {
+        let indexString = 'indexstep="' + index + '"';
+        let newString = indexString + ' value="' + stepValues[index] + '"';
         html = html.replace(indexString,newString);
       }
     }
