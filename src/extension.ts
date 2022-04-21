@@ -3,6 +3,7 @@ import { HelloWorldPanel } from "./panels/HelloWorldPanel";
 import { startScript } from "./utilities/functions";
 import { DashboardPanel } from "./panels/DashboardPanel";
 import { NewDashboardPanel } from "./panels/NewDashboardPanel";
+import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -26,6 +27,13 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(powershellScriptCommand);
 
+	// hello world panel (for reference)
+	const helloCommand = vscode.commands.registerCommand("mypanel.helloWorld", () => {
+		HelloWorldPanel.render(context.extensionUri);
+	  });
+	
+	context.subscriptions.push(helloCommand);
+
 	// dashboard panel
 	const dashboardCommand = vscode.commands.registerCommand("mypanel.dashboard", () => {
 		DashboardPanel.render(context.extensionUri, 0, context);
@@ -40,10 +48,12 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(newDashboardCommand);
 
-	// hello world panel (for reference)
-	const helloCommand = vscode.commands.registerCommand("mypanel.helloWorld", () => {
-		HelloWorldPanel.render(context.extensionUri);
-	  });
+	// Create Integration panel
+	const createIntegrationCommand = vscode.commands.registerCommand("mypanel.createintegration", () => {
+		CreateIntegrationPanel.render(context.extensionUri, 0, context);
+	});
 	
-	context.subscriptions.push(helloCommand);
+	context.subscriptions.push(createIntegrationCommand);
+
+	
 }

@@ -12,8 +12,8 @@
   "activationEvents": [
     "onCommand:mypanel.dashboard",
     "onCommand:mypanel.newdashboard",
-    "onCommand:mypanel.startPowerShellScript",
-    "onCommand:mypanel.createIntegration",
+    "onCommand:mypanel.startpowershellscript",
+    "onCommand:mypanel.createintegration",
     "onCommand:mypanel.helloWorld"
   ],
   "main": "./out/extension.js",
@@ -21,19 +21,19 @@
     "commands": [
       {
         "command": "mypanel.dashboard",
-        "title": "MyPanel: Start dashboard"
+        "title": "MyPanel: Open dashboard panel"
       },
       {
         "command": "mypanel.newdashboard",
-        "title": "MyPanel: Start new webview-ui dashboard"
+        "title": "MyPanel: Open webview-ui dashboard panel"
       },
       {
-        "command": "mypanel.startPowerShellScript",
+        "command": "mypanel.startpowershellscript",
         "title": "MyPanel: Run PowerShell script"
       },
       {
-        "command": "mypanel.createIntegration",
-        "title": "MyPanel: Open panel to create new integration"
+        "command": "mypanel.createintegration",
+        "title": "MyPanel: Create new integration"
       },
       {
         "command": "mypanel.helloWorld",
@@ -43,7 +43,7 @@
     "menus": {
       "explorer/context": [
         {
-          "command": "mypanel.startPowerShellScript"
+          "command": "mypanel.startpowershellscript"
         }
       ]
     }
