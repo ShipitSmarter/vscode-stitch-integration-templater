@@ -57,7 +57,7 @@ export class HelloWorldPanel {
         "toolkit.js", // A toolkit.min.js file is also available
     ]);
 
-    const mainUri = getUri(webview, extensionUri, ["scripts", "hello-world.js"]);
+    const mainUri = getUri(webview, extensionUri, ["panels", "helloworld","main.js"]);
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
     return /*html*/ `

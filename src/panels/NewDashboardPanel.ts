@@ -190,9 +190,8 @@ export class NewDashboardPanel {
         "toolkit.js", // A toolkit.min.js file is also available
     ]);
 
-    const mainUri = getUri(webview, extensionUri, ["scripts", "newdashboard.js"]);
-    // const myStyle = getUri(webview, extensionUri, ['media', 'style.css']);
-    const myStyle = getUri(webview, extensionUri, ["media", "newdashboard.css"]);
+    const mainUri = getUri(webview, extensionUri, ["panels","newdashboard", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["panels","newdashboard", "style.css"]);
     let nofStepsString: String = this._fieldValues[0];
     let nofSteps: number = +nofStepsString;
     const stepIntputFields = this._stepInputs(nofSteps);
@@ -207,7 +206,7 @@ export class NewDashboardPanel {
                 <script type="module" src="${toolkitUri}"></script>
                 <script type="module" src="${mainUri}"></script>
                 <title>My Dashboard!</title>
-				<link href="${myStyle}" rel="stylesheet" /> 
+				<link href="${styleUri}" rel="stylesheet" /> 
 			</head>
 			<body>
 				<div>

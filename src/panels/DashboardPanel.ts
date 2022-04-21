@@ -165,8 +165,8 @@ export class DashboardPanel {
         "toolkit.js", // A toolkit.min.js file is also available
     ]);
 
-    const mainUri = getUri(webview, extensionUri, ["scripts", "dashboard.js"]);
-    const myStyle = getUri(webview, extensionUri, ['media', 'style.css']);
+    const mainUri = getUri(webview, extensionUri, ["panels","dashboard", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["panels","dashboard", "style.css"]);
 
     const stepIntputFields = this._stepInputs(nofSteps);
 
@@ -180,7 +180,7 @@ export class DashboardPanel {
                 <script type="module" src="${toolkitUri}"></script>
                 <script type="module" src="${mainUri}"></script>
                 <title>My Dashboard!</title>
-				<link href="${myStyle}" rel="stylesheet" /> 
+				<link href="${styleUri}" rel="stylesheet" /> 
 			</head>
 			<body>
 				<div>
