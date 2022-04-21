@@ -8,6 +8,9 @@ export class CreateIntegrationPanel {
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: String[] = [];
   private _stepFieldValues: String[] = [];
+  private _scenarioFieldValues: String[] = [];
+  private _createUpdateValue: String = '';
+  private _modularValue: boolean = false;
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -71,7 +74,12 @@ export class CreateIntegrationPanel {
 
         switch (command) {
           case 'updatenofsteps':
-            vscode.window.showInformationMessage(`Updated number of step input fields to ${text}`);
+            vscode.window.showInformationMessage(`Updated number of step input rows to ${text}`);
+            this._updateWebview(extensionUri);
+            break;
+
+          case 'updatenofscenarios':
+            vscode.window.showInformationMessage(`Updated number of scenario input fields to ${text}`);
             this._updateWebview(extensionUri);
             break;
 
@@ -90,15 +98,29 @@ export class CreateIntegrationPanel {
     
                 terminal.sendText(message.text);
             });
-
             break;
+
           case "savefieldvalue":
             let indexValue = message.text.split('|');
             this._fieldValues[indexValue[0]] = indexValue[1];
             break;
+          
           case "savestepfieldvalue":
             let stepIndexValue = message.text.split('|');
             this._stepFieldValues[stepIndexValue[0]] = stepIndexValue[1];
+            break;
+
+          case "savescenariofieldvalue":
+            let scenarioIndexValue = message.text.split('|');
+            this._scenarioFieldValues[scenarioIndexValue[0]] = scenarioIndexValue[1];
+            break;
+
+          case "savecreateupdatevalue":
+            this._createUpdateValue = text;
+            break;
+
+          case "savemodularvalue":
+            this._modularValue = text;
             break;
         }
       },
@@ -106,7 +128,6 @@ export class CreateIntegrationPanel {
       this._disposables
     );
   }
-
 
   private _nth(num:number): string {
     let after:string = '';
@@ -130,17 +151,58 @@ export class CreateIntegrationPanel {
   // make additional html for step fields
   private _stepInputs(nofSteps:number): string {
     let html: string = ``;
+    let moduleName:String ='booking';
+    if (this._fieldValues[2] !== undefined) {
+      moduleName = this._fieldValues[2];
+    }
 
     for (let step = 1; step <= nofSteps; step++) {
+      // set html string addition
+      let subhtml:string = /*html*/`
+        <section class="component-example">
+          <p>${step + this._nth(step)} step: <b>name / carrier TEST url / carrier PROD url</b></p>
+          <vscode-dropdown id="stepname${step}" indexstep="${step}" class="stepdropdown" position="below">
+            <vscode-option>${moduleName}</vscode-option>
+            <vscode-option>label</vscode-option>
+            <vscode-option>login</vscode-option>
+            <vscode-option>get_token</vscode-option>
+            <vscode-option>save_token</vscode-option>
+            <vscode-option>other</vscode-option>
+          </vscode-dropdown>
+          <vscode-text-field id="testurl${step}" indexstep="${step+10}" class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" indexstep="${step+20}" class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+        </section>
+      `;
+
+      // replace nth <vscode-option> occurrence to pre-set different selected for each step 
+      // BUT: only if not already set in _stepFieldValues
+      if (this._stepFieldValues[step] === undefined) {
+        // from https://stackoverflow.com/a/44568739/1716283
+        let t: number = 0;
+        subhtml = subhtml.replace(/<vscode-option>/g, match => ++t === step ? '<vscode-option selected>' : match);
+      }
+
+      // add to output
+      html += subhtml;
+    }
+
+    // Example on reading file
+    // let document = await vscode.workspace.openTextDocument(element.path);
+    // document.getText();
+    return html;
+  }
+
+  private _scenarioInputs(nofScenarios:number): string {
+    let html: string = ``;
+  
+    for (let scenario = 1; scenario <= nofScenarios; scenario++) {
       html += /*html*/`
         <section class="component-example">
-          <vscode-text-field id="stepname${step}" indexstep="${step}" class="stepfield" placeholder="${step + this._nth(step)} step name...">Step ${step} name</vscode-text-field>
-          <vscode-text-field id="testurl${step}" indexstep="${step+10}" class="stepfield" placeholder="https://test-dpd.com/booking">Carrier TEST Url</vscode-text-field>
-          <vscode-text-field id="produrl${step}" indexstep="${step+20}" class="stepfield" placeholder="https://prod-dpd.com/booking">Carrier PROD Url</vscode-text-field>
+          <vscode-text-field id="scenario${scenario}" size="40" indexscenario="${scenario}" class="scenariofield" placeholder="${scenario + this._nth(scenario)} scenario name..."></vscode-text-field>
         </section>
       `;
     }
-
+  
     // Example on reading file
     // let document = await vscode.workspace.openTextDocument(element.path);
     // document.getText();
@@ -159,20 +221,27 @@ export class CreateIntegrationPanel {
 
     const mainUri = getUri(webview, extensionUri, ["panels","createintegration", "main.js"]);
     const styleUri = getUri(webview, extensionUri, ["panels","createintegration", "style.css"]);
+
+    // step fields
     let nofStepsString: String = this._fieldValues[5];
     let nofSteps: number = +nofStepsString;
     const stepIntputFields = this._stepInputs(nofSteps);
+
+    // scenario fields
+    let nofScenariosString: String = this._fieldValues[6];
+    let nofScenarios: number = +nofScenariosString;
+    const scenarioFields = this._scenarioInputs(nofScenarios);
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
     let html =  /*html*/`
 		<!DOCTYPE html>
 		<html>
 			<head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <script type="module" src="${toolkitUri}"></script>
-                <script type="module" src="${mainUri}"></script>
-                <title>My Dashboard!</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="module" src="${toolkitUri}"></script>
+        <script type="module" src="${mainUri}"></script>
+        <title>My Dashboard!</title>
 				<link href="${styleUri}" rel="stylesheet" /> 
 			</head>
 			<body>
@@ -196,7 +265,7 @@ export class CreateIntegrationPanel {
                   <vscode-option>tracking</vscode-option>
                   <vscode-option>cancel</vscode-option>
                   <vscode-option>pickup</vscode-option>
-                  <vscode-option>pickup-cancel</vscode-option>
+                  <vscode-option>pickup_cancel</vscode-option>
                 </vscode-dropdown>
               </section>
 
@@ -206,6 +275,18 @@ export class CreateIntegrationPanel {
 
               <section class="component-example">
                 <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+              </section>
+            </section>
+
+            <section class="component-container">
+              <h2>Options</h2>
+
+              <section class="component-example">
+                <vscode-radio-group id="createupdate">
+                  <label slot="label">Create/update</label>
+                  <vscode-radio name="createupdate" value="create">Create</vscode-radio>
+                  <vscode-radio name="createupdate" value="update">Update</vscode-radio>
+                </vscode-radio-group>
               </section>
             </section>
 
@@ -236,8 +317,21 @@ export class CreateIntegrationPanel {
 
           <section class="component-example">
             <section class="component-container">
-            <h2>Scenarios</h2>
+              <h2>Scenarios</h2>
 
+              <section class="component-example">
+                <vscode-checkbox id="modular">Modular</vscode-checkbox>
+              </section>
+
+              <section class="component-example">
+                <vscode-text-field id="nofscenarios" class="field" index="6" placeholder="Integer">Number of Scenarios</vscode-text-field>
+              </section>
+
+              <section class="component-example">
+                <vscode-button id="updatescenarios" appearance="primary">Update</vscode-button>
+              </section>
+
+              ${scenarioFields}
             </section>
           </section>
         </section>
@@ -264,6 +358,31 @@ export class CreateIntegrationPanel {
         let newString = indexString + ' value="' + stepValues[index] + '"';
         html = html.replace(indexString,newString);
       }
+    }
+
+    // update scenarioField values
+    let scenarioValues = this._scenarioFieldValues;
+    for (let index = 0; index < scenarioValues.length; index++) {
+      if (scenarioValues[index] !== undefined ) {
+        let indexString = 'indexscenario="' + index + '"';
+        let newString = indexString + ' value="' + scenarioValues[index] + '"';
+        html = html.replace(indexString,newString);
+      }
+    }
+
+    // update createupdate radio group value
+    let createString: string = 'name="createupdate" value="create"';
+    let updateString: string = 'name="createupdate" value="update"';
+    if (this._createUpdateValue === 'update') {
+      html = html.replace(updateString, updateString + ' checked');
+    } else {
+      html = html.replace(createString, createString + ' checked');
+    }
+
+    // update modular checkbox value
+    let modularString: string = 'id="modular"';
+    if (this._modularValue === true) {
+      html = html.replace(modularString, modularString + ' checked');
     }
 
     return html;
