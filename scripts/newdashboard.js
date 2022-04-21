@@ -54,15 +54,19 @@ function executeCommand () {
 }
 
 function executeScript () {
+  let executeScriptField = document.getElementById('scriptarguments');
+  saveFieldValue(executeScriptField.getAttribute('index'),executeScriptField.value);
   vscodeApi.postMessage({ 
     command: "executescript", 
-    text:  document.getElementById('scriptarguments').value 
+    text:  executeScriptField.value 
   });
 }
 
 function executeWithFunctions () {
+  let executeWithFunctionsField = document.getElementById('functionsarguments');
+  saveFieldValue(executeWithFunctionsField.getAttribute('index'),executeWithFunctionsField.value);
   vscodeApi.postMessage({ 
     command: "executewithfunctions", 
-    text: document.getElementById('functionsarguments').value 
+    text: executeWithFunctionsField.value 
   });
 }
