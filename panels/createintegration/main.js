@@ -6,6 +6,7 @@ function main() {
   // button onclick event listeners
   document.getElementById("updatesteps").addEventListener("click", updateNofSteps);
   document.getElementById("updatescenarios").addEventListener("click", updateNofScenarios);
+  document.getElementById("createintegration").addEventListener("click", createIntegration);
 
   // save field entries
   const fields = document.getElementsByClassName("field");
@@ -91,5 +92,12 @@ function updateNofScenarios () {
   vscodeApi.postMessage({ 
     command: "updatenofscenarios", 
     text: nofScenariosField.value
+  });
+}
+
+function createIntegration () {
+  vscodeApi.postMessage({ 
+    command: "createintegration", 
+    text: "real fast!"
   });
 }

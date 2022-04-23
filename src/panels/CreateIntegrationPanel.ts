@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { getUri, getWorkspaceFile, getExtensionFile , startScript} from "../utilities/functions";
+import * as fs from 'fs';
 
 export class CreateIntegrationPanel {
   // PROPERTIES
@@ -83,20 +84,52 @@ export class CreateIntegrationPanel {
             this._updateWebview(extensionUri);
             break;
 
-          case 'executewithfunctions':
+          case 'createintegration':
             vscode.window.showInformationMessage('Dot-Source functions file and execute script');
 
             // getWorkspaceFile is async -> all following steps must be executed within the 'then'
             getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
-                if (terminalExists) {
-                    // if terminal exists and has not exited: re-use
-                    terminal.sendText(`. ${functionsPath}`);
-                } else {
-                    // else: open new terminal
-                    terminal = startScript('','',`. ${functionsPath}`);
+
+              // get new carrier path
+              let carrierFolder = this._fieldValues[0];
+              let scriptsPath = functionsPath.replace(/\\/g, '/').replace(/\/[^\/]+$/,'');
+              let filesPath = scriptsPath.replace(/\/[^\/]+$/,'').replace(/\/[^\/]+$/,'');
+              let carrierFolderPath = filesPath + '/carriers/' + carrierFolder;
+
+              // make carrierFolderPath if not exists
+              try { 
+                fs.mkdirSync(carrierFolderPath, { recursive: true });
+              } catch (e: unknown) { }
+
+              // load ps integration template file
+              //getWorkspaceFile('**/scripts/templates/create-module-integration-template.ps1')
+              vscode.workspace.openTextDocument(scriptsPath + '/templates/create-module-integration-template.ps1').then(templateFile => {
+                let templateContent = templateFile.getText();
+
+                // replace all fieldValues
+                let newScriptContent = templateContent;
+                for (let index = 0; index <= this._fieldValues.length; index++) {
+                  let replaceString = '[fieldValues' + index + ']';
+                  newScriptContent = newScriptContent.replace(replaceString,this._fieldValues[index] + "");
                 }
-    
-                terminal.sendText(message.text);
+
+                // save to file
+                let scriptFilePath = carrierFolderPath + '/create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
+                //vscode.workspace.fs.writeFile(vscode.Uri.file(scriptFileName), new Uint8Array(newScriptContent) );
+                fs.writeFileSync(scriptFilePath, newScriptContent, 'utf8');
+
+                // // execute powershell
+                // if (terminalExists) {
+                //   // if terminal exists and has not exited: re-use
+                //   terminal.sendText(`. ${functionsPath}`);
+                // } else {
+                //   // else: open new terminal
+                //   terminal = startScript('','',`. ${functionsPath}`);
+                // }
+  
+                // terminal.sendText(message.text);
+              });
+
             });
             break;
 
@@ -316,6 +349,15 @@ export class CreateIntegrationPanel {
           </section>
 
           <section class="component-example">
+            <section class="component-container">
+              <h2>Create integration</h2>
+
+              <section class="component-example">
+                <vscode-button id="createintegration" appearance="primary">Create integration</vscode-button>
+              </section>
+
+              ${scenarioFields}
+            </section>
             <section class="component-container">
               <h2>Scenarios</h2>
 
