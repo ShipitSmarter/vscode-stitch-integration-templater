@@ -85,7 +85,7 @@ export class CreateIntegrationPanel {
             break;
 
           case 'createintegration':
-            vscode.window.showInformationMessage('Dot-Source functions file and execute script');
+            vscode.window.showInformationMessage('Creating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
 
             // getWorkspaceFile is async -> all following steps must be executed within the 'then'
             getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
@@ -102,33 +102,30 @@ export class CreateIntegrationPanel {
               } catch (e: unknown) { }
 
               // load ps integration template file
-              //getWorkspaceFile('**/scripts/templates/create-module-integration-template.ps1')
-              vscode.workspace.openTextDocument(scriptsPath + '/templates/create-module-integration-template.ps1').then(templateFile => {
-                let templateContent = templateFile.getText();
+              let templatePath = scriptsPath + '/templates/create-module-integration-template.ps1';
+              let templateContent = fs.readFileSync(templatePath, 'utf8');
 
-                // replace all fieldValues
-                let newScriptContent = templateContent;
-                for (let index = 0; index <= this._fieldValues.length; index++) {
-                  let replaceString = '[fieldValues' + index + ']';
-                  newScriptContent = newScriptContent.replace(replaceString,this._fieldValues[index] + "");
-                }
+              // replace all fieldValues
+              let newScriptContent = templateContent;
+              for (let index = 0; index <= this._fieldValues.length; index++) {
+                let replaceString = '[fieldValues' + index + ']';
+                newScriptContent = newScriptContent.replace(replaceString,this._fieldValues[index] + "");
+              }
 
-                // save to file
-                let scriptFilePath = carrierFolderPath + '/create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
-                //vscode.workspace.fs.writeFile(vscode.Uri.file(scriptFileName), new Uint8Array(newScriptContent) );
-                fs.writeFileSync(scriptFilePath, newScriptContent, 'utf8');
+              // save to file
+              let scriptFilePath = carrierFolderPath + '/create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
+              fs.writeFileSync(scriptFilePath, newScriptContent, 'utf8');
 
-                // // execute powershell
-                // if (terminalExists) {
-                //   // if terminal exists and has not exited: re-use
-                //   terminal.sendText(`. ${functionsPath}`);
-                // } else {
-                //   // else: open new terminal
-                //   terminal = startScript('','',`. ${functionsPath}`);
-                // }
-  
-                // terminal.sendText(message.text);
-              });
+              // // execute powershell
+              // if (terminalExists) {
+              //   // if terminal exists and has not exited: re-use
+              //   terminal.sendText(`. ${functionsPath}`);
+              // } else {
+              //   // else: open new terminal
+              //   terminal = startScript('','',`. ${functionsPath}`);
+              // }
+
+              // terminal.sendText(message.text);
 
             });
             break;
