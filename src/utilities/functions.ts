@@ -43,3 +43,11 @@ export function startScript (fileName ?: string , filePath ?: string , command ?
 	
 	return terminal;
 }
+
+export function cleanPath (path: string) : string {
+	return path.replace(/\\/g, '/');
+}
+
+export function parentPath (path: string) : string {
+	return path.replace(/\/[^\/]+$/,'');
+}

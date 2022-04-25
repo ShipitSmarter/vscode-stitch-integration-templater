@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getExtensionFile , startScript} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath} from "../utilities/functions";
 import * as fs from 'fs';
 
 export class CreateIntegrationPanel {
@@ -92,8 +92,8 @@ export class CreateIntegrationPanel {
 
               // get new carrier path
               let carrierFolder = this._fieldValues[0];
-              let scriptsPath = functionsPath.replace(/\\/g, '/').replace(/\/[^\/]+$/,'');
-              let filesPath = scriptsPath.replace(/\/[^\/]+$/,'').replace(/\/[^\/]+$/,'');
+              let scriptsPath = parentPath(cleanPath(functionsPath));
+              let filesPath = parentPath(parentPath(scriptsPath));
               let carrierFolderPath = filesPath + '/carriers/' + carrierFolder;
 
               // make carrierFolderPath if not exists
