@@ -3,6 +3,16 @@
   grid-template-columns: 2fr 1fr;
 }
 
+.component-subrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.component-subrow > * {
+  margin-right: 60px;
+}
+
+
 #carrier-row,
 #panels-row {
   display: grid;

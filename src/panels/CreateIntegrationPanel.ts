@@ -106,12 +106,59 @@ export class CreateIntegrationPanel {
               let templatePath = scriptsPath + '/templates/create-module-integration-template.ps1';
               let templateContent = fs.readFileSync(templatePath, 'utf8');
 
-              // replace all fieldValues
+              // replace all field values
+              // fixed field values
               let newScriptContent = templateContent;
-              for (let index = 0; index <= this._fieldValues.length; index++) {
+              for (let index = 0; index < this._fieldValues.length; index++) {
                 let replaceString = '[fieldValues' + index + ']';
-                newScriptContent = newScriptContent.replace(replaceString,this._fieldValues[index] + "");
+                if (this._fieldValues[index] !== undefined) {
+                  newScriptContent = newScriptContent.replace(replaceString,this._fieldValues[index] + "");
+                }
               }
+
+              // createupdate
+              newScriptContent = newScriptContent.replace('[createupdate]',this._createUpdateValue + "");
+
+              // modular
+              newScriptContent = newScriptContent.replace('[modular]',this._modularValue + "");
+
+              // scenarios
+              let scenariosString:string = '';
+              for (let index = 0; index < this._scenarioFieldValues.length; index++) {
+                if (this._scenarioFieldValues[index] !== undefined) {
+                  scenariosString += '\n    "' + this._scenarioFieldValues[index] + '"';
+                  if (index !== this._scenarioFieldValues.length -1) {
+                    scenariosString += ',';
+                  }
+                }
+              }
+              newScriptContent = newScriptContent.replace('[scenarios]',scenariosString);
+
+              // steps, testurls, produrls
+              let nofSteps = this._fieldValues[5];
+              let stepsString:string = '';
+              let testUrlsString:string = '';
+              let prodUrlsString:string = '';
+              for (let index = 0; index < +nofSteps; index++) {
+                let step:string = this._stepFieldValues[index] + '';
+                // steps
+                stepsString += '\n    "' + step + '"';
+                if (index !== +nofSteps -1) {
+                  stepsString += ',';
+                }
+                // testurls
+                if (this._stepFieldValues[index+10] !== undefined) {
+                  testUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERTESTENDPOINT = "' + this._stepFieldValues[index+10] + '"';
+                }
+                // produrls
+                if (this._stepFieldValues[index+20] !== undefined) {
+                  prodUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERPRODUCTIONENDPOINT = "' + this._stepFieldValues[index+20] + '"';
+                }
+              }
+              // replace
+              newScriptContent = newScriptContent.replace('[steps]',stepsString);
+              newScriptContent = newScriptContent.replace('[testurls]',testUrlsString);
+              newScriptContent = newScriptContent.replace('[produrls]',prodUrlsString);
 
               // save to file
               let scriptFilePath = carrierFolderPath + '/create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
@@ -313,13 +360,30 @@ export class CreateIntegrationPanel {
                 </vscode-dropdown>
               </section>
 
-              <section class="component-example">
-                <vscode-text-field id="carriercode" class="field" index="3" placeholder="DPD">SiS CarrierCode</vscode-text-field>
-              </section>
+              <section class="component-subrow">
+                <section class="component-example">
+                  <h4>Carrier details</h4>
+                  <section class="component-example">
+                    <vscode-text-field id="carriercode" class="field" index="3" placeholder="DPD">SiS CarrierCode</vscode-text-field>
+                  </section>
 
-              <section class="component-example">
-                <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+                  <section class="component-example">
+                    <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+                  </section>
+                </section>
+
+                <section class="component-example">
+                  <h4>Carrier TST credentials</h4>
+                  <section class="component-example">
+                    <vscode-text-field id="testuser" class="field" index="7" placeholder="DPDTstUser">User</vscode-text-field>
+                  </section>
+
+                  <section class="component-example">
+                    <vscode-text-field id="testpwd" class="field" index="8" placeholder="aslfjakl">Pwd</vscode-text-field>
+                  </section>
+                </section>
               </section>
+              
             </section>
 
             <section class="component-container">
