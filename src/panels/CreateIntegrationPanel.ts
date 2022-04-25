@@ -193,6 +193,7 @@ export class CreateIntegrationPanel {
 
           case "savecreateupdatevalue":
             this._createUpdateValue = text;
+            this._updateWebview(extensionUri);
             break;
 
           case "savemodularvalue":
@@ -244,9 +245,6 @@ export class CreateIntegrationPanel {
       html += subhtml;
     }
 
-    // Example on reading file
-    // let document = await vscode.workspace.openTextDocument(element.path);
-    // document.getText();
     return html;
   }
 
@@ -260,11 +258,17 @@ export class CreateIntegrationPanel {
         </section>
       `;
     }
-  
-    // Example on reading file
-    // let document = await vscode.workspace.openTextDocument(element.path);
-    // document.getText();
+ 
     return html;
+  }
+
+  private _ifCreate(content:string) : string {
+    let outString = '';
+    if (this._createUpdateValue === 'create') {
+      outString = content;
+    }
+
+    return outString;
   }
 
   // determine content
@@ -279,6 +283,8 @@ export class CreateIntegrationPanel {
 
     const mainUri = getUri(webview, extensionUri, ["panels","createintegration", "main.js"]);
     const styleUri = getUri(webview, extensionUri, ["panels","createintegration", "style.css"]);
+
+    // check if 
 
     // step fields
     let nofStepsString: String = this._fieldValues[5];
@@ -314,6 +320,110 @@ export class CreateIntegrationPanel {
     // scenarios
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0,+nofScenarios);
 
+    // grids
+    let carrierDetailsGrid = /*html*/ `
+    <section class="component-subrow">
+      <section class="component-example">
+        <h4>Carrier details</h4>
+        <section class="component-example">
+          <vscode-text-field id="carriercode" class="field" index="3" placeholder="DPD">SiS CarrierCode</vscode-text-field>
+        </section>
+
+        <section class="component-example">
+          <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+        </section>
+      </section>
+
+      <section class="component-example">
+        <h4>Carrier TST credentials</h4>
+        <section class="component-example">
+          <vscode-text-field id="testuser" class="field" index="7" placeholder="DPDTstUser">User</vscode-text-field>
+        </section>
+
+        <section class="component-example">
+          <vscode-text-field id="testpwd" class="field" index="8" placeholder="aslfjakl">Pwd</vscode-text-field>
+        </section>
+      </section>
+    </section>`;
+
+
+    let carrierGrid = /*html*/ `
+    <section class="component-container">
+      <h2>Carrier</h2>
+
+      <section class="component-example">
+        <p>Folder structure:    <b>carrier / api-name / module</b></p>
+        <vscode-text-field id="carriername" class="field" index="0" placeholder="carrier" size="5"></vscode-text-field>
+        /
+        <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
+        /
+        <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
+          ${dropdownOptions(['booking','tracking','cancel','pickup','pickup_cancel'])}
+        </vscode-dropdown>
+      </section>
+
+      ${this._ifCreate(carrierDetailsGrid)}
+      
+    </section>`;
+
+    let createUpdateGrid = /*html*/ `
+    <section class="component-container">
+      <h2>Execute</h2>
+
+      <section class="component-example">
+        <vscode-radio-group id="createupdate">
+          <label slot="label">Create/update</label>
+          <vscode-radio name="createupdate" value="create">Create</vscode-radio>
+          <vscode-radio name="createupdate" value="update">Update</vscode-radio>
+        </vscode-radio-group>
+      </section>
+
+      <section class="component-example">
+        <vscode-button id="createintegration" appearance="primary">Create integration</vscode-button>
+      </section>
+    </section>`;
+
+
+    let stepsGrid = /*html*/ `
+    <section  class="component-grid">
+      <section class="component-container">
+        <h2>Steps</h2>
+
+        <section class="component-example">
+          <p>Number of steps</p>
+          <vscode-dropdown id="nofsteps" class="dropdown" index="5" position="below">
+            ${dropdownOptions(arrayFrom1(10))}
+          </vscode-dropdown>
+        </section>
+
+        <section class="component-example">
+          <h3>Step fields: <b>name / carrier TEST url / carrier PROD url</b></h3>
+        </section>
+
+        ${stepIntputFields}
+      </section>
+    </section>`;
+
+    let scenariosGrid = /*html*/ `
+    <section class="component-grid">
+      <section class="component-container">
+        <h2>Scenarios</h2>
+
+        <section class="component-example">
+          <vscode-checkbox id="modular">Modular</vscode-checkbox>
+        </section>
+
+        <section class="component-example">
+          <p>Number of Scenarios</p>
+          <vscode-dropdown id="nofscenarios" class="dropdown" index="6" position="below">
+            ${dropdownOptions(arrayFrom1(100))}
+          </vscode-dropdown>
+        </section>
+
+        ${scenarioFields}
+      </section>
+    </section>`;
+
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
     let html =  /*html*/`
 		<!DOCTYPE html>
@@ -335,102 +445,20 @@ export class CreateIntegrationPanel {
           <section class="component-example">
 
             <section class="component-row">
-              <section class="component-container">
-                <h2>Carrier</h2>
 
-                <section class="component-example">
-                  <p>Folder structure:    <b>carrier / api-name / module</b></p>
-                  <vscode-text-field id="carriername" class="field" index="0" placeholder="carrier" size="5"></vscode-text-field>
-                  /
-                  <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
-                  /
-                  <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
-                    ${dropdownOptions(['booking','tracking','cancel','pickup','pickup_cancel'])}
-                  </vscode-dropdown>
-                </section>
+              ${carrierGrid}
 
-                <section class="component-subrow">
-                  <section class="component-example">
-                    <h4>Carrier details</h4>
-                    <section class="component-example">
-                      <vscode-text-field id="carriercode" class="field" index="3" placeholder="DPD">SiS CarrierCode</vscode-text-field>
-                    </section>
+              ${createUpdateGrid}
 
-                    <section class="component-example">
-                      <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
-                    </section>
-                  </section>
-
-                  <section class="component-example">
-                    <h4>Carrier TST credentials</h4>
-                    <section class="component-example">
-                      <vscode-text-field id="testuser" class="field" index="7" placeholder="DPDTstUser">User</vscode-text-field>
-                    </section>
-
-                    <section class="component-example">
-                      <vscode-text-field id="testpwd" class="field" index="8" placeholder="aslfjakl">Pwd</vscode-text-field>
-                    </section>
-                  </section>
-                </section>
-                
-              </section>
-
-              <section class="component-container">
-                <h2>Create/update integration</h2>
-
-                <section class="component-example">
-                  <vscode-radio-group id="createupdate">
-                    <label slot="label">Create/update</label>
-                    <vscode-radio name="createupdate" value="create">Create</vscode-radio>
-                    <vscode-radio name="createupdate" value="update">Update</vscode-radio>
-                  </vscode-radio-group>
-                </section>
-
-                <section class="component-example">
-                  <vscode-button id="createintegration" appearance="primary">Create integration</vscode-button>
-                </section>
-              </section>
             </section>
 
             
-            <section  class="component-grid">
-              <section class="component-container">
-                <h2>Steps</h2>
+            ${this._ifCreate(stepsGrid)}
 
-                <section class="component-example">
-                  <p>Number of steps</p>
-                  <vscode-dropdown id="nofsteps" class="dropdown" index="5" position="below">
-                    ${dropdownOptions(arrayFrom1(10))}
-                  </vscode-dropdown>
-                </section>
-
-                <section class="component-example">
-                  <h3>Step fields: <b>name / carrier TEST url / carrier PROD url</b></h3>
-                </section>
-
-                ${stepIntputFields}
-              </section>
-            </section>
           </section>
 
-          <section class="component-grid">
-            <section class="component-container">
-              <h2>Scenarios</h2>
+          ${scenariosGrid}
 
-              <section class="component-example">
-                <vscode-checkbox id="modular">Modular</vscode-checkbox>
-              </section>
-
-              <section class="component-example">
-                <p>Number of Scenarios</p>
-                <vscode-dropdown id="nofscenarios" class="dropdown" index="6" position="below">
-                  ${dropdownOptions(arrayFrom1(100))}
-                </vscode-dropdown>
-              </section>
-
-              ${scenarioFields}
-            </section>
-          </section>
         </section>
 
 			</body>
