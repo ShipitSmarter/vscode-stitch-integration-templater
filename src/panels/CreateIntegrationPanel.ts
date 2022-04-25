@@ -312,13 +312,6 @@ export class CreateIntegrationPanel {
     this._stepFieldValues = newStepFieldValues;
 
     // scenarios
-    // let newScenarioFieldValues: String[] = [];
-    // for (let index = 0; index < +nofScenarios; index++) {
-    //   if (this._scenarioFieldValues[index] !== undefined ) {
-    //     newScenarioFieldValues[index] = this._scenarioFieldValues[index];
-    //   }
-    // }
-    // this._scenarioFieldValues = newScenarioFieldValues;
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0,+nofScenarios);
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
@@ -400,26 +393,27 @@ export class CreateIntegrationPanel {
             </section>
 
             
+            <section  class="component-grid">
+              <section class="component-container">
+                <h2>Steps</h2>
 
-            <section class="component-container">
-              <h2>Steps</h2>
+                <section class="component-example">
+                  <p>Number of steps</p>
+                  <vscode-dropdown id="nofsteps" class="dropdown" index="5" position="below">
+                    ${dropdownOptions(arrayFrom1(10))}
+                  </vscode-dropdown>
+                </section>
 
-              <section class="component-example">
-                <p>Number of steps</p>
-                <vscode-dropdown id="nofsteps" class="dropdown" index="5" position="below">
-                  ${dropdownOptions(arrayFrom1(10))}
-                </vscode-dropdown>
+                <section class="component-example">
+                  <h3>Step fields: <b>name / carrier TEST url / carrier PROD url</b></h3>
+                </section>
+
+                ${stepIntputFields}
               </section>
-
-              <section class="component-example">
-                <h3>Step fields: <b>name / carrier TEST url / carrier PROD url</b></h3>
-              </section>
-
-              ${stepIntputFields}
             </section>
           </section>
 
-          <section class="component-example">
+          <section class="component-grid">
             <section class="component-container">
               <h2>Scenarios</h2>
 

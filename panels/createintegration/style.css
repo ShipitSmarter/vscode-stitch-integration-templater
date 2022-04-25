@@ -13,8 +13,7 @@
 }
 
 
-#carrier-row,
-#panels-row {
+.component-grid {
   display: grid;
   grid-template-columns: 1fr;
 }
