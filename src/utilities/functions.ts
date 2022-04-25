@@ -53,20 +53,38 @@ export function parentPath (path: string) : string {
 }
 
 export function nth(num:number): string {
-    let after:string = '';
-    switch (num) {
-      case 1 :
-        after = 'st';
-        break;
-      case 2 :
-        after = 'nd';
-        break;
-      case 3 :
-        after = 'rd';
-        break;
-      default:
-        after = 'th';
-        break;
-    }
-    return after;
-  }
+	let after:string = '';
+	switch (num) {
+		case 1 :
+		after = 'st';
+		break;
+		case 2 :
+		after = 'nd';
+		break;
+		case 3 :
+		after = 'rd';
+		break;
+		default:
+		after = 'th';
+		break;
+	}
+	return after;
+}
+
+export function dropdownOptions(options:(string|number)[]) : string {
+	let optionsString : string = '';
+	for (const option of options) {
+		optionsString += '\n    <vscode-option>' + option + '</vscode-option>';
+	}
+
+	return optionsString;
+}
+
+export function arrayFrom0(max:number) : number[] {
+	// from https://stackoverflow.com/a/33352604/1716283
+	return [...Array(max).keys()];
+}
+
+export function arrayFrom1(max:number) : number[] {
+	return arrayFrom0(max).map(x => ++x);
+}

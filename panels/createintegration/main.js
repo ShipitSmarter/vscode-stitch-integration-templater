@@ -52,6 +52,7 @@ function main() {
    // fieldValues dropdowns (modulename, nofsteps)
    vscodeApi.postMessage({ command: "savefieldvalue", text:  '2|' + document.getElementById("modulename").value });
    vscodeApi.postMessage({ command: "savefieldvalue", text:  '5|' + document.getElementById("nofsteps").value });
+   vscodeApi.postMessage({ command: "savefieldvalue", text:  '6|' + document.getElementById("nofscenarios").value });
 
    // stepDropdowns
    for (const stepDropDown of document.getElementsByClassName("stepdropdown")) {

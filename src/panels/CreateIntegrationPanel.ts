@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath, nth} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1} from "../utilities/functions";
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -404,16 +404,7 @@ export class CreateIntegrationPanel {
               <section class="component-example">
                 <p>Number of steps</p>
                 <vscode-dropdown id="nofsteps" class="dropdown" index="5" position="below">
-                  <vscode-option>1</vscode-option>
-                  <vscode-option>2</vscode-option>
-                  <vscode-option>3</vscode-option>
-                  <vscode-option>4</vscode-option>
-                  <vscode-option>5</vscode-option>
-                  <vscode-option>6</vscode-option>
-                  <vscode-option>7</vscode-option>
-                  <vscode-option>8</vscode-option>
-                  <vscode-option>9</vscode-option>
-                  <vscode-option>10</vscode-option>
+                  ${dropdownOptions(arrayFrom1(10))}
                 </vscode-dropdown>
 
                 <vscode-button id="updatesteps" appearance="primary">Update</vscode-button>
@@ -444,7 +435,10 @@ export class CreateIntegrationPanel {
               </section>
 
               <section class="component-example">
-                <vscode-text-field id="nofscenarios" class="field" index="6" placeholder="Integer">Number of Scenarios</vscode-text-field>
+                <p>Number of Scenarios</p>
+                <vscode-dropdown id="nofscenarios" class="dropdown" index="6" position="below">
+                  ${dropdownOptions(arrayFrom1(100))}
+                </vscode-dropdown>
               </section>
 
               <section class="component-example">
