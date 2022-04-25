@@ -89,14 +89,37 @@ export class CreateIntegrationPanel {
             getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
               // get new carrier path
               let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-              let carrierFolderPath = filesPath + '/carriers/' + carrier + '/' + api + '/' + module;
+              let carrierPath = filesPath + '/carriers/' + carrier;
+              let integrationPath = carrierPath + '/' + api + '/' + module;
+              let scriptPath = carrierPath + '/create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
 
-              if (fs.existsSync(carrierFolderPath) && this._createUpdateValue === 'create') {
+              if (fs.existsSync(integrationPath) && this._createUpdateValue === 'create') {
+                // set 'update'
                 this._createUpdateValue = 'update';
+
+                // load scenarios if present
+                if (fs.existsSync(scriptPath)) {
+                  // find scenarios using regex
+                  let scriptContent = fs.readFileSync(scriptPath, 'utf8');
+                  let scenarioString = scriptContent.match(/\$Scenarios = \@\(([^\)]+)/) ?? '';
+                  let rawScenarios: string[] = [];
+                  if (scenarioString.length >= 2) {
+                    rawScenarios = scenarioString[1].split(',');
+                  }
+
+                  // update scenario fields and nofScenarios
+                  for (let index = 0; index < rawScenarios.length; index++) {
+                    this._scenarioFieldValues[index] = rawScenarios[index].trim().replace(/"/g,'');
+                  }
+                  this._scenarioFieldValues = this._scenarioFieldValues.slice(0,rawScenarios.length);
+                  this._fieldValues[6] = rawScenarios.length + "";
+                }
+                
+                // update panel
                 this._updateWebview(extensionUri);
               } 
               
-              if ((fs.existsSync(carrierFolderPath) === false) && (this._createUpdateValue === 'update')) {
+              if ((fs.existsSync(integrationPath) === false) && (this._createUpdateValue === 'update')) {
                 this._createUpdateValue = 'create';
                 this._updateWebview(extensionUri);
               }
