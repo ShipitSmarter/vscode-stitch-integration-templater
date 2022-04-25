@@ -47,6 +47,17 @@ function main() {
    for (const scenarioField of scenarioFields) {
     scenarioField.addEventListener("keyup",saveScenarioFieldValue);
    }
+
+   // on panel creation: save all dropdown values
+   // fieldValues dropdowns (modulename, nofsteps)
+   vscodeApi.postMessage({ command: "savefieldvalue", text:  '2|' + document.getElementById("modulename").value });
+   vscodeApi.postMessage({ command: "savefieldvalue", text:  '5|' + document.getElementById("nofsteps").value });
+
+   // stepDropdowns
+   for (const stepDropDown of document.getElementsByClassName("stepdropdown")) {
+    let textString = stepDropDown.getAttribute('indexstep') + '|' + stepDropDown.value;
+    vscodeApi.postMessage({ command: "savestepfieldvalue", text:  textString });
+   }
 }
 
 function saveFieldValue(event) {

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath, nth} from "../utilities/functions";
 import * as fs from 'fs';
+import * as path from 'path';
 
 export class CreateIntegrationPanel {
   // PROPERTIES
@@ -10,8 +11,8 @@ export class CreateIntegrationPanel {
   private _fieldValues: String[] = [];
   private _stepFieldValues: String[] = [];
   private _scenarioFieldValues: String[] = [];
-  private _createUpdateValue: String = '';
-  private _modularValue: boolean = false;
+  private _createUpdateValue: String = 'create';      // pre-allocate with 'create'
+  private _modularValue: boolean = false;             // pre-allocate with 'false'
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -64,7 +65,7 @@ export class CreateIntegrationPanel {
     // Pre-allocate terminal and terminalExists
     let terminal: vscode.Terminal;
     let terminalExists: boolean;
-
+    
     webview.onDidReceiveMessage(
       (message: any) => {
         const command = message.command;
@@ -159,24 +160,6 @@ export class CreateIntegrationPanel {
     );
   }
 
-  private _nth(num:number): string {
-    let after:string = '';
-    switch (num) {
-      case 1 :
-        after = 'st';
-        break;
-      case 2 :
-        after = 'nd';
-        break;
-      case 3 :
-        after = 'rd';
-        break;
-      default:
-        after = 'th';
-        break;
-    }
-    return after;
-  }
 
   // make additional html for step fields
   private _stepInputs(nofSteps:number): string {
@@ -186,11 +169,11 @@ export class CreateIntegrationPanel {
       moduleName = this._fieldValues[2];
     }
 
-    for (let step = 1; step <= nofSteps; step++) {
+    for (let step = 0; step < +nofSteps; step++) {
       // set html string addition
       let subhtml:string = /*html*/`
         <section class="component-example">
-          <p>${step + this._nth(step)} step: <b>name / carrier TEST url / carrier PROD url</b></p>
+          <p>${(step+1) + nth(step+1)} step</p>
           <vscode-dropdown id="stepname${step}" indexstep="${step}" class="stepdropdown" position="below">
             <vscode-option>${moduleName}</vscode-option>
             <vscode-option>label</vscode-option>
@@ -209,7 +192,7 @@ export class CreateIntegrationPanel {
       if (this._stepFieldValues[step] === undefined) {
         // from https://stackoverflow.com/a/44568739/1716283
         let t: number = 0;
-        subhtml = subhtml.replace(/<vscode-option>/g, match => ++t === step ? '<vscode-option selected>' : match);
+        subhtml = subhtml.replace(/<vscode-option>/g, match => ++t === (step+1) ? '<vscode-option selected>' : match);
       }
 
       // add to output
@@ -225,10 +208,10 @@ export class CreateIntegrationPanel {
   private _scenarioInputs(nofScenarios:number): string {
     let html: string = ``;
   
-    for (let scenario = 1; scenario <= nofScenarios; scenario++) {
+    for (let scenario = 0; scenario < +nofScenarios; scenario++) {
       html += /*html*/`
         <section class="component-example">
-          <vscode-text-field id="scenario${scenario}" size="40" indexscenario="${scenario}" class="scenariofield" placeholder="${scenario + this._nth(scenario)} scenario name..."></vscode-text-field>
+          <vscode-text-field id="scenario${scenario}" size="40" indexscenario="${scenario}" class="scenariofield" placeholder="${(scenario+1) + nth(scenario+1)} scenario name..."></vscode-text-field>
         </section>
       `;
     }
@@ -261,6 +244,37 @@ export class CreateIntegrationPanel {
     let nofScenariosString: String = this._fieldValues[6];
     let nofScenarios: number = +nofScenariosString;
     const scenarioFields = this._scenarioInputs(nofScenarios);
+
+    // crop flexible field arrays
+    // steps
+    let newStepFieldValues: String[] = [];
+    for (let index = 0; index < +nofSteps; index++) {
+      // stepname
+      if (this._stepFieldValues[index] !== undefined ) {
+        newStepFieldValues[index] = this._stepFieldValues[index];
+      }
+
+      // testurl
+      if (this._stepFieldValues[index + 10] !== undefined ) {
+        newStepFieldValues[index + 10] = this._stepFieldValues[index + 10];
+      }
+
+      // produrl
+      if (this._stepFieldValues[index + 20] !== undefined ) {
+        newStepFieldValues[index + 20] = this._stepFieldValues[index + 20];
+      }
+    }
+    this._stepFieldValues = newStepFieldValues;
+
+    // scenarios
+    // let newScenarioFieldValues: String[] = [];
+    // for (let index = 0; index < +nofScenarios; index++) {
+    //   if (this._scenarioFieldValues[index] !== undefined ) {
+    //     newScenarioFieldValues[index] = this._scenarioFieldValues[index];
+    //   }
+    // }
+    // this._scenarioFieldValues = newScenarioFieldValues;
+    this._scenarioFieldValues = this._scenarioFieldValues.slice(0,+nofScenarios);
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
     let html =  /*html*/`
@@ -341,6 +355,10 @@ export class CreateIntegrationPanel {
                 <vscode-button id="updatesteps" appearance="primary">Update</vscode-button>
               </section>
 
+              <section class="component-example">
+                <h3>Step fields: <b>name / carrier TEST url / carrier PROD url</b></h3>
+              </section>
+
               ${stepIntputFields}
             </section>
           </section>
@@ -353,7 +371,6 @@ export class CreateIntegrationPanel {
                 <vscode-button id="createintegration" appearance="primary">Create integration</vscode-button>
               </section>
 
-              ${scenarioFields}
             </section>
             <section class="component-container">
               <h2>Scenarios</h2>

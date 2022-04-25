@@ -51,3 +51,22 @@ export function cleanPath (path: string) : string {
 export function parentPath (path: string) : string {
 	return path.replace(/\/[^\/]+$/,'');
 }
+
+export function nth(num:number): string {
+    let after:string = '';
+    switch (num) {
+      case 1 :
+        after = 'st';
+        break;
+      case 2 :
+        after = 'nd';
+        break;
+      case 3 :
+        after = 'rd';
+        break;
+      default:
+        after = 'th';
+        break;
+    }
+    return after;
+  }
