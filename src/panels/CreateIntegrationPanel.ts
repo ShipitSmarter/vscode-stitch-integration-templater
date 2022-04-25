@@ -161,19 +161,19 @@ export class CreateIntegrationPanel {
               newScriptContent = newScriptContent.replace('[produrls]',prodUrlsString);
 
               // save to file
-              let scriptFilePath = carrierFolderPath + '/create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
+              let scriptFileName = 'create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1'
+              let scriptFilePath = carrierFolderPath + '/' + scriptFileName;
               fs.writeFileSync(scriptFilePath, newScriptContent, 'utf8');
 
-              // // execute powershell
-              // if (terminalExists) {
-              //   // if terminal exists and has not exited: re-use
-              //   terminal.sendText(`. ${functionsPath}`);
-              // } else {
-              //   // else: open new terminal
-              //   terminal = startScript('','',`. ${functionsPath}`);
-              // }
+              // execute powershell
+              // open terminal if not yet exists
+              if (!terminalExists) {
+                terminal = startScript('','');
+              }
 
-              // terminal.sendText(message.text);
+              // execute newly created script
+              terminal.sendText(`cd ${carrierFolderPath}`);
+              terminal.sendText(`./${scriptFileName}`);
 
             });
             break;
