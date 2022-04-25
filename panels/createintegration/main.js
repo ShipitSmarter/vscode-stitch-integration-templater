@@ -4,8 +4,6 @@ window.addEventListener("load", main);
 
 function main() {
   // button onclick event listeners
-  document.getElementById("updatesteps").addEventListener("click", updateNofSteps);
-  document.getElementById("updatescenarios").addEventListener("click", updateNofScenarios);
   document.getElementById("createintegration").addEventListener("click", createIntegration);
 
   // save field entries
@@ -17,7 +15,7 @@ function main() {
   // save dropdown entries
   const dropDowns = document.getElementsByClassName("dropdown");
   for (const dropDown of dropDowns) {
-    dropDown.addEventListener("change",saveFieldValue);
+    dropDown.addEventListener("change",dropdownChange);
   }
 
   // save create/update radio entry
@@ -61,6 +59,16 @@ function main() {
    }
 }
 
+function dropdownChange(event) {
+  const field = event.target;
+  // save field value
+  let textString = field.getAttribute('index') + '|' + field.value;
+  vscodeApi.postMessage({ command: "savefieldvalue", text:  textString });
+
+  // refresh panel
+  vscodeApi.postMessage({ command: "refreshpanel", text:  'fromdropdown' });
+}
+
 function saveFieldValue(event) {
   const field = event.target;
   let textString = field.getAttribute('index') + '|' + field.value;
@@ -89,22 +97,6 @@ function saveModularValue(event) {
   const field = event.target;
   let textString = field.checked;
   vscodeApi.postMessage({ command: "savemodularvalue", text:  textString });
-}
-
-function updateNofSteps () {
-  let nofStepsField = document.getElementById("nofsteps");
-  vscodeApi.postMessage({ 
-    command: "updatenofsteps", 
-    text: nofStepsField.value
-  });
-}
-
-function updateNofScenarios () {
-  let nofScenariosField = document.getElementById("nofscenarios");
-  vscodeApi.postMessage({ 
-    command: "updatenofscenarios", 
-    text: nofScenariosField.value
-  });
 }
 
 function createIntegration () {

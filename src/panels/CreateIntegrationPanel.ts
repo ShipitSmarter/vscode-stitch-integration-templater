@@ -75,13 +75,11 @@ export class CreateIntegrationPanel {
         terminalExists = (terminal && !(terminal.exitStatus));
 
         switch (command) {
-          case 'updatenofsteps':
-            vscode.window.showInformationMessage(`Updated number of step input rows to ${text}`);
-            this._updateWebview(extensionUri);
-            break;
 
-          case 'updatenofscenarios':
-            vscode.window.showInformationMessage(`Updated number of scenario input fields to ${text}`);
+          case 'refreshpanel':
+            if (text === 'fromdropdown') {
+              vscode.window.showInformationMessage(`Refreshed page due to dropdown update`);
+            }
             this._updateWebview(extensionUri);
             break;
 
@@ -352,11 +350,7 @@ export class CreateIntegrationPanel {
                 <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
                 /
                 <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
-                  <vscode-option>booking</vscode-option>
-                  <vscode-option>tracking</vscode-option>
-                  <vscode-option>cancel</vscode-option>
-                  <vscode-option>pickup</vscode-option>
-                  <vscode-option>pickup_cancel</vscode-option>
+                  ${dropdownOptions(['booking','tracking','cancel','pickup','pickup_cancel'])}
                 </vscode-dropdown>
               </section>
 
@@ -406,8 +400,6 @@ export class CreateIntegrationPanel {
                 <vscode-dropdown id="nofsteps" class="dropdown" index="5" position="below">
                   ${dropdownOptions(arrayFrom1(10))}
                 </vscode-dropdown>
-
-                <vscode-button id="updatesteps" appearance="primary">Update</vscode-button>
               </section>
 
               <section class="component-example">
@@ -439,10 +431,6 @@ export class CreateIntegrationPanel {
                 <vscode-dropdown id="nofscenarios" class="dropdown" index="6" position="below">
                   ${dropdownOptions(arrayFrom1(100))}
                 </vscode-dropdown>
-              </section>
-
-              <section class="component-example">
-                <vscode-button id="updatescenarios" appearance="primary">Update</vscode-button>
               </section>
 
               ${scenarioFields}
