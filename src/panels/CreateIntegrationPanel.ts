@@ -340,57 +340,66 @@ export class CreateIntegrationPanel {
         <section class="component-row">
 
           <section class="component-example">
-            <section class="component-container">
-              <h2>Carrier</h2>
 
-              <section class="component-example">
-                <p>Folder structure:    <b>carrier / api-name / module</b></p>
-                <vscode-text-field id="carriername" class="field" index="0" placeholder="carrier" size="5"></vscode-text-field>
-                /
-                <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
-                /
-                <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
-                  ${dropdownOptions(['booking','tracking','cancel','pickup','pickup_cancel'])}
-                </vscode-dropdown>
+            <section class="component-row">
+              <section class="component-container">
+                <h2>Carrier</h2>
+
+                <section class="component-example">
+                  <p>Folder structure:    <b>carrier / api-name / module</b></p>
+                  <vscode-text-field id="carriername" class="field" index="0" placeholder="carrier" size="5"></vscode-text-field>
+                  /
+                  <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
+                  /
+                  <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
+                    ${dropdownOptions(['booking','tracking','cancel','pickup','pickup_cancel'])}
+                  </vscode-dropdown>
+                </section>
+
+                <section class="component-subrow">
+                  <section class="component-example">
+                    <h4>Carrier details</h4>
+                    <section class="component-example">
+                      <vscode-text-field id="carriercode" class="field" index="3" placeholder="DPD">SiS CarrierCode</vscode-text-field>
+                    </section>
+
+                    <section class="component-example">
+                      <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+                    </section>
+                  </section>
+
+                  <section class="component-example">
+                    <h4>Carrier TST credentials</h4>
+                    <section class="component-example">
+                      <vscode-text-field id="testuser" class="field" index="7" placeholder="DPDTstUser">User</vscode-text-field>
+                    </section>
+
+                    <section class="component-example">
+                      <vscode-text-field id="testpwd" class="field" index="8" placeholder="aslfjakl">Pwd</vscode-text-field>
+                    </section>
+                  </section>
+                </section>
+                
               </section>
 
-              <section class="component-subrow">
-                <section class="component-example">
-                  <h4>Carrier details</h4>
-                  <section class="component-example">
-                    <vscode-text-field id="carriercode" class="field" index="3" placeholder="DPD">SiS CarrierCode</vscode-text-field>
-                  </section>
+              <section class="component-container">
+                <h2>Create/update integration</h2>
 
-                  <section class="component-example">
-                    <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
-                  </section>
+                <section class="component-example">
+                  <vscode-radio-group id="createupdate">
+                    <label slot="label">Create/update</label>
+                    <vscode-radio name="createupdate" value="create">Create</vscode-radio>
+                    <vscode-radio name="createupdate" value="update">Update</vscode-radio>
+                  </vscode-radio-group>
                 </section>
 
                 <section class="component-example">
-                  <h4>Carrier TST credentials</h4>
-                  <section class="component-example">
-                    <vscode-text-field id="testuser" class="field" index="7" placeholder="DPDTstUser">User</vscode-text-field>
-                  </section>
-
-                  <section class="component-example">
-                    <vscode-text-field id="testpwd" class="field" index="8" placeholder="aslfjakl">Pwd</vscode-text-field>
-                  </section>
+                  <vscode-button id="createintegration" appearance="primary">Create integration</vscode-button>
                 </section>
               </section>
-              
             </section>
 
-            <section class="component-container">
-              <h2>Options</h2>
-
-              <section class="component-example">
-                <vscode-radio-group id="createupdate">
-                  <label slot="label">Create/update</label>
-                  <vscode-radio name="createupdate" value="create">Create</vscode-radio>
-                  <vscode-radio name="createupdate" value="update">Update</vscode-radio>
-                </vscode-radio-group>
-              </section>
-            </section>
+            
 
             <section class="component-container">
               <h2>Steps</h2>
@@ -411,14 +420,6 @@ export class CreateIntegrationPanel {
           </section>
 
           <section class="component-example">
-            <section class="component-container">
-              <h2>Create integration</h2>
-
-              <section class="component-example">
-                <vscode-button id="createintegration" appearance="primary">Create integration</vscode-button>
-              </section>
-
-            </section>
             <section class="component-container">
               <h2>Scenarios</h2>
 
