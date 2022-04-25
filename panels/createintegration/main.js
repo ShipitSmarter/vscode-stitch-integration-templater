@@ -57,6 +57,27 @@ function main() {
     let textString = stepDropDown.getAttribute('indexstep') + '|' + stepDropDown.value;
     vscodeApi.postMessage({ command: "savestepfieldvalue", text:  textString });
    }
+
+   // add additional special event listeners to integration path fields
+   document.getElementById("carriername").addEventListener("keyup", integrationPathUpdate);
+   document.getElementById("carrierapiname").addEventListener("keyup", integrationPathUpdate);
+   document.getElementById("modulename").addEventListener("change", integrationPathUpdate);
+
+}
+
+function integrationPathUpdate(event) {
+  const field = event.target;
+  // save field value
+  let textString = field.getAttribute('index') + '|' + field.value;
+  vscodeApi.postMessage({ command: "savefieldvalue", text:  textString });
+
+  // if dropdown: refresh panel
+  if (field.id === 'modulename') {
+    vscodeApi.postMessage({ command: "refreshpanel", text:  'fromdropdown' });
+  }
+
+  // check if module exists
+  vscodeApi.postMessage({ command: "checkintegrationexists", text:  'checkintegrationexists' });
 }
 
 function dropdownChange(event) {
