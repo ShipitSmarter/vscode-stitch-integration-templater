@@ -390,13 +390,17 @@ export class CreateIntegrationPanel {
 
       <section class="component-example">
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
-        <vscode-text-field id="carriername" index="0" placeholder="carrier" size="5"></vscode-text-field>
+        <vscode-text-field id="carriername" class="field" index="0" placeholder="carrier" size="5"></vscode-text-field>
         /
-        <vscode-text-field id="carrierapiname" index="1" placeholder="api-name" size="5"></vscode-text-field>
+        <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
         /
-        <vscode-dropdown id="modulename" index="2" position="below">
+        <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
           ${dropdownOptions(['booking','tracking','cancel','pickup','pickup_cancel'])}
         </vscode-dropdown>
+
+        <section class="component-example">
+          <vscode-button id="checkintegrationexists" appearance="primary">Check</vscode-button>
+        </section>
       </section>
 
       ${this._ifCreate(carrierDetailsGrid)}
