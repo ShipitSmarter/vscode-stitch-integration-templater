@@ -86,12 +86,10 @@ export class CreateIntegrationPanel {
             break;
 
           case 'createintegration':
-            vscode.window.showInformationMessage('Creating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
-
             if (this._createUpdateValue === 'create') {
-              this._createIntegration(terminal);
+              this._createIntegration(terminal, extensionUri);
             } else {
-              this._updateIntegration(terminal);
+              this._updateIntegration(terminal, extensionUri);
             }
             
             break;
@@ -197,7 +195,7 @@ export class CreateIntegrationPanel {
     });   
   }
 
-  private _createIntegration (terminal: vscode.Terminal) {
+  private _createIntegration (terminal: vscode.Terminal,extensionUri: vscode.Uri) {
     // check if terminal exists and is still alive
     let terminalExists: boolean = (terminal && !(terminal.exitStatus));
 
@@ -209,6 +207,18 @@ export class CreateIntegrationPanel {
       let scriptsPath = parentPath(cleanPath(functionsPath));
       let filesPath = parentPath(parentPath(scriptsPath));
       let carrierFolderPath = filesPath + '/carriers/' + carrierFolder;
+
+      // check if script path already exists (i.e., should be 'update')
+      let scriptFileName = 'create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
+      let scriptFilePath = carrierFolderPath + '/' + scriptFileName;
+
+      if (fs.existsSync(scriptFilePath)) {
+        vscode.window.showErrorMessage(`Cannot create: ${scriptFileName} already exists`);
+        this._checkIntegrationExists(extensionUri);
+        return;
+      } else {
+        vscode.window.showInformationMessage('Creating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
+      }
 
       // make carrierFolderPath if not exists
       try { 
@@ -274,8 +284,6 @@ export class CreateIntegrationPanel {
       newScriptContent = newScriptContent.replace('[produrls]',prodUrlsString);
 
       // save to file
-      let scriptFileName = 'create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
-      let scriptFilePath = carrierFolderPath + '/' + scriptFileName;
       fs.writeFileSync(scriptFilePath, newScriptContent, 'utf8');
 
       // execute powershell
@@ -291,7 +299,7 @@ export class CreateIntegrationPanel {
     });
   }
 
-  private _updateIntegration (terminal: vscode.Terminal) {
+  private _updateIntegration (terminal: vscode.Terminal,extensionUri: vscode.Uri) {
     let carrier = this._fieldValues[0];
     let api     = this._fieldValues[1];
     let module  = this._fieldValues[2];
@@ -311,6 +319,8 @@ export class CreateIntegrationPanel {
 
       if (fs.existsSync(scriptPath)) {
         // if script exists: update and run
+        vscode.window.showInformationMessage('Updating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
+
         // load script content
         let scriptContent = fs.readFileSync(scriptPath, 'utf8');
         
@@ -369,6 +379,7 @@ export class CreateIntegrationPanel {
 
       } else {
         vscode.window.showErrorMessage(`Cannot update: ${scriptFileName} does not exist`);
+        this._checkIntegrationExists(extensionUri);
       }
     });
   }
