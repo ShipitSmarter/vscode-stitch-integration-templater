@@ -135,6 +135,7 @@ export class CreateIntegrationPanel {
     let carrier = this._fieldValues[0];
     let api     = this._fieldValues[1];
     let module  = this._fieldValues[2];
+    let modular: boolean = this._modularValue;
 
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     // start at scripts/functions.ps1, because unique
@@ -149,10 +150,24 @@ export class CreateIntegrationPanel {
         // set 'update'
         this._createUpdateValue = 'update';
 
-        // load scenarios if present
+        // load scenarios if present, and check if modular
         if (fs.existsSync(scriptPath)) {
-          // find scenarios using regex
+          // load script content
           let scriptContent = fs.readFileSync(scriptPath, 'utf8');
+
+          // check if modular
+          // $ModularXMLs    = $true
+          let rawModular:string[] = scriptContent.match(/\$ModularXMLs\s+=\s+\$(\S+)/) ?? [''];
+          if (rawModular.length >= 2) {
+            let modularString:string = rawModular[1];
+            if (modularString.toLowerCase() === 'true') {
+              this._modularValue = true;
+            } else {
+              this._modularValue = false;
+            }
+          }
+
+          // find scenarios using regex
           let scenarioString = scriptContent.match(/\$Scenarios = \@\(([^\)]+)/) ?? '';
           let rawScenarios: string[] = [];
           if (scenarioString.length >= 2) {
@@ -341,6 +356,16 @@ export class CreateIntegrationPanel {
 
         // save to file
         fs.writeFileSync(scriptPath, newScriptContent, 'utf8');
+
+        // execute powershell
+        // open terminal if not yet exists
+        if (!terminalExists) {
+          terminal = startScript('','');
+        }
+
+        // execute newly created script
+        terminal.sendText(`cd ${carrierPath}`);
+        terminal.sendText(`./${scriptFileName}`);
 
       } else {
         vscode.window.showErrorMessage(`Cannot update: ${scriptFileName} does not exist`);
