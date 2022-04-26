@@ -81,52 +81,7 @@ export class CreateIntegrationPanel {
             break;
 
           case 'checkintegrationexists':
-            let carrier = this._fieldValues[0];
-            let api     = this._fieldValues[1];
-            let module  = this._fieldValues[2];
-
-            // getWorkspaceFile is async -> all following steps must be executed within the 'then'
-            // start at scripts/functions.ps1, because unique
-            getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
-              // get new carrier path
-              let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-              let carrierPath = filesPath + '/carriers/' + carrier;
-              let integrationPath = carrierPath + '/' + api + '/' + module;
-              let scriptPath = carrierPath + '/create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
-
-              if (fs.existsSync(integrationPath)) {
-                // set 'update'
-                this._createUpdateValue = 'update';
-
-                // load scenarios if present
-                if (fs.existsSync(scriptPath)) {
-                  // find scenarios using regex
-                  let scriptContent = fs.readFileSync(scriptPath, 'utf8');
-                  let scenarioString = scriptContent.match(/\$Scenarios = \@\(([^\)]+)/) ?? '';
-                  let rawScenarios: string[] = [];
-                  if (scenarioString.length >= 2) {
-                    rawScenarios = scenarioString[1].split('\n');
-                  }
-
-                  // update scenario fields and nofScenarios
-                  for (let index = 0; index < rawScenarios.length; index++) {
-                    this._existingScenarioFieldValues[index] = rawScenarios[index].replace(/"/g,'').replace(/,/g,'').replace(/#/g,'').trim();
-                  }
-                  this._existingScenarioFieldValues = this._existingScenarioFieldValues.filter(function (element) {
-                    // filter on empty array values
-                    return ((element !== null) && ("" + element !== ""));
-                  });
-                }
-                
-                // update panel
-                this._updateWebview(extensionUri);
-              } else {
-                // fs.existsSync(integrationPath) === false
-                this._createUpdateValue = 'create';
-                this._existingScenarioFieldValues = [];
-                this._updateWebview(extensionUri);
-              }
-            });    
+            this._checkIntegrationExists(extensionUri);
             break;
 
           case 'createintegration':
@@ -164,21 +119,53 @@ export class CreateIntegrationPanel {
     );
   }
 
-  // private _integrationExists() : boolean {
-  //   let carrier = this._fieldValues[0];
-  //   let api     = this._fieldValues[1];
-  //   let module  = this._fieldValues[2];
+  private _checkIntegrationExists(extensionUri: vscode.Uri) {
+    let carrier = this._fieldValues[0];
+    let api     = this._fieldValues[1];
+    let module  = this._fieldValues[2];
 
-  //   // getWorkspaceFile is async -> all following steps must be executed within the 'then'
-  //   // check scripts/functions.ps1, because unique
-  //   getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
-  //     // get new carrier path
-  //     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-  //     let carrierFolderPath = filesPath + '/carriers/' + carrier + '/' + api + '/' + module;
+    // getWorkspaceFile is async -> all following steps must be executed within the 'then'
+    // start at scripts/functions.ps1, because unique
+    getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
+      // get new carrier path
+      let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
+      let carrierPath = filesPath + '/carriers/' + carrier;
+      let integrationPath = carrierPath + '/' + api + '/' + module;
+      let scriptPath = carrierPath + '/create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
 
-  //     return fs.existsSync(carrierFolderPath);
-  //   });    
-  // }
+      if (fs.existsSync(integrationPath)) {
+        // set 'update'
+        this._createUpdateValue = 'update';
+
+        // load scenarios if present
+        if (fs.existsSync(scriptPath)) {
+          // find scenarios using regex
+          let scriptContent = fs.readFileSync(scriptPath, 'utf8');
+          let scenarioString = scriptContent.match(/\$Scenarios = \@\(([^\)]+)/) ?? '';
+          let rawScenarios: string[] = [];
+          if (scenarioString.length >= 2) {
+            rawScenarios = scenarioString[1].split('\n');
+          }
+
+          // update scenario fields and nofScenarios
+          for (let index = 0; index < rawScenarios.length; index++) {
+            this._existingScenarioFieldValues[index] = rawScenarios[index].replace(/"/g,'').replace(/,/g,'').replace(/#/g,'').trim();
+          }
+          this._existingScenarioFieldValues = this._existingScenarioFieldValues.filter(function (element) {
+            // filter on empty array values
+            return ((element !== null) && ("" + element !== ""));
+          });
+        }
+      } else {
+        // fs.existsSync(integrationPath) === false
+        this._createUpdateValue = 'create';
+        this._existingScenarioFieldValues = [];
+      }
+
+      // update panel
+      this._updateWebview(extensionUri);
+    });   
+  }
 
   private _createIntegration (terminal: vscode.Terminal) {
     // check if terminal exists and is still alive
@@ -321,7 +308,7 @@ export class CreateIntegrationPanel {
     for (let scenario = 0; scenario < +nofScenarios; scenario++) {
       html += /*html*/`
         <section class="component-example">
-          <vscode-text-field id="scenario${scenario}" size="40" indexscenario="${scenario}" class="scenariofield" placeholder="${(scenario+1) + nth(scenario+1)} scenario name..."></vscode-text-field>
+          <vscode-text-field id="scenario${scenario}" size="30" indexscenario="${scenario}" class="scenariofield" placeholder="${(scenario+1) + nth(scenario+1)} scenario name..."></vscode-text-field>
         </section>
       `;
     }
@@ -335,7 +322,8 @@ export class CreateIntegrationPanel {
     for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
       html += /*html*/`
         <section class="component-example">
-          <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}"></vscode-text-field>
+          <vscode-checkbox id="runexistingscenario${index}"></vscode-checkbox>
+          <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" readonly></vscode-text-field>
         </section>
       `;
     }
@@ -518,7 +506,7 @@ export class CreateIntegrationPanel {
     let existingScenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Existing scenarios</h2>
-
+        <p>Check for running again</p>
         ${existingScenarioFields}
       </section>`;
 
