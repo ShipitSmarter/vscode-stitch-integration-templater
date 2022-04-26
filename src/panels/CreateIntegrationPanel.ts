@@ -569,7 +569,7 @@ export class CreateIntegrationPanel {
       <h2>Execute</h2>
 
       <section class="component-example">
-        <vscode-radio-group id="createupdate">
+        <vscode-radio-group id="createupdate" readonly>
           <label slot="label">Create/update</label>
           <vscode-radio name="createupdate" value="create">Create</vscode-radio>
           <vscode-radio name="createupdate" value="update">Update</vscode-radio>
