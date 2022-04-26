@@ -433,14 +433,16 @@ export class CreateIntegrationPanel {
   
     for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
       let checked = '';
+      let disabledReadonly = 'disabled';
       if (this._existingScenarioCheckboxValues[index] === true) {
         checked = 'checked';
+        disabledReadonly = 'readonly';
       }
 
       html += /*html*/`
         <section class="component-example">
           <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" indexescheckbox="${index}" ${checked}></vscode-checkbox>
-          <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" readonly></vscode-text-field>
+          <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" ${disabledReadonly}></vscode-text-field>
         </section>
       `;
     }
@@ -623,7 +625,7 @@ export class CreateIntegrationPanel {
     let existingScenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Existing scenarios</h2>
-        <p>Check for running again</p>
+        <p>Check to run again</p>
         ${existingScenarioFields}
       </section>`;
 

@@ -112,8 +112,20 @@ function saveModularValue(event) {
 
 function saveESCheckboxValue(event) {
   const field = event.target;
+
+  // save value
   let textString = field.getAttribute('indexescheckbox') + '|' + field.checked;
   vscodeApi.postMessage({ command: "saveescheckboxvalue", text:  textString });
+
+  // update associated existing scenario field
+  let scenarioId = field.id.slice(3,field.id.length);
+  if (field.checked) {
+    document.getElementById(scenarioId).readOnly = true;
+    document.getElementById(scenarioId).disabled = false;
+  } else {
+    document.getElementById(scenarioId).disabled = true;
+    document.getElementById(scenarioId).readOnly = false;
+  }
 }
 
 function createIntegration () {
