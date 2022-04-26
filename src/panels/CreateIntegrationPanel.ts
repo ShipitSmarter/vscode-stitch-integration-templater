@@ -168,6 +168,9 @@ export class CreateIntegrationPanel {
         this._existingScenarioFieldValues = [];
       }
 
+      // clean existing scenario checkbox values upon 'check'
+      this._existingScenarioCheckboxValues = [];
+
       // update panel
       this._updateWebview(extensionUri);
     });   
@@ -326,9 +329,14 @@ export class CreateIntegrationPanel {
     let html: string = ``;
   
     for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
+      let checked = '';
+      if (this._existingScenarioCheckboxValues[index] === true) {
+        checked = 'checked';
+      }
+
       html += /*html*/`
         <section class="component-example">
-          <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" indexescheckbox="${index}"></vscode-checkbox>
+          <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" indexescheckbox="${index}" ${checked}></vscode-checkbox>
           <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" readonly></vscode-text-field>
         </section>
       `;

@@ -92,7 +92,7 @@ export function arrayFrom1(max:number) : number[] {
 export function toBoolean(string:string) : boolean {
 	let outString : boolean = false;
 	if (string.toLowerCase() === 'true') {
-		outString = false;
+		outString = true;
 	}
 
 	return outString;
