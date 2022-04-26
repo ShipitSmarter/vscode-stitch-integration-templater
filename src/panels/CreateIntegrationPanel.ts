@@ -168,7 +168,7 @@ export class CreateIntegrationPanel {
         this._existingScenarioFieldValues = [];
       }
 
-      // clean existing scenario checkbox values upon 'check'
+      // clean existing scenario checkbox values upon clicking 'check' button
       this._existingScenarioCheckboxValues = [];
 
       // update panel
@@ -474,7 +474,7 @@ export class CreateIntegrationPanel {
       </section>
 
       <section class="component-example">
-        <vscode-button id="createintegration" appearance="primary">Create integration</vscode-button>
+        <vscode-button id="createintegration" appearance="primary" ${this._ifUpdate('style="background-color:green"')}>${this._ifCreate('Create') + this._ifUpdate('Update')} integration</vscode-button>
       </section>
     </section>`;
 
