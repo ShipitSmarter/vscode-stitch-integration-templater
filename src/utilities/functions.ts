@@ -98,7 +98,7 @@ export function toBoolean(string:string) : boolean {
 	return outString;
 }
 
-export function isEmptyStringArray(array: string[]) : boolean {
+export function isEmptyStringArray(array: String[]) : boolean {
 	let isEmpty: boolean = true;
 
 	for (let index = 0; index < array.length; index++) {

@@ -308,13 +308,25 @@ export class CreateIntegrationPanel {
             commenting = '';
           }
 
-          newScenarioString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"' + ',';
+          newScenarioString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"';
+
+          // check if comma is needed
+          let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index+1,this._existingScenarioCheckboxValues.length);
+          if ((remainingCheckboxes.filter(el => el === true).length > 0) || !isEmptyStringArray(this._scenarioFieldValues)) {
+            newScenarioString += ',';
+          }
         }
 
         // add 'new' scenarios
         for (let index = 0; index < this._scenarioFieldValues.length; index++) {
-          if (this._scenarioFieldValues[index] !== undefined) {
-            newScenarioString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"' + ',';
+          if (this._scenarioFieldValues[index] !== undefined && this._scenarioFieldValues[index] !== '') {
+            newScenarioString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"';
+
+            // check if comma is needed
+            let remainingFieldValues: String[] = this._scenarioFieldValues.slice(index+1,this._scenarioFieldValues.length);
+            if (!isEmptyStringArray(remainingFieldValues)) {
+              newScenarioString += ',';
+            }
           }
         }
 
@@ -324,7 +336,7 @@ export class CreateIntegrationPanel {
         // replace in content string
         let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g,newScenarioString);
 
-        // replace CreateOrUpdate value if necessary
+        // replace CreateOrUpdate value
         newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
 
         // save to file
