@@ -105,21 +105,23 @@ export class CreateIntegrationPanel {
                   let scenarioString = scriptContent.match(/\$Scenarios = \@\(([^\)]+)/) ?? '';
                   let rawScenarios: string[] = [];
                   if (scenarioString.length >= 2) {
-                    rawScenarios = scenarioString[1].split(',');
+                    rawScenarios = scenarioString[1].split('\n');
                   }
 
                   // update scenario fields and nofScenarios
                   for (let index = 0; index < rawScenarios.length; index++) {
-                    this._existingScenarioFieldValues[index] = rawScenarios[index].trim().replace(/"/g,'');
+                    this._existingScenarioFieldValues[index] = rawScenarios[index].replace(/"/g,'').replace(/,/g,'').replace(/#/g,'').trim();
                   }
-                  this._existingScenarioFieldValues = this._existingScenarioFieldValues.slice(0,rawScenarios.length);
+                  this._existingScenarioFieldValues = this._existingScenarioFieldValues.filter(function (element) {
+                    // filter on empty array values
+                    return ((element !== null) && ("" + element !== ""));
+                  });
                 }
                 
                 // update panel
                 this._updateWebview(extensionUri);
-              } 
-              
-              if ((fs.existsSync(integrationPath) === false)) {
+              } else {
+                // fs.existsSync(integrationPath) === false
                 this._createUpdateValue = 'create';
                 this._existingScenarioFieldValues = [];
                 this._updateWebview(extensionUri);
