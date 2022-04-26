@@ -97,3 +97,16 @@ export function toBoolean(string:string) : boolean {
 
 	return outString;
 }
+
+export function isEmptyStringArray(array: string[]) : boolean {
+	let isEmpty: boolean = true;
+
+	for (let index = 0; index < array.length; index++) {
+        let current = array[index];
+		if (current !== undefined && ("" + current) !== "") {
+			isEmpty = false;
+			break;
+		}
+	}
+	return isEmpty;
+}

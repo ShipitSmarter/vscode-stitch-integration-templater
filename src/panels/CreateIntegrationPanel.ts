@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean, isEmptyStringArray, arrayFrom0} from "../utilities/functions";
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -87,7 +87,13 @@ export class CreateIntegrationPanel {
 
           case 'createintegration':
             vscode.window.showInformationMessage('Creating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
-            this._createIntegration(terminal);
+
+            if (this._createUpdateValue === 'create') {
+              this._createIntegration(terminal);
+            } else {
+              this._updateIntegration(terminal);
+            }
+            
             break;
 
           case "savefieldvalue":
@@ -253,7 +259,7 @@ export class CreateIntegrationPanel {
       newScriptContent = newScriptContent.replace('[produrls]',prodUrlsString);
 
       // save to file
-      let scriptFileName = 'create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1'
+      let scriptFileName = 'create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
       let scriptFilePath = carrierFolderPath + '/' + scriptFileName;
       fs.writeFileSync(scriptFilePath, newScriptContent, 'utf8');
 
@@ -267,6 +273,66 @@ export class CreateIntegrationPanel {
       terminal.sendText(`cd ${carrierFolderPath}`);
       terminal.sendText(`./${scriptFileName}`);
 
+    });
+  }
+
+  private _updateIntegration (terminal: vscode.Terminal) {
+    let carrier = this._fieldValues[0];
+    let api     = this._fieldValues[1];
+    let module  = this._fieldValues[2];
+
+    // check if terminal exists and is still alive
+    let terminalExists: boolean = (terminal && !(terminal.exitStatus));
+
+    // getWorkspaceFile is async -> all following steps must be executed within the 'then'
+    // start at scripts/functions.ps1, because unique
+    getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
+      // get new carrier path
+      let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
+      let carrierPath = filesPath + '/carriers/' + carrier;
+      let integrationPath = carrierPath + '/' + api + '/' + module;
+      let scriptFileName = 'create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
+      let scriptPath = carrierPath + '/' + scriptFileName;
+
+      if (fs.existsSync(scriptPath)) {
+        // if script exists: update and run
+        // load script content
+        let scriptContent = fs.readFileSync(scriptPath, 'utf8');
+        
+        // construct new scenarios string
+        let newScenarioString = '';     // pre-allocate
+        // add existing scenarios
+        for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
+          let commenting = '# ';
+          if (this._existingScenarioCheckboxValues[index]) {
+            commenting = '';
+          }
+
+          newScenarioString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"' + ',';
+        }
+
+        // add 'new' scenarios
+        for (let index = 0; index < this._scenarioFieldValues.length; index++) {
+          if (this._scenarioFieldValues[index] !== undefined) {
+            newScenarioString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"' + ',';
+          }
+        }
+
+        // add 'Scenarios'  label
+        newScenarioString = '$Scenarios = @(' + newScenarioString + '\n )';
+
+        // replace in content string
+        let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g,newScenarioString);
+
+        // replace CreateOrUpdate value if necessary
+        newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
+
+        // save to file
+        fs.writeFileSync(scriptPath, newScriptContent, 'utf8');
+
+      } else {
+        vscode.window.showErrorMessage(`Cannot update: ${scriptFileName} does not exist`);
+      }
     });
   }
 
