@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean} from "../utilities/functions";
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -12,6 +12,7 @@ export class CreateIntegrationPanel {
   private _stepFieldValues: String[] = [];
   private _scenarioFieldValues: String[] = [];
   private _existingScenarioFieldValues: String[] = [];
+  private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: String = 'create';      // pre-allocate with 'create'
   private _modularValue: boolean = false;             // pre-allocate with 'false'
 
@@ -111,6 +112,11 @@ export class CreateIntegrationPanel {
 
           case "savemodularvalue":
             this._modularValue = text;
+            break;
+
+          case "saveescheckboxvalue":
+            let checkboxIndexValue = message.text.split('|');
+            this._existingScenarioCheckboxValues[checkboxIndexValue[0]] = toBoolean(checkboxIndexValue[1]);
             break;
         }
       },
@@ -322,7 +328,7 @@ export class CreateIntegrationPanel {
     for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
       html += /*html*/`
         <section class="component-example">
-          <vscode-checkbox id="runexistingscenario${index}"></vscode-checkbox>
+          <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" indexescheckbox="${index}"></vscode-checkbox>
           <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" readonly></vscode-text-field>
         </section>
       `;

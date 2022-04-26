@@ -47,6 +47,11 @@ function main() {
     scenarioField.addEventListener("keyup",saveScenarioFieldValue);
    }
 
+   // save existing scenario checkbox entries
+   for (const esCheckbox of document.getElementsByClassName("existingscenariocheckbox")) {
+    esCheckbox.addEventListener("click",saveESCheckboxValue);
+   }
+
    // on panel creation: save all dropdown values
    // fieldValues dropdowns (modulename, nofsteps)
    vscodeApi.postMessage({ command: "savefieldvalue", text:  '2|' + document.getElementById("modulename").value });
@@ -103,6 +108,12 @@ function saveModularValue(event) {
   const field = event.target;
   let textString = field.checked;
   vscodeApi.postMessage({ command: "savemodularvalue", text:  textString });
+}
+
+function saveESCheckboxValue(event) {
+  const field = event.target;
+  let textString = field.getAttribute('indexescheckbox') + '|' + field.checked;
+  vscodeApi.postMessage({ command: "saveescheckboxvalue", text:  textString });
 }
 
 function createIntegration () {

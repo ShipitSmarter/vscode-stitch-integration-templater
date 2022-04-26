@@ -88,3 +88,12 @@ export function arrayFrom0(max:number) : number[] {
 export function arrayFrom1(max:number) : number[] {
 	return arrayFrom0(max).map(x => ++x);
 }
+
+export function toBoolean(string:string) : boolean {
+	let outString : boolean = false;
+	if (string.toLowerCase() === 'true') {
+		outString = false;
+	}
+
+	return outString;
+}
