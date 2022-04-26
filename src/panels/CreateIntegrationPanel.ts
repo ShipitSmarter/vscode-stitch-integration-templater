@@ -11,6 +11,7 @@ export class CreateIntegrationPanel {
   private _fieldValues: String[] = [];
   private _stepFieldValues: String[] = [];
   private _scenarioFieldValues: String[] = [];
+  private _existingScenarioFieldValues: String[] = [];
   private _createUpdateValue: String = 'create';      // pre-allocate with 'create'
   private _modularValue: boolean = false;             // pre-allocate with 'false'
 
@@ -93,7 +94,7 @@ export class CreateIntegrationPanel {
               let integrationPath = carrierPath + '/' + api + '/' + module;
               let scriptPath = carrierPath + '/create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
 
-              if (fs.existsSync(integrationPath) && this._createUpdateValue === 'create') {
+              if (fs.existsSync(integrationPath)) {
                 // set 'update'
                 this._createUpdateValue = 'update';
 
@@ -109,18 +110,18 @@ export class CreateIntegrationPanel {
 
                   // update scenario fields and nofScenarios
                   for (let index = 0; index < rawScenarios.length; index++) {
-                    this._scenarioFieldValues[index] = rawScenarios[index].trim().replace(/"/g,'');
+                    this._existingScenarioFieldValues[index] = rawScenarios[index].trim().replace(/"/g,'');
                   }
-                  this._scenarioFieldValues = this._scenarioFieldValues.slice(0,rawScenarios.length);
-                  this._fieldValues[6] = rawScenarios.length + "";
+                  this._existingScenarioFieldValues = this._existingScenarioFieldValues.slice(0,rawScenarios.length);
                 }
                 
                 // update panel
                 this._updateWebview(extensionUri);
               } 
               
-              if ((fs.existsSync(integrationPath) === false) && (this._createUpdateValue === 'update')) {
+              if ((fs.existsSync(integrationPath) === false)) {
                 this._createUpdateValue = 'create';
+                this._existingScenarioFieldValues = [];
                 this._updateWebview(extensionUri);
               }
             });    
@@ -326,9 +327,32 @@ export class CreateIntegrationPanel {
     return html;
   }
 
+  private _existingScenarios(): string {
+    let html: string = ``;
+  
+    for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
+      html += /*html*/`
+        <section class="component-example">
+          <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}"></vscode-text-field>
+        </section>
+      `;
+    }
+ 
+    return html;
+  }
+
   private _ifCreate(content:string) : string {
     let outString = '';
     if (this._createUpdateValue === 'create') {
+      outString = content;
+    }
+
+    return outString;
+  }
+
+  private _ifUpdate(content:string) : string {
+    let outString = '';
+    if (this._createUpdateValue === 'update') {
       outString = content;
     }
 
@@ -355,6 +379,9 @@ export class CreateIntegrationPanel {
     // scenario fields
     let nofScenarios: number = +(this._fieldValues[6] ?? 1);
     const scenarioFields = this._scenarioInputs(nofScenarios);
+
+    // existing scenario fields
+    const existingScenarioFields = this._existingScenarios();
 
     // crop flexible field arrays
     // steps
@@ -468,8 +495,7 @@ export class CreateIntegrationPanel {
       </section>
     </section>`;
 
-    let scenariosGrid = /*html*/ `
-    <section class="component-grid">
+    let scenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Scenarios</h2>
 
@@ -485,8 +511,14 @@ export class CreateIntegrationPanel {
         </section>
 
         ${scenarioFields}
-      </section>
-    </section>`;
+      </section>`;
+
+    let existingScenariosGrid = /*html*/ `    
+      <section class="component-container">
+        <h2>Existing scenarios</h2>
+
+        ${existingScenarioFields}
+      </section>`;
 
     // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
     let html =  /*html*/`
@@ -501,28 +533,24 @@ export class CreateIntegrationPanel {
 				<link href="${styleUri}" rel="stylesheet" /> 
 			</head>
 			<body>
+
 				<div>
 					<h1>Create module integration</h1>
 				</div>
         <section class="component-row">
 
           <section class="component-example">
-
             <section class="component-row">
-
               ${carrierGrid}
-
               ${createUpdateGrid}
-
-            </section>
-
-            
+            </section>   
             ${this._ifCreate(stepsGrid)}
-
           </section>
 
-          ${scenariosGrid}
-
+            <section class="component-grid">
+              ${scenariosGrid}
+              ${this._ifUpdate(existingScenariosGrid)}
+            </section>
         </section>
 
 			</body>
