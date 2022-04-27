@@ -296,6 +296,10 @@ export class CreateIntegrationPanel {
       terminal.sendText(`cd ${carrierFolderPath}`);
       terminal.sendText(`./${scriptFileName}`);
 
+      // refresh window
+      this._fieldValues[6] = "1";       // nofScenarios
+      this._scenarioFieldValues = [];
+      this._checkIntegrationExists(extensionUri);
     });
   }
 
@@ -376,6 +380,11 @@ export class CreateIntegrationPanel {
         // execute newly created script
         terminal.sendText(`cd ${carrierPath}`);
         terminal.sendText(`./${scriptFileName}`);
+
+        // refresh window
+        this._fieldValues[6] = "1";       // nofScenarios
+        this._scenarioFieldValues = [];
+        this._checkIntegrationExists(extensionUri);
 
       } else {
         vscode.window.showErrorMessage(`Cannot update: ${scriptFileName} does not exist`);
