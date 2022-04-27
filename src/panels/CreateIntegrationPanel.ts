@@ -169,23 +169,21 @@ export class CreateIntegrationPanel {
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
 
-      // check if script path already exists (i.e., should be 'update')
+      // if script path already exists: show error and refresh form
       if (fs.existsSync(this._getScriptPath(functionsPath))) {
         vscode.window.showErrorMessage(`Cannot create: ${this._getScriptName()} already exists`);
         this._checkIntegrationExists(extensionUri);
         return;
-      } else {
-        vscode.window.showInformationMessage('Creating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
-      }
+      } 
+
+      // show info message
+      vscode.window.showInformationMessage('Creating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
 
       // make integrationPath if not exists
-      try { 
-        fs.mkdirSync(this._getCarrierPath(functionsPath), { recursive: true });
-      } catch (e: unknown) { }
+      fs.mkdirSync(this._getCarrierPath(functionsPath), { recursive: true });
 
       // load integration script template file
-      let templatePath = parentPath(cleanPath(functionsPath)) + '/templates/create-module-integration-template.ps1';
-      let templateContent = fs.readFileSync(templatePath, 'utf8');
+      let templateContent = fs.readFileSync(this._getTemplatePath(functionsPath), 'utf8');
 
       // replace all values in template
       let newScriptContent = this._replaceInScriptTemplate(templateContent);
@@ -207,27 +205,24 @@ export class CreateIntegrationPanel {
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     // start at scripts/functions.ps1, because unique
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
-      // get script path and file name
-      let scriptFileName  = this._getScriptName();
-      let scriptPath      = this._getScriptPath(functionsPath);
+      // get script path
+      let scriptPath = this._getScriptPath(functionsPath);
 
       // if script path does not exist: show error and refresh form
       if (!fs.existsSync(scriptPath)) {
-        vscode.window.showErrorMessage(`Cannot update: ${scriptFileName} does not exist`);
+        vscode.window.showErrorMessage(`Cannot update: ${this._getScriptName()} does not exist`);
         this._checkIntegrationExists(extensionUri);
         return;
-      } else {
-        vscode.window.showInformationMessage('Updating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
-      }
+      } 
+
+      // show info message
+      vscode.window.showInformationMessage('Updating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
 
       // load script content
       let scriptContent = fs.readFileSync(scriptPath, 'utf8');
-      
-      // construct new scenarios string
-      let newScenarioString = this._getScenariosString();
 
-      // replace in content string
-      let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g,newScenarioString);
+      // replace scenarios in script content
+      let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
 
       // replace CreateOrUpdate value
       newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
@@ -371,13 +366,9 @@ export class CreateIntegrationPanel {
     return filesPath + '/carriers/' + carrier + '/' + this._getScriptName();
   }
 
-  private _getIntegrationPath(functionsPath:string) : string {
-    let carrier = this._fieldValues[0];
-    let api     = this._fieldValues[1];
-    let module  = this._fieldValues[2];
-
-    let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-    return filesPath + '/carriers/' + carrier + '/' + api + '/' + module;
+  private _getTemplatePath(functionsPath:string) : string {
+    let scriptsPath: string = parentPath(cleanPath(functionsPath));
+    return scriptsPath + '/templates/create-module-integration-template.ps1';
   }
 
   private _getCarrierPath(functionsPath:string) : string {
