@@ -500,6 +500,15 @@ export class CreateIntegrationPanel {
     return outString;
   }
 
+  private _checkedString(checked:boolean) : string {
+    let outString: string = '';
+    if (checked) {
+      outString = 'checked';
+    }
+
+    return outString;
+  }
+
   private _ifUpdate(content:string) : string {
     let outString = '';
     if (this._createUpdateValue === 'update') {
@@ -624,7 +633,6 @@ export class CreateIntegrationPanel {
       </section>
     </section>`;
 
-
     let stepsGrid = /*html*/ `
     <section  class="component-grid">
       <section class="component-container">
@@ -650,7 +658,7 @@ export class CreateIntegrationPanel {
         <h2>Scenarios</h2>
 
         <section class="component-example">
-          <vscode-checkbox id="modular">Modular</vscode-checkbox>
+          <vscode-checkbox id="modular" ${this._checkedString(this._modularValue)} ${this._ifUpdate('readonly')}>Modular</vscode-checkbox>
         </section>
 
         <section class="component-example">
@@ -746,15 +754,8 @@ export class CreateIntegrationPanel {
       html = html.replace(createString, createString + ' checked');
     }
 
-    // update modular checkbox value
-    let modularString: string = 'id="modular"';
-    if (this._modularValue === true) {
-      html = html.replace(modularString, modularString + ' checked');
-    }
-
     return html;
   }
-
 
   // dispose
   public dispose() {
