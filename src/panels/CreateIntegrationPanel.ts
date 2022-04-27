@@ -180,9 +180,9 @@ export class CreateIntegrationPanel {
         vscode.window.showInformationMessage('Creating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
       }
 
-      // make carrierFolderPath if not exists
+      // make integrationPath if not exists
       try { 
-        fs.mkdirSync(this._getCarrierPath(functionsPath), { recursive: true });
+        fs.mkdirSync(this._getIntegrationPath(functionsPath), { recursive: true });
       } catch (e: unknown) { }
 
       // load integration script template file
@@ -215,13 +215,6 @@ export class CreateIntegrationPanel {
   }
 
   private _updateIntegration (terminal: vscode.Terminal,extensionUri: vscode.Uri) {
-    let carrier = this._fieldValues[0];
-    let api     = this._fieldValues[1];
-    let module  = this._fieldValues[2];
-
-    // check if terminal exists and is still alive
-    let terminalExists: boolean = (terminal && !(terminal.exitStatus));
-
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     // start at scripts/functions.ps1, because unique
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
@@ -254,6 +247,8 @@ export class CreateIntegrationPanel {
       fs.writeFileSync(scriptPath, newScriptContent, 'utf8');
 
       // execute powershell
+      // check if terminal exists and is still alive
+      let terminalExists: boolean = (terminal && !(terminal.exitStatus));
       // open terminal if not yet exists
       if (!terminalExists) {
         terminal = startScript('','');
