@@ -168,24 +168,12 @@ export class CreateIntegrationPanel {
   }
 
   private _createIntegration (terminal: vscode.Terminal,extensionUri: vscode.Uri) {
-    // check if terminal exists and is still alive
-    let terminalExists: boolean = (terminal && !(terminal.exitStatus));
-
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
 
-      // get new carrier path
-      let carrierFolder = this._fieldValues[0];
-      let scriptsPath = parentPath(cleanPath(functionsPath));
-      let filesPath = parentPath(parentPath(scriptsPath));
-      let carrierFolderPath = filesPath + '/carriers/' + carrierFolder;
-
       // check if script path already exists (i.e., should be 'update')
-      let scriptFileName = 'create-integration-' + this._fieldValues[0] + '-' + this._fieldValues[1] + '-' + this._fieldValues[2] + '.ps1';
-      let scriptFilePath = carrierFolderPath + '/' + scriptFileName;
-
-      if (fs.existsSync(scriptFilePath)) {
-        vscode.window.showErrorMessage(`Cannot create: ${scriptFileName} already exists`);
+      if (fs.existsSync(this._getScriptPath(functionsPath))) {
+        vscode.window.showErrorMessage(`Cannot create: ${this._getScriptName()} already exists`);
         this._checkIntegrationExists(extensionUri);
         return;
       } else {
@@ -194,79 +182,30 @@ export class CreateIntegrationPanel {
 
       // make carrierFolderPath if not exists
       try { 
-        fs.mkdirSync(carrierFolderPath, { recursive: true });
+        fs.mkdirSync(this._getCarrierPath(functionsPath), { recursive: true });
       } catch (e: unknown) { }
 
-      // load ps integration template file
-      let templatePath = scriptsPath + '/templates/create-module-integration-template.ps1';
+      // load integration script template file
+      let templatePath = parentPath(cleanPath(functionsPath)) + '/templates/create-module-integration-template.ps1';
       let templateContent = fs.readFileSync(templatePath, 'utf8');
 
-      // replace all field values
-      // fixed field values
-      let newScriptContent = templateContent;
-      for (let index = 0; index < this._fieldValues.length; index++) {
-        let replaceString = '[fieldValues' + index + ']';
-        if (this._fieldValues[index] !== undefined) {
-          newScriptContent = newScriptContent.replace(replaceString,this._fieldValues[index] + "");
-        }
-      }
-
-      // createupdate
-      newScriptContent = newScriptContent.replace('[createupdate]',this._createUpdateValue + "");
-
-      // modular
-      newScriptContent = newScriptContent.replace('[modular]',this._modularValue + "");
-
-      // scenarios
-      let scenariosString:string = '';
-      for (let index = 0; index < this._scenarioFieldValues.length; index++) {
-        if (this._scenarioFieldValues[index] !== undefined) {
-          scenariosString += '\n    "' + this._scenarioFieldValues[index] + '"';
-          if (index !== this._scenarioFieldValues.length -1) {
-            scenariosString += ',';
-          }
-        }
-      }
-      newScriptContent = newScriptContent.replace('[scenarios]',scenariosString);
-
-      // steps, testurls, produrls
-      let nofSteps = this._fieldValues[5];
-      let stepsString:string = '';
-      let testUrlsString:string = '';
-      let prodUrlsString:string = '';
-      for (let index = 0; index < +nofSteps; index++) {
-        let step:string = this._stepFieldValues[index] + '';
-        // steps
-        stepsString += '\n    "' + step + '"';
-        if (index !== +nofSteps -1) {
-          stepsString += ',';
-        }
-        // testurls
-        if (this._stepFieldValues[index+10] !== undefined) {
-          testUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERTESTENDPOINT = "' + this._stepFieldValues[index+10] + '"';
-        }
-        // produrls
-        if (this._stepFieldValues[index+20] !== undefined) {
-          prodUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERPRODUCTIONENDPOINT = "' + this._stepFieldValues[index+20] + '"';
-        }
-      }
-      // replace
-      newScriptContent = newScriptContent.replace('[steps]',stepsString);
-      newScriptContent = newScriptContent.replace('[testurls]',testUrlsString);
-      newScriptContent = newScriptContent.replace('[produrls]',prodUrlsString);
+      // replace all values in template
+      let newScriptContent = this._replaceInScriptTemplate(templateContent);
 
       // save to file
-      fs.writeFileSync(scriptFilePath, newScriptContent, 'utf8');
+      fs.writeFileSync(this._getScriptPath(functionsPath), newScriptContent, 'utf8');
 
       // execute powershell
+      // check if terminal exists and is still alive
+      let terminalExists: boolean = (terminal && !(terminal.exitStatus));
       // open terminal if not yet exists
       if (!terminalExists) {
         terminal = startScript('','');
       }
 
       // execute newly created script
-      terminal.sendText(`cd ${carrierFolderPath}`);
-      terminal.sendText(`./${scriptFileName}`);
+      terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
+      terminal.sendText(`./${this._getScriptName()}`);
 
       // refresh window
       this._fieldValues[6] = "1";       // nofScenarios
@@ -365,6 +304,66 @@ export class CreateIntegrationPanel {
     });
   }
 
+  private _replaceInScriptTemplate(templateContent:string) : string {
+    // define initial outcome string
+    let newScriptContent = templateContent;
+
+    // replace fixed field values
+    for (let index = 0; index < this._fieldValues.length; index++) {
+      let replaceString = '[fieldValues' + index + ']';
+      if (this._fieldValues[index] !== undefined) {
+        newScriptContent = newScriptContent.replace(replaceString,this._fieldValues[index] + "");
+      }
+    }
+
+    // createupdate
+    newScriptContent = newScriptContent.replace('[createupdate]',this._createUpdateValue + "");
+
+    // modular
+    newScriptContent = newScriptContent.replace('[modular]',this._modularValue + "");
+
+    // scenarios
+    let scenariosString:string = '';
+    for (let index = 0; index < this._scenarioFieldValues.length; index++) {
+      if (this._scenarioFieldValues[index] !== undefined) {
+        scenariosString += '\n    "' + this._scenarioFieldValues[index] + '"';
+        if (index !== this._scenarioFieldValues.length -1) {
+          scenariosString += ',';
+        }
+      }
+    }
+    newScriptContent = newScriptContent.replace('[scenarios]',scenariosString);
+
+    // steps fields: step name, testurls, produrls
+    let nofSteps = this._fieldValues[5];
+    let stepsString:string = '';
+    let testUrlsString:string = '';
+    let prodUrlsString:string = '';
+    for (let index = 0; index < +nofSteps; index++) {
+      let step:string = this._stepFieldValues[index] + '';
+      // steps
+      stepsString += '\n    "' + step + '"';
+      if (index !== +nofSteps -1) {
+        stepsString += ',';
+      }
+      // testurls
+      if (this._stepFieldValues[index+10] !== undefined) {
+        testUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERTESTENDPOINT = "' + this._stepFieldValues[index+10] + '"';
+      }
+      // produrls
+      if (this._stepFieldValues[index+20] !== undefined) {
+        prodUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERPRODUCTIONENDPOINT = "' + this._stepFieldValues[index+20] + '"';
+      }
+    }
+    // replace
+    newScriptContent = newScriptContent.replace('[steps]',stepsString);
+    newScriptContent = newScriptContent.replace('[testurls]',testUrlsString);
+    newScriptContent = newScriptContent.replace('[produrls]',prodUrlsString);
+
+    // return script content
+    return newScriptContent;
+  }
+
   private _getScriptName() : string {
     let carrier = this._fieldValues[0];
     let api     = this._fieldValues[1];
@@ -387,6 +386,12 @@ export class CreateIntegrationPanel {
 
     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
     return filesPath + '/carriers/' + carrier + '/' + api + '/' + module;
+  }
+
+  private _getCarrierPath(functionsPath:string) : string {
+    let carrier = this._fieldValues[0];
+    let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
+    return filesPath + '/carriers/' + carrier;
   }
 
   private _getModularFromScript(scriptContent:string) : boolean {
