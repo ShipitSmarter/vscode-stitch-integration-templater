@@ -138,21 +138,19 @@ export class CreateIntegrationPanel {
       // get script path
       let scriptPath = this._getScriptPath(functionsPath);
 
-      if (fs.existsSync(this._getIntegrationPath(functionsPath))) {
+      if (fs.existsSync(scriptPath)) {
         // set 'update' if integration path exists
         this._createUpdateValue = 'update';
 
-        // load scenarios if present, and check if modular
-        if (fs.existsSync(scriptPath)) {
-          // load script content
-          let scriptContent = fs.readFileSync(scriptPath, 'utf8');
+        // load script content
+        let scriptContent = fs.readFileSync(scriptPath, 'utf8');
 
-          // update modular value from script
-          this._modularValue = this._getModularFromScript(scriptContent);
+        // update modular value from script
+        this._modularValue = this._getModularFromScript(scriptContent);
 
-          // update existing scenario values from script
-          this._existingScenarioFieldValues = this._getScenariosFromScript(scriptContent);
-        }
+        // update existing scenario values from script
+        this._existingScenarioFieldValues = this._getScenariosFromScript(scriptContent);
+        
       } else {
         // integrationpath does not exist: 'create'
         this._createUpdateValue = 'create';
@@ -182,7 +180,7 @@ export class CreateIntegrationPanel {
 
       // make integrationPath if not exists
       try { 
-        fs.mkdirSync(this._getIntegrationPath(functionsPath), { recursive: true });
+        fs.mkdirSync(this._getCarrierPath(functionsPath), { recursive: true });
       } catch (e: unknown) { }
 
       // load integration script template file
@@ -196,16 +194,7 @@ export class CreateIntegrationPanel {
       fs.writeFileSync(this._getScriptPath(functionsPath), newScriptContent, 'utf8');
 
       // execute powershell
-      // check if terminal exists and is still alive
-      let terminalExists: boolean = (terminal && !(terminal.exitStatus));
-      // open terminal if not yet exists
-      if (!terminalExists) {
-        terminal = startScript('','');
-      }
-
-      // execute newly created script
-      terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
-      terminal.sendText(`./${this._getScriptName()}`);
+      this._runScript(terminal, functionsPath);
 
       // refresh window
       this._fieldValues[6] = "1";       // nofScenarios
@@ -247,22 +236,26 @@ export class CreateIntegrationPanel {
       fs.writeFileSync(scriptPath, newScriptContent, 'utf8');
 
       // execute powershell
-      // check if terminal exists and is still alive
-      let terminalExists: boolean = (terminal && !(terminal.exitStatus));
-      // open terminal if not yet exists
-      if (!terminalExists) {
-        terminal = startScript('','');
-      }
-
-      // execute newly created script
-      terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
-      terminal.sendText(`./${scriptFileName}`);
+      this._runScript(terminal, functionsPath);
 
       // refresh window
       this._fieldValues[6] = "1";       // nofScenarios
       this._scenarioFieldValues = [];
       this._checkIntegrationExists(extensionUri);
     });
+  }
+
+  private _runScript(terminal: vscode.Terminal, functionsPath:string) {
+    // check if terminal exists and is still alive
+    let terminalExists: boolean = (terminal && !(terminal.exitStatus));
+    // open terminal if not yet exists
+    if (!terminalExists) {
+      terminal = startScript('','');
+    }
+
+    // execute script
+    terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
+    terminal.sendText(`./${this._getScriptName()}`);
   }
 
   private _getScenariosString() : string {
