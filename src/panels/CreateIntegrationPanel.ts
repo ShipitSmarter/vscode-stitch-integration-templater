@@ -225,83 +225,87 @@ export class CreateIntegrationPanel {
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     // start at scripts/functions.ps1, because unique
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
-      // get new carrier path
-      let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-      let carrierPath = filesPath + '/carriers/' + carrier;
-      let integrationPath = carrierPath + '/' + api + '/' + module;
-      let scriptFileName = 'create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
-      let scriptPath = carrierPath + '/' + scriptFileName;
+      // get script path and file name
+      let scriptFileName  = this._getScriptName();
+      let scriptPath      = this._getScriptPath(functionsPath);
 
-      if (fs.existsSync(scriptPath)) {
-        // if script exists: update and run
-        vscode.window.showInformationMessage('Updating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
-
-        // load script content
-        let scriptContent = fs.readFileSync(scriptPath, 'utf8');
-        
-        // construct new scenarios string
-        let newScenarioString = '';     // pre-allocate
-        // add existing scenarios
-        for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
-          let commenting = '# ';
-          if (this._existingScenarioCheckboxValues[index]) {
-            commenting = '';
-          }
-
-          newScenarioString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"';
-
-          // check if comma is needed
-          let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index+1,this._existingScenarioCheckboxValues.length);
-          if ((remainingCheckboxes.filter(el => el === true).length > 0) || !isEmptyStringArray(this._scenarioFieldValues)) {
-            newScenarioString += ',';
-          }
-        }
-
-        // add 'new' scenarios
-        for (let index = 0; index < this._scenarioFieldValues.length; index++) {
-          if (this._scenarioFieldValues[index] !== undefined && this._scenarioFieldValues[index] !== '') {
-            newScenarioString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"';
-
-            // check if comma is needed
-            let remainingFieldValues: String[] = this._scenarioFieldValues.slice(index+1,this._scenarioFieldValues.length);
-            if (!isEmptyStringArray(remainingFieldValues)) {
-              newScenarioString += ',';
-            }
-          }
-        }
-
-        // add 'Scenarios'  label
-        newScenarioString = '$Scenarios = @(' + newScenarioString + '\n )';
-
-        // replace in content string
-        let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g,newScenarioString);
-
-        // replace CreateOrUpdate value
-        newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
-
-        // save to file
-        fs.writeFileSync(scriptPath, newScriptContent, 'utf8');
-
-        // execute powershell
-        // open terminal if not yet exists
-        if (!terminalExists) {
-          terminal = startScript('','');
-        }
-
-        // execute newly created script
-        terminal.sendText(`cd ${carrierPath}`);
-        terminal.sendText(`./${scriptFileName}`);
-
-        // refresh window
-        this._fieldValues[6] = "1";       // nofScenarios
-        this._scenarioFieldValues = [];
-        this._checkIntegrationExists(extensionUri);
-
-      } else {
+      // if script path does not exist: show error and refresh form
+      if (!fs.existsSync(scriptPath)) {
         vscode.window.showErrorMessage(`Cannot update: ${scriptFileName} does not exist`);
         this._checkIntegrationExists(extensionUri);
+        return;
+      } else {
+        vscode.window.showInformationMessage('Updating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
       }
+
+      // load script content
+      let scriptContent = fs.readFileSync(scriptPath, 'utf8');
+      
+      // construct new scenarios string
+      let newScenarioString = this._getScenariosString();
+
+      // replace in content string
+      let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g,newScenarioString);
+
+      // replace CreateOrUpdate value
+      newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
+
+      // save to file
+      fs.writeFileSync(scriptPath, newScriptContent, 'utf8');
+
+      // execute powershell
+      // open terminal if not yet exists
+      if (!terminalExists) {
+        terminal = startScript('','');
+      }
+
+      // execute newly created script
+      terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
+      terminal.sendText(`./${scriptFileName}`);
+
+      // refresh window
+      this._fieldValues[6] = "1";       // nofScenarios
+      this._scenarioFieldValues = [];
+      this._checkIntegrationExists(extensionUri);
     });
+  }
+
+  private _getScenariosString() : string {
+    let newScenarioString = '';     // pre-allocate
+
+    // add existing scenarios
+    for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
+      let commenting = '# ';
+      if (this._existingScenarioCheckboxValues[index]) {
+        commenting = '';
+      }
+
+      newScenarioString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"';
+
+      // check if comma is needed
+      let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index+1,this._existingScenarioCheckboxValues.length);
+      if ((remainingCheckboxes.filter(el => el === true).length > 0) || !isEmptyStringArray(this._scenarioFieldValues)) {
+        newScenarioString += ',';
+      }
+    }
+
+    // add 'new' scenarios
+    for (let index = 0; index < this._scenarioFieldValues.length; index++) {
+      if (this._scenarioFieldValues[index] !== undefined && this._scenarioFieldValues[index] !== '') {
+        newScenarioString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"';
+
+        // check if comma is needed
+        let remainingFieldValues: String[] = this._scenarioFieldValues.slice(index+1,this._scenarioFieldValues.length);
+        if (!isEmptyStringArray(remainingFieldValues)) {
+          newScenarioString += ',';
+        }
+      }
+    }
+
+    // add 'Scenarios'  label
+    newScenarioString = '$Scenarios = @(' + newScenarioString + '\n )';
+
+    return newScenarioString;
   }
 
   private _replaceInScriptTemplate(templateContent:string) : string {
