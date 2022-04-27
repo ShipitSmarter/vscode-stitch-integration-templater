@@ -129,23 +129,17 @@ export class CreateIntegrationPanel {
     );
   }
 
-  private _checkIntegrationExists(extensionUri: vscode.Uri) {
-    let carrier = this._fieldValues[0];
-    let api     = this._fieldValues[1];
-    let module  = this._fieldValues[2];
-    let modular: boolean = this._modularValue;
 
+
+  private _checkIntegrationExists(extensionUri: vscode.Uri) {
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     // start at scripts/functions.ps1, because unique
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
-      // get new carrier path
-      let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-      let carrierPath = filesPath + '/carriers/' + carrier;
-      let integrationPath = carrierPath + '/' + api + '/' + module;
-      let scriptPath = carrierPath + '/create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
+      // get script path
+      let scriptPath = this._getScriptPath(functionsPath);
 
-      if (fs.existsSync(integrationPath)) {
-        // set 'update'
+      if (fs.existsSync(this._getIntegrationPath(functionsPath))) {
+        // set 'update' if integration path exists
         this._createUpdateValue = 'update';
 
         // load scenarios if present, and check if modular
@@ -153,36 +147,14 @@ export class CreateIntegrationPanel {
           // load script content
           let scriptContent = fs.readFileSync(scriptPath, 'utf8');
 
-          // check if modular
-          // $ModularXMLs    = $true
-          let rawModular:string[] = scriptContent.match(/\$ModularXMLs\s+=\s+\$(\S+)/) ?? [''];
-          if (rawModular.length >= 2) {
-            let modularString:string = rawModular[1];
-            if (modularString.toLowerCase() === 'true') {
-              this._modularValue = true;
-            } else {
-              this._modularValue = false;
-            }
-          }
+          // update modular value from script
+          this._modularValue = this._getModularFromScript(scriptContent);
 
-          // find scenarios using regex
-          let scenarioString = scriptContent.match(/\$Scenarios = \@\(([^\)]+)/) ?? '';
-          let rawScenarios: string[] = [];
-          if (scenarioString.length >= 2) {
-            rawScenarios = scenarioString[1].split('\n');
-          }
-
-          // update scenario fields and nofScenarios
-          for (let index = 0; index < rawScenarios.length; index++) {
-            this._existingScenarioFieldValues[index] = rawScenarios[index].replace(/"/g,'').replace(/,/g,'').replace(/#/g,'').trim();
-          }
-          this._existingScenarioFieldValues = this._existingScenarioFieldValues.filter(function (element) {
-            // filter on empty array values
-            return ((element !== null) && ("" + element !== ""));
-          });
+          // update existing scenario values from script
+          this._existingScenarioFieldValues = this._getScenariosFromScript(scriptContent);
         }
       } else {
-        // fs.existsSync(integrationPath) === false
+        // integrationpath does not exist: 'create'
         this._createUpdateValue = 'create';
         this._existingScenarioFieldValues = [];
       }
@@ -391,6 +363,67 @@ export class CreateIntegrationPanel {
         this._checkIntegrationExists(extensionUri);
       }
     });
+  }
+
+  private _getScriptName() : string {
+    let carrier = this._fieldValues[0];
+    let api     = this._fieldValues[1];
+    let module  = this._fieldValues[2];
+
+    return 'create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
+  }
+
+  private _getScriptPath(functionsPath:string) : string {
+    let carrier = this._fieldValues[0];
+
+    let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
+    return filesPath + '/carriers/' + carrier + '/' + this._getScriptName();
+  }
+
+  private _getIntegrationPath(functionsPath:string) : string {
+    let carrier = this._fieldValues[0];
+    let api     = this._fieldValues[1];
+    let module  = this._fieldValues[2];
+
+    let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
+    return filesPath + '/carriers/' + carrier + '/' + api + '/' + module;
+  }
+
+  private _getModularFromScript(scriptContent:string) : boolean {
+    let isModular: boolean = false;
+
+    // extract modular value from ps script content using regex
+    let rawModular:string[] = scriptContent.match(/\$ModularXMLs\s+=\s+\$(\S+)/) ?? [''];
+    if (rawModular.length >= 2) {
+      let modularString:string = rawModular[1];
+      if (modularString.toLowerCase() === 'true') {
+        isModular = true;
+      }
+    }
+
+    return isModular;
+  }
+
+  private _getScenariosFromScript(scriptContent:string) : string[] {
+    // extract scenarios from script content using regex
+    let scenarioString = scriptContent.match(/\$Scenarios = \@\(([^\)]+)/) ?? '';
+    let rawScenarios: string[] = [];
+    if (scenarioString.length >= 2) {
+      rawScenarios = scenarioString[1].split('\n');
+    }
+
+    // clean up raw scenarios and write to new array
+    let scenarios: string[] = [];
+    for (let index = 0; index < rawScenarios.length; index++) {
+      scenarios[index] = rawScenarios[index].replace(/"/g,'').replace(/,/g,'').replace(/#/g,'').trim();
+    }
+
+    // filter out empty values
+    scenarios = scenarios.filter(function (element) {
+      return ((element !== null) && ("" + element !== ""));
+    });
+
+    return scenarios;
   }
 
   // make additional html for step fields
