@@ -33,6 +33,10 @@ export class CreateIntegrationPanel {
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     this._panel = panel;
 
+    // predefine nofSteps, nofScenarios
+    this._fieldValues[nofStepsIndex] = "1";
+    this._fieldValues[nofScenariosIndex] = "1";
+
     // set content
     this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
 
@@ -522,34 +526,10 @@ export class CreateIntegrationPanel {
     return outString;
   }
 
-  // determine content
-  private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
-    const toolkitUri = getUri(webview, extensionUri, [
-      "node_modules",
-      "@vscode",
-      "webview-ui-toolkit",
-      "dist",
-      "toolkit.js", // A toolkit.min.js file is also available
-    ]);
-
-    const mainUri = getUri(webview, extensionUri, ["panels", "createintegration", "main.js"]);
-    const styleUri = getUri(webview, extensionUri, ["panels", "createintegration", "style.css"]);
-
-    // step fields
-    let nofSteps: number = +(this._fieldValues[nofStepsIndex] ?? 1);
-    const stepIntputFields = this._stepInputs(nofSteps);
-
-    // scenario fields
-    let nofScenarios: number = +(this._fieldValues[nofScenariosIndex] ?? 1);
-    const scenarioFields = this._scenarioInputs(nofScenarios);
-
-    // existing scenario fields
-    const existingScenarioFields = this._existingScenarios();
-
-    // crop flexible field arrays
-    // steps
+  private _cropFlexFields() {
+    // crop steps array
     let newStepFieldValues: String[] = [];
-    for (let index = 0; index < +nofSteps; index++) {
+    for (let index = 0; index < +this._fieldValues[nofStepsIndex]; index++) {
       // stepname
       if (this._stepFieldValues[index] !== undefined) {
         newStepFieldValues[index] = this._stepFieldValues[index];
@@ -567,40 +547,12 @@ export class CreateIntegrationPanel {
     }
     this._stepFieldValues = newStepFieldValues;
 
-    // scenarios
-    this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +nofScenarios);
+    // crop scenarios array
+    this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
+  }
 
-    // grids
-    let carrierDetailsGrid = /*html*/ `
-    <section class="component-subrow">
-      <section class="component-example">
-        <h4>Carrier details</h4>
-        <section class="component-example">
-          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" placeholder="DPD">SiS CarrierCode</vscode-text-field>
-        </section>
-
-        <section class="component-example">
-          <vscode-text-field id="carrierapidescription" class="field" index="${apiDescriptionIndex}" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
-        </section>
-      </section>
-
-      <section class="component-example">
-        <h4>Carrier TST credentials</h4>
-        <section class="component-example">
-          <vscode-text-field id="testuser" class="field" index="${carrierUserIndex}" placeholder="DPDTstUser">User</vscode-text-field>
-        </section>
-
-        <section class="component-example">
-          <vscode-text-field id="testpwd" class="field" index="${carrierPwdIndex}" placeholder="aslfjakl">Pwd</vscode-text-field>
-        </section>
-      </section>
-    </section>`;
-
-
-    let carrierGrid = /*html*/ `
-    <section class="component-container">
-      <h2>Carrier</h2>
-
+  private _getCarrierFolderStructureGrid() : string {
+    let carrierFolderStructureGrid = /*html*/ `
       <section class="component-example">
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
         <vscode-text-field id="carriername" class="field" index="${carrierIndex}" placeholder="carrier" size="5"></vscode-text-field>
@@ -614,49 +566,66 @@ export class CreateIntegrationPanel {
         <section class="component-example">
           <vscode-button id="checkintegrationexists" appearance="primary">Check</vscode-button>
         </section>
-      </section>
+      </section>`;
 
-      ${this._ifCreate(carrierDetailsGrid)}
-      
-    </section>`;
+    return carrierFolderStructureGrid;
+  }
 
-    let createUpdateGrid = /*html*/ `
-    <section class="component-container">
-      <h2>Execute</h2>
 
-      <section class="component-example">
-        <vscode-radio-group id="createupdate" readonly>
-          <label slot="label">Create/update</label>
-          <vscode-radio name="createupdate" value="create">Create</vscode-radio>
-          <vscode-radio name="createupdate" value="update">Update</vscode-radio>
-        </vscode-radio-group>
-      </section>
+  private _getCarrierDetailsGrid() : string {
+    let carrierDetailsGrid = /*html*/ `
+      <section class="component-subrow">
+        <section class="component-example">
+          <h4>Carrier details</h4>
+          <section class="component-example">
+            <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" placeholder="DPD">SiS CarrierCode</vscode-text-field>
+          </section>
 
-      <section class="component-example">
-        <vscode-button id="createintegration" appearance="primary" ${this._ifUpdate('style="background-color:green"')}>${this._ifCreate('Create') + this._ifUpdate('Update')} integration</vscode-button>
-      </section>
-    </section>`;
+          <section class="component-example">
+            <vscode-text-field id="carrierapidescription" class="field" index="${apiDescriptionIndex}" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+          </section>
+        </section>
 
+        <section class="component-example">
+          <h4>Carrier TST credentials</h4>
+          <section class="component-example">
+            <vscode-text-field id="testuser" class="field" index="${carrierUserIndex}" placeholder="DPDTstUser">User</vscode-text-field>
+          </section>
+
+          <section class="component-example">
+            <vscode-text-field id="testpwd" class="field" index="${carrierPwdIndex}" placeholder="aslfjakl">Pwd</vscode-text-field>
+          </section>
+        </section>
+      </section>`;
+
+      return carrierDetailsGrid;
+  }
+
+  private _getStepsGrid() : string {
     let stepsGrid = /*html*/ `
-    <section  class="component-grid">
-      <section class="component-container">
-        <h2>Steps</h2>
+      <section  class="component-grid">
+        <section class="component-container">
+          <h2>Steps</h2>
 
-        <section class="component-example">
-          <p>Number of steps</p>
-          <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" position="below">
-            ${dropdownOptions(arrayFrom1(10))}
-          </vscode-dropdown>
+          <section class="component-example">
+            <p>Number of steps</p>
+            <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" position="below">
+              ${dropdownOptions(arrayFrom1(10))}
+            </vscode-dropdown>
+          </section>
+
+          <section class="component-example">
+            <h3>Step fields: <b>name / carrier TEST url / carrier PROD url</b></h3>
+          </section>
+
+          ${this._stepInputs(+this._fieldValues[nofStepsIndex])}
         </section>
+      </section>`;
 
-        <section class="component-example">
-          <h3>Step fields: <b>name / carrier TEST url / carrier PROD url</b></h3>
-        </section>
+    return stepsGrid;
+  }
 
-        ${stepIntputFields}
-      </section>
-    </section>`;
-
+  private _getScenariosGrid() : string {
     let scenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Scenarios</h2>
@@ -672,17 +641,55 @@ export class CreateIntegrationPanel {
           </vscode-dropdown>
         </section>
 
-        ${scenarioFields}
+        ${this._scenarioInputs(+this._fieldValues[nofScenariosIndex])}
       </section>`;
 
+      return scenariosGrid;
+  }
+
+  private _getExistingScenariosGrid() : string {
     let existingScenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Existing scenarios</h2>
         <p>Check to run again</p>
-        ${existingScenarioFields}
+        ${this._existingScenarios()}
       </section>`;
 
-    // Tip: Install the es6-string-html VS Code extension to enable code highlighting below
+    return existingScenariosGrid;
+  }
+
+  private _getCreateUpdateGrid() : string {
+    let createUpdateGrid = /*html*/ `
+      <section class="component-container">
+        <h2>Execute</h2>
+
+        <section class="component-example">
+          <vscode-radio-group id="createupdate" readonly>
+            <label slot="label">Create/update</label>
+            <vscode-radio name="createupdate" value="create">Create</vscode-radio>
+            <vscode-radio name="createupdate" value="update">Update</vscode-radio>
+          </vscode-radio-group>
+        </section>
+
+        <section class="component-example">
+          <vscode-button id="createintegration" appearance="primary" ${this._ifUpdate('style="background-color:green"')}>${this._ifCreate('Create') + this._ifUpdate('Update')} integration</vscode-button>
+        </section>
+      </section>`;
+
+    return createUpdateGrid;
+  }
+
+  // determine content
+  private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
+    // define necessary extension Uris
+    const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
+    const mainUri = getUri(webview, extensionUri, ["panels", "createintegration", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["panels", "createintegration", "style.css"]);
+
+    // crop flexible field arrays
+    this._cropFlexFields();    
+
+    // define panel HTML
     let html =  /*html*/`
 		<!DOCTYPE html>
 		<html>
@@ -691,7 +698,6 @@ export class CreateIntegrationPanel {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="module" src="${toolkitUri}"></script>
         <script type="module" src="${mainUri}"></script>
-        <title>My Dashboard!</title>
 				<link href="${styleUri}" rel="stylesheet" /> 
 			</head>
 			<body>
@@ -703,15 +709,19 @@ export class CreateIntegrationPanel {
 
           <section class="component-example">
             <section class="component-row">
-              ${carrierGrid}
-              ${createUpdateGrid}
+              <section class="component-container">
+                <h2>Carrier</h2>
+                ${this._getCarrierFolderStructureGrid()}
+                ${this._ifCreate(this._getCarrierDetailsGrid())}
+              </section>
+              ${this._getCreateUpdateGrid()}
             </section>   
-            ${this._ifCreate(stepsGrid)}
+            ${this._ifCreate(this._getStepsGrid())}
           </section>
 
             <section class="component-grid">
-              ${scenariosGrid}
-              ${this._ifUpdate(existingScenariosGrid)}
+              ${this._getScenariosGrid()}
+              ${this._ifUpdate(this._getExistingScenariosGrid())}
             </section>
         </section>
 
