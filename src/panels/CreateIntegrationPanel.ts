@@ -576,22 +576,22 @@ export class CreateIntegrationPanel {
       <section class="component-example">
         <h4>Carrier details</h4>
         <section class="component-example">
-          <vscode-text-field id="carriercode" class="field" index="3" placeholder="DPD">SiS CarrierCode</vscode-text-field>
+          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" placeholder="DPD">SiS CarrierCode</vscode-text-field>
         </section>
 
         <section class="component-example">
-          <vscode-text-field id="carrierapidescription" class="field" index="4" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+          <vscode-text-field id="carrierapidescription" class="field" index="${apiDescriptionIndex}" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
         </section>
       </section>
 
       <section class="component-example">
         <h4>Carrier TST credentials</h4>
         <section class="component-example">
-          <vscode-text-field id="testuser" class="field" index="7" placeholder="DPDTstUser">User</vscode-text-field>
+          <vscode-text-field id="testuser" class="field" index="${carrierUserIndex}" placeholder="DPDTstUser">User</vscode-text-field>
         </section>
 
         <section class="component-example">
-          <vscode-text-field id="testpwd" class="field" index="8" placeholder="aslfjakl">Pwd</vscode-text-field>
+          <vscode-text-field id="testpwd" class="field" index="${carrierPwdIndex}" placeholder="aslfjakl">Pwd</vscode-text-field>
         </section>
       </section>
     </section>`;
@@ -603,11 +603,11 @@ export class CreateIntegrationPanel {
 
       <section class="component-example">
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
-        <vscode-text-field id="carriername" class="field" index="0" placeholder="carrier" size="5"></vscode-text-field>
+        <vscode-text-field id="carriername" class="field" index="${carrierIndex}" placeholder="carrier" size="5"></vscode-text-field>
         /
-        <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
+        <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" placeholder="api-name" size="5"></vscode-text-field>
         /
-        <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
+        <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" position="below">
           ${dropdownOptions(['booking', 'tracking', 'cancel', 'pickup', 'pickup_cancel'])}
         </vscode-dropdown>
 
@@ -644,7 +644,7 @@ export class CreateIntegrationPanel {
 
         <section class="component-example">
           <p>Number of steps</p>
-          <vscode-dropdown id="nofsteps" class="dropdown" index="5" position="below">
+          <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" position="below">
             ${dropdownOptions(arrayFrom1(10))}
           </vscode-dropdown>
         </section>
@@ -667,7 +667,7 @@ export class CreateIntegrationPanel {
 
         <section class="component-example">
           <p>Number of Scenarios</p>
-          <vscode-dropdown id="nofscenarios" class="dropdown" index="6" position="below">
+          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" position="below">
             ${dropdownOptions(arrayFrom1(100))}
           </vscode-dropdown>
         </section>
