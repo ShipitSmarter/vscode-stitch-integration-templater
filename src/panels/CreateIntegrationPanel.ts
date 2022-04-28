@@ -1,7 +1,20 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getExtensionFile , startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean, isEmptyStringArray, arrayFrom0} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getExtensionFile, startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean, isEmptyStringArray, arrayFrom0 } from "../utilities/functions";
 import * as fs from 'fs';
 import * as path from 'path';
+
+
+// fixed fields indices
+const carrierIndex = 0;
+const apiIndex = 1;
+const moduleIndex = 2;
+const carrierCodeIndex = 3;
+const apiDescriptionIndex = 4;
+const nofStepsIndex = 5;
+const nofScenariosIndex = 6;
+const carrierUserIndex = 7;
+const carrierPwdIndex = 8;
+
 
 export class CreateIntegrationPanel {
   // PROPERTIES
@@ -14,7 +27,7 @@ export class CreateIntegrationPanel {
   private _existingScenarioFieldValues: String[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: String = 'create';      // pre-allocate with 'create'
-  private _modularValue: boolean = false;             // pre-allocate with 'false'
+  private _modularValue: boolean = false;             // pre-allocate with 'false'  
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -27,14 +40,14 @@ export class CreateIntegrationPanel {
     this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
 
     // set ondidchangeviewstate
-    this._panel.onDidChangeViewState( e => {
-        const panel = e.webviewPanel;
-        let isVisible = panel.visible;
+    this._panel.onDidChangeViewState(e => {
+      const panel = e.webviewPanel;
+      let isVisible = panel.visible;
 
-        if (isVisible) {
-          this._updateWebview(extensionUri);
-        }
-      },
+      if (isVisible) {
+        this._updateWebview(extensionUri);
+      }
+    },
       null,
       context.subscriptions
     );
@@ -66,7 +79,7 @@ export class CreateIntegrationPanel {
   private _setWebviewMessageListener(extensionUri: vscode.Uri, webview: vscode.Webview, context: vscode.ExtensionContext) {
     // Pre-allocate terminal and terminalExists
     let terminal: vscode.Terminal;
-    
+
     webview.onDidReceiveMessage(
       (message: any) => {
         const command = message.command;
@@ -91,14 +104,14 @@ export class CreateIntegrationPanel {
             } else {
               this._updateIntegration(terminal, extensionUri);
             }
-            
+
             break;
 
           case "savefieldvalue":
             let indexValue = message.text.split('|');
             this._fieldValues[indexValue[0]] = indexValue[1];
             break;
-          
+
           case "savestepfieldvalue":
             let stepIndexValue = message.text.split('|');
             this._stepFieldValues[stepIndexValue[0]] = stepIndexValue[1];
@@ -129,7 +142,76 @@ export class CreateIntegrationPanel {
     );
   }
 
+  private _getField(fieldName: string): String {
+    let fieldIndex: number = -1;
+    switch (fieldName) {
+      case 'carrier':
+        fieldIndex = carrierIndex;
+        break;
+      case 'api':
+        fieldIndex = apiIndex;
+        break;
+      case 'module':
+        fieldIndex = moduleIndex;
+        break;
+      case 'carrierCode':
+        fieldIndex = carrierCodeIndex;
+        break;
+      case 'apiDescription':
+        fieldIndex = apiDescriptionIndex;
+        break;
+      case 'nofSteps':
+        fieldIndex = nofStepsIndex;
+        break;
+      case 'nofScenarios':
+        fieldIndex = nofScenariosIndex;
+        break;
+      case 'carrierUser':
+        fieldIndex = carrierUserIndex;
+        break;
+      case 'carrierPwd':
+        fieldIndex = carrierPwdIndex;
+        break;
+    }
 
+    return this._fieldValues[fieldIndex];
+  }
+
+
+  private _setField(fieldName: string, value:string) {
+    let fieldIndex: number = -1;
+    switch (fieldName) {
+      case 'carrier':
+        fieldIndex = carrierIndex;
+        break;
+      case 'api':
+        fieldIndex = apiIndex;
+        break;
+      case 'module':
+        fieldIndex = moduleIndex;
+        break;
+      case 'carrierCode':
+        fieldIndex = carrierCodeIndex;
+        break;
+      case 'apiDescription':
+        fieldIndex = apiDescriptionIndex;
+        break;
+      case 'nofSteps':
+        fieldIndex = nofStepsIndex;
+        break;
+      case 'nofScenarios':
+        fieldIndex = nofScenariosIndex;
+        break;
+      case 'carrierUser':
+        fieldIndex = carrierUserIndex;
+        break;
+      case 'carrierPwd':
+        fieldIndex = carrierPwdIndex;
+        break;
+    }
+
+    this._fieldValues[fieldIndex] = value;
+  }
 
   private _checkIntegrationExists(extensionUri: vscode.Uri) {
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
@@ -150,7 +232,7 @@ export class CreateIntegrationPanel {
 
         // update existing scenario values from script
         this._existingScenarioFieldValues = this._getScenariosFromScript(scriptContent);
-        
+
       } else {
         // integrationpath does not exist: 'create'
         this._createUpdateValue = 'create';
@@ -162,10 +244,10 @@ export class CreateIntegrationPanel {
 
       // update panel
       this._updateWebview(extensionUri);
-    });   
+    });
   }
 
-  private _createIntegration (terminal: vscode.Terminal,extensionUri: vscode.Uri) {
+  private _createIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
 
@@ -174,10 +256,10 @@ export class CreateIntegrationPanel {
         vscode.window.showErrorMessage(`Cannot create: ${this._getScriptName()} already exists`);
         this._checkIntegrationExists(extensionUri);
         return;
-      } 
+      }
 
       // show info message
-      vscode.window.showInformationMessage('Creating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
+      vscode.window.showInformationMessage('Creating integration ' + this._getIntegrationName());
 
       // make integrationPath if not exists
       fs.mkdirSync(this._getCarrierPath(functionsPath), { recursive: true });
@@ -195,13 +277,13 @@ export class CreateIntegrationPanel {
       this._runScript(terminal, functionsPath);
 
       // refresh window
-      this._fieldValues[6] = "1";       // nofScenarios
+      this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
       this._checkIntegrationExists(extensionUri);
     });
   }
 
-  private _updateIntegration (terminal: vscode.Terminal,extensionUri: vscode.Uri) {
+  private _updateIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     // start at scripts/functions.ps1, because unique
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
@@ -213,10 +295,10 @@ export class CreateIntegrationPanel {
         vscode.window.showErrorMessage(`Cannot update: ${this._getScriptName()} does not exist`);
         this._checkIntegrationExists(extensionUri);
         return;
-      } 
+      }
 
       // show info message
-      vscode.window.showInformationMessage('Updating integration '+ this._fieldValues[0] + '/' + this._fieldValues[1] + '/' + this._fieldValues[2]);
+      vscode.window.showInformationMessage('Updating integration ' + this._getIntegrationName());
 
       // load script content
       let scriptContent = fs.readFileSync(scriptPath, 'utf8');
@@ -234,18 +316,18 @@ export class CreateIntegrationPanel {
       this._runScript(terminal, functionsPath);
 
       // refresh window
-      this._fieldValues[6] = "1";       // nofScenarios
+      this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
       this._checkIntegrationExists(extensionUri);
     });
   }
 
-  private _runScript(terminal: vscode.Terminal, functionsPath:string) {
+  private _runScript(terminal: vscode.Terminal, functionsPath: string) {
     // check if terminal exists and is still alive
     let terminalExists: boolean = (terminal && !(terminal.exitStatus));
     // open terminal if not yet exists
     if (!terminalExists) {
-      terminal = startScript('','');
+      terminal = startScript('', '');
     }
 
     // execute script
@@ -253,7 +335,7 @@ export class CreateIntegrationPanel {
     terminal.sendText(`./${this._getScriptName()}`);
   }
 
-  private _getScenariosString() : string {
+  private _getScenariosString(): string {
     let newScenarioString = '';     // pre-allocate
 
     // add existing scenarios
@@ -266,7 +348,7 @@ export class CreateIntegrationPanel {
       newScenarioString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"';
 
       // check if comma is needed
-      let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index+1,this._existingScenarioCheckboxValues.length);
+      let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index + 1, this._existingScenarioCheckboxValues.length);
       if ((remainingCheckboxes.filter(el => el === true).length > 0) || !isEmptyStringArray(this._scenarioFieldValues)) {
         newScenarioString += ',';
       }
@@ -278,7 +360,7 @@ export class CreateIntegrationPanel {
         newScenarioString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"';
 
         // check if comma is needed
-        let remainingFieldValues: String[] = this._scenarioFieldValues.slice(index+1,this._scenarioFieldValues.length);
+        let remainingFieldValues: String[] = this._scenarioFieldValues.slice(index + 1, this._scenarioFieldValues.length);
         if (!isEmptyStringArray(remainingFieldValues)) {
           newScenarioString += ',';
         }
@@ -291,7 +373,7 @@ export class CreateIntegrationPanel {
     return newScenarioString;
   }
 
-  private _replaceInScriptTemplate(templateContent:string) : string {
+  private _replaceInScriptTemplate(templateContent: string): string {
     // define initial outcome string
     let newScriptContent = templateContent;
 
@@ -299,91 +381,88 @@ export class CreateIntegrationPanel {
     for (let index = 0; index < this._fieldValues.length; index++) {
       let replaceString = '[fieldValues' + index + ']';
       if (this._fieldValues[index] !== undefined) {
-        newScriptContent = newScriptContent.replace(replaceString,this._fieldValues[index] + "");
+        newScriptContent = newScriptContent.replace(replaceString, this._fieldValues[index] + "");
       }
     }
 
     // createupdate
-    newScriptContent = newScriptContent.replace('[createupdate]',this._createUpdateValue + "");
+    newScriptContent = newScriptContent.replace('[createupdate]', this._createUpdateValue + "");
 
     // modular
-    newScriptContent = newScriptContent.replace('[modular]',this._modularValue + "");
+    newScriptContent = newScriptContent.replace('[modular]', this._modularValue + "");
 
     // scenarios
-    let scenariosString:string = '';
+    let scenariosString: string = '';
     for (let index = 0; index < this._scenarioFieldValues.length; index++) {
       if (this._scenarioFieldValues[index] !== undefined) {
         scenariosString += '\n    "' + this._scenarioFieldValues[index] + '"';
-        if (index !== this._scenarioFieldValues.length -1) {
+        if (index !== this._scenarioFieldValues.length - 1) {
           scenariosString += ',';
         }
       }
     }
-    newScriptContent = newScriptContent.replace('[scenarios]',scenariosString);
+    newScriptContent = newScriptContent.replace('[scenarios]', scenariosString);
 
     // steps fields: step name, testurls, produrls
-    let nofSteps = this._fieldValues[5];
-    let stepsString:string = '';
-    let testUrlsString:string = '';
-    let prodUrlsString:string = '';
+    let nofSteps = this._fieldValues[nofStepsIndex];
+    let stepsString: string = '';
+    let testUrlsString: string = '';
+    let prodUrlsString: string = '';
     for (let index = 0; index < +nofSteps; index++) {
-      let step:string = this._stepFieldValues[index] + '';
+      let step: string = this._stepFieldValues[index] + '';
       // steps
       stepsString += '\n    "' + step + '"';
-      if (index !== +nofSteps -1) {
+      if (index !== +nofSteps - 1) {
         stepsString += ',';
       }
       // testurls
-      if (this._stepFieldValues[index+10] !== undefined) {
-        testUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERTESTENDPOINT = "' + this._stepFieldValues[index+10] + '"';
+      if (this._stepFieldValues[index + 10] !== undefined) {
+        testUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERTESTENDPOINT = "' + this._stepFieldValues[index + 10] + '"';
       }
       // produrls
-      if (this._stepFieldValues[index+20] !== undefined) {
-        prodUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERPRODUCTIONENDPOINT = "' + this._stepFieldValues[index+20] + '"';
+      if (this._stepFieldValues[index + 20] !== undefined) {
+        prodUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERPRODUCTIONENDPOINT = "' + this._stepFieldValues[index + 20] + '"';
       }
     }
     // replace
-    newScriptContent = newScriptContent.replace('[steps]',stepsString);
-    newScriptContent = newScriptContent.replace('[testurls]',testUrlsString);
-    newScriptContent = newScriptContent.replace('[produrls]',prodUrlsString);
+    newScriptContent = newScriptContent.replace('[steps]', stepsString);
+    newScriptContent = newScriptContent.replace('[testurls]', testUrlsString);
+    newScriptContent = newScriptContent.replace('[produrls]', prodUrlsString);
 
     // return script content
     return newScriptContent;
   }
 
-  private _getScriptName() : string {
-    let carrier = this._fieldValues[0];
-    let api     = this._fieldValues[1];
-    let module  = this._fieldValues[2];
-
-    return 'create-integration-' + carrier + '-' + api + '-' + module + '.ps1';
+  private _getScriptName(): string {
+    return 'create-integration-' + this._fieldValues[carrierIndex] + '-' + this._fieldValues[apiIndex] + '-' + this._fieldValues[moduleIndex] + '.ps1';
   }
 
-  private _getScriptPath(functionsPath:string) : string {
-    let carrier = this._fieldValues[0];
+  private _getIntegrationName(): string {
+    return this._fieldValues[carrierIndex] + '/' + this._fieldValues[apiIndex] + '/' + this._fieldValues[moduleIndex];
+  }
 
+  private _getScriptPath(functionsPath: string): string {
     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-    return filesPath + '/carriers/' + carrier + '/' + this._getScriptName();
+    return filesPath + '/carriers/' + this._fieldValues[carrierIndex] + '/' + this._getScriptName();
   }
 
-  private _getTemplatePath(functionsPath:string) : string {
+  private _getTemplatePath(functionsPath: string): string {
     let scriptsPath: string = parentPath(cleanPath(functionsPath));
     return scriptsPath + '/templates/create-module-integration-template.ps1';
   }
 
-  private _getCarrierPath(functionsPath:string) : string {
-    let carrier = this._fieldValues[0];
+  private _getCarrierPath(functionsPath: string): string {
     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-    return filesPath + '/carriers/' + carrier;
+    return filesPath + '/carriers/' + this._fieldValues[carrierIndex];
   }
 
-  private _getModularFromScript(scriptContent:string) : boolean {
+  private _getModularFromScript(scriptContent: string): boolean {
     let isModular: boolean = false;
 
     // extract modular value from ps script content using regex
-    let rawModular:string[] = scriptContent.match(/\$ModularXMLs\s+=\s+\$(\S+)/) ?? [''];
+    let rawModular: string[] = scriptContent.match(/\$ModularXMLs\s+=\s+\$(\S+)/) ?? [''];
     if (rawModular.length >= 2) {
-      let modularString:string = rawModular[1];
+      let modularString: string = rawModular[1];
       if (modularString.toLowerCase() === 'true') {
         isModular = true;
       }
@@ -392,7 +471,7 @@ export class CreateIntegrationPanel {
     return isModular;
   }
 
-  private _getScenariosFromScript(scriptContent:string) : string[] {
+  private _getScenariosFromScript(scriptContent: string): string[] {
     // extract scenarios from script content using regex
     let scenarioString = scriptContent.match(/\$Scenarios = \@\(([^\)]+)/) ?? '';
     let rawScenarios: string[] = [];
@@ -403,7 +482,7 @@ export class CreateIntegrationPanel {
     // clean up raw scenarios and write to new array
     let scenarios: string[] = [];
     for (let index = 0; index < rawScenarios.length; index++) {
-      scenarios[index] = rawScenarios[index].replace(/"/g,'').replace(/,/g,'').replace(/#/g,'').trim();
+      scenarios[index] = rawScenarios[index].replace(/"/g, '').replace(/,/g, '').replace(/#/g, '').trim();
     }
 
     // filter out empty values
@@ -415,28 +494,24 @@ export class CreateIntegrationPanel {
   }
 
   // make additional html for step fields
-  private _stepInputs(nofSteps:number): string {
+  private _stepInputs(nofSteps: number): string {
     let html: string = ``;
-    let moduleName:String ='booking';
-    if (this._fieldValues[2] !== undefined) {
-      moduleName = this._fieldValues[2];
-    }
 
     for (let step = 0; step < +nofSteps; step++) {
       // set html string addition
-      let subhtml:string = /*html*/`
+      let subhtml: string = /*html*/`
         <section class="component-example">
-          <p>${(step+1) + nth(step+1)} step</p>
+          <p>${(step + 1) + nth(step + 1)} step</p>
           <vscode-dropdown id="stepname${step}" indexstep="${step}" class="stepdropdown" position="below">
-            <vscode-option>${moduleName}</vscode-option>
+            <vscode-option>${(this._fieldValues[moduleIndex] ?? 'booking')}</vscode-option>
             <vscode-option>label</vscode-option>
             <vscode-option>login</vscode-option>
             <vscode-option>get_token</vscode-option>
             <vscode-option>save_token</vscode-option>
             <vscode-option>other</vscode-option>
           </vscode-dropdown>
-          <vscode-text-field id="testurl${step}" indexstep="${step+10}" class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
-          <vscode-text-field id="produrl${step}" indexstep="${step+20}" class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
         </section>
       `;
 
@@ -445,7 +520,7 @@ export class CreateIntegrationPanel {
       if (this._stepFieldValues[step] === undefined) {
         // from https://stackoverflow.com/a/44568739/1716283
         let t: number = 0;
-        subhtml = subhtml.replace(/<vscode-option>/g, match => ++t === (step+1) ? '<vscode-option selected>' : match);
+        subhtml = subhtml.replace(/<vscode-option>/g, match => ++t === (step + 1) ? '<vscode-option selected>' : match);
       }
 
       // add to output
@@ -455,23 +530,23 @@ export class CreateIntegrationPanel {
     return html;
   }
 
-  private _scenarioInputs(nofScenarios:number): string {
+  private _scenarioInputs(nofScenarios: number): string {
     let html: string = ``;
-  
+
     for (let scenario = 0; scenario < +nofScenarios; scenario++) {
       html += /*html*/`
         <section class="component-example">
-          <vscode-text-field id="scenario${scenario}" size="30" indexscenario="${scenario}" class="scenariofield" placeholder="${(scenario+1) + nth(scenario+1)} scenario name..."></vscode-text-field>
+          <vscode-text-field id="scenario${scenario}" size="30" indexscenario="${scenario}" class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>
         </section>
       `;
     }
- 
+
     return html;
   }
 
   private _existingScenarios(): string {
     let html: string = ``;
-  
+
     for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
       let checked = '';
       let disabledReadonly = 'disabled';
@@ -487,11 +562,11 @@ export class CreateIntegrationPanel {
         </section>
       `;
     }
- 
+
     return html;
   }
 
-  private _ifCreate(content:string) : string {
+  private _ifCreate(content: string): string {
     let outString = '';
     if (this._createUpdateValue === 'create') {
       outString = content;
@@ -500,7 +575,7 @@ export class CreateIntegrationPanel {
     return outString;
   }
 
-  private _checkedString(checked:boolean) : string {
+  private _checkedString(checked: boolean): string {
     let outString: string = '';
     if (checked) {
       outString = 'checked';
@@ -509,7 +584,7 @@ export class CreateIntegrationPanel {
     return outString;
   }
 
-  private _ifUpdate(content:string) : string {
+  private _ifUpdate(content: string): string {
     let outString = '';
     if (this._createUpdateValue === 'update') {
       outString = content;
@@ -521,22 +596,22 @@ export class CreateIntegrationPanel {
   // determine content
   private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     const toolkitUri = getUri(webview, extensionUri, [
-        "node_modules",
-        "@vscode",
-        "webview-ui-toolkit",
-        "dist",
-        "toolkit.js", // A toolkit.min.js file is also available
+      "node_modules",
+      "@vscode",
+      "webview-ui-toolkit",
+      "dist",
+      "toolkit.js", // A toolkit.min.js file is also available
     ]);
 
-    const mainUri = getUri(webview, extensionUri, ["panels","createintegration", "main.js"]);
-    const styleUri = getUri(webview, extensionUri, ["panels","createintegration", "style.css"]);
+    const mainUri = getUri(webview, extensionUri, ["panels", "createintegration", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["panels", "createintegration", "style.css"]);
 
     // step fields
-    let nofSteps: number = +(this._fieldValues[5] ?? 1);
+    let nofSteps: number = +(this._fieldValues[nofStepsIndex] ?? 1);
     const stepIntputFields = this._stepInputs(nofSteps);
 
     // scenario fields
-    let nofScenarios: number = +(this._fieldValues[6] ?? 1);
+    let nofScenarios: number = +(this._fieldValues[nofScenariosIndex] ?? 1);
     const scenarioFields = this._scenarioInputs(nofScenarios);
 
     // existing scenario fields
@@ -547,24 +622,24 @@ export class CreateIntegrationPanel {
     let newStepFieldValues: String[] = [];
     for (let index = 0; index < +nofSteps; index++) {
       // stepname
-      if (this._stepFieldValues[index] !== undefined ) {
+      if (this._stepFieldValues[index] !== undefined) {
         newStepFieldValues[index] = this._stepFieldValues[index];
       }
 
       // testurl
-      if (this._stepFieldValues[index + 10] !== undefined ) {
+      if (this._stepFieldValues[index + 10] !== undefined) {
         newStepFieldValues[index + 10] = this._stepFieldValues[index + 10];
       }
 
       // produrl
-      if (this._stepFieldValues[index + 20] !== undefined ) {
+      if (this._stepFieldValues[index + 20] !== undefined) {
         newStepFieldValues[index + 20] = this._stepFieldValues[index + 20];
       }
     }
     this._stepFieldValues = newStepFieldValues;
 
     // scenarios
-    this._scenarioFieldValues = this._scenarioFieldValues.slice(0,+nofScenarios);
+    this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +nofScenarios);
 
     // grids
     let carrierDetailsGrid = /*html*/ `
@@ -604,7 +679,7 @@ export class CreateIntegrationPanel {
         <vscode-text-field id="carrierapiname" class="field" index="1" placeholder="api-name" size="5"></vscode-text-field>
         /
         <vscode-dropdown id="modulename" class="dropdown" index="2" position="below">
-          ${dropdownOptions(['booking','tracking','cancel','pickup','pickup_cancel'])}
+          ${dropdownOptions(['booking', 'tracking', 'cancel', 'pickup', 'pickup_cancel'])}
         </vscode-dropdown>
 
         <section class="component-example">
@@ -721,27 +796,27 @@ export class CreateIntegrationPanel {
       if (values[index] !== undefined) {
         let indexString = 'index="' + index + '"';
         let newString = indexString + ' value="' + values[index] + '"';
-        html = html.replace(indexString,newString);
+        html = html.replace(indexString, newString);
       }
     }
 
     // update stepfield values
     let stepValues = this._stepFieldValues;
     for (let index = 0; index < stepValues.length; index++) {
-      if (stepValues[index] !== undefined ) {
+      if (stepValues[index] !== undefined) {
         let indexString = 'indexstep="' + index + '"';
         let newString = indexString + ' value="' + stepValues[index] + '"';
-        html = html.replace(indexString,newString);
+        html = html.replace(indexString, newString);
       }
     }
 
     // update scenarioField values
     let scenarioValues = this._scenarioFieldValues;
     for (let index = 0; index < scenarioValues.length; index++) {
-      if (scenarioValues[index] !== undefined ) {
+      if (scenarioValues[index] !== undefined) {
         let indexString = 'indexscenario="' + index + '"';
         let newString = indexString + ' value="' + scenarioValues[index] + '"';
-        html = html.replace(indexString,newString);
+        html = html.replace(indexString, newString);
       }
     }
 
