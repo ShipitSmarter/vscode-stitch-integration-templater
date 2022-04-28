@@ -435,7 +435,7 @@ export class CreateIntegrationPanel {
       let subhtml: string = /*html*/`
         <section class="component-example">
           <p>${(step + 1) + nth(step + 1)} step</p>
-          <vscode-dropdown id="stepname${step}" indexstep="${step}" class="stepdropdown" position="below">
+          <vscode-dropdown id="stepname${step}" indexstep="${step}" ${this._valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
             <vscode-option>${(this._fieldValues[moduleIndex] ?? 'booking')}</vscode-option>
             <vscode-option>label</vscode-option>
             <vscode-option>login</vscode-option>
@@ -443,8 +443,8 @@ export class CreateIntegrationPanel {
             <vscode-option>save_token</vscode-option>
             <vscode-option>other</vscode-option>
           </vscode-dropdown>
-          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
-          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step+10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step+20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
         </section>
       `;
 
@@ -469,7 +469,7 @@ export class CreateIntegrationPanel {
     for (let scenario = 0; scenario < +nofScenarios; scenario++) {
       html += /*html*/`
         <section class="component-example">
-          <vscode-text-field id="scenario${scenario}" size="30" indexscenario="${scenario}" class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>
+          <vscode-text-field id="scenario${scenario}" size="30" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>
         </section>
       `;
     }
@@ -551,15 +551,23 @@ export class CreateIntegrationPanel {
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
   }
 
+  private _valueString(string:(string | String)) : string {
+    let outString = '';
+    if (string !== undefined && string !== "") {
+      outString = `value="${string}"`;
+    }
+    return outString;
+  }
+
   private _getCarrierFolderStructureGrid() : string {
     let carrierFolderStructureGrid = /*html*/ `
       <section class="component-example">
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
-        <vscode-text-field id="carriername" class="field" index="${carrierIndex}" placeholder="carrier" size="5"></vscode-text-field>
+        <vscode-text-field id="carriername" class="field" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} placeholder="carrier" size="5"></vscode-text-field>
         /
-        <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" placeholder="api-name" size="5"></vscode-text-field>
+        <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
         /
-        <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" position="below">
+        <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
           ${dropdownOptions(['booking', 'tracking', 'cancel', 'pickup', 'pickup_cancel'])}
         </vscode-dropdown>
 
@@ -578,22 +586,22 @@ export class CreateIntegrationPanel {
         <section class="component-example">
           <h4>Carrier details</h4>
           <section class="component-example">
-            <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" placeholder="DPD">SiS CarrierCode</vscode-text-field>
+            <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${this._valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD">SiS CarrierCode</vscode-text-field>
           </section>
 
           <section class="component-example">
-            <vscode-text-field id="carrierapidescription" class="field" index="${apiDescriptionIndex}" placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+            <vscode-text-field id="carrierapidescription" class="field" index="${apiDescriptionIndex}" ${this._valueString(this._fieldValues[apiDescriptionIndex])} placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
           </section>
         </section>
 
         <section class="component-example">
           <h4>Carrier TST credentials</h4>
           <section class="component-example">
-            <vscode-text-field id="testuser" class="field" index="${carrierUserIndex}" placeholder="DPDTstUser">User</vscode-text-field>
+            <vscode-text-field id="testuser" class="field" index="${carrierUserIndex}" ${this._valueString(this._fieldValues[carrierUserIndex])} placeholder="DPDTstUser">User</vscode-text-field>
           </section>
 
           <section class="component-example">
-            <vscode-text-field id="testpwd" class="field" index="${carrierPwdIndex}" placeholder="aslfjakl">Pwd</vscode-text-field>
+            <vscode-text-field id="testpwd" class="field" index="${carrierPwdIndex}" ${this._valueString(this._fieldValues[carrierPwdIndex])} placeholder="aslfjakl">Pwd</vscode-text-field>
           </section>
         </section>
       </section>`;
@@ -609,7 +617,7 @@ export class CreateIntegrationPanel {
 
           <section class="component-example">
             <p>Number of steps</p>
-            <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" position="below">
+            <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${this._valueString(this._fieldValues[nofStepsIndex])} position="below">
               ${dropdownOptions(arrayFrom1(10))}
             </vscode-dropdown>
           </section>
@@ -636,7 +644,7 @@ export class CreateIntegrationPanel {
 
         <section class="component-example">
           <p>Number of Scenarios</p>
-          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" position="below">
+          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" ${this._valueString(this._fieldValues[nofScenariosIndex])} position="below">
             ${dropdownOptions(arrayFrom1(100))}
           </vscode-dropdown>
         </section>
@@ -719,45 +727,15 @@ export class CreateIntegrationPanel {
             ${this._ifCreate(this._getStepsGrid())}
           </section>
 
-            <section class="component-grid">
-              ${this._getScenariosGrid()}
-              ${this._ifUpdate(this._getExistingScenariosGrid())}
-            </section>
+          <section class="component-grid">
+            ${this._getScenariosGrid()}
+            ${this._ifUpdate(this._getExistingScenariosGrid())}
+          </section>
         </section>
 
 			</body>
 		</html>
 	  `;
-
-    // update field values
-    let values = this._fieldValues;
-    for (let index = 0; index < values.length; index++) {
-      if (values[index] !== undefined) {
-        let indexString = 'index="' + index + '"';
-        let newString = indexString + ' value="' + values[index] + '"';
-        html = html.replace(indexString, newString);
-      }
-    }
-
-    // update stepfield values
-    let stepValues = this._stepFieldValues;
-    for (let index = 0; index < stepValues.length; index++) {
-      if (stepValues[index] !== undefined) {
-        let indexString = 'indexstep="' + index + '"';
-        let newString = indexString + ' value="' + stepValues[index] + '"';
-        html = html.replace(indexString, newString);
-      }
-    }
-
-    // update scenarioField values
-    let scenarioValues = this._scenarioFieldValues;
-    for (let index = 0; index < scenarioValues.length; index++) {
-      if (scenarioValues[index] !== undefined) {
-        let indexString = 'indexscenario="' + index + '"';
-        let newString = indexString + ' value="' + scenarioValues[index] + '"';
-        html = html.replace(indexString, newString);
-      }
-    }
 
     // update createupdate radio group value
     let createString: string = 'name="createupdate" value="create"';
