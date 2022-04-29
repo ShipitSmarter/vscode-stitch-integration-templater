@@ -428,13 +428,14 @@ export class CreateIntegrationPanel {
 
   // make additional html for step fields
   private _stepInputs(nofSteps: number): string {
-    let html: string = ``;
 
+    let sub_stepnames: string = '';
+    let sub_testurl: string = '';
+    let sub_produrl: string = '';
     for (let step = 0; step < +nofSteps; step++) {
       // set html string addition
-      let subhtml: string = /*html*/`
+      let sub_stepnames_current = /*html*/`
         <section class="component-example">
-          <p>${(step + 1) + nth(step + 1)} step</p>
           <vscode-dropdown id="stepname${step}" indexstep="${step}" ${this._valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
             <vscode-option>${(this._fieldValues[moduleIndex] ?? 'booking')}</vscode-option>
             <vscode-option>label</vscode-option>
@@ -443,8 +444,6 @@ export class CreateIntegrationPanel {
             <vscode-option>save_token</vscode-option>
             <vscode-option>other</vscode-option>
           </vscode-dropdown>
-          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step+10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
-          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step+20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
         </section>
       `;
 
@@ -453,12 +452,37 @@ export class CreateIntegrationPanel {
       if (this._stepFieldValues[step] === undefined) {
         // from https://stackoverflow.com/a/44568739/1716283
         let t: number = 0;
-        subhtml = subhtml.replace(/<vscode-option>/g, match => ++t === (step + 1) ? '<vscode-option selected>' : match);
+        sub_stepnames_current = sub_stepnames_current.replace(/<vscode-option>/g, match => ++t === (step + 1) ? '<vscode-option selected>' : match);
       }
 
-      // add to output
-      html += subhtml;
+      sub_stepnames += sub_stepnames_current;
+
+      sub_testurl += /*html*/ `
+        <section class="component-example">
+          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step+10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+        </section>`;
+
+        sub_produrl += /*html*/ `
+        <section class="component-example">
+          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step+20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+        </section>`;
     }
+
+    let html: string = /*html*/ `
+      <section class="row433">
+        <section class="component-example">
+          <p>step name</p>
+          ${sub_stepnames}
+        </section>
+        <section class="component-example">
+          <p>test url</p>
+          ${sub_testurl}
+        </section>
+        <section class="component-example">
+          <p>prod url</p>
+          ${sub_produrl}
+        </section>
+      </section>`;
 
     return html;
   }
@@ -582,8 +606,8 @@ export class CreateIntegrationPanel {
 
   private _getCarrierDetailsGrid() : string {
     let carrierDetailsGrid = /*html*/ `
-      <section class="component-subrow">
-        <section class="component-example">
+      <section class="row11">
+        <section class="rowelement">
           <h4>Carrier details</h4>
           <section class="component-example">
             <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${this._valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD">SiS CarrierCode</vscode-text-field>
@@ -594,7 +618,7 @@ export class CreateIntegrationPanel {
           </section>
         </section>
 
-        <section class="component-example">
+        <section class="rowelement">
           <h4>Carrier TST credentials</h4>
           <section class="component-example">
             <vscode-text-field id="testuser" class="field" index="${carrierUserIndex}" ${this._valueString(this._fieldValues[carrierUserIndex])} placeholder="DPDTstUser">User</vscode-text-field>
@@ -619,10 +643,6 @@ export class CreateIntegrationPanel {
             <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${this._valueString(this._fieldValues[nofStepsIndex])} position="below">
               ${dropdownOptions(arrayFrom1(10))}
             </vscode-dropdown>
-          </section>
-
-          <section class="component-example">
-            <h3>Step fields: <b>name / carrier TEST url / carrier PROD url</b></h3>
           </section>
 
           ${this._stepInputs(+this._fieldValues[nofStepsIndex])}
@@ -699,7 +719,7 @@ export class CreateIntegrationPanel {
 			</head>
 			<body>
 
-				<div class="component-subrow" id="main">
+				<div class="row11" id="main">
           <section id="farleft">
 					  <h1>Create module integration</h1> 
           </section>
@@ -708,21 +728,21 @@ export class CreateIntegrationPanel {
           </section>
 				</div>
         
-        <section class="component-row">
+        <section class="row32">
 
-          <section class="component-grid">
+          <section class="rowsingle">
             <section class="component-container">
               <h2>Carrier</h2>
               ${this._getCarrierFolderStructureGrid()}
               ${this._ifCreate(this._getCarrierDetailsGrid())}
             </section> 
             
-            <section  class="component-grid">
+            <section  class="rowsingle">
               ${this._ifCreate(this._getStepsGrid())}
             </section>
           </section>
 
-          <section class="component-grid">
+          <section class="rowsingle">
             ${this._getScenariosGrid()}
             ${this._ifUpdate(this._getExistingScenariosGrid())}
           </section>

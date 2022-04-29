@@ -1,21 +1,33 @@
-.component-row {
+.row32 {
   display: grid;
   grid-template-columns: 3fr 2fr;
 }
 
-.component-subrow {
+.row11 {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
 
-.component-subrow > * {
-  margin-right: 60px;
+.row433 {
+  display: grid;
+  grid-template-columns: 4fr 3fr 3fr;
+}
+
+.row111 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 
-.component-grid {
+.rowsingle {
   display: grid;
   grid-template-columns: 1fr;
+}
+
+.rowelement {
+  margin-right: 5rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
 }
 
 .component-container {
