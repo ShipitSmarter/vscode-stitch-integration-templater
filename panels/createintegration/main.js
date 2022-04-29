@@ -19,12 +19,6 @@ function main() {
     dropDown.addEventListener("change",dropdownChange);
   }
 
-  // save create/update radio entry
-  // const createUpdateFields = document.getElementsByName("createupdate");
-  // for (const createUpdateField of createUpdateFields) {
-  //   createUpdateField.addEventListener("click",saveCreateUpdateValue);
-  // }
-
   // save modular checkbox entry
   document.getElementById("modular").addEventListener("click",saveModularValue);
 
@@ -97,12 +91,6 @@ function saveScenarioFieldValue(event) {
   let textString = scenarioField.getAttribute('indexscenario') + '|' + scenarioField.value;
   vscodeApi.postMessage({ command: "savescenariofieldvalue", text:  textString });
 }
-
-// function saveCreateUpdateValue(event) {
-//   const field = event.target;
-//   let textString = field.value;
-//   vscodeApi.postMessage({ command: "savecreateupdatevalue", text:  textString });
-// }
 
 function saveModularValue(event) {
   const field = event.target;

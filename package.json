@@ -71,6 +71,7 @@
   },
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.0.0",
+    "@vscode/codicons": "^0.0.29",
     "vscode-uri": "^3.0.3"
   }
 }

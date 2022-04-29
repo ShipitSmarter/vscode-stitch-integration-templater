@@ -611,7 +611,6 @@ export class CreateIntegrationPanel {
 
   private _getStepsGrid() : string {
     let stepsGrid = /*html*/ `
-      <section  class="component-grid">
         <section class="component-container">
           <h2>Steps</h2>
 
@@ -627,8 +626,7 @@ export class CreateIntegrationPanel {
           </section>
 
           ${this._stepInputs(+this._fieldValues[nofStepsIndex])}
-        </section>
-      </section>`;
+        </section>`;
 
     return stepsGrid;
   }
@@ -666,31 +664,21 @@ export class CreateIntegrationPanel {
     return existingScenariosGrid;
   }
 
-  private _getCreateUpdateGrid() : string {
-    let createUpdateGrid = /*html*/ `
-      <section class="component-container">
-        <h2>Execute</h2>
+  private _getCreateUpdateButton() : string {
+    let createUpdateButton: string = /*html*/ `
+      <vscode-button id="createintegration" appearance="primary" ${this._ifUpdate('style="background-color:green"')}>
+        ${this._ifCreate('Create') + this._ifUpdate('Update')} integration
+        <span slot="start" class="codicon ${this._ifCreate('codicon-add') + this._ifUpdate('codicon-arrow-right')}"></span>
+      </vscode-button>`;
 
-        <section class="component-example">
-          <vscode-radio-group id="createupdate" readonly>
-            <label slot="label">Create/update</label>
-            <vscode-radio name="createupdate" value="create">Create</vscode-radio>
-            <vscode-radio name="createupdate" value="update">Update</vscode-radio>
-          </vscode-radio-group>
-        </section>
-
-        <section class="component-example">
-          <vscode-button id="createintegration" appearance="primary" ${this._ifUpdate('style="background-color:green"')}>${this._ifCreate('Create') + this._ifUpdate('Update')} integration</vscode-button>
-        </section>
-      </section>`;
-
-    return createUpdateGrid;
+    return createUpdateButton;
   }
 
   // determine content
   private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
+    const codiconsUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);
     const mainUri = getUri(webview, extensionUri, ["panels", "createintegration", "main.js"]);
     const styleUri = getUri(webview, extensionUri, ["panels", "createintegration", "style.css"]);
 
@@ -706,25 +694,32 @@ export class CreateIntegrationPanel {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="module" src="${toolkitUri}"></script>
         <script type="module" src="${mainUri}"></script>
-				<link href="${styleUri}" rel="stylesheet" /> 
+				<link rel="stylesheet" href="${styleUri}"/> 
+        <link rel="stylesheet" href="${codiconsUri}">
 			</head>
 			<body>
 
-				<div>
-					<h1>Create module integration</h1>
+				<div class="component-subrow" id="main">
+          <section id="farleft">
+					  <h1>Create module integration</h1> 
+          </section>
+          <section id="farright">
+            ${this._getCreateUpdateButton()}
+          </section>
 				</div>
+        
         <section class="component-row">
 
-          <section class="component-example">
-            <section class="component-row">
-              <section class="component-container">
-                <h2>Carrier</h2>
-                ${this._getCarrierFolderStructureGrid()}
-                ${this._ifCreate(this._getCarrierDetailsGrid())}
-              </section>
-              ${this._getCreateUpdateGrid()}
-            </section>   
-            ${this._ifCreate(this._getStepsGrid())}
+          <section class="component-grid">
+            <section class="component-container">
+              <h2>Carrier</h2>
+              ${this._getCarrierFolderStructureGrid()}
+              ${this._ifCreate(this._getCarrierDetailsGrid())}
+            </section> 
+            
+            <section  class="component-grid">
+              ${this._ifCreate(this._getStepsGrid())}
+            </section>
           </section>
 
           <section class="component-grid">
