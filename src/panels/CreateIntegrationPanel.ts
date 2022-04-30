@@ -484,7 +484,7 @@ export class CreateIntegrationPanel {
             <vscode-option>other</vscode-option>
           </vscode-dropdown>
 
-          <vscode-text-field id="otherstepname${step}" size="10" indexotherstep="${step}" ${this._valueString(this._otherStepValues[step])} class="otherstepfield" placeholder="step" ${hiddenString}></vscode-text-field>
+          <vscode-text-field id="otherstepname${step}" indexotherstep="${step}" ${this._valueString(this._otherStepValues[step])} class="otherstepfield" placeholder="step" ${hiddenString}></vscode-text-field>
         </section>
       `;
 
@@ -500,12 +500,12 @@ export class CreateIntegrationPanel {
 
       subTestUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="testurl${step}" style="width:15rem" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
         </section>`;
 
       subProdUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" style="width:15rem" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
         </section>`;
     }
 
