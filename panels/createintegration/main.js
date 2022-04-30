@@ -29,10 +29,16 @@ function main() {
     stepField.addEventListener("keyup",saveStepFieldValue);
    }
 
+   // other step fields
+   const otherStepFields = document.getElementsByClassName("otherstepfield");
+   for (const otherStepField of otherStepFields) {
+    otherStepField.addEventListener("keyup",saveOtherStepValue);
+   }
+
    // dropdowns
    const stepDropDowns = document.getElementsByClassName("stepdropdown");
    for (const stepDropDown of stepDropDowns) {
-    stepDropDown.addEventListener("change",saveStepFieldValue);
+    stepDropDown.addEventListener("change",stepDropdownChange);
    }
 
    // save scenario field entries
@@ -66,6 +72,7 @@ function checkIntegrationPath () {
 
 function dropdownChange(event) {
   const field = event.target;
+  
   // save field value
   let textString = field.getAttribute('index') + '|' + field.value;
   vscodeApi.postMessage({ command: "savefieldvalue", text:  textString });
@@ -80,10 +87,40 @@ function saveFieldValue(event) {
   vscodeApi.postMessage({ command: "savefieldvalue", text:  textString });
 }
 
+function stepDropdownChange(event) {
+  const stepField = event.target;
+
+  // save field
+  let index = stepField.getAttribute('indexstep');
+  let textString = index + '|' + stepField.value;
+  vscodeApi.postMessage({ command: "savestepfieldvalue", text:  textString });
+
+  // if 'other', show other step field
+  if (stepField.value === 'other') {
+    document.getElementById("otherstepname" + index).style.display = 'inline-table';
+  } else {
+    // not other: hide other step field and delete value
+    document.getElementById("otherstepname" + index).style.display = 'none';
+    document.getElementById("otherstepname" + index).value = '';
+    let otherTextString = index + '|';
+    vscodeApi.postMessage({ command: "saveotherstepvalue", text: otherTextString  });
+  }
+
+  // if 'other' refresh panel
+  //vscodeApi.postMessage({ command: "refreshpanel", text:  document.getElementById("otherstepname" + index).style.display });
+  
+}
+
 function saveStepFieldValue(event) {
   const stepField = event.target;
   let textString = stepField.getAttribute('indexstep') + '|' + stepField.value;
   vscodeApi.postMessage({ command: "savestepfieldvalue", text:  textString });
+}
+
+function saveOtherStepValue(event) {
+  const otherStepField = event.target;
+  let textString = otherStepField.getAttribute('indexotherstep') + '|' + otherStepField.value;
+  vscodeApi.postMessage({ command: "saveotherstepvalue", text:  textString });
 }
 
 function saveScenarioFieldValue(event) {

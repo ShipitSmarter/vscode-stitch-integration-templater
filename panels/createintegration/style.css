@@ -48,10 +48,12 @@
 .component-example {
   margin-bottom: 0.5rem;
   width: 100%;
+  /* display: inline-block; */
 }
 
 .component-example > * {
   margin: 0.25rem;
+  /* white-space: nowrap; */
 }
 
 .component-example > p {

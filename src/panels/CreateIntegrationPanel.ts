@@ -23,6 +23,7 @@ export class CreateIntegrationPanel {
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: String[] = [];
   private _stepFieldValues: String[] = [];
+  private _otherStepValues: String[] = [];
   private _scenarioFieldValues: String[] = [];
   private _existingScenarioFieldValues: String[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
@@ -64,9 +65,9 @@ export class CreateIntegrationPanel {
   // initial rendering
   public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     if (CreateIntegrationPanel.currentPanel) {
-      CreateIntegrationPanel.currentPanel._panel.reveal(vscode.ViewColumn.Two);
+      CreateIntegrationPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("create-integration", "Create Integration", vscode.ViewColumn.Two, {
+      const panel = vscode.window.createWebviewPanel("create-integration", "Create Integration", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
@@ -119,6 +120,11 @@ export class CreateIntegrationPanel {
           case "savestepfieldvalue":
             let stepIndexValue = message.text.split('|');
             this._stepFieldValues[stepIndexValue[0]] = stepIndexValue[1];
+            break;
+
+          case "saveotherstepvalue":
+            let otherStepIndexValue = message.text.split('|');
+            this._otherStepValues[otherStepIndexValue[0]] = otherStepIndexValue[1];
             break;
 
           case "savescenariofieldvalue":
@@ -342,7 +348,15 @@ export class CreateIntegrationPanel {
     let testUrlsString: string = '';
     let prodUrlsString: string = '';
     for (let index = 0; index < +nofSteps; index++) {
-      let step: string = this._stepFieldValues[index] + '';
+      let step: string = '';
+
+      // if 'other': take alternative value
+      if (this._stepFieldValues[index] === 'other') {
+        step = this._otherStepValues[index] + '';
+      } else {
+        step = this._stepFieldValues[index] + '';
+      }
+
       // steps
       stepsString += '\n    "' + step + '"';
       if (index !== +nofSteps - 1) {
@@ -426,15 +440,37 @@ export class CreateIntegrationPanel {
     return scenarios;
   }
 
+  private _isOther(string: (string | String)): boolean {
+    let isOther: boolean = false;
+    if ((string + "").toLowerCase() === 'other') {
+      isOther = true;
+    }
+
+    return isOther;
+  }
+
+  private _hiddenString(ifTrue: boolean): string {
+    let hiddenString = 'hidden';
+    if (ifTrue) {
+      hiddenString = '';
+    }
+
+    return hiddenString;
+  }
+
   // make additional html for step fields
   private _stepInputs(nofSteps: number): string {
 
-    let sub_stepnames: string = '';
-    let sub_testurl: string = '';
-    let sub_produrl: string = '';
+    let subStepNames: string = '';
+    let subTestUrl: string = '';
+    let subProdUrl: string = '';
     for (let step = 0; step < +nofSteps; step++) {
+      let thisStepFieldValue = this._stepFieldValues[step];
+      let isOther: boolean = this._isOther(thisStepFieldValue);
+      let hiddenString: string = this._hiddenString(isOther);
+
       // set html string addition
-      let sub_stepnames_current = /*html*/`
+      let subStepNamesCurrent = /*html*/`
         <section class="component-example">
           <vscode-dropdown id="stepname${step}" indexstep="${step}" ${this._valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
             <vscode-option>${(this._fieldValues[moduleIndex] ?? 'booking')}</vscode-option>
@@ -444,6 +480,8 @@ export class CreateIntegrationPanel {
             <vscode-option>save_token</vscode-option>
             <vscode-option>other</vscode-option>
           </vscode-dropdown>
+
+          <vscode-text-field id="otherstepname${step}" size="10" indexotherstep="${step}" ${this._valueString(this._otherStepValues[step])} class="otherstepfield" placeholder="step" ${hiddenString}></vscode-text-field>
         </section>
       `;
 
@@ -452,19 +490,19 @@ export class CreateIntegrationPanel {
       if (this._stepFieldValues[step] === undefined) {
         // from https://stackoverflow.com/a/44568739/1716283
         let t: number = 0;
-        sub_stepnames_current = sub_stepnames_current.replace(/<vscode-option>/g, match => ++t === (step + 1) ? '<vscode-option selected>' : match);
+        subStepNamesCurrent = subStepNamesCurrent.replace(/<vscode-option>/g, match => ++t === (step + 1) ? '<vscode-option selected>' : match);
       }
 
-      sub_stepnames += sub_stepnames_current;
+      subStepNames += subStepNamesCurrent;
 
-      sub_testurl += /*html*/ `
+      subTestUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step+10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
         </section>`;
 
-        sub_produrl += /*html*/ `
+      subProdUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step+20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
         </section>`;
     }
 
@@ -472,15 +510,15 @@ export class CreateIntegrationPanel {
       <section class="row433">
         <section class="component-example">
           <p>step name</p>
-          ${sub_stepnames}
+          ${subStepNames}
         </section>
         <section class="component-example">
           <p>test url</p>
-          ${sub_testurl}
+          ${subTestUrl}
         </section>
         <section class="component-example">
           <p>prod url</p>
-          ${sub_produrl}
+          ${subProdUrl}
         </section>
       </section>`;
 
@@ -551,12 +589,17 @@ export class CreateIntegrationPanel {
   }
 
   private _cropFlexFields() {
-    // crop steps array
+    // crop steps, othersteps arrays
     let newStepFieldValues: String[] = [];
+    let newOtherStepValues: String [] = [];
     for (let index = 0; index < +this._fieldValues[nofStepsIndex]; index++) {
-      // stepname
+      // stepname, other step
       if (this._stepFieldValues[index] !== undefined) {
         newStepFieldValues[index] = this._stepFieldValues[index];
+
+        if (this._stepFieldValues[index] === 'other') {
+          newOtherStepValues[index] = this._otherStepValues[index];
+        }
       }
 
       // testurl
@@ -568,14 +611,16 @@ export class CreateIntegrationPanel {
       if (this._stepFieldValues[index + 20] !== undefined) {
         newStepFieldValues[index + 20] = this._stepFieldValues[index + 20];
       }
+
     }
     this._stepFieldValues = newStepFieldValues;
-
+    this._otherStepValues = newOtherStepValues;
+ 
     // crop scenarios array
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
   }
 
-  private _valueString(string:(string | String)) : string {
+  private _valueString(string: (string | String)): string {
     let outString = '';
     if (string !== undefined && string !== "") {
       outString = `value="${string}"`;
@@ -583,7 +628,7 @@ export class CreateIntegrationPanel {
     return outString;
   }
 
-  private _getCarrierFolderStructureGrid() : string {
+  private _getCarrierFolderStructureGrid(): string {
     let carrierFolderStructureGrid = /*html*/ `
       <section class="component-example">
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
@@ -596,7 +641,10 @@ export class CreateIntegrationPanel {
         </vscode-dropdown>
 
         <section class="component-example">
-          <vscode-button id="checkintegrationexists" appearance="primary">Check</vscode-button>
+          <vscode-button id="checkintegrationexists" appearance="primary">
+            Check
+            <span slot="start" class="codicon codicon-refresh"></span>
+          </vscode-button>
         </section>
       </section>`;
 
@@ -604,7 +652,7 @@ export class CreateIntegrationPanel {
   }
 
 
-  private _getCarrierDetailsGrid() : string {
+  private _getCarrierDetailsGrid(): string {
     let carrierDetailsGrid = /*html*/ `
       <section class="row11">
         <section class="rowelement">
@@ -630,10 +678,10 @@ export class CreateIntegrationPanel {
         </section>
       </section>`;
 
-      return carrierDetailsGrid;
+    return carrierDetailsGrid;
   }
 
-  private _getStepsGrid() : string {
+  private _getStepsGrid(): string {
     let stepsGrid = /*html*/ `
         <section class="component-container">
           <h2>Steps</h2>
@@ -651,7 +699,7 @@ export class CreateIntegrationPanel {
     return stepsGrid;
   }
 
-  private _getScenariosGrid() : string {
+  private _getScenariosGrid(): string {
     let scenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Scenarios</h2>
@@ -670,10 +718,10 @@ export class CreateIntegrationPanel {
         ${this._scenarioInputs(+this._fieldValues[nofScenariosIndex])}
       </section>`;
 
-      return scenariosGrid;
+    return scenariosGrid;
   }
 
-  private _getExistingScenariosGrid() : string {
+  private _getExistingScenariosGrid(): string {
     let existingScenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Existing scenarios</h2>
@@ -684,7 +732,7 @@ export class CreateIntegrationPanel {
     return existingScenariosGrid;
   }
 
-  private _getCreateUpdateButton() : string {
+  private _getCreateUpdateButton(): string {
     let createUpdateButton: string = /*html*/ `
       <vscode-button id="createintegration" appearance="primary" ${this._ifUpdate('style="background-color:green"')}>
         ${this._ifCreate('Create') + this._ifUpdate('Update')} integration
@@ -703,7 +751,7 @@ export class CreateIntegrationPanel {
     const styleUri = getUri(webview, extensionUri, ["panels", "createintegration", "style.css"]);
 
     // crop flexible field arrays
-    this._cropFlexFields();    
+    this._cropFlexFields();
 
     // define panel HTML
     let html =  /*html*/`
