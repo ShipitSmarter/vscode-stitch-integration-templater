@@ -26,7 +26,7 @@ export function getExtensionFile(context: ExtensionContext, folder: string, file
 }
 
 export function startScript (fileName ?: string , filePath ?: string , command ?: string) : Terminal {
-	let terminal = window.createTerminal('bram');
+	let terminal = window.createTerminal();
 	terminal.show();
 	//terminal.sendText('Get-Location');
 	if (filePath && filePath !== '') {
@@ -98,7 +98,7 @@ export function toBoolean(string:string) : boolean {
 	return outString;
 }
 
-export function isEmptyStringArray(array: String[]) : boolean {
+export function isEmptyStringArray(array: string[]) : boolean {
 	let isEmpty: boolean = true;
 
 	for (let index = 0; index < array.length; index++) {

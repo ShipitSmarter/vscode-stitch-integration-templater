@@ -21,13 +21,13 @@ export class CreateIntegrationPanel {
   public static currentPanel: CreateIntegrationPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
-  private _fieldValues: String[] = [];
-  private _stepFieldValues: String[] = [];
-  private _otherStepValues: String[] = [];
-  private _scenarioFieldValues: String[] = [];
-  private _existingScenarioFieldValues: String[] = [];
+  private _fieldValues: string[] = [];
+  private _stepFieldValues: string[] = [];
+  private _otherStepValues: string[] = [];
+  private _scenarioFieldValues: string[] = [];
+  private _existingScenarioFieldValues: string[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
-  private _createUpdateValue: String = 'create';      // pre-allocate with 'create'
+  private _createUpdateValue: string = 'create';      // pre-allocate with 'create'
   private _modularValue: boolean = false;             // pre-allocate with 'false'  
 
   // constructor
@@ -299,7 +299,7 @@ export class CreateIntegrationPanel {
         newScenarioString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"';
 
         // check if comma is needed
-        let remainingFieldValues: String[] = this._scenarioFieldValues.slice(index + 1, this._scenarioFieldValues.length);
+        let remainingFieldValues: string[] = this._scenarioFieldValues.slice(index + 1, this._scenarioFieldValues.length);
         if (!isEmptyStringArray(remainingFieldValues)) {
           newScenarioString += ',';
         }
@@ -440,7 +440,7 @@ export class CreateIntegrationPanel {
     return scenarios;
   }
 
-  private _isOther(string: (string | String)): boolean {
+  private _isOther(string: string): boolean {
     let isOther: boolean = false;
     if ((string + "").toLowerCase() === 'other') {
       isOther = true;
@@ -590,8 +590,8 @@ export class CreateIntegrationPanel {
 
   private _cropFlexFields() {
     // crop steps, othersteps arrays
-    let newStepFieldValues: String[] = [];
-    let newOtherStepValues: String [] = [];
+    let newStepFieldValues: string[] = [];
+    let newOtherStepValues: string [] = [];
     for (let index = 0; index < +this._fieldValues[nofStepsIndex]; index++) {
       // stepname, other step
       if (this._stepFieldValues[index] !== undefined) {
@@ -620,7 +620,7 @@ export class CreateIntegrationPanel {
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
   }
 
-  private _valueString(string: (string | String)): string {
+  private _valueString(string: string): string {
     let outString = '';
     if (string !== undefined && string !== "") {
       outString = `value="${string}"`;
