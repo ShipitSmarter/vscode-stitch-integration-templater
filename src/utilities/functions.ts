@@ -8,8 +8,17 @@ export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) 
 export async function getWorkspaceFile(matchString: string): Promise<string> {
 	// get path to file in workspace
 	let functionsFiles = await workspace.findFiles(matchString);
-	const outFile = functionsFiles[0].fsPath.replace(/\\/g, '/');
-	return outFile;
+	return cleanPath(functionsFiles[0].fsPath);
+}
+
+export async function getWorkspaceFiles(matchString: string): Promise<string[]> {
+	// get path to file in workspace
+	let functionsFiles = await workspace.findFiles(matchString);
+	let outFiles: string[] = [];
+	for (let index = 0; index < functionsFiles.length; index++) {
+		outFiles[index] = cleanPath(functionsFiles[index].fsPath);
+	}
+	return outFiles;
 }
 
 export function getExtensionFile(context: ExtensionContext, folder: string, file: string): string {

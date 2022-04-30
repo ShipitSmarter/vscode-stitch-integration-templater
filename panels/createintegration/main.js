@@ -45,6 +45,7 @@ function main() {
    const scenarioFields = document.getElementsByClassName("scenariofield");
    for (const scenarioField of scenarioFields) {
     scenarioField.addEventListener("keyup",saveScenarioFieldValue);
+    scenarioField.addEventListener("change",saveScenarioFieldValue);
    }
 
    // save existing scenario checkbox entries
@@ -139,6 +140,9 @@ function saveModularValue(event) {
   const field = event.target;
   let textString = field.checked;
   vscodeApi.postMessage({ command: "savemodularvalue", text:  textString });
+
+  // refresh panel
+  vscodeApi.postMessage({ command: "refreshpanel", text:  'frommodular' });
 }
 
 function saveESCheckboxValue(event) {

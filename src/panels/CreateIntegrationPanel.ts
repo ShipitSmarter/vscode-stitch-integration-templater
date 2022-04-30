@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getExtensionFile, startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean, isEmptyStringArray, arrayFrom0 } from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, getExtensionFile, startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean, isEmptyStringArray, arrayFrom0 } from "../utilities/functions";
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -34,12 +34,13 @@ export class CreateIntegrationPanel {
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     this._panel = panel;
 
-    // predefine nofSteps, nofScenarios
+    // predefine some fixed fields
+    this._fieldValues[moduleIndex] = 'booking';
     this._fieldValues[nofStepsIndex] = "1";
     this._fieldValues[nofScenariosIndex] = "1";
 
     // set content
-    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
+    this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
 
     // set message listener
     this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
@@ -77,7 +78,7 @@ export class CreateIntegrationPanel {
 
   // update number of step fields
   private _updateWebview(extensionUri: vscode.Uri) {
-    this._panel.webview.html = this._getWebviewContent(this._panel.webview, extensionUri);
+    this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
   }
 
   // message listener
@@ -525,15 +526,26 @@ export class CreateIntegrationPanel {
     return html;
   }
 
-  private _scenarioInputs(nofScenarios: number): string {
+  private _scenarioInputs(nofScenarios: number, scenarios: string[]): string {
     let html: string = ``;
 
     for (let scenario = 0; scenario < +nofScenarios; scenario++) {
+
+      let scenarioInputField: string = '';
+      if (this._modularValue) {
+        scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" size="30" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
+      } else {
+        scenarioInputField = /*html*/ `
+          <vscode-dropdown id="scenario${scenario}" size="30" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
+            <vscode-option></vscode-option>  
+            ${dropdownOptions(scenarios)}
+          </vscode-dropdown>`;
+      }
+
       html += /*html*/`
         <section class="component-example">
-          <vscode-text-field id="scenario${scenario}" size="30" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>
-        </section>
-      `;
+          ${scenarioInputField}
+        </section>`;
     }
 
     return html;
@@ -699,7 +711,7 @@ export class CreateIntegrationPanel {
     return stepsGrid;
   }
 
-  private _getScenariosGrid(): string {
+  private _getScenariosGrid(scenarios:string[]): string {
     let scenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Scenarios</h2>
@@ -715,7 +727,7 @@ export class CreateIntegrationPanel {
           </vscode-dropdown>
         </section>
 
-        ${this._scenarioInputs(+this._fieldValues[nofScenariosIndex])}
+        ${this._scenarioInputs(+this._fieldValues[nofScenariosIndex], scenarios)}
       </section>`;
 
     return scenariosGrid;
@@ -742,8 +754,20 @@ export class CreateIntegrationPanel {
     return createUpdateButton;
   }
 
+  private async _getScenarios(module:string) : Promise<string[]> {
+    let bookingScenarioXmls: string[] = await getWorkspaceFiles('**/scenario-templates/'+ module + '/**/*.xml');
+
+    let bookingScenarios : string[] = [];
+
+    for (let index = 0; index < bookingScenarioXmls.length; index++) {
+      bookingScenarios[index] = (cleanPath(bookingScenarioXmls[index]).split('/').pop() ?? '').replace(/.xml$/,'');
+    }
+
+    return bookingScenarios;
+  }
+
   // determine content
-  private _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) {
+  private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) : Promise<string> {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
     const codiconsUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);
@@ -752,6 +776,9 @@ export class CreateIntegrationPanel {
 
     // crop flexible field arrays
     this._cropFlexFields();
+
+    // get all input.json files in carrier
+    let scenarios: string[] = await this._getScenarios(this._fieldValues[moduleIndex]);
 
     // define panel HTML
     let html =  /*html*/`
@@ -791,7 +818,7 @@ export class CreateIntegrationPanel {
           </section>
 
           <section class="rowsingle">
-            ${this._getScenariosGrid()}
+            ${this._getScenariosGrid(scenarios)}
             ${this._ifUpdate(this._getExistingScenariosGrid())}
           </section>
         </section>
@@ -799,15 +826,6 @@ export class CreateIntegrationPanel {
 			</body>
 		</html>
 	  `;
-
-    // update createupdate radio group value
-    let createString: string = 'name="createupdate" value="create"';
-    let updateString: string = 'name="createupdate" value="update"';
-    if (this._createUpdateValue === 'update') {
-      html = html.replace(updateString, updateString + ' checked');
-    } else {
-      html = html.replace(createString, createString + ' checked');
-    }
 
     return html;
   }
