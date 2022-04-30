@@ -3,7 +3,6 @@ import { getUri, getWorkspaceFile, getWorkspaceFiles, getExtensionFile, startScr
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 // fixed fields indices
 const carrierIndex = 0;
 const apiIndex = 1;
@@ -14,7 +13,6 @@ const nofStepsIndex = 5;
 const nofScenariosIndex = 6;
 const carrierUserIndex = 7;
 const carrierPwdIndex = 8;
-
 
 export class CreateIntegrationPanel {
   // PROPERTIES
@@ -68,7 +66,7 @@ export class CreateIntegrationPanel {
     if (CreateIntegrationPanel.currentPanel) {
       CreateIntegrationPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("create-integration", "Create Integration", vscode.ViewColumn.One, {
+      const panel = vscode.window.createWebviewPanel("create-integration", "Create or update carrier integration", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
@@ -763,8 +761,8 @@ export class CreateIntegrationPanel {
     for (let index = 0; index < bookingScenarioXmls.length; index++) {
       let scenarioName = (cleanPath(bookingScenarioXmls[index]).split('/').pop() ?? '').replace(/.xml$/,'');
       let scenarioParentName = parentPath(cleanPath(bookingScenarioXmls[index])).split('/').pop() ?? '';
-      // only show parent indicator if not '0-request-templates'
-      if (scenarioParentName === '0-request-templates') {
+      // only show parent indicator if not [module]
+      if (scenarioParentName === this._fieldValues[moduleIndex]) {
         scenarioParentName = '';
       }
       bookingScenarios[index] = `${scenarioParentName} > ${scenarioName}`;
@@ -803,7 +801,7 @@ export class CreateIntegrationPanel {
 
 				<div class="row11" id="main">
           <section id="farleft">
-					  <h1>Create/update integration</h1> 
+					  <h1>Create or update carrier integration</h1> 
           </section>
           <section id="farright">
             ${this._getCreateUpdateButton()}
