@@ -500,12 +500,12 @@ export class CreateIntegrationPanel {
 
       subTestUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="testurl${step}" style="width:15rem" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="testurl${step}" style="width:12rem" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
         </section>`;
 
       subProdUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="produrl${step}" style="width:15rem" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" style="width:12rem" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
         </section>`;
     }
 
