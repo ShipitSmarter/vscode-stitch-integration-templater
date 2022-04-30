@@ -1,52 +1,33 @@
 {
-  "name": "dash1",
-  "displayName": "dash1",
-  "description": "dash1",
-  "version": "0.0.1",
+  "name": "stitch-integration-templater",
+  "displayName": "Stitch integration templater",
+  "description": "Provides dashboard for creating and updating Stitch integrations",
+  "license": "MIT",
+  "version": "1.0.0",
+  "publisher": "ShipitSmarter",
   "engines": {
     "vscode": "^1.66.0"
   },
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "ShipitSmarter",
+    "Stitch",
+    "integration",
+    "templater"
+  ],
   "activationEvents": [
-    "onCommand:mypanel.dashboard",
-    "onCommand:mypanel.newdashboard",
-    "onCommand:mypanel.startpowershellscript",
-    "onCommand:mypanel.createintegration",
-    "onCommand:mypanel.helloWorld"
+    "onCommand:stitch.integration-templater"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "mypanel.dashboard",
-        "title": "MyPanel: Open dashboard panel"
-      },
-      {
-        "command": "mypanel.newdashboard",
-        "title": "MyPanel: Open webview-ui dashboard panel"
-      },
-      {
-        "command": "mypanel.startpowershellscript",
-        "title": "MyPanel: Run PowerShell script"
-      },
-      {
-        "command": "mypanel.createintegration",
-        "title": "MyPanel: Create new integration"
-      },
-      {
-        "command": "mypanel.helloWorld",
-        "title": "MyPanel: Open Hello World panel"
+        "command": "stitch.integration-templater",
+        "title": "Stitch: Create/update integration"
       }
-    ],
-    "menus": {
-      "explorer/context": [
-        {
-          "command": "mypanel.startpowershellscript"
-        }
-      ]
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -69,6 +50,11 @@
     "mocha": "^9.2.2",
     "typescript": "^4.5.5"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ShipitSmarter/vscode-stitch-integration-templater"
+  },
+  "icon": "img/sih_logo.png",
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.0.0",
     "@vscode/codicons": "^0.0.29",

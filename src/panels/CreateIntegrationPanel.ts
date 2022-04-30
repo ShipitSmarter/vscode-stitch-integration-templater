@@ -803,7 +803,7 @@ export class CreateIntegrationPanel {
 
 				<div class="row11" id="main">
           <section id="farleft">
-					  <h1>Create module integration</h1> 
+					  <h1>Create/update integration</h1> 
           </section>
           <section id="farright">
             ${this._getCreateUpdateButton()}
