@@ -112,7 +112,7 @@ export function isEmptyStringArray(array: string[]) : boolean {
 
 	for (let index = 0; index < array.length; index++) {
         let current = array[index];
-		if (current !== undefined && ("" + current) !== "") {
+		if (current !== undefined &&  current !== "") {
 			isEmpty = false;
 			break;
 		}

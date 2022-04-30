@@ -275,42 +275,51 @@ export class CreateIntegrationPanel {
     terminal.sendText(`./${this._getScriptName()}`);
   }
 
-  private _getScenariosString(): string {
-    let newScenarioString = '';     // pre-allocate
+  private _getNewScenariosString() : string {
 
-    // add existing scenarios
-    for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
-      let commenting = '# ';
-      if (this._existingScenarioCheckboxValues[index]) {
-        commenting = '';
-      }
-
-      newScenarioString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"';
-
-      // check if comma is needed
-      let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index + 1, this._existingScenarioCheckboxValues.length);
-      if ((remainingCheckboxes.filter(el => el === true).length > 0) || !isEmptyStringArray(this._scenarioFieldValues)) {
-        newScenarioString += ',';
-      }
-    }
-
-    // add 'new' scenarios
+    let newScenariosString: string = '';
     for (let index = 0; index < this._scenarioFieldValues.length; index++) {
       if (this._scenarioFieldValues[index] !== undefined && this._scenarioFieldValues[index] !== '') {
-        newScenarioString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"';
+        newScenariosString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"';
 
         // check if comma is needed
         let remainingFieldValues: string[] = this._scenarioFieldValues.slice(index + 1, this._scenarioFieldValues.length);
         if (!isEmptyStringArray(remainingFieldValues)) {
-          newScenarioString += ',';
+          newScenariosString += ',';
         }
       }
     }
+    return newScenariosString;
+  }
+
+  private _getScenariosString(): string {
+    let scenariosString = '';     // pre-allocate
+
+    // add existing scenarios
+    if (this._createUpdateValue === 'update') {
+      for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
+        let commenting = '# ';
+        if (this._existingScenarioCheckboxValues[index]) {
+          commenting = '';
+        }
+  
+        scenariosString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"';
+  
+        // check if comma is needed
+        let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index + 1, this._existingScenarioCheckboxValues.length);
+        if ((remainingCheckboxes.filter(el => el === true).length > 0) || !isEmptyStringArray(this._scenarioFieldValues)) {
+          scenariosString += ',';
+        }
+      }
+    }
+    
+    // add 'new' scenarios
+    scenariosString += this._getNewScenariosString();
 
     // add 'Scenarios'  label
-    newScenarioString = '$Scenarios = @(' + newScenarioString + '\n )';
+    scenariosString = '$Scenarios = @(' + scenariosString + '\n )';
 
-    return newScenarioString;
+    return scenariosString;
   }
 
   private _replaceInScriptTemplate(templateContent: string): string {
@@ -332,16 +341,7 @@ export class CreateIntegrationPanel {
     newScriptContent = newScriptContent.replace('[modular]', this._modularValue + "");
 
     // scenarios
-    let scenariosString: string = '';
-    for (let index = 0; index < this._scenarioFieldValues.length; index++) {
-      if (this._scenarioFieldValues[index] !== undefined) {
-        scenariosString += '\n    "' + this._scenarioFieldValues[index] + '"';
-        if (index !== this._scenarioFieldValues.length - 1) {
-          scenariosString += ',';
-        }
-      }
-    }
-    newScriptContent = newScriptContent.replace('[scenarios]', scenariosString);
+    newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
 
     // steps fields: step name, testurls, produrls
     let nofSteps = this._fieldValues[nofStepsIndex];
@@ -533,10 +533,10 @@ export class CreateIntegrationPanel {
 
       let scenarioInputField: string = '';
       if (this._modularValue) {
-        scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" size="30" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
+        scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
       } else {
         scenarioInputField = /*html*/ `
-          <vscode-dropdown id="scenario${scenario}" size="30" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
+          <vscode-dropdown id="scenario${scenario}" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
             <vscode-option></vscode-option>  
             ${dropdownOptions(scenarios)}
           </vscode-dropdown>`;
