@@ -280,7 +280,9 @@ export class CreateIntegrationPanel {
     let newScenariosString: string = '';
     for (let index = 0; index < this._scenarioFieldValues.length; index++) {
       if (this._scenarioFieldValues[index] !== undefined && this._scenarioFieldValues[index] !== '') {
-        newScenariosString += '\n    ' + '"' + this._scenarioFieldValues[index] + '"';
+        // remove parent folder indicator if present
+        let scenarioName = this._scenarioFieldValues[index].replace(/[^\>]+\> /g,'');
+        newScenariosString += '\n    ' + '"' + scenarioName + '"';
 
         // check if comma is needed
         let remainingFieldValues: string[] = this._scenarioFieldValues.slice(index + 1, this._scenarioFieldValues.length);
@@ -663,7 +665,6 @@ export class CreateIntegrationPanel {
     return carrierFolderStructureGrid;
   }
 
-
   private _getCarrierDetailsGrid(): string {
     let carrierDetailsGrid = /*html*/ `
       <section class="row11">
@@ -754,16 +755,22 @@ export class CreateIntegrationPanel {
     return createUpdateButton;
   }
 
-  private async _getScenarios(module:string) : Promise<string[]> {
+  private async _getAvailableScenarios(module:string) : Promise<string[]> {
     let bookingScenarioXmls: string[] = await getWorkspaceFiles('**/scenario-templates/'+ module + '/**/*.xml');
 
     let bookingScenarios : string[] = [];
 
     for (let index = 0; index < bookingScenarioXmls.length; index++) {
-      bookingScenarios[index] = (cleanPath(bookingScenarioXmls[index]).split('/').pop() ?? '').replace(/.xml$/,'');
+      let scenarioName = (cleanPath(bookingScenarioXmls[index]).split('/').pop() ?? '').replace(/.xml$/,'');
+      let scenarioParentName = parentPath(cleanPath(bookingScenarioXmls[index])).split('/').pop() ?? '';
+      // only show parent indicator if not '0-request-templates'
+      if (scenarioParentName === '0-request-templates') {
+        scenarioParentName = '';
+      }
+      bookingScenarios[index] = `${scenarioParentName} > ${scenarioName}`;
     }
 
-    return bookingScenarios;
+    return bookingScenarios.sort();
   }
 
   // determine content
@@ -778,7 +785,7 @@ export class CreateIntegrationPanel {
     this._cropFlexFields();
 
     // get all input.json files in carrier
-    let scenarios: string[] = await this._getScenarios(this._fieldValues[moduleIndex]);
+    let scenarios: string[] = await this._getAvailableScenarios(this._fieldValues[moduleIndex]);
 
     // define panel HTML
     let html =  /*html*/`

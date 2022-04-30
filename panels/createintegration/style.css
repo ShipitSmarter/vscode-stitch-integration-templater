@@ -91,5 +91,9 @@ h1 {
 }
 
 .scenariofield {
+  width: 25rem;
+}
+
+.existingscenariofield {
   width: 20rem;
 }
