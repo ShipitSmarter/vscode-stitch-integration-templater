@@ -62,6 +62,12 @@ function main() {
    for (const stepDropDown of document.getElementsByClassName("stepdropdown")) {
     let textString = stepDropDown.getAttribute('indexstep') + '|' + stepDropDown.value;
     vscodeApi.postMessage({ command: "savestepfieldvalue", text:  textString });
+
+    // if 'other': reveal other step field
+    if (stepDropDown.value === 'other') {
+      let index = stepDropDown.getAttribute('indexstep');
+      document.getElementById("otherstepname" + index).style.display = 'inline-table';
+    }
    }
 }
 
