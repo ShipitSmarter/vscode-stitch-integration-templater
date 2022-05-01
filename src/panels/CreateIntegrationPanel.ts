@@ -709,10 +709,12 @@ export class CreateIntegrationPanel {
     return stepsGrid;
   }
 
-  private _getScenariosGrid(scenarios: string[]): string {
+  private _getScenariosGrid(scenarios: string[], modularElements: string[]): string {
     let scenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Scenarios</h2>
+
+        <vscode-text-field id="modularelements" value="${modularElements.join(',')}" hidden></vscode-text-field>
 
         <section class="component-example">
           <vscode-checkbox id="modular" ${this._checkedString(this._modularValue)} ${this._ifUpdate('readonly')}>Modular</vscode-checkbox>
@@ -752,8 +754,8 @@ export class CreateIntegrationPanel {
     return createUpdateButton;
   }
 
-  private async _getAvailableScenarios(module: string): Promise<string[]> {
-    let bookingScenarioXmls: string[] = await getWorkspaceFiles('**/scenario-templates/' + module + '/**/*.xml');
+  private async _getAvailableScenarios(): Promise<string[]> {
+    let bookingScenarioXmls: string[] = await getWorkspaceFiles('**/scenario-templates/' + this._fieldValues[moduleIndex] + '/**/*.xml');
 
     let bookingScenarios: string[] = [];
 
@@ -770,6 +772,24 @@ export class CreateIntegrationPanel {
     return bookingScenarios.sort();
   }
 
+  private async _getAvailableModularScenarioElements(): Promise<string[]> {
+    let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + this._fieldValues[moduleIndex] + '/**/*.xml');
+
+    let elements: string[] = [];
+
+    for (let index = 0; index < elementXmls.length; index++) {
+      let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
+      let elementParentName = parentPath(cleanPath(elementXmls[index])).split('/').pop() ?? '';
+      // only show parent indicator if not [module]
+      if (elementParentName === this._fieldValues[moduleIndex]) {
+        elementParentName = '';
+      }
+      elements[index] = elementName;
+    }
+
+    return elements.sort();
+  }
+
   // determine content
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
     // define necessary extension Uris
@@ -782,7 +802,8 @@ export class CreateIntegrationPanel {
     this._cropFlexFields();
 
     // get all input.json files in carrier
-    let scenarios: string[] = await this._getAvailableScenarios(this._fieldValues[moduleIndex]);
+    let scenarios: string[] = await this._getAvailableScenarios();
+    let modularElements : string[] = await this._getAvailableModularScenarioElements();
 
     // define panel HTML
     let html =  /*html*/`
@@ -822,7 +843,7 @@ export class CreateIntegrationPanel {
           </section>
 
           <section class="rowsingle">
-            ${this._getScenariosGrid(scenarios)}
+            ${this._getScenariosGrid(scenarios, modularElements)}
             ${this._ifUpdate(this._getExistingScenariosGrid())}
           </section>
         </section>

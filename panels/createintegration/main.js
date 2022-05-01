@@ -145,8 +145,6 @@ function checkContent(id, value) {
   return isCorrect;
 }
 
-
-
 function getContentHint(elementid) {
   let hint = '';
   switch (elementid) {
@@ -172,6 +170,10 @@ function getContentHint(elementid) {
     case 'stepfield':
       hint = 'A-Z, a-z, 0-9, :/.?=&-_ (no spaces)';
       break;
+
+    case 'scenariofield':
+      hint = 'Must exist of elements present in scenario-elements/modular, separated by \'-\'';
+      break;
   }
 
   return hint;
@@ -195,6 +197,17 @@ function checkFields() {
     if (!checkContent(stepField.className, stepField.value)) {
       correctContent = false;
       break;
+    }
+  }
+
+  // modular scenario fields
+  if (document.getElementById("modular").checked) {
+    let scenarioFields = document.getElementsByClassName('scenariofield');
+    for (const scenarioField of scenarioFields) {
+      if (!checkModularScenario(scenarioField.value)) {
+        correctContent = false;
+        break;
+      }
     }
   }
 
@@ -244,10 +257,40 @@ function saveOtherStepValue(event) {
   vscodeApi.postMessage({ command: "saveotherstepvalue", text: textString });
 }
 
+function checkModularScenario(content) {
+  let currentElements = content.split('-');
+  let modularElements = document.getElementById("modularelements").value.split(',');
+  let isValid = true;
+  if (currentElements !== null) {
+    for (let index = 0; index < currentElements.length; index++ ) {
+      if (!modularElements.includes(currentElements[index])) {
+        isValid = false;
+        break;
+      }
+    }
+  }
+
+  return isValid;
+}
+
 function saveScenarioFieldValue(event) {
   const scenarioField = event.target;
+
+  // save field value
   let textString = scenarioField.getAttribute('indexscenario') + '|' + scenarioField.value;
   vscodeApi.postMessage({ command: "savescenariofieldvalue", text: textString });
+
+  // if modular: check if contains allowed elements
+  if (document.getElementById("modular").checked) {
+    //if invalid: show red outline and content tooltip
+    if (!checkModularScenario(scenarioField.value)) {
+      scenarioField.style.outline = "1px solid red";
+      scenarioField.title = getContentHint(scenarioField.className);
+    } else {
+      scenarioField.style.outline = "none";
+      scenarioField.title = '';
+    }
+  }
 }
 
 function saveModularValue(event) {
