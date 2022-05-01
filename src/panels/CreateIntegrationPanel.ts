@@ -92,9 +92,6 @@ export class CreateIntegrationPanel {
         switch (command) {
 
           case 'refreshpanel':
-            if (text === 'fromdropdown') {
-              vscode.window.showInformationMessage(`Refreshed page due to dropdown update`);
-            }
             this._updateWebview(extensionUri);
             break;
 
@@ -129,11 +126,6 @@ export class CreateIntegrationPanel {
           case "savescenariofieldvalue":
             let scenarioIndexValue = message.text.split('|');
             this._scenarioFieldValues[scenarioIndexValue[0]] = scenarioIndexValue[1];
-            break;
-
-          case "savecreateupdatevalue":
-            this._createUpdateValue = text;
-            this._updateWebview(extensionUri);
             break;
 
           case "savemodularvalue":
