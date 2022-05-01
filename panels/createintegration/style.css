@@ -103,6 +103,10 @@ h1 {
   width: 20rem;
 }
 
+.stepfield {
+  width: 12rem;
+}
+
 .otherstepfield {
   width: 4rem;
 }

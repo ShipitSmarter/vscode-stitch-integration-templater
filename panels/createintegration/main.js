@@ -95,8 +95,8 @@ function saveFieldValue(event) {
   let textString = field.getAttribute('index') + '|' + field.value;
   vscodeApi.postMessage({ command: "savefieldvalue", text: textString });
 
-  // if invalid content: add red outline and title
-  if (!checkContent(field.id)) {
+  // if invalid content: add red outline and tooltip
+  if (!checkContent(field.id, field.value)) {
     field.style.outline = "1px solid red";
     field.title = getContentHint(field.id);
   } else {
@@ -105,30 +105,34 @@ function saveFieldValue(event) {
   }
 }
 
-function checkContent(elementId) {
-  let field = document.getElementById(elementId);
+function checkContent(id, value) {
+  // let field = document.getElementById(elementId);
   let check = '';
-  switch (field.id) {
+  switch (id) {
     case 'carriername':
-      check = field.value.match(/[^a-z0-9]/);
+      check = value.match(/[^a-z0-9]/);
       break;
     case 'carrierapiname':
-      check = field.value.match(/[^a-z0-9\-]/);
+      check = value.match(/[^a-z0-9\-]/);
       break;
     case 'carriercode':
-      check = field.value.match(/[^A-Z0-9]/);
-      if (field.value.length !== 3) {
+      check = value.match(/[^A-Z0-9]/);
+      if (value.length !== 3) {
         check = 'invalid';
       }
       break;
     case 'carrierapidescription':
-      check = field.value.match(/[^A-Za-z0-9\-\:\(\) ]/);
+      check = value.match(/[^A-Za-z0-9\-\:\(\) ]/);
       break;
     case 'testuser':
-      check = field.value.match(/[^A-Za-z0-9\-\_]/);
+      check = value.match(/[^A-Za-z0-9\-\_]/);
       break;
     case 'testpwd':
       check = '';
+      break;
+
+    case 'stepfield':
+      check = value.match(/[^A-Za-z0-9\:\/\.\?\=\&\-\_]/);
       break;
   }
 
@@ -140,6 +144,8 @@ function checkContent(elementId) {
 
   return isCorrect;
 }
+
+
 
 function getContentHint(elementid) {
   let hint = '';
@@ -162,6 +168,10 @@ function getContentHint(elementid) {
     case 'testpwd':
       hint = 'Any character allowed';
       break;
+
+    case 'stepfield':
+      hint = 'A-Z, a-z, 0-9, :/.?=&-_ (no spaces)';
+      break;
   }
 
   return hint;
@@ -173,7 +183,16 @@ function checkFields() {
   // fixed fields
   let fixedFields = document.getElementsByClassName('field');
   for (const fixedField of fixedFields) {
-    if (!checkContent(fixedField.id)) {
+    if (!checkContent(fixedField.id, fixedField.value)) {
+      correctContent = false;
+      break;
+    }
+  }
+
+  // step url fields
+  let stepFields = document.getElementsByClassName('stepfield');
+  for (const stepField of stepFields) {
+    if (!checkContent(stepField.className, stepField.value)) {
       correctContent = false;
       break;
     }
@@ -204,8 +223,19 @@ function stepDropdownChange(event) {
 
 function saveStepFieldValue(event) {
   const stepField = event.target;
+
+  // save field value
   let textString = stepField.getAttribute('indexstep') + '|' + stepField.value;
   vscodeApi.postMessage({ command: "savestepfieldvalue", text: textString });
+
+  // if invalid content: add red outline and tooltip
+  if (!checkContent(stepField.className, stepField.value)) {
+    stepField.style.outline = "1px solid red";
+    stepField.title = getContentHint(stepField.className);
+  } else {
+    stepField.style.outline = "none";
+    stepField.title = '';
+  }
 }
 
 function saveOtherStepValue(event) {
