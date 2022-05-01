@@ -96,7 +96,16 @@ function saveFieldValue(event) {
   let textString = field.getAttribute('index') + '|' + field.value;
   vscodeApi.postMessage({ command: "savefieldvalue", text: textString });
 
-  // check if field contains invalid characters
+  // if invalid content: add red outline
+  if (!checkContent(field.id)) {
+    field.style.outline = "1px solid red";
+  }  
+}
+
+function checkContent(elementId) {
+  let valid = true;
+  let field = document.getElementById(elementId);
+
   let check = '';
   switch (field.id) {
     case 'carriername':
@@ -122,10 +131,12 @@ function saveFieldValue(event) {
       break;
   }
 
-  // if invalid content: add red outline
+  // if invalid content: return false
   if (check.length > 0) {
-    field.style.outline = "1px solid red";
-  }  
+    valid = false;
+  } 
+
+  return valid;
 }
 
 function stepDropdownChange(event) {
