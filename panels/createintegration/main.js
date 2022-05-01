@@ -90,15 +90,18 @@ function dropdownChange(event) {
 
 function saveFieldValue(event) {
   const field = event.target;
-  field.style.outline = "none";
 
   // save field value
   let textString = field.getAttribute('index') + '|' + field.value;
   vscodeApi.postMessage({ command: "savefieldvalue", text: textString });
 
-  // if invalid content: add red outline
+  // if invalid content: add red outline and title
   if (!checkContent(field.id)) {
     field.style.outline = "1px solid red";
+    field.title = getContentHint(field.id);
+  } else {
+    field.style.outline = "none";
+    field.title = '';
   }
 }
 
@@ -113,7 +116,7 @@ function checkContent(elementId) {
       check = field.value.match(/[^a-z0-9\-]/);
       break;
     case 'carriercode':
-      check = field.value.match(/[^A-Z]/);
+      check = field.value.match(/[^A-Z0-9]/);
       if (field.value.length !== 3) {
         check = 'invalid';
       }
@@ -133,9 +136,35 @@ function checkContent(elementId) {
   let isCorrect = true;
   if (check !== '' && check !== null) {
     isCorrect = false;
-  } 
+  }
 
   return isCorrect;
+}
+
+function getContentHint(elementid) {
+  let hint = '';
+  switch (elementid) {
+    case 'carriername':
+      hint = 'a-z, 0-9 (no capitals)';
+      break;
+    case 'carrierapiname':
+      hint = 'a-z, 0-9, \'-\' (no capitals)';
+      break;
+    case 'carriercode':
+      hint = 'A-Z, 0-9 (only capitals); exactly 3 characters';
+      break;
+    case 'carrierapidescription':
+      hint = 'A-Z, a-z, 0-9, \':\', \'(\', \')\' (spaces allowed)';
+      break;
+    case 'testuser':
+      hint = 'A-Z, a-z, 0-9, \'-\', \'_\' (no spaces)';
+      break;
+    case 'testpwd':
+      hint = 'Any character allowed';
+      break;
+  }
+
+  return hint;
 }
 
 function checkFields() {
@@ -224,6 +253,6 @@ function createIntegration() {
     //vscodeApi.postMessage({ command: "showinformationmessage", text: "correct code content" });
     vscodeApi.postMessage({ command: "createintegration", text: "real fast!" });
   } else {
-    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content" });
+    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
   }
 }
