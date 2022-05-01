@@ -105,7 +105,14 @@ export class CreateIntegrationPanel {
             } else {
               this._updateIntegration(terminal, extensionUri);
             }
+            break;
 
+          case 'showerrormessage':
+            vscode.window.showErrorMessage(text);
+            break;
+
+          case 'showinformationmessage':
+            vscode.window.showInformationMessage(text);
             break;
 
           case "savefieldvalue":
@@ -265,13 +272,13 @@ export class CreateIntegrationPanel {
     terminal.sendText(`./${this._getScriptName()}`);
   }
 
-  private _getNewScenariosString() : string {
+  private _getNewScenariosString(): string {
 
     let newScenariosString: string = '';
     for (let index = 0; index < this._scenarioFieldValues.length; index++) {
       if (this._scenarioFieldValues[index] !== undefined && this._scenarioFieldValues[index] !== '') {
         // remove parent folder indicator if present
-        let scenarioName = this._scenarioFieldValues[index].replace(/[^\>]+\> /g,'');
+        let scenarioName = this._scenarioFieldValues[index].replace(/[^\>]+\> /g, '');
         newScenariosString += '\n    ' + '"' + scenarioName + '"';
 
         // check if comma is needed
@@ -294,9 +301,9 @@ export class CreateIntegrationPanel {
         if (this._existingScenarioCheckboxValues[index]) {
           commenting = '';
         }
-  
+
         scenariosString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"';
-  
+
         // check if comma is needed
         let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index + 1, this._existingScenarioCheckboxValues.length);
         if ((remainingCheckboxes.filter(el => el === true).length > 0) || !isEmptyStringArray(this._scenarioFieldValues)) {
@@ -304,7 +311,7 @@ export class CreateIntegrationPanel {
         }
       }
     }
-    
+
     // add 'new' scenarios
     scenariosString += this._getNewScenariosString();
 
@@ -595,7 +602,7 @@ export class CreateIntegrationPanel {
   private _cropFlexFields() {
     // crop steps, othersteps arrays
     let newStepFieldValues: string[] = [];
-    let newOtherStepValues: string [] = [];
+    let newOtherStepValues: string[] = [];
     for (let index = 0; index < +this._fieldValues[nofStepsIndex]; index++) {
       // stepname, other step
       if (this._stepFieldValues[index] !== undefined) {
@@ -619,7 +626,7 @@ export class CreateIntegrationPanel {
     }
     this._stepFieldValues = newStepFieldValues;
     this._otherStepValues = newOtherStepValues;
- 
+
     // crop scenarios array
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
   }
@@ -702,7 +709,7 @@ export class CreateIntegrationPanel {
     return stepsGrid;
   }
 
-  private _getScenariosGrid(scenarios:string[]): string {
+  private _getScenariosGrid(scenarios: string[]): string {
     let scenariosGrid = /*html*/ `    
       <section class="component-container">
         <h2>Scenarios</h2>
@@ -745,13 +752,13 @@ export class CreateIntegrationPanel {
     return createUpdateButton;
   }
 
-  private async _getAvailableScenarios(module:string) : Promise<string[]> {
-    let bookingScenarioXmls: string[] = await getWorkspaceFiles('**/scenario-templates/'+ module + '/**/*.xml');
+  private async _getAvailableScenarios(module: string): Promise<string[]> {
+    let bookingScenarioXmls: string[] = await getWorkspaceFiles('**/scenario-templates/' + module + '/**/*.xml');
 
-    let bookingScenarios : string[] = [];
+    let bookingScenarios: string[] = [];
 
     for (let index = 0; index < bookingScenarioXmls.length; index++) {
-      let scenarioName = (cleanPath(bookingScenarioXmls[index]).split('/').pop() ?? '').replace(/.xml$/,'');
+      let scenarioName = (cleanPath(bookingScenarioXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
       let scenarioParentName = parentPath(cleanPath(bookingScenarioXmls[index])).split('/').pop() ?? '';
       // only show parent indicator if not [module]
       if (scenarioParentName === this._fieldValues[moduleIndex]) {
@@ -764,7 +771,7 @@ export class CreateIntegrationPanel {
   }
 
   // determine content
-  private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri) : Promise<string> {
+  private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
     const codiconsUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);

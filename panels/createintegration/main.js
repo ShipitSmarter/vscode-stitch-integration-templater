@@ -99,13 +99,11 @@ function saveFieldValue(event) {
   // if invalid content: add red outline
   if (!checkContent(field.id)) {
     field.style.outline = "1px solid red";
-  }  
+  }
 }
 
 function checkContent(elementId) {
-  let valid = true;
   let field = document.getElementById(elementId);
-
   let check = '';
   switch (field.id) {
     case 'carriername':
@@ -132,11 +130,27 @@ function checkContent(elementId) {
   }
 
   // if invalid content: return false
-  if (check.length > 0) {
-    valid = false;
+  let isCorrect = true;
+  if (check !== '' && check !== null) {
+    isCorrect = false;
   } 
 
-  return valid;
+  return isCorrect;
+}
+
+function checkFields() {
+  let correctContent = true;
+
+  // fixed fields
+  let fixedFields = document.getElementsByClassName('field');
+  for (const fixedField of fixedFields) {
+    if (!checkContent(fixedField.id)) {
+      correctContent = false;
+      break;
+    }
+  }
+
+  return correctContent;
 }
 
 function stepDropdownChange(event) {
@@ -205,8 +219,11 @@ function saveESCheckboxValue(event) {
 }
 
 function createIntegration() {
-  vscodeApi.postMessage({
-    command: "createintegration",
-    text: "real fast!"
-  });
+  // check field content
+  if (checkFields()) {
+    //vscodeApi.postMessage({ command: "showinformationmessage", text: "correct code content" });
+    vscodeApi.postMessage({ command: "createintegration", text: "real fast!" });
+  } else {
+    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content" });
+  }
 }
