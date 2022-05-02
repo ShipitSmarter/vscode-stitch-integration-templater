@@ -72,6 +72,7 @@ function main() {
   }
 
   // on panel creation: update field outlines and tooltips
+  checkFields();
 }
 
 function checkIntegrationPath() {
@@ -190,32 +191,30 @@ function getContentHint(elementid) {
 }
 
 function checkFields() {
+  // check if any incorrect field contents and update fields outlining and tooltip in the process
   let correctContent = true;
 
   // fixed fields
   let fixedFields = document.getElementsByClassName('field');
   for (const fixedField of fixedFields) {
-    if (!checkContent(fixedField.id, fixedField.value)) {
+    if (!updateFieldOutlineAndTooltip(fixedField.id, fixedField.id)) {
       correctContent = false;
-      break;
     }
   }
 
   // step url fields
   let stepFields = document.getElementsByClassName('stepfield');
   for (const stepField of stepFields) {
-    if (!checkContent(stepField.className, stepField.value)) {
+    if (!updateFieldOutlineAndTooltip(stepField.id, stepField.className)) {
       correctContent = false;
-      break;
     }
   }
 
   // 'other' step fields
   let otherStepFields = document.getElementsByClassName('otherstepfield');
   for (const otherStepField of otherStepFields) {
-    if (!checkContent(otherStepField.className, otherStepField.value)) {
+    if (!updateFieldOutlineAndTooltip(otherStepField.id, otherStepField.className)) {
       correctContent = false;
-      break;
     }
   }
 
@@ -223,9 +222,8 @@ function checkFields() {
   if (document.getElementById("modular").checked) {
     let scenarioFields = document.getElementsByClassName('scenariofield');
     for (const scenarioField of scenarioFields) {
-      if (!checkModularScenario(scenarioField.value)) {
+      if (!updateFieldOutlineAndTooltip(scenarioField.id, scenarioField.className, 'modular')) {
         correctContent = false;
-        break;
       }
     }
   }
@@ -266,12 +264,16 @@ function updateFieldRight(fieldId,fieldType) {
 }
 
 function updateFieldOutlineAndTooltip(fieldId, fieldType, modular = 'normal') {
+  let isCorrect = true;
   let field = document.getElementById(fieldId);
   if (!checkContent(fieldType, field.value, modular)) {
     updateFieldWrong(field.id,fieldType);
+    isCorrect = false;
   } else {
     updateFieldRight(field.id, fieldType);
   }
+
+  return isCorrect;
 }
 
 function saveStepFieldValue(event) {
