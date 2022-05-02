@@ -192,43 +192,13 @@ function getContentHint(elementid) {
 
 function checkFields() {
   // check if any incorrect field contents and update fields outlining and tooltip in the process
-  let correctContent = true;
-
-  // fixed fields
-  let fixedFields = document.getElementsByClassName('field');
-  for (const fixedField of fixedFields) {
-    if (!updateFieldOutlineAndTooltip(fixedField.id, fixedField.id)) {
-      correctContent = false;
-    }
+  var check = true;
+  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield,.scenariofield");
+  for (const field of fields) {
+    check = updateFieldOutlineAndTooltip(field.id) ? check : false;
   }
 
-  // step url fields
-  let stepFields = document.getElementsByClassName('stepfield');
-  for (const stepField of stepFields) {
-    if (!updateFieldOutlineAndTooltip(stepField.id, stepField.className)) {
-      correctContent = false;
-    }
-  }
-
-  // 'other' step fields
-  let otherStepFields = document.getElementsByClassName('otherstepfield');
-  for (const otherStepField of otherStepFields) {
-    if (!updateFieldOutlineAndTooltip(otherStepField.id, otherStepField.className)) {
-      correctContent = false;
-    }
-  }
-
-  // modular scenario fields
-  if (document.getElementById("modular").checked) {
-    let scenarioFields = document.getElementsByClassName('scenariofield');
-    for (const scenarioField of scenarioFields) {
-      if (!updateFieldOutlineAndTooltip(scenarioField.id, scenarioField.className, 'modular')) {
-        correctContent = false;
-      }
-    }
-  }
-
-  return correctContent;
+  return check;
 }
 
 function stepDropdownChange(event) {
@@ -263,16 +233,23 @@ function updateFieldRight(fieldId,fieldType) {
   field.title = '';
 }
 
-function updateFieldOutlineAndTooltip(fieldId, fieldType, modular = 'normal') {
+function updateFieldOutlineAndTooltip(fieldId) {
   let isCorrect = true;
   let field = document.getElementById(fieldId);
-  if (!checkContent(fieldType, field.value, modular)) {
-    updateFieldWrong(field.id,fieldType);
-    isCorrect = false;
-  } else {
-    updateFieldRight(field.id, fieldType);
-  }
 
+  var fieldType = (field.className === 'field') ? field.id : field.className;
+  var modular = (field.className === 'scenariofield') ? 'modular' : 'normal';
+
+  if (document.getElementById("modular").checked || (field.className !== 'scenarioField')) {
+    // ^^ skip if field is scenarioField and modular is unchecked
+    if (!checkContent(fieldType, field.value, modular)) {
+      updateFieldWrong(field.id,fieldType);
+      isCorrect = false;
+    } else {
+      updateFieldRight(field.id, fieldType);
+    }
+  }
+  
   return isCorrect;
 }
 
@@ -284,7 +261,7 @@ function saveStepFieldValue(event) {
   vscodeApi.postMessage({ command: "savestepfieldvalue", text: textString });
 
   // if invalid content: add red outline and tooltip
-  updateFieldOutlineAndTooltip(stepField.id, stepField.className);
+  updateFieldOutlineAndTooltip(stepField.id);
 }
 
 function saveOtherStepValue(event) {
@@ -295,7 +272,7 @@ function saveOtherStepValue(event) {
   vscodeApi.postMessage({ command: "saveotherstepvalue", text: textString });
 
   // if invalid content: add red outline and tooltip
-  updateFieldOutlineAndTooltip(otherStepField.id, otherStepField.className);
+  updateFieldOutlineAndTooltip(otherStepField.id);
 }
 
 function checkModularScenario(content) {
@@ -324,7 +301,7 @@ function saveScenarioFieldValue(event) {
   // if modular: check if contains allowed elements
   if (document.getElementById("modular").checked) {
     //if invalid: show red outline and content tooltip
-    updateFieldOutlineAndTooltip(scenarioField.id, scenarioField.className, 'modular');
+    updateFieldOutlineAndTooltip(scenarioField.id);
   }
 }
 
@@ -358,7 +335,6 @@ function saveESCheckboxValue(event) {
 function createIntegration() {
   // check field content
   if (checkFields()) {
-    //vscodeApi.postMessage({ command: "showinformationmessage", text: "correct code content" });
     vscodeApi.postMessage({ command: "createintegration", text: "real fast!" });
   } else {
     vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
