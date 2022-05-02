@@ -134,6 +134,10 @@ function checkContent(id, value) {
     case 'stepfield':
       check = value.match(/[^A-Za-z0-9\:\/\.\?\=\&\-\_]/);
       break;
+
+    case 'otherstepfield':
+      check = value.match(/[^a-z0-9\_]/);
+      break;
   }
 
   // if invalid content: return false
@@ -172,7 +176,11 @@ function getContentHint(elementid) {
       break;
 
     case 'scenariofield':
-      hint = 'Must exist of elements present in scenario-elements/modular, separated by \'-\'';
+      hint = 'Format: \'fromnl-tode-sl1800\'. Elements must be present in scenario-elements/modular.';
+      break;
+
+    case 'otherstepfield':
+      hint = 'a-z, 0-9, \'_\' (no spaces)';
       break;
   }
 
@@ -195,6 +203,15 @@ function checkFields() {
   let stepFields = document.getElementsByClassName('stepfield');
   for (const stepField of stepFields) {
     if (!checkContent(stepField.className, stepField.value)) {
+      correctContent = false;
+      break;
+    }
+  }
+
+  // 'other' step fields
+  let otherStepFields = document.getElementsByClassName('otherstepfield');
+  for (const otherStepField of otherStepFields) {
+    if (!checkContent(otherStepField.className, otherStepField.value)) {
       correctContent = false;
       break;
     }
@@ -253,8 +270,19 @@ function saveStepFieldValue(event) {
 
 function saveOtherStepValue(event) {
   const otherStepField = event.target;
+
+  // save field value
   let textString = otherStepField.getAttribute('indexotherstep') + '|' + otherStepField.value;
   vscodeApi.postMessage({ command: "saveotherstepvalue", text: textString });
+
+  // if invalid content: add red outline and tooltip
+  if (!checkContent(otherStepField.className, otherStepField.value)) {
+    otherStepField.style.outline = "1px solid red";
+    otherStepField.title = getContentHint(otherStepField.className);
+  } else {
+    otherStepField.style.outline = "none";
+    otherStepField.title = '';
+  }
 }
 
 function checkModularScenario(content) {
@@ -262,7 +290,7 @@ function checkModularScenario(content) {
   let modularElements = document.getElementById("modularelements").value.split(',');
   let isValid = true;
   if (currentElements !== null) {
-    for (let index = 0; index < currentElements.length; index++ ) {
+    for (let index = 0; index < currentElements.length; index++) {
       if (!modularElements.includes(currentElements[index])) {
         isValid = false;
         break;
