@@ -70,6 +70,8 @@ function main() {
       document.getElementById("otherstepname" + index).style.display = 'inline-table';
     }
   }
+
+  // on panel creation: update field outlines and tooltips
 }
 
 function checkIntegrationPath() {
@@ -96,54 +98,54 @@ function saveFieldValue(event) {
   vscodeApi.postMessage({ command: "savefieldvalue", text: textString });
 
   // if invalid content: add red outline and tooltip
-  if (!checkContent(field.id, field.value)) {
-    field.style.outline = "1px solid red";
-    field.title = getContentHint(field.id);
-  } else {
-    field.style.outline = "none";
-    field.title = '';
-  }
+  updateFieldOutlineAndTooltip(field.id,field.id);
 }
 
-function checkContent(id, value) {
-  // let field = document.getElementById(elementId);
-  let check = '';
-  switch (id) {
-    case 'carriername':
-      check = value.match(/[^a-z0-9]/);
-      break;
-    case 'carrierapiname':
-      check = value.match(/[^a-z0-9\-]/);
-      break;
-    case 'carriercode':
-      check = value.match(/[^A-Z0-9]/);
-      if (value.length !== 3) {
-        check = 'invalid';
-      }
-      break;
-    case 'carrierapidescription':
-      check = value.match(/[^A-Za-z0-9\-\:\(\) ]/);
-      break;
-    case 'testuser':
-      check = value.match(/[^A-Za-z0-9\-\_]/);
-      break;
-    case 'testpwd':
-      check = '';
-      break;
-
-    case 'stepfield':
-      check = value.match(/[^A-Za-z0-9\:\/\.\?\=\&\-\_]/);
-      break;
-
-    case 'otherstepfield':
-      check = value.match(/[^a-z0-9\_]/);
-      break;
-  }
-
-  // if invalid content: return false
+function checkContent(id, value, modular = 'normal') {
   let isCorrect = true;
-  if (check !== '' && check !== null) {
-    isCorrect = false;
+
+  // return checkModularScenario instead if 'modular'
+  if (modular === 'modular') {
+    isCorrect = checkModularScenario(value);
+  } else {
+    // else: check 'normal'
+    let check = '';
+    switch (id) {
+      case 'carriername':
+        check = value.match(/[^a-z0-9]/);
+        break;
+      case 'carrierapiname':
+        check = value.match(/[^a-z0-9\-]/);
+        break;
+      case 'carriercode':
+        check = value.match(/[^A-Z0-9]/);
+        if (value.length !== 3) {
+          check = 'invalid';
+        }
+        break;
+      case 'carrierapidescription':
+        check = value.match(/[^A-Za-z0-9\-\:\(\) ]/);
+        break;
+      case 'testuser':
+        check = value.match(/[^A-Za-z0-9\-\_]/);
+        break;
+      case 'testpwd':
+        check = '';
+        break;
+
+      case 'stepfield':
+        check = value.match(/[^A-Za-z0-9\:\/\.\?\=\&\-\_]/);
+        break;
+
+      case 'otherstepfield':
+        check = value.match(/[^a-z0-9\_]/);
+        break;
+    }
+
+    // if invalid content: return false
+    if (check !== '' && check !== null) {
+      isCorrect = false;
+    }
   }
 
   return isCorrect;
@@ -251,6 +253,27 @@ function stepDropdownChange(event) {
   }
 }
 
+function updateFieldWrong(fieldId,fieldType) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid red";
+  field.title = getContentHint(fieldType);
+}
+
+function updateFieldRight(fieldId,fieldType) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "none";
+  field.title = '';
+}
+
+function updateFieldOutlineAndTooltip(fieldId, fieldType, modular = 'normal') {
+  let field = document.getElementById(fieldId);
+  if (!checkContent(fieldType, field.value, modular)) {
+    updateFieldWrong(field.id,fieldType);
+  } else {
+    updateFieldRight(field.id, fieldType);
+  }
+}
+
 function saveStepFieldValue(event) {
   const stepField = event.target;
 
@@ -259,13 +282,7 @@ function saveStepFieldValue(event) {
   vscodeApi.postMessage({ command: "savestepfieldvalue", text: textString });
 
   // if invalid content: add red outline and tooltip
-  if (!checkContent(stepField.className, stepField.value)) {
-    stepField.style.outline = "1px solid red";
-    stepField.title = getContentHint(stepField.className);
-  } else {
-    stepField.style.outline = "none";
-    stepField.title = '';
-  }
+  updateFieldOutlineAndTooltip(stepField.id, stepField.className);
 }
 
 function saveOtherStepValue(event) {
@@ -276,13 +293,7 @@ function saveOtherStepValue(event) {
   vscodeApi.postMessage({ command: "saveotherstepvalue", text: textString });
 
   // if invalid content: add red outline and tooltip
-  if (!checkContent(otherStepField.className, otherStepField.value)) {
-    otherStepField.style.outline = "1px solid red";
-    otherStepField.title = getContentHint(otherStepField.className);
-  } else {
-    otherStepField.style.outline = "none";
-    otherStepField.title = '';
-  }
+  updateFieldOutlineAndTooltip(otherStepField.id, otherStepField.className);
 }
 
 function checkModularScenario(content) {
@@ -311,13 +322,7 @@ function saveScenarioFieldValue(event) {
   // if modular: check if contains allowed elements
   if (document.getElementById("modular").checked) {
     //if invalid: show red outline and content tooltip
-    if (!checkModularScenario(scenarioField.value)) {
-      scenarioField.style.outline = "1px solid red";
-      scenarioField.title = getContentHint(scenarioField.className);
-    } else {
-      scenarioField.style.outline = "none";
-      scenarioField.title = '';
-    }
+    updateFieldOutlineAndTooltip(scenarioField.id, scenarioField.className, 'modular');
   }
 }
 
