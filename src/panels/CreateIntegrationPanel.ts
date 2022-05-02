@@ -139,6 +139,8 @@ export class CreateIntegrationPanel {
                 break;
               case 'modular':
                 this._modularValue = toBoolean(value);
+                // empty scenario values
+                this._scenarioFieldValues = [];
                 break;
             }
         }
