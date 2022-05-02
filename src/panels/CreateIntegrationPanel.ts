@@ -518,7 +518,7 @@ export class CreateIntegrationPanel {
     // crop flexible field arrays
     this._cropFlexFields();
 
-    // get all input.json files in carrier
+    // get available scenarios, available modular elements
     let availableScenarios: string[] = await this._getAvailableScenarios();
     let modularElements : string[] = await this._getAvailableModularScenarioElements();
 
