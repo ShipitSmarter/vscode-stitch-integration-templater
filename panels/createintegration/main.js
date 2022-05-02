@@ -250,7 +250,7 @@ function updateFieldOutlineAndTooltip(fieldId) {
   var fieldType = (field.className === 'field') ? field.id : field.className;
   var modular = (field.className === 'scenariofield') ? 'modular' : 'normal';
 
-  if (document.getElementById("modular").checked || (field.className !== 'scenarioField')) {
+  if (document.getElementById("modular").checked || (field.className !== 'scenariofield')) {
     // ^^ skip if field is scenarioField and modular is unchecked
     if (!checkContent(fieldType, field.value, modular)) {
       updateFieldWrong(field.id,fieldType);
