@@ -115,34 +115,32 @@ export class CreateIntegrationPanel {
             vscode.window.showInformationMessage(text);
             break;
 
-          case "savefieldvalue":
-            let indexValue = message.text.split('|');
-            this._fieldValues[indexValue[0]] = indexValue[1];
-            break;
-
-          case "savestepfieldvalue":
-            let stepIndexValue = message.text.split('|');
-            this._stepFieldValues[stepIndexValue[0]] = stepIndexValue[1];
-            break;
-
-          case "saveotherstepvalue":
-            let otherStepIndexValue = message.text.split('|');
-            this._otherStepValues[otherStepIndexValue[0]] = otherStepIndexValue[1];
-            break;
-
-          case "savescenariofieldvalue":
-            let scenarioIndexValue = message.text.split('|');
-            this._scenarioFieldValues[scenarioIndexValue[0]] = scenarioIndexValue[1];
-            break;
-
-          case "savemodularvalue":
-            this._modularValue = text;
-            break;
-
-          case "saveescheckboxvalue":
-            let checkboxIndexValue = message.text.split('|');
-            this._existingScenarioCheckboxValues[checkboxIndexValue[0]] = toBoolean(checkboxIndexValue[1]);
-            break;
+          case "savevalue":
+            var classIndexValue = text.split('|');
+            var index = classIndexValue[1];
+            var value = classIndexValue[2];
+            switch (classIndexValue[0]) {
+              case 'dropdown':
+              case 'field':
+                this._fieldValues[index] = value;
+                break;
+              case 'stepdropdown':
+              case 'stepfield':
+                this._stepFieldValues[index] = value;
+                break;
+              case 'otherstepfield':
+                this._otherStepValues[index] = value;
+                break;
+              case 'scenariofield':
+                this._scenarioFieldValues[index] = value;
+                break;
+              case 'existingscenariocheckbox':
+                this._existingScenarioCheckboxValues[index] = toBoolean(value);
+                break;
+              case 'modular':
+                this._modularValue = toBoolean(value);
+                break;
+            }
         }
       },
       undefined,

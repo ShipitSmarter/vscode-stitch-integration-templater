@@ -7,46 +7,29 @@ function main() {
   document.getElementById("createintegration").addEventListener("click", createIntegration);
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
 
-  // save field entries
-  const fields = document.getElementsByClassName("field");
+  // input fields
+  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield,.scenariofield");
   for (const field of fields) {
-    field.addEventListener("keyup", saveFieldValue);
+    field.addEventListener("keyup", saveCheckFieldContent);
+    if (field.classList[0] === 'scenariofield') {
+      field.addEventListener("change", saveCheckFieldContent);
+    }
   }
 
-  // save dropdown entries
+  // fixed dropdowns
   const dropDowns = document.getElementsByClassName("dropdown");
   for (const dropDown of dropDowns) {
     dropDown.addEventListener("change", dropdownChange);
   }
 
+   // step dropdowns
+   const stepDropDowns = document.getElementsByClassName("stepdropdown");
+   for (const stepDropDown of stepDropDowns) {
+     stepDropDown.addEventListener("change", stepDropdownChange);
+   }
+
   // save modular checkbox entry
   document.getElementById("modular").addEventListener("click", saveModularValue);
-
-  // save step field entries: 
-  // fields
-  const stepFields = document.getElementsByClassName("stepfield");
-  for (const stepField of stepFields) {
-    stepField.addEventListener("keyup", saveStepFieldValue);
-  }
-
-  // other step fields
-  const otherStepFields = document.getElementsByClassName("otherstepfield");
-  for (const otherStepField of otherStepFields) {
-    otherStepField.addEventListener("keyup", saveOtherStepValue);
-  }
-
-  // dropdowns
-  const stepDropDowns = document.getElementsByClassName("stepdropdown");
-  for (const stepDropDown of stepDropDowns) {
-    stepDropDown.addEventListener("change", stepDropdownChange);
-  }
-
-  // save scenario field entries
-  const scenarioFields = document.getElementsByClassName("scenariofield");
-  for (const scenarioField of scenarioFields) {
-    scenarioField.addEventListener("keyup", saveScenarioFieldValue);
-    scenarioField.addEventListener("change", saveScenarioFieldValue);
-  }
 
   // save existing scenario checkbox entries
   for (const esCheckbox of document.getElementsByClassName("existingscenariocheckbox")) {
@@ -55,14 +38,13 @@ function main() {
 
   // on panel creation: save all dropdown values
   // fieldValues dropdowns (modulename, nofsteps)
-  vscodeApi.postMessage({ command: "savefieldvalue", text: '2|' + document.getElementById("modulename").value });
-  vscodeApi.postMessage({ command: "savefieldvalue", text: '5|' + document.getElementById("nofsteps").value });
-  vscodeApi.postMessage({ command: "savefieldvalue", text: '6|' + document.getElementById("nofscenarios").value });
+  saveValue("modulename");
+  saveValue("nofsteps");
+  saveValue("nofscenarios");
 
   // stepDropdowns
   for (const stepDropDown of document.getElementsByClassName("stepdropdown")) {
-    let textString = stepDropDown.getAttribute('indexstep') + '|' + stepDropDown.value;
-    vscodeApi.postMessage({ command: "savestepfieldvalue", text: textString });
+    saveValue(stepDropDown.id);
 
     // if 'other': reveal other step field
     if (stepDropDown.value === 'other') {
@@ -75,31 +57,111 @@ function main() {
   checkFields();
 }
 
-function checkIntegrationPath() {
-  // check if module exists
-  vscodeApi.postMessage({ command: "checkintegrationexists", text: 'checkintegrationexists' });
+function saveCheckFieldContent(event) {
+  const field = event.target;
+
+  // save field value and check if content is valid
+  saveValue(field.id);
+  updateFieldOutlineAndTooltip(field.id,field.id);
 }
 
 function dropdownChange(event) {
   const field = event.target;
 
   // save field value
-  let textString = field.getAttribute('index') + '|' + field.value;
-  vscodeApi.postMessage({ command: "savefieldvalue", text: textString });
+  saveValue(field.id);
 
   // refresh panel
   vscodeApi.postMessage({ command: "refreshpanel", text: 'fromdropdown' });
 }
 
-function saveFieldValue(event) {
+function stepDropdownChange(event) {
+  const stepField = event.target;
+
+  // save field
+  saveValue(stepField.id);
+
+  // other step field
+  var index = stepField.getAttribute('indexstep');
+  var otherStepField = document.getElementById("otherstepname" + index);
+
+  if (stepField.value === 'other') {
+    // if 'other': show other step field 
+    otherStepField.style.display = 'inline-table';
+  } else {
+    // not other: hide other step field and delete value
+    otherStepField.style.display = 'none';
+    otherStepField.value = '';
+    saveValue(otherStepField.id);
+  }
+}
+
+function saveModularValue(event) {
   const field = event.target;
 
-  // save field value
-  let textString = field.getAttribute('index') + '|' + field.value;
-  vscodeApi.postMessage({ command: "savefieldvalue", text: textString });
+  // save value
+  saveValue(field.id);
 
-  // if invalid content: add red outline and tooltip
-  updateFieldOutlineAndTooltip(field.id,field.id);
+  // refresh panel
+  vscodeApi.postMessage({ command: "refreshpanel", text: 'frommodular' });
+}
+
+function saveESCheckboxValue(event) {
+  const field = event.target;
+
+  // save value
+  saveValue(field.id);
+
+  // update associated existing scenario field
+  let scenarioId = field.id.slice(3, field.id.length);
+  if (field.checked) {
+    document.getElementById(scenarioId).readOnly = true;
+    document.getElementById(scenarioId).disabled = false;
+  } else {
+    document.getElementById(scenarioId).disabled = true;
+    document.getElementById(scenarioId).readOnly = false;
+  }
+}
+
+function saveValue(fieldId) {
+  var field = document.getElementById(fieldId);
+  var attr = '';
+  switch (field.classList[0]) {
+    case 'dropdown':
+    case 'field':
+      attr = 'index';
+      break;
+    case 'stepdropdown':
+    case 'stepfield':
+      attr = 'indexstep';
+      break;
+    case 'otherstepfield':
+      attr = 'indexotherstep';
+      break;
+    case 'scenariofield':
+      attr = 'indexscenario';
+      break;
+    case 'existingscenariocheckbox':
+      attr = 'indexescheckbox';
+      break;
+    case 'modular':
+      attr = '';
+      break;
+  }
+  var value = field.checked ?? field.value;
+  var textString = field.classList[0] + '|' + (field.getAttribute(attr) ?? '') + '|' + value;
+  vscodeApi.postMessage({ command: "savevalue", text: textString });
+}
+
+function checkFields() {
+  // check if any incorrect field contents and update fields outlining and tooltip in the process
+  var check = true;
+  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield,.scenariofield");
+  for (const field of fields) {
+    check = updateFieldOutlineAndTooltip(field.id) ? check : false;
+  }
+
+  return check;
 }
 
 function checkContent(id, value, modular = 'normal') {
@@ -190,37 +252,6 @@ function getContentHint(elementid) {
   return hint;
 }
 
-function checkFields() {
-  // check if any incorrect field contents and update fields outlining and tooltip in the process
-  var check = true;
-  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield,.scenariofield");
-  for (const field of fields) {
-    check = updateFieldOutlineAndTooltip(field.id) ? check : false;
-  }
-
-  return check;
-}
-
-function stepDropdownChange(event) {
-  const stepField = event.target;
-
-  // save field
-  let index = stepField.getAttribute('indexstep');
-  let textString = index + '|' + stepField.value;
-  vscodeApi.postMessage({ command: "savestepfieldvalue", text: textString });
-
-  // if 'other', show other step field
-  if (stepField.value === 'other') {
-    document.getElementById("otherstepname" + index).style.display = 'inline-table';
-  } else {
-    // not other: hide other step field and delete value
-    document.getElementById("otherstepname" + index).style.display = 'none';
-    document.getElementById("otherstepname" + index).value = '';
-    let otherTextString = index + '|';
-    vscodeApi.postMessage({ command: "saveotherstepvalue", text: otherTextString });
-  }
-}
-
 function updateFieldWrong(fieldId,fieldType) {
   let field = document.getElementById(fieldId);
   field.style.outline = "1px solid red";
@@ -253,33 +284,11 @@ function updateFieldOutlineAndTooltip(fieldId) {
   return isCorrect;
 }
 
-function saveStepFieldValue(event) {
-  const stepField = event.target;
-
-  // save field value
-  let textString = stepField.getAttribute('indexstep') + '|' + stepField.value;
-  vscodeApi.postMessage({ command: "savestepfieldvalue", text: textString });
-
-  // if invalid content: add red outline and tooltip
-  updateFieldOutlineAndTooltip(stepField.id);
-}
-
-function saveOtherStepValue(event) {
-  const otherStepField = event.target;
-
-  // save field value
-  let textString = otherStepField.getAttribute('indexotherstep') + '|' + otherStepField.value;
-  vscodeApi.postMessage({ command: "saveotherstepvalue", text: textString });
-
-  // if invalid content: add red outline and tooltip
-  updateFieldOutlineAndTooltip(otherStepField.id);
-}
-
 function checkModularScenario(content) {
   let currentElements = content.split('-');
   let modularElements = document.getElementById("modularelements").value.split(',');
   let isValid = true;
-  if (currentElements !== null) {
+  if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
     for (let index = 0; index < currentElements.length; index++) {
       if (!modularElements.includes(currentElements[index])) {
         isValid = false;
@@ -291,45 +300,9 @@ function checkModularScenario(content) {
   return isValid;
 }
 
-function saveScenarioFieldValue(event) {
-  const scenarioField = event.target;
-
-  // save field value
-  let textString = scenarioField.getAttribute('indexscenario') + '|' + scenarioField.value;
-  vscodeApi.postMessage({ command: "savescenariofieldvalue", text: textString });
-
-  // if modular: check if contains allowed elements
-  if (document.getElementById("modular").checked) {
-    //if invalid: show red outline and content tooltip
-    updateFieldOutlineAndTooltip(scenarioField.id);
-  }
-}
-
-function saveModularValue(event) {
-  const field = event.target;
-  let textString = field.checked;
-  vscodeApi.postMessage({ command: "savemodularvalue", text: textString });
-
-  // refresh panel
-  vscodeApi.postMessage({ command: "refreshpanel", text: 'frommodular' });
-}
-
-function saveESCheckboxValue(event) {
-  const field = event.target;
-
-  // save value
-  let textString = field.getAttribute('indexescheckbox') + '|' + field.checked;
-  vscodeApi.postMessage({ command: "saveescheckboxvalue", text: textString });
-
-  // update associated existing scenario field
-  let scenarioId = field.id.slice(3, field.id.length);
-  if (field.checked) {
-    document.getElementById(scenarioId).readOnly = true;
-    document.getElementById(scenarioId).disabled = false;
-  } else {
-    document.getElementById(scenarioId).disabled = true;
-    document.getElementById(scenarioId).readOnly = false;
-  }
+function checkIntegrationPath() {
+  // check if module exists
+  vscodeApi.postMessage({ command: "checkintegrationexists", text: 'checkintegrationexists' });
 }
 
 function createIntegration() {

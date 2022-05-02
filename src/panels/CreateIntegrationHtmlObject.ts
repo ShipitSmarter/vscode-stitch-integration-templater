@@ -230,7 +230,7 @@ export class CreateIntegrationHtmlObject {
         <vscode-text-field id="modularelements" value="${modularElements.join(',')}" hidden></vscode-text-field>
 
         <section class="component-example">
-          <vscode-checkbox id="modular" ${this._checkedString(this._modularValue)} ${this._ifUpdate('readonly')}>Modular</vscode-checkbox>
+          <vscode-checkbox id="modular" class="modular" ${this._checkedString(this._modularValue)} ${this._ifUpdate('readonly')}>Modular</vscode-checkbox>
         </section>
 
         <section class="component-example">
