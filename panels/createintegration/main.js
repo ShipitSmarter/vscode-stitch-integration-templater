@@ -176,7 +176,7 @@ function checkContent(id, value, modular = 'normal') {
         break;
       case 'carriercode':
         check = value.match(/[^A-Z0-9]/);
-        if (value.length !== 3) {
+        if (value.length !== 3 && value.length !== 0) {
           check = 'invalid';
         }
         break;
@@ -252,6 +252,12 @@ function updateFieldWrong(fieldId,fieldType) {
   field.title = getContentHint(fieldType);
 }
 
+function updateFieldEmpty(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid cyan";
+  field.title = 'Field is mandatory';
+}
+
 function updateFieldRight(fieldId,fieldType) {
   let field = document.getElementById(fieldId);
   field.style.outline = "none";
@@ -270,12 +276,24 @@ function updateFieldOutlineAndTooltip(fieldId) {
     if (!checkContent(fieldType, field.value, modular)) {
       updateFieldWrong(field.id,fieldType);
       isCorrect = false;
+    } else if (['carriername','carrierapiname','carriercode'].includes(field.id) && isEmpty(field.value)) {
+      updateFieldEmpty(field.id);
+      isCorrect = false;
     } else {
       updateFieldRight(field.id, fieldType);
     }
   }
   
   return isCorrect;
+}
+
+function isEmpty(string) {
+  var empty = false;
+  if (string === '' || string === undefined || string === null) {
+    empty = true;
+  }
+
+  return empty;
 }
 
 function checkModularScenario(content) {
