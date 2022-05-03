@@ -64,9 +64,16 @@ function fieldChange(event) {
       updateFieldOutlineAndTooltip(field.id);
       break;
 
-    // modular, dropdown: refresh panel
+    // dropdown: delete scenarios if module dropdown change, refresh panel
     case 'dropdown':
+      if (field.id === 'modulename') {
+        vscodeApi.postMessage({ command: "clearscenarios", text: '' });
+      }
+      vscodeApi.postMessage({ command: "refreshpanel", text: '' });
+
+    // modular: clear scenarios, refresh panel
     case 'modular':
+      vscodeApi.postMessage({ command: "clearscenarios", text: '' });
       vscodeApi.postMessage({ command: "refreshpanel", text: '' });
       break;
 

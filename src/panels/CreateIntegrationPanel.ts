@@ -115,9 +115,13 @@ export class CreateIntegrationPanel {
             vscode.window.showInformationMessage(text);
             break;
 
+          case 'clearscenarios':
+            this._scenarioFieldValues = [];
+            break;
+
           case "savevalue":
             var classIndexValue = text.split('|');
-            var index = classIndexValue[1];
+            var index = +classIndexValue[1];
             var value = classIndexValue[2];
             switch (classIndexValue[0]) {
               case 'dropdown':
@@ -139,8 +143,6 @@ export class CreateIntegrationPanel {
                 break;
               case 'modular':
                 this._modularValue = toBoolean(value);
-                // empty scenario values
-                this._scenarioFieldValues = [];
                 break;
             }
         }
