@@ -67,6 +67,10 @@
     "type": "git",
     "url": "https://github.com/ShipitSmarter/vscode-stitch-integration-templater"
   },
+  "galleryBanner": {
+    "color": "#1c2237",
+    "theme": "dark"
+  },
   "icon": "img/sit-logo.png",
   "dependencies": {
     "@vscode/webview-ui-toolkit": "^1.0.0",
