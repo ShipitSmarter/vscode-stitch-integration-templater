@@ -147,8 +147,10 @@ export class CreateIntegrationHtmlObject {
       <vscode-button id="createintegration" appearance="primary" ${this._ifUpdate('style="background-color:green"')}>
         ${this._ifCreate('Create') + this._ifUpdate('Update')} integration
         <span slot="start" class="codicon ${this._ifCreate('codicon-add') + this._ifUpdate('codicon-arrow-right')}"></span>
-      </vscode-button>`;
-
+      </vscode-button>
+      
+      <vscode-text-field id="createupdate" value="${this._createUpdateValue}" hidden></vscode-text-field>
+      `;
     return createUpdateButton;
   }
 

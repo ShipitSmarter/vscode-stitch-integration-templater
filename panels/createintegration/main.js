@@ -3,6 +3,9 @@ const vscodeApi = acquireVsCodeApi();
 window.addEventListener("load", main);
 
 function main() {
+  // check if create or update
+  var create = (document.getElementById('createupdate').value === 'create');
+
   // button onclick event listeners
   document.getElementById("createintegration").addEventListener("click", createIntegration);
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
@@ -28,22 +31,26 @@ function main() {
     checkbox.addEventListener("click", fieldChange);
   }
 
-  // on panel creation: save all dropdown values
+  // on panel creation: save all dropdown values (if exist)
   saveValue("modulename");
-  saveValue("nofsteps");
   saveValue("nofscenarios");
-
-  // stepDropdowns
-  for (const stepDropDown of document.getElementsByClassName("stepdropdown")) {
-    saveValue(stepDropDown.id);
-
-    // if 'other': reveal other step field
-    if (stepDropDown.value === 'other') {
-      let index = stepDropDown.getAttribute('indexstep');
-      document.getElementById("otherstepname" + index).style.display = 'inline-table';
-    }
+  if(create) {
+    saveValue("nofsteps");
   }
 
+  // stepDropdowns (if create)
+  if(create) {
+    for (const stepDropDown of document.querySelectorAll(".stepdropdown")) {
+      saveValue(stepDropDown.id);
+  
+      // if 'other': reveal other step field
+      if (stepDropDown.value === 'other') {
+        var index = stepDropDown.getAttribute('indexstep');
+        document.getElementById("otherstepname" + index).style.display = 'inline-table';
+      }
+    }
+  }
+  
   // on panel creation: update field outlines and tooltips
   checkFields();
 }
@@ -71,7 +78,7 @@ function fieldChange(event) {
       }
       vscodeApi.postMessage({ command: "refreshpanel", text: '' });
       break;
-      
+
     // modular: clear scenarios, refresh panel
     case 'modular':
       vscodeApi.postMessage({ command: "clearscenarios", text: '' });
