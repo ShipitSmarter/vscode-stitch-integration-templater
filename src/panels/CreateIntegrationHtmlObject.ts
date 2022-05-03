@@ -237,8 +237,8 @@ export class CreateIntegrationHtmlObject {
 
         <section class="component-example">
           <p>Number of Scenarios</p>
-          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" ${this._valueString(this._fieldValues[nofScenariosIndex])} position="below">
-            ${dropdownOptions(arrayFrom1(100))}
+          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" ${this._valueString(this._fieldValues[nofScenariosIndex] ?? 1)} position="below">
+            ${dropdownOptions(arrayFrom0(100))}
           </vscode-dropdown>
         </section>
 
