@@ -12,6 +12,9 @@ To use it, open the *Command Palette* (`Ctrl`+`Shift`+`P`) and search for `Stitc
 
 Once the command is executed, the 'Create or update carrier integration' dashboard appears.
 
+## Dependencies
+This dashboard is a graphical frontend for the ShipitSmarter integration automation PowerShell script, and does not function independently without it.
+
 ## Change Log
 See Change Log [here](CHANGELOG.md)
 
