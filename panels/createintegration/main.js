@@ -70,7 +70,8 @@ function fieldChange(event) {
         vscodeApi.postMessage({ command: "clearscenarios", text: '' });
       }
       vscodeApi.postMessage({ command: "refreshpanel", text: '' });
-
+      break;
+      
     // modular: clear scenarios, refresh panel
     case 'modular':
       vscodeApi.postMessage({ command: "clearscenarios", text: '' });
