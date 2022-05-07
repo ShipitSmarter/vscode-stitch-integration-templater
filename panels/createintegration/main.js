@@ -3,9 +3,6 @@ const vscodeApi = acquireVsCodeApi();
 window.addEventListener("load", main);
 
 function main() {
-  // check if create or update
-  var create = (document.getElementById('createupdate').value === 'create');
-
   // button onclick event listeners
   document.getElementById("createintegration").addEventListener("click", createIntegration);
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
@@ -34,12 +31,12 @@ function main() {
   // on panel creation: save all dropdown values (if exist)
   saveValue("modulename");
   saveValue("nofscenarios");
-  if(create) {
+  if(isCreate()) {
     saveValue("nofsteps");
   }
 
   // stepDropdowns (if create)
-  if(create) {
+  if(isCreate()) {
     for (const stepDropDown of document.querySelectorAll(".stepdropdown")) {
       saveValue(stepDropDown.id);
   
@@ -55,6 +52,15 @@ function main() {
   checkFields();
 }
 
+function isCreate() {
+  // check if create or update
+  return (document.getElementById('createupdate').value === 'create');
+}
+
+function isModular() {
+  return document.getElementById("modular").checked;
+}
+
 function fieldChange(event) {
   const field = event.target;
 
@@ -67,8 +73,18 @@ function fieldChange(event) {
     case 'field':
     case 'stepfield':
     case 'otherstepfield':
-    case 'scenariofield':
       updateFieldOutlineAndTooltip(field.id);
+      break;
+    case 'scenariofield':
+      if (!isModular()) {
+        // if not modular: check ALL scenarios
+        for (const sc of document.querySelectorAll(".scenariofield")) {
+          updateFieldOutlineAndTooltip(sc.id);
+        }
+      } else {
+        // else: just check this one
+        updateFieldOutlineAndTooltip(field.id);
+      }
       break;
 
     // dropdown: delete scenarios if module dropdown change, refresh panel
@@ -117,6 +133,14 @@ function fieldChange(event) {
   
 }
 
+function infoMessage(info) {
+  vscodeApi.postMessage({ command: "showinformationmessage", text: info });
+}
+
+function getNewScenarioValue(fieldValue) {
+  return fieldValue.replace(/[^\>]+\> /g, '');
+}
+
 function saveValue(fieldId) {
   var field = document.getElementById(fieldId);
   var attr = '';
@@ -158,11 +182,11 @@ function checkFields() {
   return check;
 }
 
-function checkContent(id, value, modular = 'normal') {
+function checkContent(id, value) {
   let isCorrect = true;
 
-  // return checkModularScenario instead if 'modular'
-  if (modular === 'modular') {
+  // if this is modular scenario field: return checkModularScenario
+  if (isModular() && id.startsWith('scenario')) {
     isCorrect = checkModularScenario(value);
   } else {
     // else: check 'normal'
@@ -246,6 +270,12 @@ function getContentHint(elementid) {
   return hint;
 }
 
+function updateFieldDuplicate(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid red";
+  field.title = 'Scenario is duplicate of other (existing) scenario';
+}
+
 function updateFieldWrong(fieldId,fieldType) {
   let field = document.getElementById(fieldId);
   field.style.outline = "1px solid red";
@@ -264,16 +294,54 @@ function updateFieldRight(fieldId,fieldType) {
   field.title = '';
 }
 
+function isScenarioDuplicate(fieldId) {
+  var isDuplicate = false;
+  let field = document.getElementById(fieldId);
+  
+  // check other scenarios
+  var scenarioFields = document.querySelectorAll(".scenariofield");
+  for (const sf of scenarioFields) {
+    if (sf.id !== field.id && sf.value === field.value) {
+      // if scenario equal to other scenario: duplicate
+      isDuplicate = true;
+      break;
+    }
+  }
+
+  // if no duplicate other scenarios: check existing scenarios
+  if (!isDuplicate && !isCreate() ) {
+    var actualValue = getNewScenarioValue(field.value);
+    var existingScenarios = document.querySelectorAll(".existingscenariofield");
+    for (const es of existingScenarios) {
+      if (actualValue === es.value ) {
+        // if scenario equal to existing scenario: duplicate
+        isDuplicate = true;
+        break;
+      }    
+    }
+  }
+
+  return isDuplicate;
+}
+
 function updateFieldOutlineAndTooltip(fieldId) {
   let isCorrect = true;
   let field = document.getElementById(fieldId);
 
   var fieldType = (field.className === 'field') ? field.id : field.className;
-  var modular = (field.className === 'scenariofield') ? 'modular' : 'normal';
 
-  if (document.getElementById("modular").checked || (field.className !== 'scenariofield')) {
-    // ^^ skip if field is scenarioField and modular is unchecked
-    if (!checkContent(fieldType, field.value, modular)) {
+  if (!isModular() && (field.classList[0] === 'scenariofield')) {
+    // check duplicate scenario drop-downs
+    if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
+      isCorrect = false;
+      updateFieldDuplicate(field.id);
+    } else {
+      updateFieldRight(field.id, fieldType);
+    }   
+    
+  } else {
+    // check any 'normal' input field
+    if (!checkContent(fieldType, field.value)) {
       updateFieldWrong(field.id,fieldType);
       isCorrect = false;
     } else if (['carriername','carrierapiname','carriercode'].includes(field.id) && isEmpty(field.value)) {
