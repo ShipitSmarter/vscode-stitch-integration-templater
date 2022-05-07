@@ -107,6 +107,10 @@ export function toBoolean(string:string) : boolean {
 	return outString;
 }
 
+export function isEmpty(string: string) : boolean {
+	return (string === undefined || string === null || string === '');
+}
+
 export function isEmptyStringArray(array: string[]) : boolean {
 	let isEmpty: boolean = true;
 

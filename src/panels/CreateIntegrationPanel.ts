@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, getExtensionFile, startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean, isEmptyStringArray, arrayFrom0 } from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 
@@ -275,21 +275,26 @@ export class CreateIntegrationPanel {
   }
 
   private _getNewScenarioValue(fieldValue:string) : string {
-    return fieldValue.replace(/[^\>]+\> /g, '');
+    let newScenarioValue = '';
+    if (!isEmpty(fieldValue)) {
+      newScenarioValue = fieldValue.replace(/[^\>]+\> /g, '');
+    }
+    return newScenarioValue;
   }
 
   private _getNewScenariosString(): string {
+    // extract scenario names and sort
+    let newScenarios : string[] = this._scenarioFieldValues.map( el => this._getNewScenarioValue(el)).sort();
 
     let newScenariosString: string = '';
-    for (let index = 0; index < this._scenarioFieldValues.length; index++) {
-      if (this._scenarioFieldValues[index] !== undefined && this._scenarioFieldValues[index] !== '') {
+    for (let index = 0; index < newScenarios.length; index++) {
+      if (newScenarios[index] !== '') {
         // remove parent folder indicator if present
-        let scenarioName = this._getNewScenarioValue(this._scenarioFieldValues[index]);
-        newScenariosString += '\n    ' + '"' + scenarioName + '"';
+        newScenariosString += '\n    ' + '"' + newScenarios[index] + '"';
 
         // check if comma is needed
-        let remainingFieldValues: string[] = this._scenarioFieldValues.slice(index + 1, this._scenarioFieldValues.length);
-        if (!isEmptyStringArray(remainingFieldValues)) {
+        let remainingScenarios: string[] = newScenarios.slice(index + 1, newScenarios.length);
+        if (!isEmptyStringArray(remainingScenarios)) {
           newScenariosString += ',';
         }
       }
