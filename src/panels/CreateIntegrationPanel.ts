@@ -274,13 +274,17 @@ export class CreateIntegrationPanel {
     terminal.sendText(`./${this._getScriptName()}`);
   }
 
+  private _getNewScenarioValue(fieldValue:string) : string {
+    return fieldValue.replace(/[^\>]+\> /g, '');
+  }
+
   private _getNewScenariosString(): string {
 
     let newScenariosString: string = '';
     for (let index = 0; index < this._scenarioFieldValues.length; index++) {
       if (this._scenarioFieldValues[index] !== undefined && this._scenarioFieldValues[index] !== '') {
         // remove parent folder indicator if present
-        let scenarioName = this._scenarioFieldValues[index].replace(/[^\>]+\> /g, '');
+        let scenarioName = this._getNewScenarioValue(this._scenarioFieldValues[index]);
         newScenariosString += '\n    ' + '"' + scenarioName + '"';
 
         // check if comma is needed
