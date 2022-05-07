@@ -282,49 +282,47 @@ export class CreateIntegrationPanel {
     return newScenarioValue;
   }
 
-  private _getNewScenariosString(): string {
-    // extract scenario names and sort
-    let newScenarios : string[] = this._scenarioFieldValues.map( el => this._getNewScenarioValue(el)).sort();
-
-    let newScenariosString: string = '';
-    for (let index = 0; index < newScenarios.length; index++) {
-      if (newScenarios[index] !== '') {
-        // remove parent folder indicator if present
-        newScenariosString += '\n    ' + '"' + newScenarios[index] + '"';
-
-        // check if comma is needed
-        let remainingScenarios: string[] = newScenarios.slice(index + 1, newScenarios.length);
-        if (!isEmptyStringArray(remainingScenarios)) {
-          newScenariosString += ',';
-        }
-      }
-    }
-    return newScenariosString;
-  }
-
   private _getScenariosString(): string {
     let scenariosString = '';     // pre-allocate
 
-    // add existing scenarios
+    // pre-allocate scenario object array
+    let scenarioObjectArray : {execute: boolean, name: string}[] = [];
+
+    // add existing scenarios (if 'update')
     if (this._createUpdateValue === 'update') {
       for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
-        let commenting = '# ';
-        if (this._existingScenarioCheckboxValues[index]) {
-          commenting = '';
-        }
-
-        scenariosString += '\n    ' + commenting + '"' + this._existingScenarioFieldValues[index] + '"';
-
-        // check if comma is needed
-        let remainingCheckboxes: boolean[] = this._existingScenarioCheckboxValues.slice(index + 1, this._existingScenarioCheckboxValues.length);
-        if ((remainingCheckboxes.filter(el => el === true).length > 0) || !isEmptyStringArray(this._scenarioFieldValues)) {
-          scenariosString += ',';
-        }
+        scenarioObjectArray.push( {
+          execute: this._existingScenarioCheckboxValues[index],
+          name: this._existingScenarioFieldValues[index]
+        });
       }
     }
 
-    // add 'new' scenarios
-    scenariosString += this._getNewScenariosString();
+    // add new scenarios
+    let newScenarios : string[] = this._scenarioFieldValues.map( el => this._getNewScenarioValue(el)).sort();
+    for (const scenario of newScenarios) {
+      if (!isEmpty(scenario)) {
+        scenarioObjectArray.push( {
+          execute: true,
+          name: scenario
+        });
+      }
+    }
+
+    // sort
+    scenarioObjectArray.sort((a, b) => (a.name > b.name) ? 1 : -1);
+
+    // build scenario string
+    for (let index = 0; index < scenarioObjectArray.length; index++) {
+      let scenarioObject = scenarioObjectArray[index];
+      scenariosString += '\n    ' + (scenarioObject.execute ? '' : '#') + '"' + scenarioObject.name + '"'; 
+
+      // check if comma is needed
+      let remaining : boolean[] = scenarioObjectArray.slice(index+1, scenarioObjectArray.length).map( x => x.execute);
+      if (remaining.includes(true)) {
+        scenariosString += ',';
+      }
+    }
 
     // add 'Scenarios'  label
     scenariosString = '$Scenarios = @(' + scenariosString + '\n )';
