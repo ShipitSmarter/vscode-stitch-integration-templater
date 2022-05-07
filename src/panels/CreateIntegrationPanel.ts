@@ -446,7 +446,7 @@ export class CreateIntegrationPanel {
       return ((element !== null) && ("" + element !== ""));
     });
 
-    return scenarios;
+    return scenarios.sort();
   }
 
   private _cropFlexFields() {
