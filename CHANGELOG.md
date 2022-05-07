@@ -4,7 +4,9 @@
 
 * Initial release
 
-# 1.0.1 
-- now disallows execution of create/update if form contains duplicate scenarios
-- reads/writes scenarios from/to integration script file in alphabetical order, both when 'create' and 'update'
-  - This means the 'existing scenarios' also show in alphabetical order in the 'update' form
+## 1.0.1 
+- now disallows create/update action scenario fields contain duplicates
+  - indicates with colors and tooltip what should be fixed
+- Alphabetical ordering of scenarios
+  - When 'update', the 'existing scenarios' now show in alphabetical order
+  - When 'create' or 'update', scenarios are written to integration script file in alphabetical order
