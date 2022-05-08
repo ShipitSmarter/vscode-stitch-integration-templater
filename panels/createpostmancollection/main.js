@@ -6,10 +6,10 @@ function main() {
   // button onclick event listeners
   document.getElementById("createpostmancollection").addEventListener("click", createPostmanCollection);
 
-  // input fields
-  const fields = document.querySelectorAll(".field,dropdown");
+  // dropdowns
+  const fields = document.querySelectorAll(".dropdown");
   for (const field of fields) {
-    field.addEventListener("keyup", fieldChange);
+    field.addEventListener("change", fieldChange);
   }
 
   // on panel creation: save all dropdown values (if exist)
@@ -32,6 +32,7 @@ function fieldChange(event) {
     // dropdown: delete scenarios if module dropdown change, refresh panel
     case 'dropdown':
       // some dropdown logic here
+      refreshPanel('dropdown');
       break;
   }
   
@@ -62,6 +63,10 @@ function isEmpty(string) {
   }
 
   return empty;
+}
+
+function refreshPanel(string="") {
+  vscodeApi.postMessage({ command: "refreshpanel", text: string });
 }
 
 function createPostmanCollection() {

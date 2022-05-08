@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 
@@ -15,6 +15,17 @@ export class CreatePostmanCollectionPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
+  private _scriptPath: string = '';
+  private _carriers: string[] = [];
+  private _apis: string[] = [];
+  private _modules: string[] = [];
+  private _integrationObjects: { 
+    path: string, 
+    carrier: string, 
+    api: string, 
+    module: string,
+    carriercode: string
+  }[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -60,7 +71,7 @@ export class CreatePostmanCollectionPanel {
     }
   }
 
-  // update number of step fields
+  // update panel
   private _updateWebview(extensionUri: vscode.Uri) {
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
   }
@@ -113,8 +124,9 @@ export class CreatePostmanCollectionPanel {
       // show info message
       vscode.window.showInformationMessage('Creating Postman Collection for ' + this._getIntegrationName());
 
-      // get script path
-      //let scriptPath = this._getScriptPath(functionsPath);
+
+      // load script content
+      let scriptContent = fs.readFileSync(this._scriptPath, 'utf8');
 
       // execute powershell
       this._runScript(terminal, functionsPath);
@@ -137,21 +149,16 @@ export class CreatePostmanCollectionPanel {
     terminal.sendText(`Write-Host 'Hello World!'`);
   }
 
-  private _getModularFromScript(scriptContent: string): boolean {
-    let isModular: boolean = false;
-
-    // extract modular value from ps script content using regex
-    let rawModular: string[] = scriptContent.match(/\$ModularXMLs\s+=\s+\$(\S+)/) ?? [''];
-    if (rawModular.length >= 2) {
-      let modularString: string = rawModular[1];
-      if (modularString.toLowerCase() === 'true') {
-        isModular = true;
-      }
+  private _getFromScript(scriptContent: string, variableName: string) : string {
+    let variableValue: string = '';
+    let variableRegex = new RegExp("\\$" + variableName + "\\s+=\\s+(\\S+)");
+    let rawVariable: string[] = scriptContent.match(variableRegex) ?? [''];
+    if (rawVariable.length >= 2) {
+      variableValue = rawVariable[1].replace(/["'`]*/g,'');
     }
 
-    return isModular;
+    return variableValue;
   }
-
 
   private _getIntegrationName(): string {
     return this._fieldValues[carrierIndex] + '/' + this._fieldValues[apiIndex] + '/' + this._fieldValues[moduleIndex];
@@ -162,22 +169,25 @@ export class CreatePostmanCollectionPanel {
     return filesPath + '/carriers/' + this._fieldValues[carrierIndex];
   }
 
-  private async _getAvailableModularScenarioElements(): Promise<string[]> {
-    let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + this._fieldValues[moduleIndex] + '/**/*.xml');
+  private async _getAvailableIntegrations() {
+    // integration script path array
+    let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
 
-    let elements: string[] = [];
+    // build integration array
+    for (const script of integrationScripts) {
+      // load script content
+      let scriptContent = fs.readFileSync(script, 'utf8');
 
-    for (let index = 0; index < elementXmls.length; index++) {
-      let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
-      let elementParentName = parentPath(cleanPath(elementXmls[index])).split('/').pop() ?? '';
-      // only show parent indicator if not [module]
-      if (elementParentName === this._fieldValues[moduleIndex]) {
-        elementParentName = '';
-      }
-      elements[index] = elementName;
+      // add array element
+      this._integrationObjects.push({
+        path: script,
+        carrier: this._getFromScript(scriptContent,'CarrierName'),
+        api: this._getFromScript(scriptContent, 'CarrierAPI'),
+        module: this._getFromScript(scriptContent,'Module'),
+        carriercode: this._getFromScript(scriptContent,'CARRIERCODE')
+      });
+
     }
-
-    return elements.sort();
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
@@ -187,14 +197,36 @@ export class CreatePostmanCollectionPanel {
     const mainUri = getUri(webview, extensionUri, ["panels", "createpostmancollection", "main.js"]);
     const styleUri = getUri(webview, extensionUri, ["panels", "createpostmancollection", "style.css"]);
 
-    // get available scenarios, available modular elements
-    let modularElements : string[] = await this._getAvailableModularScenarioElements();
+    // get available integration details (first time only)
+    if (this._integrationObjects.length === 0) {
+      await this._getAvailableIntegrations();
+
+      let firstIntegration: { path: string, carrier: string, api: string, module: string, carriercode: string} = this._integrationObjects[0] ?? { path: "", carrier: "", api: "", module: "booking", carriercode: ""} ;
+
+      this._fieldValues[carrierIndex]     = firstIntegration.carrier;
+      this._fieldValues[apiIndex]         = firstIntegration.api;
+      this._fieldValues[moduleIndex]      = firstIntegration.module;
+      this._fieldValues[carrierCodeIndex] = firstIntegration.carriercode;
+    }
+
+    // set carrier array: just all carriers available (in .ps1 integration script files)
+    this._carriers      = uniqueSort(this._integrationObjects.map(el => el.carrier));
+
+    // api array: filter on carrier
+    let carrierIOs    = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
+    this._apis          = uniqueSort(carrierIOs.map(el => el.api));
+
+    // module array: filter on carrier and api
+    let carrierApiIOs = carrierIOs.filter(el => this._fieldValues[apiIndex] === el.api );
+    this._modules       = uniqueSort(carrierApiIOs.map(el => el.module));
 
     // construct panel html object and retrieve html
     let createPostmanCollectionHtmlObject: CreatePostmanCollectionHtmlObject = new CreatePostmanCollectionHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
-      modularElements,
-      this._fieldValues
+      this._fieldValues,
+      this._carriers,
+      this._apis,
+      this._modules
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();

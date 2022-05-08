@@ -123,3 +123,12 @@ export function isEmptyStringArray(array: string[]) : boolean {
 	}
 	return isEmpty;
 }
+
+export function uniqueArray(array: any[]) : any[] {
+	// https://stackoverflow.com/a/33121880/1716283
+	return [...new Set(array)];
+} 
+
+export function uniqueSort(array: any[]) : any[] {
+	return uniqueArray(array).sort();
+}

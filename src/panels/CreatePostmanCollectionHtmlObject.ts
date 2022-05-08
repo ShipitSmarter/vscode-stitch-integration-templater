@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort} from "../utilities/functions";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -13,17 +13,19 @@ export class CreatePostmanCollectionHtmlObject {
   // constructor
   public constructor(  
     private _uris: vscode.Uri[],
-    private _modularElements: string[],
-    private _fieldValues: string[]
+    private _fieldValues: string[],
+    private _carriers: string[],
+    private _apis: string[],
+    private _modules: string[]
     ) { }
 
   // METHODS
   public getHtml() {
     // define necessary extension Uris
-    const toolkitUri    = this._uris[0];
-    const codiconsUri   = this._uris[1];
-    const mainUri       = this._uris[2];
-    const styleUri      = this._uris[3];
+    const toolkitUri  = this._uris[0];
+    const codiconsUri = this._uris[1];
+    const mainUri     = this._uris[2];
+    const styleUri    = this._uris[3];
 
     // define panel HTML
     let html =  /*html*/`
@@ -93,12 +95,16 @@ export class CreatePostmanCollectionHtmlObject {
     let carrierFolderStructureGrid = /*html*/ `
       <section class="component-example">
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
-        <vscode-text-field id="carriername" title="test hover carrier name" class="field" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} placeholder="carrier" size="5"></vscode-text-field>
+        <vscode-dropdown id="carriername" class="dropdown" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} position="below">
+            ${dropdownOptions(this._carriers)}
+          </vscode-dropdown>
         /
-        <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
+        <vscode-dropdown id="carrierapiname" class="dropdown" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} position="below">
+            ${dropdownOptions(this._apis)}
+          </vscode-dropdown>
         /
         <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
-          ${dropdownOptions(['booking', 'tracking', 'cancel', 'pickup', 'pickup_cancel'])}
+          ${dropdownOptions(this._modules)}
         </vscode-dropdown>
 
       </section>`;
