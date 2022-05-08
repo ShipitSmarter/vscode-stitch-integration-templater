@@ -31,7 +31,8 @@
     "templater"
   ],
   "activationEvents": [
-    "onCommand:stitch.integration-templater"
+    "onCommand:stitch.integration-templater",
+    "onCommand:stitch.postman-collection"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -39,6 +40,10 @@
       {
         "command": "stitch.integration-templater",
         "title": "Stitch: Create or update carrier integration"
+      },
+      {
+        "command": "stitch.postman-collection",
+        "title": "Stitch: Create Postman collection"
       }
     ]
   },
