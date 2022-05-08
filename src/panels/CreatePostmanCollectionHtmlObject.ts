@@ -81,8 +81,8 @@ export class CreatePostmanCollectionHtmlObject {
 
   private _getCreateButton(): string {
     let createButton: string = /*html*/ `
-      <vscode-button id="createintegration" appearance="primary">
-        CreatePostman Collection
+      <vscode-button id="createpostmancollection" appearance="primary">
+        Create Postman Collection
         <span slot="start" class="codicon codicon-add"></span>
       </vscode-button>
       `;
@@ -101,12 +101,6 @@ export class CreatePostmanCollectionHtmlObject {
           ${dropdownOptions(['booking', 'tracking', 'cancel', 'pickup', 'pickup_cancel'])}
         </vscode-dropdown>
 
-        <section class="component-example">
-          <vscode-button id="checkintegrationexists" appearance="primary">
-            Check
-            <span slot="start" class="codicon codicon-refresh"></span>
-          </vscode-button>
-        </section>
       </section>`;
 
     return carrierFolderStructureGrid;

@@ -113,6 +113,9 @@ export class CreatePostmanCollectionPanel {
       // show info message
       vscode.window.showInformationMessage('Creating Postman Collection for ' + this._getIntegrationName());
 
+      // get script path
+      //let scriptPath = this._getScriptPath(functionsPath);
+
       // execute powershell
       this._runScript(terminal, functionsPath);
 
@@ -181,8 +184,8 @@ export class CreatePostmanCollectionPanel {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
     const codiconsUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);
-    const mainUri = getUri(webview, extensionUri, ["panels", "createintegration", "main.js"]);
-    const styleUri = getUri(webview, extensionUri, ["panels", "createintegration", "style.css"]);
+    const mainUri = getUri(webview, extensionUri, ["panels", "createpostmancollection", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["panels", "createpostmancollection", "style.css"]);
 
     // get available scenarios, available modular elements
     let modularElements : string[] = await this._getAvailableModularScenarioElements();
