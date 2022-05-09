@@ -32,7 +32,7 @@ function fieldChange(event) {
     // dropdown: delete scenarios if module dropdown change, refresh panel
     case 'dropdown':
       // some dropdown logic here
-      refreshPanel('dropdown');
+      //refreshPanel('dropdown');
       break;
   }
   

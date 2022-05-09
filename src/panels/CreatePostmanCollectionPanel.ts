@@ -15,7 +15,6 @@ export class CreatePostmanCollectionPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
-  private _scriptPath: string = '';
   private _carriers: string[] = [];
   private _apis: string[] = [];
   private _modules: string[] = [];
@@ -109,12 +108,37 @@ export class CreatePostmanCollectionPanel {
             var index = +classIndexValue[1];
             var value = classIndexValue[2];
             this._fieldValues[index] = value;
+
+            // do some updating and refreshing
+            switch (index) {
+              case carrierIndex:
+                // api array: filter on carrier
+                let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
+                this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
+                this._fieldValues[apiIndex]         = this._apis[0];
+
+                // no break: fall-through is intentional!
+              case apiIndex:
+                // module array: filter on carrier and api
+                let carrierApiIOs                   = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api );
+                this._modules                       = uniqueSort(carrierApiIOs.map(el => el.module));
+                this._fieldValues[moduleIndex]      = this._modules[0];
+
+                this._updateWebview(extensionUri);
+                break;
+              case moduleIndex:
+                break;
+            }
             break;
         }
       },
       undefined,
       this._disposables
     );
+  }
+
+  private _getIntegrationObject() : {path:string, carrier:string, api:string, module:string, carriercode:string} {
+    return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0];
   }
 
   private _createPostmanCollection(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
@@ -124,12 +148,15 @@ export class CreatePostmanCollectionPanel {
       // show info message
       vscode.window.showInformationMessage('Creating Postman Collection for ' + this._getIntegrationName());
 
-
       // load script content
-      let scriptContent = fs.readFileSync(this._scriptPath, 'utf8');
+      //let allIntObjects = this._integrationObjects;
+      let currentIntObject = this._getIntegrationObject();
+      let scriptContent = fs.readFileSync(currentIntObject.path, 'utf8');
 
       // execute powershell
       this._runScript(terminal, functionsPath);
+
+      //let henk = '';
 
       // refresh window? TODO: possibly write refresh window functionality
       // ...
@@ -151,7 +178,7 @@ export class CreatePostmanCollectionPanel {
 
   private _getFromScript(scriptContent: string, variableName: string) : string {
     let variableValue: string = '';
-    let variableRegex = new RegExp("\\$" + variableName + "\\s+=\\s+(\\S+)");
+    let variableRegex = new RegExp(variableName + "\\s+=\\s+(\\S+)");
     let rawVariable: string[] = scriptContent.match(variableRegex) ?? [''];
     if (rawVariable.length >= 2) {
       variableValue = rawVariable[1].replace(/["'`]*/g,'');
@@ -201,24 +228,24 @@ export class CreatePostmanCollectionPanel {
     if (this._integrationObjects.length === 0) {
       await this._getAvailableIntegrations();
 
-      let firstIntegration: { path: string, carrier: string, api: string, module: string, carriercode: string} = this._integrationObjects[0] ?? { path: "", carrier: "", api: "", module: "booking", carriercode: ""} ;
+      // set carrier array: just all carriers available (in .ps1 integration script files)
+      this._carriers                      = uniqueSort(this._integrationObjects.map(el => el.carrier));
+      this._fieldValues[carrierIndex]     = this._carriers[0];
 
-      this._fieldValues[carrierIndex]     = firstIntegration.carrier;
-      this._fieldValues[apiIndex]         = firstIntegration.api;
-      this._fieldValues[moduleIndex]      = firstIntegration.module;
-      this._fieldValues[carrierCodeIndex] = firstIntegration.carriercode;
+      // api array: filter on carrier
+      let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
+      this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
+      this._fieldValues[apiIndex]         = this._apis[0];
+
+      // module array: filter on carrier and api
+      let carrierApiIOs                   = carrierIOs.filter(el => this._fieldValues[apiIndex] === el.api );
+      this._modules                       = uniqueSort(carrierApiIOs.map(el => el.module));
+      this._fieldValues[moduleIndex]      = this._modules[0];
+
+      // carrier code
+      let currentIntObject                = this._getIntegrationObject();
+      this._fieldValues[carrierCodeIndex] = currentIntObject.carriercode;
     }
-
-    // set carrier array: just all carriers available (in .ps1 integration script files)
-    this._carriers      = uniqueSort(this._integrationObjects.map(el => el.carrier));
-
-    // api array: filter on carrier
-    let carrierIOs    = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
-    this._apis          = uniqueSort(carrierIOs.map(el => el.api));
-
-    // module array: filter on carrier and api
-    let carrierApiIOs = carrierIOs.filter(el => this._fieldValues[apiIndex] === el.api );
-    this._modules       = uniqueSort(carrierApiIOs.map(el => el.module));
 
     // construct panel html object and retrieve html
     let createPostmanCollectionHtmlObject: CreatePostmanCollectionHtmlObject = new CreatePostmanCollectionHtmlObject(
