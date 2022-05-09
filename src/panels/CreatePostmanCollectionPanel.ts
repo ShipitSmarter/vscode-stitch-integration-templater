@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 
@@ -204,6 +204,19 @@ export class CreatePostmanCollectionPanel {
     for (const script of integrationScripts) {
       // load script content
       let scriptContent = fs.readFileSync(script, 'utf8');
+
+      // extract carrier, api, module
+      let carrier: string   = this._getFromScript(scriptContent,'CarrierName');
+      let api: string       = this._getFromScript(scriptContent, 'CarrierAPI');
+      let module: string    = this._getFromScript(scriptContent,'Module');
+      let modular: boolean  = toBoolean(this._getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
+
+      // check if any scenarios available, and if not, skip
+      let scenarioGlob = modular ? `**/carriers/${carrier}/${api}/${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
+      let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
+      if (scenarios.length === 0) {
+        continue;
+      }
 
       // add array element
       this._integrationObjects.push({
