@@ -1,5 +1,6 @@
 import { Uri, Webview, workspace , ExtensionContext, window, Terminal} from "vscode";
 import * as path from "path";
+import * as fs from "fs";
 
 export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) {
   return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList));
@@ -32,6 +33,55 @@ export function getExtensionFile(context: ExtensionContext, folder: string, file
 	let filePath = Uri.parse(filePathEscaped).fsPath;
 
 	return filePath;
+}
+
+export async function getAvailableIntegrations() : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string}[]> {
+	// pre-allocate output
+	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string}[] = [];
+
+	// integration script path array
+	let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
+
+	// build integration array
+	for (const script of integrationScripts) {
+		// load script content
+		let scriptContent = fs.readFileSync(script, 'utf8');
+
+		// extract carrier, api, module
+		let carrier: string   = getFromScript(scriptContent,'CarrierName');
+		let api: string       = getFromScript(scriptContent, 'CarrierAPI');
+		let module: string    = getFromScript(scriptContent,'Module');
+		let modular: boolean  = toBoolean(getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
+
+		// check if any scenarios available, and if not, skip
+		let scenarioGlob = modular ? `**/carriers/${carrier}/${api}/${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
+		let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
+		if (scenarios.length === 0) {
+			continue;
+		}
+
+		// add array element
+		integrationObjects.push({
+			path: 		 script,
+			carrier: 	 getFromScript(scriptContent,'CarrierName'),
+			api: 		 getFromScript(scriptContent, 'CarrierAPI'),
+			module: 	 getFromScript(scriptContent,'Module'),
+			carriercode: getFromScript(scriptContent,'CARRIERCODE')
+		});
+	}
+
+	return integrationObjects;
+}
+
+export function getFromScript(scriptContent: string, variableName: string) : string {
+    let variableValue: string = '';
+    let variableRegex = new RegExp(variableName + "\\s+=\\s+(\\S+)");
+    let rawVariable: string[] = scriptContent.match(variableRegex) ?? [''];
+    if (rawVariable.length >= 2) {
+      variableValue = rawVariable[1].replace(/["'`]*/g,'');
+    }
+
+    return variableValue;
 }
 
 export function startScript (fileName ?: string , filePath ?: string , command ?: string) : Terminal {

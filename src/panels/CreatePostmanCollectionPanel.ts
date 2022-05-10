@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -262,17 +262,6 @@ export class CreatePostmanCollectionPanel {
     terminal.sendText(command);
   }
 
-  private _getFromScript(scriptContent: string, variableName: string) : string {
-    let variableValue: string = '';
-    let variableRegex = new RegExp(variableName + "\\s+=\\s+(\\S+)");
-    let rawVariable: string[] = scriptContent.match(variableRegex) ?? [''];
-    if (rawVariable.length >= 2) {
-      variableValue = rawVariable[1].replace(/["'`]*/g,'');
-    }
-
-    return variableValue;
-  }
-
   private _getIntegrationName(): string {
     return this._fieldValues[carrierIndex] + '/' + this._fieldValues[apiIndex] + '/' + this._fieldValues[moduleIndex];
   }
@@ -280,40 +269,6 @@ export class CreatePostmanCollectionPanel {
   private _getCarrierPath(functionsPath: string): string {
     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
     return filesPath + '/carriers/' + this._fieldValues[carrierIndex];
-  }
-
-  private async _getAvailableIntegrations() {
-    // integration script path array
-    let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
-
-    // build integration array
-    for (const script of integrationScripts) {
-      // load script content
-      let scriptContent = fs.readFileSync(script, 'utf8');
-
-      // extract carrier, api, module
-      let carrier: string   = this._getFromScript(scriptContent,'CarrierName');
-      let api: string       = this._getFromScript(scriptContent, 'CarrierAPI');
-      let module: string    = this._getFromScript(scriptContent,'Module');
-      let modular: boolean  = toBoolean(this._getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
-
-      // check if any scenarios available, and if not, skip
-      let scenarioGlob = modular ? `**/carriers/${carrier}/${api}/${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
-      let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
-      if (scenarios.length === 0) {
-        continue;
-      }
-
-      // add array element
-      this._integrationObjects.push({
-        path: script,
-        carrier: this._getFromScript(scriptContent,'CarrierName'),
-        api: this._getFromScript(scriptContent, 'CarrierAPI'),
-        module: this._getFromScript(scriptContent,'Module'),
-        carriercode: this._getFromScript(scriptContent,'CARRIERCODE')
-      });
-
-    }
   }
 
   private async _getCompanies() {
@@ -329,7 +284,7 @@ export class CreatePostmanCollectionPanel {
     }
 
     // sort
-    this._codeCompanies = uniqueSort(this._codeCompanies);
+    this._codeCompanies = uniqueSort(this._codeCompanies).sort((a, b) => (a.company > b.company) ? 1 : -1);
 
   }
 
@@ -378,10 +333,10 @@ export class CreatePostmanCollectionPanel {
 
     // initialize (first time)
     if (this._integrationObjects.length === 0) {
-      await this._getAvailableIntegrations();
+      this._integrationObjects = await getAvailableIntegrations();
       await this._getCompanies();
       await this._getRestUrls();
-      this._initializeValues();      
+      this._initializeValues();
     }
 
     // crop flexible header field values
