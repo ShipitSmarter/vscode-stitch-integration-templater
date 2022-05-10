@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -194,6 +194,24 @@ export class CreatePostmanCollectionPanel {
     return this._codeCompanies.filter(el => el.company === this._fieldValues[companyIndex])[0];
   }
 
+  private _getHeaderString() : string {
+    let headerString : string = '';
+    for (let index = 0; index < this._headers.length; index++) {
+      let header = this._headers[index];
+      if (!isEmpty(header.name)) {
+        headerString += `"${header.name}": "${header.value}"`;
+
+
+        // check if comma is needed
+      let remaining : string[] = this._headers.slice(index+1, this._headers.length).map( el => el.name);
+      if (!isEmpty(remaining.join(''))) {
+        headerString += ', \n';
+      }
+      }
+    }
+    return headerString;
+  }
+
   private _getPowerShellCommand() : string {
     // company object
     let companyObject: {company:string, codecompany:string} = this._getCompany();
@@ -208,8 +226,7 @@ export class CreatePostmanCollectionPanel {
     }`;
 
     let headers : string = `$Headers = '{
-      "CodeCompany": "${companyObject.codecompany}",
-      "Authorization": "{{managerlogin}}"
+      ${this._getHeaderString()}
     }'`;
 
     let modulePath = `$ModulePath = '${this._fieldValues[apiIndex]}\\${this._fieldValues[moduleIndex]}'`;
