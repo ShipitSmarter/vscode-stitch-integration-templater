@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
+import { create } from "domain";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -152,11 +153,6 @@ export class CreatePostmanCollectionPanel {
       // show info message
       vscode.window.showInformationMessage('Creating Postman Collection for ' + this._getIntegrationName());
 
-      // load script content
-      //let allIntObjects = this._integrationObjects;
-      let currentIntObject = this._getIntegrationObject();
-      let scriptContent = fs.readFileSync(currentIntObject.path, 'utf8');
-
       // execute powershell
       this._runScript(terminal, functionsPath);
 
@@ -167,7 +163,35 @@ export class CreatePostmanCollectionPanel {
     });
   }
 
+  private _getPowerShellCommand() : string {
+    // company object
+    let companyObject: {company:string, codecompany:string} = this._codeCompanies.filter(el => el.company === this._fieldValues[companyIndex])[0];
+
+    // string replace list
+    let stringReplaceList: string = `$StringReplaceList = @{
+      COLLECTIONNAME      = '${companyObject.company}_${this._fieldValues[carrierIndex]}_${this._fieldValues[apiIndex]}_${this._fieldValues[moduleIndex]}'
+      CARRIERNAME         = '${this._fieldValues[carrierIndex]}'
+      SISRESTAPIURL       = 'https://www2.shipitsmarter.com/api/ext/v1/shipments'
+      MODULENAME          = '${this._fieldValues[moduleIndex]}'
+    }`;
+
+    let headers : string = `$Headers = '{
+      "CodeCompany": "${companyObject.codecompany}",
+      "Authorization": "{{managerlogin}}"
+    }'`;
+
+    let modulePath = `$ModulePath = '${this._fieldValues[apiIndex]}\\${this._fieldValues[moduleIndex]}'`;
+    let loadFunctions = `. "..\\..\\scenario-templates\\scripts\\functions.ps1"`;
+    let createPostmanCollection = `New-PostmanCollection -StringReplaceList $StringReplaceList -Headers $Headers -ModulePath $ModulePath -Test`;
+    let nl = '\n';
+
+    return stringReplaceList + nl + headers + nl + modulePath + nl + loadFunctions + nl + createPostmanCollection;
+  }
+
   private _runScript(terminal: vscode.Terminal, functionsPath: string) {
+    // get script string
+    let command = this._getPowerShellCommand();
+
     // check if terminal exists and is still alive
     let terminalExists: boolean = (terminal && !(terminal.exitStatus));
     // open terminal if not yet exists
@@ -175,9 +199,9 @@ export class CreatePostmanCollectionPanel {
       terminal = startScript('', '');
     }
 
-    // execute script TODO: write script input
+    // execute script write script input
     terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
-    terminal.sendText(`Write-Host 'Hello World!'`);
+    terminal.sendText(command);
   }
 
   private _getFromScript(scriptContent: string, variableName: string) : string {
