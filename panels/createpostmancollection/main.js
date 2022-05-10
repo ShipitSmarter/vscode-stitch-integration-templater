@@ -18,7 +18,10 @@ function main() {
     field.addEventListener("keyup", fieldChange);
   }
 
-  
+  // headers
+  // set first header read-only
+  document.getElementById('headername0').readOnly = true;
+  document.getElementById('headervalue0').readOnly = true;
 }
 
 function fieldChange(event) {
