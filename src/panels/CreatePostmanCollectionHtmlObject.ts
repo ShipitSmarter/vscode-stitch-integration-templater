@@ -167,15 +167,15 @@ export class CreatePostmanCollectionHtmlObject {
     }
 
     let html: string = /*html*/ `
-      <section class="row11">
-        <section class="component-example">
+      <section class="component-example">
+        <div class="floatleft">
           <p>Name</p>
           ${subHeaderName}
-        </section>
-        <section class="component-example">
+        </div>
+        <div class="floatleft">
           <p>Value</p>
           ${subPHeaderValue}
-        </section>
+        </div>
       </section>`;
 
     return html;

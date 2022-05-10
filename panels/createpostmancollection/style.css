@@ -18,10 +18,13 @@
   grid-template-columns: 1fr 1fr 1fr;
 }
 
-
 .rowsingle {
   display: grid;
   grid-template-columns: 1fr;
+}
+
+.floatleft {
+  float: left;
 }
 
 .rowelement {
