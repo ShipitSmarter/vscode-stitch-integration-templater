@@ -32,6 +32,7 @@ export class CreateIntegrationPanel {
   private _currentIntegration :     {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
   private _modularElements: string[] = [];
+  private _functionsPath: string = '';
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -162,43 +163,46 @@ export class CreateIntegrationPanel {
   }
 
   private _checkIntegrationExists(extensionUri: vscode.Uri) {
-    // getWorkspaceFile is async -> all following steps must be executed within the 'then'
-    // start at scripts/functions.ps1, because unique
-    getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
-      // get current integration
-      this._currentIntegration = this._getIntegrationObject();
+    // get current integration
+    this._currentIntegration = this._getIntegrationObject();
 
-      // if current integration is not empty: exists -> 'update'
-      if (this._currentIntegration !== this._emptyIntegrationObject) {
-        // set 'update' if integration path exists
-        this._createUpdateValue = 'update';
+    // if current integration is not empty: exists -> 'update'
+    if (this._currentIntegration !== this._emptyIntegrationObject) {
+      // set 'update' if integration path exists
+      this._createUpdateValue = 'update';
 
-        // load script content
-        let scriptContent = fs.readFileSync(this._currentIntegration.path, 'utf8');
+      // update modular value from script
+      this._modularValue = this._currentIntegration.modular;
 
-        // update modular value from script
-        this._modularValue = this._currentIntegration.modular;
+      // update valid existing scenario values from scenario folder instead
+      this._existingScenarioFieldValues = this._currentIntegration.validscenarios;
 
-        // update valid existing scenario values from scenario folder instead
-        this._existingScenarioFieldValues = this._currentIntegration.validscenarios;
+    } else {
+      // integrationpath does not exist: 'create'
+      this._createUpdateValue = 'create';
+      this._existingScenarioFieldValues = [];
+    }
 
-      } else {
-        // integrationpath does not exist: 'create'
-        this._createUpdateValue = 'create';
-        this._existingScenarioFieldValues = [];
-      }
+    // clean existing scenario checkbox values upon clicking 'check' button
+    this._existingScenarioCheckboxValues = [];
 
-      // clean existing scenario checkbox values upon clicking 'check' button
-      this._existingScenarioCheckboxValues = [];
-
-      // update panel
-      this._updateWebview(extensionUri);
-    });
+    // refresh available scenarios and module elements
+    if (this._modularValue) {
+      getModularElements(this._fieldValues[moduleIndex]).then(elements => {
+        this._modularElements = elements;
+        // update panel
+        this._updateWebview(extensionUri);
+      });
+    } else {
+      getAvailableScenarios(this._fieldValues[moduleIndex]).then(scenarios => {
+        this._availableScenarios = scenarios;
+        // update panel
+        this._updateWebview(extensionUri);
+      });
+    }
   }
 
   private _createIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
-    // getWorkspaceFile is async -> all following steps must be executed within the 'then'
-    getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
       // get current integration
       this._currentIntegration = this._getIntegrationObject();
 
@@ -213,24 +217,24 @@ export class CreateIntegrationPanel {
       vscode.window.showInformationMessage('Creating integration ' + this._getIntegrationName());
 
       // make integrationPath if not exists
-      fs.mkdirSync(this._getCarrierPath(functionsPath), { recursive: true });
+      fs.mkdirSync(this._getCarrierPath(this._functionsPath), { recursive: true });
 
       // load integration script template file
-      let templateContent = fs.readFileSync(this._getTemplatePath(functionsPath), 'utf8');
+      let templateContent = fs.readFileSync(this._getTemplatePath(this._functionsPath), 'utf8');
 
       // replace all values in template
       let newScriptContent = this._replaceInScriptTemplate(templateContent);
 
       // save to file
-      fs.writeFileSync(this._getScriptPath(functionsPath), newScriptContent, 'utf8');
+      fs.writeFileSync(this._getScriptPath(this._functionsPath), newScriptContent, 'utf8');
 
       // execute powershell
-      this._runScript(terminal, functionsPath);
+      this._runScript(terminal, this._functionsPath);
 
       // update integration objects
       let scenarios : string[] = this._getNewScenarios();
       this._currentIntegration = {
-        path: this._getScriptPath(functionsPath), 
+        path: this._getScriptPath(this._functionsPath), 
         carrier: this._fieldValues[carrierIndex], 
         api: this._fieldValues[apiIndex], 
         module: this._fieldValues[moduleIndex], 
@@ -245,13 +249,9 @@ export class CreateIntegrationPanel {
       this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
       this._checkIntegrationExists(extensionUri);
-    });
   }
 
   private _updateIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
-    // getWorkspaceFile is async -> all following steps must be executed within the 'then'
-    // start at scripts/functions.ps1, because unique
-    getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
       // get current integration
       this._currentIntegration = this._getIntegrationObject();
 
@@ -284,7 +284,7 @@ export class CreateIntegrationPanel {
       }
 
       // execute powershell
-      this._runScript(terminal, functionsPath);
+      this._runScript(terminal, this._functionsPath);
 
       // update integration objects
       let newScenarios : string[] = this._getNewScenarios();
@@ -298,7 +298,6 @@ export class CreateIntegrationPanel {
       this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
       this._checkIntegrationExists(extensionUri);
-    });
   }
 
   private _runScript(terminal: vscode.Terminal, functionsPath: string) {
@@ -495,6 +494,7 @@ export class CreateIntegrationPanel {
 
     // first time only: get integrations, available scenarios, modular elements
     if (this._integrationObjects.length === 0) {
+      this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
       this._integrationObjects = await getAvailableIntegrations();
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
