@@ -21,13 +21,7 @@ export class CreatePostmanCollectionPanel {
   private _carriers: string[] = [];
   private _apis: string[] = [];
   private _modules: string[] = [];
-  private _integrationObjects: { 
-    path: string, 
-    carrier: string, 
-    api: string, 
-    module: string,
-    carriercode: string
-  }[] = [];
+  private _integrationObjects: {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
   private _codeCompanies: {
     company: string,
     codecompany: string
@@ -179,7 +173,7 @@ export class CreatePostmanCollectionPanel {
     );
   }
 
-  private _getIntegrationObject() : {path:string, carrier:string, api:string, module:string, carriercode:string} {
+  private _getIntegrationObject() : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} {
     return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0];
   }
 

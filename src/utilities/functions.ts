@@ -35,9 +35,46 @@ export function getExtensionFile(context: ExtensionContext, folder: string, file
 	return filePath;
 }
 
-export async function getAvailableIntegrations() : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string}[]> {
+export async function getAvailableScenarios(module:string, withParent:boolean = true): Promise<string[]> {
+    let bookingScenarioXmls: string[] = await getWorkspaceFiles('**/scenario-templates/' + module + '/**/*.xml');
+
+    let bookingScenarios: string[] = [];
+
+    for (let index = 0; index < bookingScenarioXmls.length; index++) {
+      let scenarioName = (cleanPath(bookingScenarioXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
+      let scenarioParentName = parentPath(cleanPath(bookingScenarioXmls[index])).split('/').pop() ?? '';
+      // only show parent indicator if not [module]
+      if (scenarioParentName === module) {
+        scenarioParentName = '';
+      }
+      bookingScenarios[index] = withParent ? `${scenarioParentName} > ${scenarioName}` : scenarioName;
+    }
+
+    return bookingScenarios.sort();
+  }
+
+
+export async function getModularElements(module:string): Promise<string[]> {
+    let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*.xml');
+
+    let elements: string[] = [];
+
+    for (let index = 0; index < elementXmls.length; index++) {
+      let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
+      let elementParentName = parentPath(cleanPath(elementXmls[index])).split('/').pop() ?? '';
+      // only show parent indicator if not [module]
+      if (elementParentName === module) {
+        elementParentName = '';
+      }
+      elements[index] = elementName;
+    }
+
+    return elements.sort();
+}
+
+export async function getAvailableIntegrations() : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[]> {
 	// pre-allocate output
-	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string}[] = [];
+	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
 
 	// integration script path array
 	let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
@@ -53,12 +90,20 @@ export async function getAvailableIntegrations() : Promise<{path:string, carrier
 		let module: string    = getFromScript(scriptContent,'Module');
 		let modular: boolean  = toBoolean(getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
 
-		// check if any scenarios available, and if not, skip
+		// check if any scenarios available, and if not, skip (because cannot make postman collection)
 		let scenarioGlob = modular ? `**/carriers/${carrier}/${api}/${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
 		let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
 		if (scenarios.length === 0) {
 			continue;
 		}
+
+		// obtain valid scenarios from scenarios folder
+		let scenarioDir = fs.readdirSync(parentPath(cleanPath(script)) + `/${api}/${module}/scenarios`);
+		let integrationScenarios = scenarioDir.filter(el => !el.includes('.')).sort();
+
+		// filter on valid scenarios
+		let valids : string[] = modular ? await getModularElements(module) : await getAvailableScenarios(module, false);
+		let validScenarios : string [] = integrationScenarios.filter(el => isScenarioValid(el, modular, valids));
 
 		// add array element
 		integrationObjects.push({
@@ -66,11 +111,32 @@ export async function getAvailableIntegrations() : Promise<{path:string, carrier
 			carrier: 	 getFromScript(scriptContent,'CarrierName'),
 			api: 		 getFromScript(scriptContent, 'CarrierAPI'),
 			module: 	 getFromScript(scriptContent,'Module'),
-			carriercode: getFromScript(scriptContent,'CARRIERCODE')
+			carriercode: getFromScript(scriptContent,'CARRIERCODE'),
+			modular: 	 modular,
+			scenarios:   integrationScenarios,
+			validscenarios: validScenarios
 		});
 	}
 
 	return integrationObjects;
+}
+
+export function isScenarioValid(scenario:string, modular:boolean, validScenarios: string[]) : boolean {
+	let isValid = true;
+	if (modular) {
+		let currentElements = scenario.split('-');
+		let modularElements = validScenarios;
+		for (const element of currentElements) {
+			if (!modularElements.includes(element)) {
+				isValid = false;
+				break;
+			}
+		}
+	} else {
+		isValid = validScenarios.includes(scenario);
+	}
+
+	return isValid;
 }
 
 export function getFromScript(scriptContent: string, variableName: string) : string {
