@@ -32,6 +32,10 @@ export class CreatePostmanCollectionPanel {
     company: string,
     codecompany: string
   }[] = [];
+  private _restUrls: {
+    module: string,
+    url: string
+  }[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -215,12 +219,17 @@ export class CreatePostmanCollectionPanel {
   private _getPowerShellCommand() : string {
     // company object
     let companyObject: {company:string, codecompany:string} = this._getCompany();
+    let restApiUrl = "";
+    let urlObject = this._restUrls.filter(el => el.module === this._fieldValues[moduleIndex]);
+    if (urlObject.length > 0) {
+      restApiUrl = urlObject[0].url;
+    }
 
     // string replace list
     let stringReplaceList: string = `$StringReplaceList = @{
       COLLECTIONNAME      = '${companyObject.company}_${this._fieldValues[carrierIndex]}_${this._fieldValues[apiIndex]}_${this._fieldValues[moduleIndex]}'
       CARRIERNAME         = '${this._fieldValues[carrierIndex]}'
-      SISRESTAPIURL       = 'https://www2.shipitsmarter.com/api/ext/v1/shipments'
+      SISRESTAPIURL       = '${restApiUrl}'
       MODULENAME          = '${this._fieldValues[moduleIndex]}'
       CARRIERCODE         = '${this._getIntegrationObject().carriercode}'
     }`;
@@ -309,7 +318,7 @@ export class CreatePostmanCollectionPanel {
 
   private async _getCompanies() {
     // get companies and codecompanies from translation file
-    let translationPath = await getWorkspaceFile('**/CompanyToCodeCompany.csv');
+    let translationPath = await getWorkspaceFile('**/translations/CompanyToCodeCompany.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
     for (const translation of translations) {
@@ -322,6 +331,19 @@ export class CreatePostmanCollectionPanel {
     // sort
     this._codeCompanies = uniqueSort(this._codeCompanies);
 
+  }
+
+  private async _getRestUrls() {
+    // get companies and codecompanies from translation file
+    let translationPath = await getWorkspaceFile('**/translations/ModuleToTestRestApiUrl.csv');
+    let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
+
+    for (const translation of translations) {
+      this._restUrls.push({
+        module: translation.split(',')[0],
+        url: translation.split(',')[1]
+      });
+    }
   }
 
   private _initializeValues() {
@@ -347,8 +369,6 @@ export class CreatePostmanCollectionPanel {
     this._headers[1] = {name: 'Authorization', value: '{{managerlogin}}'};
   }
 
-
-
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
@@ -360,6 +380,7 @@ export class CreatePostmanCollectionPanel {
     if (this._integrationObjects.length === 0) {
       await this._getAvailableIntegrations();
       await this._getCompanies();
+      await this._getRestUrls();
       this._initializeValues();      
     }
 
