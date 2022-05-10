@@ -148,6 +148,11 @@ export class CreatePostmanCollectionPanel {
                     break;
                   case moduleIndex:
                     break;
+                  case companyIndex:
+                    // update code company header field and refresh
+                    this._headers[0].value = this._getCompany().codecompany;
+                    this._updateWebview(extensionUri);
+                    break;
                   case nofHeadersIndex:
                     this._updateWebview(extensionUri);
                     break;
@@ -185,9 +190,13 @@ export class CreatePostmanCollectionPanel {
     });
   }
 
+  private _getCompany() : {company: string, codecompany: string} {
+    return this._codeCompanies.filter(el => el.company === this._fieldValues[companyIndex])[0];
+  }
+
   private _getPowerShellCommand() : string {
     // company object
-    let companyObject: {company:string, codecompany:string} = this._codeCompanies.filter(el => el.company === this._fieldValues[companyIndex])[0];
+    let companyObject: {company:string, codecompany:string} = this._getCompany();
 
     // string replace list
     let stringReplaceList: string = `$StringReplaceList = @{
