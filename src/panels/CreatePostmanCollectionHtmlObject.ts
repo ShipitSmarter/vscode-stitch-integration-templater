@@ -1,11 +1,12 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1} from "../utilities/functions";
 
 // fixed fields indices
 const carrierIndex = 0;
 const apiIndex = 1;
 const moduleIndex = 2;
 const companyIndex = 3;
+const nofHeadersIndex = 4;
 
 export class CreatePostmanCollectionHtmlObject {
   // PROPERTIES
@@ -15,6 +16,7 @@ export class CreatePostmanCollectionHtmlObject {
   public constructor(  
     private _uris: vscode.Uri[],
     private _fieldValues: string[],
+    private _headers: {name: string, value: string}[],
     private _carriers: string[],
     private _apis: string[],
     private _modules: string[],
@@ -117,10 +119,65 @@ export class CreatePostmanCollectionHtmlObject {
             ${dropdownOptions(this._companies)}
           </vscode-dropdown>
       </section>
-      
+
+      <vscode-divider role="separator"></vscode-divider>
+
+      ${this._getHeadersGrid()}      
       `;
 
     return carrierFolderStructureGrid;
   }
 
+  private _getHeadersGrid(): string {
+    let headersGrid = /*html*/ `
+        <section class="component-example">
+          <h2>Headers</h2>
+
+          <section class="component-example">
+            <p>Number of headers</p>
+            <vscode-dropdown id="nofheaders" class="dropdown" index="${nofHeadersIndex}" ${this._valueString(this._fieldValues[nofHeadersIndex])} position="below">
+              ${dropdownOptions(arrayFrom1(10))}
+            </vscode-dropdown>
+          </section>
+
+          ${this._headerInputs(+this._fieldValues[nofHeadersIndex])}
+        </section>
+        `;
+
+    return headersGrid;
+  }
+
+  private _headerInputs(nofHeaders: number): string {
+
+    let subHeaderName: string = '';
+    let subPHeaderValue: string = '';
+    let hNames: string[] = this._headers.map(el => el.name);
+    let hValues : string[] = this._headers.map(el => el.value);
+    for (let header = 0; header < +nofHeaders; header++) {
+
+      subHeaderName += /*html*/ `
+        <section class="component-example">
+          <vscode-text-field id="headername${header}" index="${header}" ${this._valueString(hNames[header])} class="headername" placeholder="header name"></vscode-text-field>
+        </section>`;
+
+        subPHeaderValue += /*html*/ `
+        <section class="component-example">
+          <vscode-text-field id="headervalue${header}" index="${header}" ${this._valueString(hValues[header] )} class="headervalue" placeholder="header value"></vscode-text-field>
+        </section>`;
+    }
+
+    let html: string = /*html*/ `
+      <section class="row11">
+        <section class="component-example">
+          <p>Name</p>
+          ${subHeaderName}
+        </section>
+        <section class="component-example">
+          <p>Value</p>
+          ${subPHeaderValue}
+        </section>
+      </section>`;
+
+    return html;
+  }
 }

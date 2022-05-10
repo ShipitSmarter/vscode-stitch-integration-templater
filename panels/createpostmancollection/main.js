@@ -6,10 +6,16 @@ function main() {
   // button onclick event listeners
   document.getElementById("createpostmancollection").addEventListener("click", createPostmanCollection);
 
-  // dropdowns
-  const fields = document.querySelectorAll(".dropdown");
-  for (const field of fields) {
+  // save dropdowns
+  const dropdowns = document.querySelectorAll(".dropdown");
+  for (const field of dropdowns) {
     field.addEventListener("change", fieldChange);
+  }
+
+  // save input fields
+  const fields = document.querySelectorAll(".headername,.headervalue");
+  for (const field of fields) {
+    field.addEventListener("keyup", fieldChange);
   }
 
   
@@ -24,7 +30,8 @@ function fieldChange(event) {
   // do some more stuff based on field class
   switch (field.classList[0]) {
     // input fields:
-    case 'field':
+    case 'headername':
+    case 'headervalue':
       // some input field logic here
       break;
 
@@ -43,13 +50,7 @@ function infoMessage(info) {
 
 function saveValue(fieldId) {
   var field = document.getElementById(fieldId);
-  var attr = '';
-  switch (field.classList[0]) {
-    case 'dropdown':
-    case 'field':
-      attr = 'index';
-      break;
-  }
+  var attr = 'index';
   var value = field.value;
   var textString = field.classList[0] + '|' + (field.getAttribute(attr) ?? '') + '|' + value;
   vscodeApi.postMessage({ command: "savevalue", text: textString });

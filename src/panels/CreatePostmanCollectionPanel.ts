@@ -9,6 +9,7 @@ const carrierIndex = 0;
 const apiIndex = 1;
 const moduleIndex = 2;
 const companyIndex = 3;
+const nofHeadersIndex = 4;
 
 export class CreatePostmanCollectionPanel {
   // PROPERTIES
@@ -16,6 +17,7 @@ export class CreatePostmanCollectionPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
+  private _headers: {name: string, value: string}[] = [];
   private _carriers: string[] = [];
   private _apis: string[] = [];
   private _modules: string[] = [];
@@ -37,6 +39,15 @@ export class CreatePostmanCollectionPanel {
 
     // predefine some fixed fields
     this._fieldValues[moduleIndex] = 'booking';
+    this._fieldValues[nofHeadersIndex] = "1";
+    
+    // pre-allocate headers array
+    for (let index = 0; index < 20; index++) {
+      this._headers.push({
+        name: '',
+        value: ''
+      });
+    }
 
     // set content
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
@@ -65,9 +76,9 @@ export class CreatePostmanCollectionPanel {
   // initial rendering
   public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     if (CreatePostmanCollectionPanel.currentPanel) {
-      CreatePostmanCollectionPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
+      CreatePostmanCollectionPanel.currentPanel._panel.reveal(vscode.ViewColumn.Two);
     } else {
-      const panel = vscode.window.createWebviewPanel("create-postman-collection", "Create Postman collection", vscode.ViewColumn.One, {
+      const panel = vscode.window.createWebviewPanel("create-postman-collection", "Create Postman collection", vscode.ViewColumn.Two, {
         enableScripts: true
       });
 
@@ -110,31 +121,45 @@ export class CreatePostmanCollectionPanel {
 
           case "savevalue":
             var classIndexValue = text.split('|');
+            var clas = classIndexValue[0];
             var index = +classIndexValue[1];
             var value = classIndexValue[2];
-            this._fieldValues[index] = value;
+            
 
             // do some updating and refreshing
-            switch (index) {
-              case carrierIndex:
-                // api array: filter on carrier
-                let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
-                this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
-                this._fieldValues[apiIndex]         = this._apis[0];
-
-                // no break: fall-through is intentional!
-              case apiIndex:
-                // module array: filter on carrier and api
-                let carrierApiIOs                   = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api );
-                this._modules                       = uniqueSort(carrierApiIOs.map(el => el.module));
-                this._fieldValues[moduleIndex]      = this._modules[0];
-
-                this._updateWebview(extensionUri);
+            switch(clas) {
+              case 'dropdown':
+                this._fieldValues[index] = value;
+                switch (index) {
+                  case carrierIndex:
+                    // api array: filter on carrier
+                    let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
+                    this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
+                    this._fieldValues[apiIndex]         = this._apis[0];
+    
+                    // no break: fall-through is intentional!
+                  case apiIndex:
+                    // module array: filter on carrier and api
+                    let carrierApiIOs                   = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api );
+                    this._modules                       = uniqueSort(carrierApiIOs.map(el => el.module));
+                    this._fieldValues[moduleIndex]      = this._modules[0];
+    
+                    this._updateWebview(extensionUri);
+                    break;
+                  case moduleIndex:
+                    break;
+                }
                 break;
-              case moduleIndex:
+              
+              case 'headername':
+                this._headers[index].name = value;
+                break;
+              
+              case 'headervalue':
+                this._headers[index].value = value;
                 break;
             }
-            break;
+            
         }
       },
       undefined,
@@ -149,17 +174,11 @@ export class CreatePostmanCollectionPanel {
   private _createPostmanCollection(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
     // getWorkspaceFile is async -> all following steps must be executed within the 'then'
     getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
-
       // show info message
       vscode.window.showInformationMessage('Creating Postman Collection for ' + this._getIntegrationName());
 
       // execute powershell
       this._runScript(terminal, functionsPath);
-
-      //let henk = '';
-
-      // refresh window? TODO: possibly write refresh window functionality
-      // ...
     });
   }
 
@@ -173,6 +192,7 @@ export class CreatePostmanCollectionPanel {
       CARRIERNAME         = '${this._fieldValues[carrierIndex]}'
       SISRESTAPIURL       = 'https://www2.shipitsmarter.com/api/ext/v1/shipments'
       MODULENAME          = '${this._fieldValues[moduleIndex]}'
+      CARRIERCODE         = '${this._getIntegrationObject().carriercode}'
     }`;
 
     let headers : string = `$Headers = '{
@@ -314,6 +334,7 @@ export class CreatePostmanCollectionPanel {
     let createPostmanCollectionHtmlObject: CreatePostmanCollectionHtmlObject = new CreatePostmanCollectionHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
       this._fieldValues,
+      this._headers,
       this._carriers,
       this._apis,
       this._modules,
