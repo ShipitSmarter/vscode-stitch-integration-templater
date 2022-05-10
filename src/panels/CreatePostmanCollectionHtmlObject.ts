@@ -5,6 +5,7 @@ import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort} from "../utilitie
 const carrierIndex = 0;
 const apiIndex = 1;
 const moduleIndex = 2;
+const companyIndex = 3;
 
 export class CreatePostmanCollectionHtmlObject {
   // PROPERTIES
@@ -16,8 +17,9 @@ export class CreatePostmanCollectionHtmlObject {
     private _fieldValues: string[],
     private _carriers: string[],
     private _apis: string[],
-    private _modules: string[]
-    ) { }
+    private _modules: string[],
+    private _companies: string[]
+  ) { }
 
   // METHODS
   public getHtml() {
@@ -107,7 +109,16 @@ export class CreatePostmanCollectionHtmlObject {
           ${dropdownOptions(this._modules)}
         </vscode-dropdown>
 
-      </section>`;
+      </section>
+      
+      <section class="component-example">
+        <p>Select customer</p>
+        <vscode-dropdown id="company" class="dropdown" index="${companyIndex}" ${this._valueString(this._fieldValues[companyIndex])} position="below">
+            ${dropdownOptions(this._companies)}
+          </vscode-dropdown>
+      </section>
+      
+      `;
 
     return carrierFolderStructureGrid;
   }

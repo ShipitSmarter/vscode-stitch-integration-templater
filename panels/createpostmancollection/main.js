@@ -12,8 +12,7 @@ function main() {
     field.addEventListener("change", fieldChange);
   }
 
-  // on panel creation: save all dropdown values (if exist)
-  saveValue("modulename");
+  
 }
 
 function fieldChange(event) {

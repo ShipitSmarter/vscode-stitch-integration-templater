@@ -7,7 +7,7 @@ import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtml
 const carrierIndex = 0;
 const apiIndex = 1;
 const moduleIndex = 2;
-const carrierCodeIndex = 3;
+const companyIndex = 3;
 
 export class CreatePostmanCollectionPanel {
   // PROPERTIES
@@ -24,6 +24,10 @@ export class CreatePostmanCollectionPanel {
     api: string, 
     module: string,
     carriercode: string
+  }[] = [];
+  private _codeCompanies: {
+    company: string,
+    codecompany: string
   }[] = [];
 
   // constructor
@@ -230,6 +234,44 @@ export class CreatePostmanCollectionPanel {
     }
   }
 
+  private async _getCompanies() {
+    // get companies and codecompanies from translation file
+    let translationPath = await getWorkspaceFile('**/CompanyToCodeCompany.csv');
+    let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
+
+    for (const translation of translations) {
+      this._codeCompanies.push({
+        company: translation.split(',')[0],
+        codecompany: translation.split(',')[1]
+      });
+    }
+
+    // sort
+    this._codeCompanies = uniqueSort(this._codeCompanies);
+
+  }
+
+  private _initializeValues() {
+    // set carrier array: just all carriers available (in .ps1 integration script files)
+    this._carriers                      = uniqueSort(this._integrationObjects.map(el => el.carrier));
+    this._fieldValues[carrierIndex]     = this._carriers[0];
+
+    // api array: filter on carrier
+    let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
+    this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
+    this._fieldValues[apiIndex]         = this._apis[0];
+
+    // module array: filter on carrier and api
+    let carrierApiIOs                   = carrierIOs.filter(el => this._fieldValues[apiIndex] === el.api );
+    this._modules                       = uniqueSort(carrierApiIOs.map(el => el.module));
+    this._fieldValues[moduleIndex]      = this._modules[0];
+
+    // set company
+    this._fieldValues[companyIndex]     = this._codeCompanies[0].company;
+  }
+
+
+
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
@@ -237,27 +279,11 @@ export class CreatePostmanCollectionPanel {
     const mainUri = getUri(webview, extensionUri, ["panels", "createpostmancollection", "main.js"]);
     const styleUri = getUri(webview, extensionUri, ["panels", "createpostmancollection", "style.css"]);
 
-    // get available integration details (first time only)
+    // initialize (first time)
     if (this._integrationObjects.length === 0) {
       await this._getAvailableIntegrations();
-
-      // set carrier array: just all carriers available (in .ps1 integration script files)
-      this._carriers                      = uniqueSort(this._integrationObjects.map(el => el.carrier));
-      this._fieldValues[carrierIndex]     = this._carriers[0];
-
-      // api array: filter on carrier
-      let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
-      this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
-      this._fieldValues[apiIndex]         = this._apis[0];
-
-      // module array: filter on carrier and api
-      let carrierApiIOs                   = carrierIOs.filter(el => this._fieldValues[apiIndex] === el.api );
-      this._modules                       = uniqueSort(carrierApiIOs.map(el => el.module));
-      this._fieldValues[moduleIndex]      = this._modules[0];
-
-      // carrier code
-      let currentIntObject                = this._getIntegrationObject();
-      this._fieldValues[carrierCodeIndex] = currentIntObject.carriercode;
+      await this._getCompanies();
+      this._initializeValues();      
     }
 
     // construct panel html object and retrieve html
@@ -266,7 +292,8 @@ export class CreatePostmanCollectionPanel {
       this._fieldValues,
       this._carriers,
       this._apis,
-      this._modules
+      this._modules,
+      this._codeCompanies.map(el => el.company)
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();
