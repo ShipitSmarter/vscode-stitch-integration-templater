@@ -148,6 +148,9 @@ export class CreatePostmanCollectionPanel {
                     break;
                   case moduleIndex:
                     break;
+                  case nofHeadersIndex:
+                    this._updateWebview(extensionUri);
+                    break;
                 }
                 break;
               
@@ -328,6 +331,11 @@ export class CreatePostmanCollectionPanel {
       await this._getAvailableIntegrations();
       await this._getCompanies();
       this._initializeValues();      
+    }
+
+    // crop flexible header field values
+    for (let index = +this._fieldValues[nofHeadersIndex] ?? 0; index < 20; index++) {
+      this._headers[index] = { name: '', value: '' };
     }
 
     // construct panel html object and retrieve html
