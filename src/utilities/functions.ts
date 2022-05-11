@@ -92,7 +92,9 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 		let modular: boolean  = toBoolean(getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
 
 		// if integration path does not exist: skip
-		if (!fs.existsSync(parentPath(cleanPath(script)) + `/${carrier}/${api}/${module}`)) {
+		let integrationPath = parentPath(cleanPath(script)) + `/${api}/${module}`;
+		let exists = fs.existsSync(integrationPath);
+		if (!exists) {
 			continue;
 		}
 
