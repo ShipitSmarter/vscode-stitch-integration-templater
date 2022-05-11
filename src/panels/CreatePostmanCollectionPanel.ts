@@ -327,7 +327,7 @@ export class CreatePostmanCollectionPanel {
 
     // initialize (first time)
     if (this._integrationObjects.length === 0) {
-      this._integrationObjects = await getAvailableIntegrations();
+      this._integrationObjects = await getAvailableIntegrations('postman');
       await this._getCompanies();
       await this._getRestUrls();
       this._initializeValues();

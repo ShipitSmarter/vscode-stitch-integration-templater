@@ -51,8 +51,7 @@ export async function getAvailableScenarios(module:string, withParent:boolean = 
     }
 
     return bookingScenarios.sort();
-  }
-
+}
 
 export async function getModularElements(module:string): Promise<string[]> {
     let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*.xml');
@@ -72,7 +71,9 @@ export async function getModularElements(module:string): Promise<string[]> {
     return elements.sort();
 }
 
-export async function getAvailableIntegrations() : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[]> {
+export async function getAvailableIntegrations(panel:string) : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[]> {
+	// panel input: 'integration' or 'postman'
+
 	// pre-allocate output
 	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
 
@@ -90,12 +91,20 @@ export async function getAvailableIntegrations() : Promise<{path:string, carrier
 		let module: string    = getFromScript(scriptContent,'Module');
 		let modular: boolean  = toBoolean(getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
 
-		// check if any scenarios available, and if not, skip (because cannot make postman collection)
-		let scenarioGlob = modular ? `**/carriers/${carrier}/${api}/${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
-		let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
-		if (scenarios.length === 0) {
+		// if integration path does not exist: skip
+		if (!fs.existsSync(parentPath(cleanPath(script)) + `/${carrier}/${api}/${module}`)) {
 			continue;
 		}
+
+		// check if any scenarios available, and if not, skip (because cannot make postman collection)
+		if (panel === 'postman') {
+			let scenarioGlob = modular ? `**/carriers/${carrier}/${api}/${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
+			let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
+			if (scenarios.length === 0) {
+				continue;
+			}
+		}
+		
 
 		// obtain valid scenarios from scenarios folder
 		let scenarioDir = fs.readdirSync(parentPath(cleanPath(script)) + `/${api}/${module}/scenarios`);
@@ -108,9 +117,9 @@ export async function getAvailableIntegrations() : Promise<{path:string, carrier
 		// add array element
 		integrationObjects.push({
 			path: 		 script,
-			carrier: 	 getFromScript(scriptContent,'CarrierName'),
-			api: 		 getFromScript(scriptContent, 'CarrierAPI'),
-			module: 	 getFromScript(scriptContent,'Module'),
+			carrier: 	 carrier,
+			api: 		 api,
+			module: 	 module,
 			carriercode: getFromScript(scriptContent,'CARRIERCODE'),
 			modular: 	 modular,
 			scenarios:   integrationScenarios,

@@ -493,7 +493,7 @@ export class CreateIntegrationPanel {
     // first time only: get integrations, available scenarios, modular elements
     if (this._integrationObjects.length === 0) {
       this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
-      this._integrationObjects = await getAvailableIntegrations();
+      this._integrationObjects = await getAvailableIntegrations('integration');
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
     }
