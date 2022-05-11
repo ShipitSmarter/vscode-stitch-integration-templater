@@ -163,6 +163,9 @@ export class CreateIntegrationPanel {
   }
 
   private async _checkIntegrationExists(extensionUri: vscode.Uri) {
+    // refresh integration object presence (in case deletes)
+    this._integrationObjects = this._integrationObjects.filter(el => fs.existsSync(el.path));
+
     // get current integration
     this._currentIntegration = this._getIntegrationObject();
 
@@ -191,15 +194,6 @@ export class CreateIntegrationPanel {
       this._modularElements = await getModularElements(this._fieldValues[moduleIndex]);
     } else {
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
-    }
-
-    // if script path does not exist (integration deleted) : update integration objects
-    if (!fs.existsSync(this._currentIntegration.path) 
-        && this._fieldValues[carrierIndex] === this._currentIntegration.carrier 
-        && this._fieldValues[apiIndex] === this._currentIntegration.api 
-        && this._fieldValues[moduleIndex] === this._currentIntegration.module ) {
-      this._integrationObjects = await getAvailableIntegrations();
-      this._currentIntegration = this._getIntegrationObject();
     }
 
     // update panel
