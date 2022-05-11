@@ -162,7 +162,7 @@ export class CreateIntegrationPanel {
     return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0] ?? this._emptyIntegrationObject;
   }
 
-  private _checkIntegrationExists(extensionUri: vscode.Uri) {
+  private async _checkIntegrationExists(extensionUri: vscode.Uri) {
     // get current integration
     this._currentIntegration = this._getIntegrationObject();
 
@@ -188,18 +188,22 @@ export class CreateIntegrationPanel {
 
     // refresh available scenarios and module elements
     if (this._modularValue) {
-      getModularElements(this._fieldValues[moduleIndex]).then(elements => {
-        this._modularElements = elements;
-        // update panel
-        this._updateWebview(extensionUri);
-      });
+      this._modularElements = await getModularElements(this._fieldValues[moduleIndex]);
     } else {
-      getAvailableScenarios(this._fieldValues[moduleIndex]).then(scenarios => {
-        this._availableScenarios = scenarios;
-        // update panel
-        this._updateWebview(extensionUri);
-      });
+      this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     }
+
+    // if script path does not exist (integration deleted) : update integration objects
+    if (!fs.existsSync(this._currentIntegration.path) 
+        && this._fieldValues[carrierIndex] === this._currentIntegration.carrier 
+        && this._fieldValues[apiIndex] === this._currentIntegration.api 
+        && this._fieldValues[moduleIndex] === this._currentIntegration.module ) {
+      this._integrationObjects = await getAvailableIntegrations();
+      this._currentIntegration = this._getIntegrationObject();
+    }
+
+    // update panel
+    this._updateWebview(extensionUri);
   }
 
   private _createIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
