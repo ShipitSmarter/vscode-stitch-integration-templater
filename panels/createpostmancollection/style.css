@@ -1,0 +1,103 @@
+.row32 {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+}
+
+.row11 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.row433 {
+  display: grid;
+  grid-template-columns: 4fr 3fr 3fr;
+}
+
+.row111 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.rowsingle {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.floatleft {
+  float: left;
+}
+
+#company {
+  width: 11rem;
+}
+
+.rowelement {
+  margin-right: 5rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.component-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin: 1rem;
+  padding: 1rem;
+  border: 2px dashed #7b61ff;
+  border-radius: 5px;
+}
+
+.component-container > * {
+  margin: 0.25rem 0;
+}
+
+.component-example {
+  margin-bottom: 0.5rem;
+  width: 100%;
+  /* display: inline-block; */
+}
+
+.component-example > * {
+  margin: 0.25rem;
+  /* white-space: nowrap; */
+}
+
+.component-example > p {
+  margin-bottom: 0.5rem;
+}
+
+vscode-data-grid,
+vscode-panels {
+  border: 2px dashed #7b61ff;
+  border-radius: 5px;
+}
+
+h1 {
+  font-size: 2em;
+}
+
+#farleft {
+  text-align: left;
+}
+
+#farright {
+  text-align: right;
+  margin-right: 5rem;
+  margin-top: 1rem;
+}
+
+#main {
+  margin-top: 1.0rem;
+  /* vertical-align: middle; */
+}
+
+#createpostmancollection {
+  width:15rem;
+  height:3rem;
+}
+
+#carriername,
+#carrierapiname {
+  width: 10rem;
+}

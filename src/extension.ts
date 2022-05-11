@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
+import { CreatePostmanCollectionPanel } from './panels/CreatePostmanCollectionPanel';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -8,5 +9,12 @@ export function activate(context: vscode.ExtensionContext) {
 		CreateIntegrationPanel.render(context.extensionUri, 0, context);
 	});
 	
-	context.subscriptions.push(createIntegrationCommand);	
+	context.subscriptions.push(createIntegrationCommand);
+	
+	// Create Postman collection panel
+	const createPostmanCollectionCommand = vscode.commands.registerCommand("stitch.postman-collection", () => {
+		CreatePostmanCollectionPanel.render(context.extensionUri, 0, context);
+	});
+	
+	context.subscriptions.push(createPostmanCollectionCommand);
 }
