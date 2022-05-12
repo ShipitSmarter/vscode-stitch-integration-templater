@@ -501,10 +501,14 @@ export class CreateIntegrationPanel {
     // crop flexible field arrays
     this._cropFlexFields();
 
+    // show only available scenarios which are not already in the existing scenarios
+    let reducedAvailableScenarios = this._availableScenarios.filter(el => !this._existingScenarioFieldValues.includes(this._getNewScenarioValue(el)));
+
+
     // Create panel Html object and retrieve html
     let createIntegrationHtmlObject: CreateIntegrationHtmlObject = new CreateIntegrationHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
-      this._availableScenarios,
+      reducedAvailableScenarios,
       this._modularElements,
       this._fieldValues,
       this._stepFieldValues,
