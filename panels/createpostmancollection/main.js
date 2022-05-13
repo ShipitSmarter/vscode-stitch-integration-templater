@@ -13,13 +13,16 @@ function main() {
   }
 
   // save input fields
-  const fields = document.querySelectorAll(".field,.headername,.headervalue");
+  const fields = document.querySelectorAll(".field,.headername,.headervalue,.scenariofield");
   for (const field of fields) {
     field.addEventListener("keyup", fieldChange);
+    if (field.classList[0] === 'scenariofield') {
+      field.addEventListener("change", fieldChange);
+    }
   }
 
    // checkboxes
-   const checkBoxes = document.querySelectorAll(".independent");
+   const checkBoxes = document.querySelectorAll(".independent,.modular");
    for (const checkbox of checkBoxes) {
      checkbox.addEventListener("change", fieldChange);
    }
@@ -45,6 +48,9 @@ function fieldChange(event) {
     case 'dropdown':
       break;
     case 'independent':
+      break;
+    // modular: clear scenarios, refresh panel
+    case 'modular':
       break;
   }
   

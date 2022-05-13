@@ -301,10 +301,10 @@ export class CreatePostmanCollectionHtmlObject {
 
       let scenarioInputField: string = '';
       if (this._modularValue) {
-        scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
+        scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" index="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
       } else {
         scenarioInputField = /*html*/ `
-          <vscode-dropdown id="scenario${scenario}" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
+          <vscode-dropdown id="scenario${scenario}" index="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
             <vscode-option></vscode-option>  
             ${dropdownOptions(scenarios)}
           </vscode-dropdown>`;

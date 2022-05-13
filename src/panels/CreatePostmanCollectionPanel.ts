@@ -161,6 +161,7 @@ export class CreatePostmanCollectionPanel {
                     this._updateWebview(extensionUri);
                     break;
                   case nofHeadersIndex:
+                  case nofScenariosIndex:
                     this._updateWebview(extensionUri);
                     break;
                 }
@@ -191,6 +192,16 @@ export class CreatePostmanCollectionPanel {
                 }
                 
                 this._updateWebview(extensionUri);
+                break;
+
+              case 'modular':
+                this._modularValue = toBoolean(value);
+                this._scenarioFieldValues = [];
+                this._updateWebview(extensionUri);
+                break;
+
+              case 'scenariofield':
+                this._scenarioFieldValues[index] = value;
                 break;
             }
             
