@@ -13,7 +13,7 @@ function main() {
   }
 
   // save input fields
-  const fields = document.querySelectorAll(".headername,.headervalue");
+  const fields = document.querySelectorAll(".field,.headername,.headervalue");
   for (const field of fields) {
     field.addEventListener("keyup", fieldChange);
   }
@@ -41,13 +41,10 @@ function fieldChange(event) {
     // input fields:
     case 'headername':
     case 'headervalue':
-      // some input field logic here
       break;
-
-    // dropdown: delete scenarios if module dropdown change, refresh panel
     case 'dropdown':
-      // some dropdown logic here
-      //refreshPanel('dropdown');
+      break;
+    case 'independent':
       break;
   }
   

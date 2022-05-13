@@ -65,7 +65,9 @@ export class CreatePostmanCollectionHtmlObject {
               <vscode-divider role="separator"></vscode-divider>
 
               <h2>Carrier</h2>
-              ${this._getCarrierFolderStructureGrid()}
+
+              ${this._ifIndependent(this._getIndependentCarrierFolderStructureGrid())}
+              ${this._ifDependent(this._getCarrierFolderStructureGrid())}
 
               <vscode-divider role="separator"></vscode-divider>
 
@@ -107,6 +109,24 @@ export class CreatePostmanCollectionHtmlObject {
     return hiddenString;
   }
 
+  private _ifIndependent(content: string): string {
+    let outString = '';
+    if (this._independent) {
+      outString = content;
+    }
+
+    return outString;
+  }
+
+  private _ifDependent(content: string): string {
+    let outString = '';
+    if (!this._independent) {
+      outString = content;
+    }
+
+    return outString;
+  }
+
   private _getCreateButton(): string {
     let createButton: string = /*html*/ `
       <vscode-button id="createpostmancollection" appearance="primary">
@@ -132,6 +152,29 @@ export class CreatePostmanCollectionHtmlObject {
         <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
           ${dropdownOptions(this._modules)}
         </vscode-dropdown>
+
+      </section>
+      
+      <section class="component-example">
+        <p>Select customer</p>
+        <vscode-dropdown id="company" class="dropdown" index="${companyIndex}" ${this._valueString(this._fieldValues[companyIndex])} position="below">
+            ${dropdownOptions(this._companies)}
+          </vscode-dropdown>
+      </section>     
+      `;
+
+    return carrierFolderStructureGrid;
+  }
+
+  private _getIndependentCarrierFolderStructureGrid(): string {
+    let carrierFolderStructureGrid = /*html*/ `
+      <section class="component-example">
+        <p>Folder structure:    <b>carrier / api-name / module</b></p>
+        <vscode-text-field id="carriername" class="field" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} placeholder="carrier" size="5"></vscode-text-field>
+        /
+        <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
+        /
+        <vscode-text-field id="modulename" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[moduleIndex])} placeholder="module" size="5"></vscode-text-field>
 
       </section>
       

@@ -17,6 +17,7 @@ export class CreatePostmanCollectionPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
+  private _initialValues: string[] = [];
   private _headers: {name: string, value: string}[] = [];
   private _carriers: string[] = [];
   private _apis: string[] = [];
@@ -167,6 +168,17 @@ export class CreatePostmanCollectionPanel {
 
               case 'independent':
                 this._independent = toBoolean(value);
+                if (this._independent) {
+                  this._fieldValues[carrierIndex] = '';
+                  this._fieldValues[apiIndex]     = '';
+                  this._fieldValues[moduleIndex]  = '';
+                } else {
+                  this._fieldValues[carrierIndex] = this._initialValues[carrierIndex];
+                  this._fieldValues[apiIndex]     = this._initialValues[apiIndex];
+                  this._fieldValues[moduleIndex]  = this._initialValues[moduleIndex];
+                }
+                
+                this._updateWebview(extensionUri);
                 break;
             }
             
@@ -303,19 +315,23 @@ export class CreatePostmanCollectionPanel {
     // set carrier array: just all carriers available (in .ps1 integration script files)
     this._carriers                      = uniqueSort(this._integrationObjects.map(el => el.carrier));
     this._fieldValues[carrierIndex]     = this._carriers[0];
+    this._initialValues[carrierIndex]   = this._carriers[0];
 
     // api array: filter on carrier
     let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
     this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
     this._fieldValues[apiIndex]         = this._apis[0];
+    this._initialValues[apiIndex]         = this._apis[0];
 
     // module array: filter on carrier and api
     let carrierApiIOs                   = carrierIOs.filter(el => this._fieldValues[apiIndex] === el.api );
     this._modules                       = uniqueSort(carrierApiIOs.map(el => el.module));
     this._fieldValues[moduleIndex]      = this._modules[0];
+    this._initialValues[moduleIndex]      = this._modules[0];
 
     // set company
     this._fieldValues[companyIndex]     = this._codeCompanies[0].company;
+    this._initialValues[companyIndex]   = this._codeCompanies[0].company;
 
     // set initial headers
     this._headers[0] = {name: 'CodeCompany', value: this._codeCompanies[0].codecompany};
