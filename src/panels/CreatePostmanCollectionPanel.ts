@@ -323,8 +323,13 @@ export class CreatePostmanCollectionPanel {
       terminal = startScript('', '');
     }
 
+    // determine filepath
+    let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
+    let cdDir = `${filesPath}/postman/${this._fieldValues[carrierIndex]}`;
+    fs.mkdirSync(cdDir, { recursive: true });
+  
     // execute script write script input
-    terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
+    terminal.sendText(`cd ${cdDir}`);
     terminal.sendText(command);
   }
 
