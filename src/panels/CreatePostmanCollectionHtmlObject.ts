@@ -7,6 +7,9 @@ const apiIndex = 1;
 const moduleIndex = 2;
 const companyIndex = 3;
 const nofHeadersIndex = 4;
+const accountNumberIndex = 5;
+const costCenterIndex = 6;
+const nofScenariosIndex = 7;
 
 export class CreatePostmanCollectionHtmlObject {
   // PROPERTIES
@@ -174,8 +177,19 @@ export class CreatePostmanCollectionHtmlObject {
         /
         <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
         /
-        <vscode-text-field id="modulename" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[moduleIndex])} placeholder="module" size="5"></vscode-text-field>
+        <vscode-text-field id="modulename" class="field" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} placeholder="module" size="5"></vscode-text-field>
 
+      </section>
+
+      <section class="component-example">
+        <div class="floatleft" id="accountnumberdiv">
+          <p>Account number</p>
+          <vscode-text-field id="accountnumber" class="field" index="${accountNumberIndex}" ${this._valueString(this._fieldValues[accountNumberIndex])} placeholder="123456" size="5"></vscode-text-field>
+        </div>
+        <div class="floatleft">
+          <p>CostCenter</p>
+          <vscode-text-field id="costcenter" class="field" index="${costCenterIndex}" ${this._valueString(this._fieldValues[costCenterIndex])} placeholder="000001" size="5"></vscode-text-field>
+        </div>
       </section>
       
       <section class="component-example">

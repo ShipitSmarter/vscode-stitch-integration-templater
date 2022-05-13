@@ -10,6 +10,9 @@ const apiIndex = 1;
 const moduleIndex = 2;
 const companyIndex = 3;
 const nofHeadersIndex = 4;
+const accountNumberIndex = 5;
+const costCenterIndex = 6;
+const nofScenariosIndex = 7;
 
 export class CreatePostmanCollectionPanel {
   // PROPERTIES
@@ -156,6 +159,10 @@ export class CreatePostmanCollectionPanel {
                     this._updateWebview(extensionUri);
                     break;
                 }
+                break;
+
+              case 'field':
+                this._fieldValues[index] = value;
                 break;
               
               case 'headername':
@@ -336,6 +343,9 @@ export class CreatePostmanCollectionPanel {
     // set initial headers
     this._headers[0] = {name: 'CodeCompany', value: this._codeCompanies[0].codecompany};
     this._headers[1] = {name: 'Authorization', value: '{{managerlogin}}'};
+
+    // default cost center
+    this._fieldValues[costCenterIndex] = '000001';
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
