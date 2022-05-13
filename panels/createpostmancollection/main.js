@@ -44,13 +44,20 @@ function fieldChange(event) {
     // input fields:
     case 'headername':
     case 'headervalue':
-      break;
     case 'dropdown':
-      break;
     case 'independent':
-      break;
-    // modular: clear scenarios, refresh panel
     case 'modular':
+      break;
+    case 'scenariofield':
+      if (!isModular()) {
+        // if not modular: check ALL scenarios
+        for (const sc of document.querySelectorAll(".scenariofield")) {
+          updateFieldOutlineAndTooltip(sc.id);
+        }
+      } else {
+        // else: just check this one
+        updateFieldOutlineAndTooltip(field.id);
+      }
       break;
   }
   
@@ -75,6 +82,92 @@ function isEmpty(string) {
   }
 
   return empty;
+}
+
+function isModular() {
+  return document.getElementById("modular").checked;
+}
+
+function updateFieldDuplicate(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid red";
+  field.title = 'Scenario is duplicate of other (existing) scenario';
+}
+
+function updateFieldWrongModularScenario(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid red";
+  field.title = 'Format: \'fromnl-tode-sl1800\'. Elements must be present in scenario-elements/modular.';
+}
+
+function updateFieldRight(fieldId,fieldType) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "none";
+  field.title = '';
+}
+
+function isScenarioDuplicate(fieldId) {
+  var isDuplicate = false;
+  let field = document.getElementById(fieldId);
+  
+  // check other scenarios
+  var scenarioFields = document.querySelectorAll(".scenariofield");
+  for (const sf of scenarioFields) {
+    if (sf.id !== field.id && sf.value === field.value) {
+      // if scenario equal to other scenario: duplicate
+      isDuplicate = true;
+      break;
+    }
+  }
+
+  return isDuplicate;
+}
+
+function updateFieldOutlineAndTooltip(fieldId) {
+  let isCorrect = true;
+  let field = document.getElementById(fieldId);
+
+  var fieldType = field.className;
+
+  if (field.classList[0] === 'scenariofield') {
+    if (!isModular()) {
+      // check duplicate scenario drop-downs
+      if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
+        isCorrect = false;
+        updateFieldDuplicate(field.id);
+      } else {
+        updateFieldRight(field.id, fieldType);
+      }   
+      
+    } else {
+      // check any 'normal' input field
+      if (!checkModularScenario(field.value)) {
+        updateFieldWrongModularScenario(field.id,fieldType);
+        isCorrect = false;
+      } else {
+        updateFieldRight(field.id, fieldType);
+      }
+    }
+  }
+  
+  
+  return isCorrect;
+}
+
+function checkModularScenario(content) {
+  let currentElements = content.split('-');
+  let modularElements = document.getElementById("modularelements").value.split(',');
+  let isValid = true;
+  if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
+    for (let index = 0; index < currentElements.length; index++) {
+      if (!modularElements.includes(currentElements[index])) {
+        isValid = false;
+        break;
+      }
+    }
+  }
+
+  return isValid;
 }
 
 function refreshPanel(string="") {
