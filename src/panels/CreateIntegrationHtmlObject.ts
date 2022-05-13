@@ -253,6 +253,9 @@ export class CreateIntegrationHtmlObject {
       <section class="component-container">
         <h2>Existing scenarios</h2>
         <p>Check to run again</p>
+        <section class="component-example">
+          <vscode-checkbox id="checkallexisting" class="checkallexisting">Check all</vscode-checkbox>
+        </section>
         ${this._existingScenarios()}
       </section>`;
 
