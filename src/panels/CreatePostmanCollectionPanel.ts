@@ -13,6 +13,7 @@ const nofHeadersIndex = 4;
 const accountNumberIndex = 5;
 const costCenterIndex = 6;
 const nofScenariosIndex = 7;
+const carrierCodeIndex = 8;
 
 export class CreatePostmanCollectionPanel {
   // PROPERTIES
@@ -259,24 +260,56 @@ export class CreatePostmanCollectionPanel {
     }
 
     // string replace list
-    let stringReplaceList: string = `$StringReplaceList = @{
-      COLLECTIONNAME      = '${companyObject.company}_${this._fieldValues[carrierIndex]}_${this._fieldValues[apiIndex]}_${this._fieldValues[moduleIndex]}'
+    // - CUSTOMERNAME
+    // - CARRIERNAME
+    // - APINAME
+    // - MODULENAME
+    // - SISRESTAPIURL
+    // - CARRIERCODE
+
+    // optional:
+    // - ACCOUNTNUMBER
+    // - COSTCENTER
+
+    let accountCostCenterString = this._independent ? `
+      ACCOUNTNUMBER       = '${this._fieldValues[accountNumberIndex]}'
+      COSTCENTER          = '${this._fieldValues[costCenterIndex]}'` : '';
+
+    let stringReplaceList = `$StringReplaceList = @{
+      CUSTOMERNAME       = '${companyObject.company}'
       CARRIERNAME         = '${this._fieldValues[carrierIndex]}'
-      SISRESTAPIURL       = '${restApiUrl}'
+      APINAME             = '${this._fieldValues[apiIndex]}'
       MODULENAME          = '${this._fieldValues[moduleIndex]}'
-      CARRIERCODE         = '${this._getIntegrationObject().carriercode}'
+      SISRESTAPIURL       = '${restApiUrl}'
+      CARRIERCODE         = '${this._fieldValues[carrierCodeIndex]}'
+      ${accountCostCenterString}
     }`;
 
     let headers : string = `$Headers = '{
       ${this._getHeaderString()}
     }'`;
 
-    let modulePath = `$ModulePath = '${this._fieldValues[apiIndex]}\\${this._fieldValues[moduleIndex]}'`;
+    // scenarios string
+    let newScenariosString : string = '';
+    let newScenarios = this._getNewScenarios();
+    for (const scenario of newScenarios) {
+      newScenariosString += `\n '${scenario}'`;
+
+      // add comma
+      if (scenario !== newScenarios[newScenarios.length-1]) {
+        newScenariosString += ',';
+      }
+    }
+
+    let defScenariosString = (this._independent) ? `$Scenarios = @( ${newScenariosString} )` : '';
+
+    let applyScenariosString = (this._independent) ? '-Scenarios $Scenarios' : '';
+    let modularString = this._modularValue ? '-Modular' : '';
     let loadFunctions = `. "..\\..\\scenario-templates\\scripts\\functions.ps1"`;
-    let createPostmanCollection = `New-PostmanCollection -StringReplaceList $StringReplaceList -Headers $Headers -ModulePath $ModulePath -Test`;
+    let createPostmanCollection = `New-PostmanCollection -StringReplaceList $StringReplaceList -Headers $Headers ${applyScenariosString} ${modularString} -Test`;
     let nl = '\n';
 
-    return stringReplaceList + nl + headers + nl + modulePath + nl + loadFunctions + nl + createPostmanCollection;
+    return stringReplaceList + nl + headers + nl + defScenariosString + nl + loadFunctions + nl + createPostmanCollection;
   }
 
   private _runScript(terminal: vscode.Terminal, functionsPath: string) {
@@ -293,6 +326,18 @@ export class CreatePostmanCollectionPanel {
     // execute script write script input
     terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
     terminal.sendText(command);
+  }
+
+  private _getNewScenarioValue(fieldValue:string) : string {
+    let newScenarioValue = '';
+    if (!isEmpty(fieldValue)) {
+      newScenarioValue = fieldValue.replace(/[^\>]+\> /g, '');
+    }
+    return newScenarioValue;
+  }
+
+  private _getNewScenarios() : string[] {
+    return this._scenarioFieldValues.map( el => this._getNewScenarioValue(el)).filter(el => !isEmpty(el)).sort();
   }
 
   private _getIntegrationName(): string {

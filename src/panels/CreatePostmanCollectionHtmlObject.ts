@@ -10,6 +10,7 @@ const nofHeadersIndex = 4;
 const accountNumberIndex = 5;
 const costCenterIndex = 6;
 const nofScenariosIndex = 7;
+const carrierCodeIndex = 8;
 
 export class CreatePostmanCollectionHtmlObject {
   // PROPERTIES
@@ -194,6 +195,11 @@ export class CreatePostmanCollectionHtmlObject {
       </section>
 
       <section class="component-example">
+
+        <div class="floatleft" id="carriercodediv">
+          <p>Carrier Code</p>
+          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${this._valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD"></vscode-text-field>
+        </div>
         <div class="floatleft" id="accountnumberdiv">
           <p>Account number</p>
           <vscode-text-field id="accountnumber" class="field" index="${accountNumberIndex}" ${this._valueString(this._fieldValues[accountNumberIndex])} placeholder="123456" size="5"></vscode-text-field>
