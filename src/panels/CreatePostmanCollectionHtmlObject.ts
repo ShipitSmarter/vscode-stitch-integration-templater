@@ -58,6 +58,11 @@ export class CreatePostmanCollectionHtmlObject {
             <section class="component-container">
               <h2>Carrier</h2>
               ${this._getCarrierFolderStructureGrid()}
+
+              <vscode-divider role="separator"></vscode-divider>
+
+              ${this._getHeadersGrid()} 
+              
             </section> 
           </section>
 
@@ -118,11 +123,7 @@ export class CreatePostmanCollectionHtmlObject {
         <vscode-dropdown id="company" class="dropdown" index="${companyIndex}" ${this._valueString(this._fieldValues[companyIndex])} position="below">
             ${dropdownOptions(this._companies)}
           </vscode-dropdown>
-      </section>
-
-      <vscode-divider role="separator"></vscode-divider>
-
-      ${this._getHeadersGrid()}      
+      </section>     
       `;
 
     return carrierFolderStructureGrid;

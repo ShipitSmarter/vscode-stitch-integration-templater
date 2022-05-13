@@ -24,6 +24,10 @@
   grid-template-columns: 1fr;
 }
 
+.floatleft {
+  float: left;
+}
+
 .rowelement {
   margin-right: 5rem;
   margin-bottom: 0.5rem;
@@ -112,5 +116,5 @@ h1 {
 }
 
 .stepdropdown {
-  width: 6rem;
+  width: 7rem;
 }
