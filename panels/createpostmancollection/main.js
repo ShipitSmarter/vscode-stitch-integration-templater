@@ -31,6 +31,9 @@ function main() {
   // set first header read-only
   document.getElementById('headername0').readOnly = true;
   document.getElementById('headervalue0').readOnly = true;
+
+   // on panel creation: update field outlines and tooltips
+   checkFields();
 }
 
 function fieldChange(event) {
@@ -86,6 +89,17 @@ function isEmpty(string) {
 
 function isModular() {
   return document.getElementById("modular").checked;
+}
+
+function checkFields() {
+  // check if any incorrect field contents and update fields outlining and tooltip in the process
+  var check = true;
+  const fields = document.querySelectorAll(".scenariofield");
+  for (const field of fields) {
+    check = updateFieldOutlineAndTooltip(field.id) ? check : false;
+  }
+
+  return check;
 }
 
 function updateFieldDuplicate(fieldId) {
@@ -150,7 +164,6 @@ function updateFieldOutlineAndTooltip(fieldId) {
     }
   }
   
-  
   return isCorrect;
 }
 
@@ -175,5 +188,10 @@ function refreshPanel(string="") {
 }
 
 function createPostmanCollection() {
-  vscodeApi.postMessage({ command: "createpostmancollection", text: "real fast!" });
+  // check field content
+  if (checkFields()) {
+    vscodeApi.postMessage({ command: "createpostmancollection", text: "real fast!" });
+  } else {
+    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+  }
 }
