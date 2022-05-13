@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth} from "../utilities/functions";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -24,7 +24,11 @@ export class CreatePostmanCollectionHtmlObject {
     private _apis: string[],
     private _modules: string[],
     private _companies: string[],
-    private _independent: boolean
+    private _scenarioFieldValues: string[],
+    private _availableScenarios: string[], 
+    private _modularElements: string[],
+    private _independent: boolean,
+    private _modularValue: boolean
   ) { }
 
   // METHODS
@@ -58,6 +62,11 @@ export class CreatePostmanCollectionHtmlObject {
           </section>
 				</div>
         
+        
+
+
+        <section class="${this._ifDependent('rowsingle')}${this._ifIndependent('row32')}">
+
           <section class="rowsingle">
             <section class="component-container">
 
@@ -78,6 +87,9 @@ export class CreatePostmanCollectionHtmlObject {
 
             </section> 
           </section>
+
+            ${this._ifIndependent(this._getScenariosGrid(this._availableScenarios, this._modularElements))}
+        </section>
 
 			</body>
 		</html>
@@ -177,7 +189,7 @@ export class CreatePostmanCollectionHtmlObject {
         /
         <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
         /
-        <vscode-text-field id="modulename" class="field" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} placeholder="module" size="5"></vscode-text-field>
+        <vscode-text-field id="modulename" class="field" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} placeholder="module" size="5" readonly></vscode-text-field>
 
       </section>
 
@@ -255,4 +267,56 @@ export class CreatePostmanCollectionHtmlObject {
 
     return html;
   }
+
+  private _getScenariosGrid(scenarios: string[], modularElements: string[]): string {
+    let scenariosGrid = /*html*/ `    
+    <section class="rowsingle">
+      <section class="component-container">
+        <h2>Scenarios</h2>
+
+        <vscode-text-field id="modularelements" value="${modularElements.join(',')}" hidden></vscode-text-field>
+
+        <section class="component-example">
+          <vscode-checkbox id="modular" class="modular" ${this._checkedString(this._modularValue)}>Modular</vscode-checkbox>
+        </section>
+
+        <section class="component-example">
+          <p>Number of Scenarios</p>
+          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" ${this._valueString(this._fieldValues[nofScenariosIndex] ?? 1)} position="below">
+            ${dropdownOptions(arrayFrom0(100))}
+          </vscode-dropdown>
+        </section>
+
+        ${this._scenarioInputs(+this._fieldValues[nofScenariosIndex], scenarios)}
+      </section>
+    </section>`;
+
+    return scenariosGrid;
+  }
+
+  private _scenarioInputs(nofScenarios: number, scenarios: string[]): string {
+    let html: string = ``;
+
+    for (let scenario = 0; scenario < +nofScenarios; scenario++) {
+
+      let scenarioInputField: string = '';
+      if (this._modularValue) {
+        scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
+      } else {
+        scenarioInputField = /*html*/ `
+          <vscode-dropdown id="scenario${scenario}" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
+            <vscode-option></vscode-option>  
+            ${dropdownOptions(scenarios)}
+          </vscode-dropdown>`;
+      }
+
+      html += /*html*/`
+        <section class="component-example">
+          ${scenarioInputField}
+        </section>`;
+    }
+
+    return html;
+  }
+
 }

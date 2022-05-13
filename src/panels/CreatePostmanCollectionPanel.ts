@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -25,7 +25,12 @@ export class CreatePostmanCollectionPanel {
   private _carriers: string[] = [];
   private _apis: string[] = [];
   private _modules: string[] = [];
+  private _scenarioFieldValues: string[] = [];
+  private _availableScenarios: string[] = [];
+  private _modularElements: string[] = [];
   private _independent: boolean = false;
+  private _modularValue: boolean = false;
+
   private _integrationObjects: {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
   private _codeCompanies: {
     company: string,
@@ -178,7 +183,7 @@ export class CreatePostmanCollectionPanel {
                 if (this._independent) {
                   this._fieldValues[carrierIndex] = '';
                   this._fieldValues[apiIndex]     = '';
-                  this._fieldValues[moduleIndex]  = '';
+                  this._fieldValues[moduleIndex]  = 'booking';
                 } else {
                   this._fieldValues[carrierIndex] = this._initialValues[carrierIndex];
                   this._fieldValues[apiIndex]     = this._initialValues[apiIndex];
@@ -361,6 +366,8 @@ export class CreatePostmanCollectionPanel {
       await this._getCompanies();
       await this._getRestUrls();
       this._initializeValues();
+      this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
+      this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
     }
 
     // crop flexible header field values
@@ -377,7 +384,11 @@ export class CreatePostmanCollectionPanel {
       this._apis,
       this._modules,
       this._codeCompanies.map(el => el.company),
-      this._independent
+      this._scenarioFieldValues,
+      this._availableScenarios,
+      this._modularElements,
+      this._independent,
+      this._modularValue
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();
