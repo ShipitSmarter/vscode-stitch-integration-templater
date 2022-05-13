@@ -21,6 +21,7 @@ export class CreatePostmanCollectionPanel {
   private _carriers: string[] = [];
   private _apis: string[] = [];
   private _modules: string[] = [];
+  private _independent: boolean = false;
   private _integrationObjects: {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
   private _codeCompanies: {
     company: string,
@@ -123,7 +124,6 @@ export class CreatePostmanCollectionPanel {
             var index = +classIndexValue[1];
             var value = classIndexValue[2];
             
-
             // do some updating and refreshing
             switch(clas) {
               case 'dropdown':
@@ -163,6 +163,10 @@ export class CreatePostmanCollectionPanel {
               
               case 'headervalue':
                 this._headers[index].value = value;
+                break;
+
+              case 'independent':
+                this._independent = toBoolean(value);
                 break;
             }
             
@@ -346,7 +350,8 @@ export class CreatePostmanCollectionPanel {
       this._carriers,
       this._apis,
       this._modules,
-      this._codeCompanies.map(el => el.company)
+      this._codeCompanies.map(el => el.company),
+      this._independent
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();

@@ -18,6 +18,12 @@ function main() {
     field.addEventListener("keyup", fieldChange);
   }
 
+   // checkboxes
+   const checkBoxes = document.querySelectorAll(".independent");
+   for (const checkbox of checkBoxes) {
+     checkbox.addEventListener("change", fieldChange);
+   }
+
   // headers
   // set first header read-only
   document.getElementById('headername0').readOnly = true;
@@ -54,7 +60,7 @@ function infoMessage(info) {
 function saveValue(fieldId) {
   var field = document.getElementById(fieldId);
   var attr = 'index';
-  var value = field.value;
+  var value = field.checked ?? field.value;
   var textString = field.classList[0] + '|' + (field.getAttribute(attr) ?? '') + '|' + value;
   vscodeApi.postMessage({ command: "savevalue", text: textString });
 }

@@ -20,7 +20,8 @@ export class CreatePostmanCollectionHtmlObject {
     private _carriers: string[],
     private _apis: string[],
     private _modules: string[],
-    private _companies: string[]
+    private _companies: string[],
+    private _independent: boolean
   ) { }
 
   // METHODS
@@ -56,13 +57,20 @@ export class CreatePostmanCollectionHtmlObject {
         
           <section class="rowsingle">
             <section class="component-container">
+
+              <section class="component-example">
+                <vscode-checkbox id="independent" class="independent" ${this._checkedString(this._independent)}>Independent of existing integrations</vscode-checkbox>
+              </section>
+
+              <vscode-divider role="separator"></vscode-divider>
+
               <h2>Carrier</h2>
               ${this._getCarrierFolderStructureGrid()}
 
               <vscode-divider role="separator"></vscode-divider>
 
               ${this._getHeadersGrid()} 
-              
+
             </section> 
           </section>
 
@@ -71,6 +79,15 @@ export class CreatePostmanCollectionHtmlObject {
 	  `;
 
     return html;
+  }
+
+  private _checkedString(checked: boolean): string {
+    let outString: string = '';
+    if (checked) {
+      outString = 'checked';
+    }
+
+    return outString;
   }
   
   private _valueString(string: string): string {
