@@ -149,6 +149,7 @@ export class CreatePostmanCollectionPanel {
                     let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
                     this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
                     this._fieldValues[apiIndex]         = this._apis[0];
+                    this._fieldValues[carrierCodeIndex] = carrierIOs[0].carriercode;
     
                     // no break: fall-through is intentional!
                   case apiIndex:
@@ -180,6 +181,14 @@ export class CreatePostmanCollectionPanel {
                 break;
 
               case 'dropdownfield':
+                this._fieldValues[index] = value;
+                switch (index) {
+                  case carrierIndex:
+                    this._fieldValues[carrierCodeIndex] = this._carrierCodes.filter(el => el.carrier === this._fieldValues[carrierIndex])[0].carriercode;
+                    this._updateWebview(extensionUri);
+                    break;
+                }
+                break;
               case 'field':
                 this._fieldValues[index] = value;
                 break;
@@ -195,13 +204,15 @@ export class CreatePostmanCollectionPanel {
               case 'independent':
                 this._independent = toBoolean(value);
                 if (this._independent) {
-                  this._fieldValues[carrierIndex] = '';
+                  this._fieldValues[carrierIndex] = this._carrierCodes[0].carrier;
                   this._fieldValues[apiIndex]     = '';
                   this._fieldValues[moduleIndex]  = 'booking';
+                  this._fieldValues[carrierCodeIndex] = this._carrierCodes[0].carriercode;
                 } else {
                   this._fieldValues[carrierIndex] = this._initialValues[carrierIndex];
                   this._fieldValues[apiIndex]     = this._initialValues[apiIndex];
                   this._fieldValues[moduleIndex]  = this._initialValues[moduleIndex];
+                  this._fieldValues[carrierCodeIndex] = this._initialValues[carrierCodeIndex];
                 }
                 
                 this._updateWebview(extensionUri);
@@ -337,8 +348,8 @@ export class CreatePostmanCollectionPanel {
 
     // determine filepath
     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-    let cdDir = `${filesPath}/postman/${this._fieldValues[carrierIndex]}`;
-    fs.mkdirSync(cdDir, { recursive: true });
+    let cdDir = `${filesPath}/carriers/${this._fieldValues[carrierIndex]}`;
+    //fs.mkdirSync(cdDir, { recursive: true });
   
     // execute script write script input
     terminal.sendText(`cd ${cdDir}`);
@@ -383,7 +394,7 @@ export class CreatePostmanCollectionPanel {
 
   }
 
-  private async _getCarriers() {
+  private async _getCarrierCodes() {
     // get companies and codecompanies from translation file
     let translationPath = await getWorkspaceFile('**/translations/CarrierToCarrierCode.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
@@ -419,6 +430,8 @@ export class CreatePostmanCollectionPanel {
     this._carriers                      = uniqueSort(this._integrationObjects.map(el => el.carrier));
     this._fieldValues[carrierIndex]     = this._carriers[0];
     this._initialValues[carrierIndex]   = this._carriers[0];
+    this._fieldValues[carrierCodeIndex] = this._integrationObjects.filter(el => el.carrier === this._fieldValues[carrierIndex])[0].carriercode;
+    this._initialValues[carrierCodeIndex] = this._fieldValues[carrierCodeIndex];
 
     // api array: filter on carrier
     let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
@@ -456,7 +469,7 @@ export class CreatePostmanCollectionPanel {
       this._integrationObjects = await getAvailableIntegrations('postman');
       await this._getCompanies();
       await this._getRestUrls();
-      await this._getCarriers();
+      await this._getCarrierCodes();
       this._initializeValues();
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
