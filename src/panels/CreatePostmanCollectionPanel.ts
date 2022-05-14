@@ -162,7 +162,13 @@ export class CreatePostmanCollectionPanel {
                     this._updateWebview(extensionUri);
                     break;
                   case nofHeadersIndex:
+                    // crop headers array
+                    // --> direct headers array cropping will break it -> instead, tactical cropping in getWebviewContent()
+                    this._updateWebview(extensionUri);
+                    break;
                   case nofScenariosIndex:
+                    // crop scenarios array
+                    this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
                     this._updateWebview(extensionUri);
                     break;
                 }

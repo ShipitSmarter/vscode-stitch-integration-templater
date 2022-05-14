@@ -288,7 +288,7 @@ export class CreatePostmanCollectionHtmlObject {
 
         <section class="component-example">
           <p>Number of Scenarios</p>
-          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" ${this._valueString(this._fieldValues[nofScenariosIndex] ?? 1)} position="below">
+          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" ${this._valueString(this._fieldValues[nofScenariosIndex] ?? 0)} position="below">
             ${dropdownOptions(arrayFrom0(100))}
           </vscode-dropdown>
         </section>
