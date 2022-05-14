@@ -7,7 +7,7 @@ function main() {
   document.getElementById("createpostmancollection").addEventListener("click", createPostmanCollection);
 
   // save dropdowns
-  const dropdowns = document.querySelectorAll(".dropdown");
+  const dropdowns = document.querySelectorAll(".dropdown,.dropdownfield");
   for (const field of dropdowns) {
     field.addEventListener("change", fieldChange);
   }

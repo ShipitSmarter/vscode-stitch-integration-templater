@@ -25,6 +25,7 @@ export class CreatePostmanCollectionHtmlObject {
     private _apis: string[],
     private _modules: string[],
     private _companies: string[],
+    private _carrierCodes: {carrier: string,  carriercode: string }[] = [],
     private _scenarioFieldValues: string[],
     private _availableScenarios: string[], 
     private _modularElements: string[],
@@ -158,12 +159,12 @@ export class CreatePostmanCollectionHtmlObject {
       <section class="component-example">
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
         <vscode-dropdown id="carriername" class="dropdown" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} position="below">
-            ${dropdownOptions(this._carriers)}
-          </vscode-dropdown>
+          ${dropdownOptions(this._carriers)}
+        </vscode-dropdown>
         /
         <vscode-dropdown id="carrierapiname" class="dropdown" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} position="below">
-            ${dropdownOptions(this._apis)}
-          </vscode-dropdown>
+          ${dropdownOptions(this._apis)}
+        </vscode-dropdown>
         /
         <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
           ${dropdownOptions(this._modules)}
@@ -185,26 +186,32 @@ export class CreatePostmanCollectionHtmlObject {
   private _getIndependentCarrierFolderStructureGrid(): string {
     let carrierFolderStructureGrid = /*html*/ `
       <section class="component-example">
-        <p>Folder structure:    <b>carrier / api-name / module</b></p>
-        <vscode-text-field id="carriername" class="field" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} placeholder="carrier" size="5"></vscode-text-field>
-        /
-        <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
-        /
-        <vscode-text-field id="modulename" class="field" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} placeholder="module" size="5" readonly></vscode-text-field>
 
+        <div class="floatleft">
+          <p>Carrier</p>
+          <vscode-dropdown id="carriername" class="dropdownfield" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} position="below">
+            ${dropdownOptions(this._carriers)}
+          </vscode-dropdown>
+        </div>
+        <div class="floatleftnopadding">
+          <p>Module</p>
+          <vscode-dropdown id="modulename" class="dropdownfield" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
+            ${dropdownOptions(this._modules)}
+          </vscode-dropdown>
+        </div>
       </section>
 
       <section class="component-example">
 
-        <div class="floatleft" id="carriercodediv">
+        <div class="floatleft">
           <p>Carrier Code</p>
-          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${this._valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD"></vscode-text-field>
+          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${this._valueString(this._fieldValues[carrierCodeIndex])} readonly></vscode-text-field>
         </div>
-        <div class="floatleft" id="accountnumberdiv">
+        <div class="floatleft">
           <p>Account number</p>
           <vscode-text-field id="accountnumber" class="field" index="${accountNumberIndex}" ${this._valueString(this._fieldValues[accountNumberIndex])} placeholder="123456" size="5"></vscode-text-field>
         </div>
-        <div class="floatleft">
+        <div class="floatleftnopadding">
           <p>CostCenter</p>
           <vscode-text-field id="costcenter" class="field" index="${costCenterIndex}" ${this._valueString(this._fieldValues[costCenterIndex])} placeholder="000001" size="5"></vscode-text-field>
         </div>

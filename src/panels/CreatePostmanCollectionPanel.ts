@@ -42,6 +42,11 @@ export class CreatePostmanCollectionPanel {
     url: string
   }[] = [];
 
+  private _carrierCodes: {
+    carrier: string,
+    carriercode: string
+  }[] = [];
+
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
     this._panel = panel;
@@ -174,6 +179,7 @@ export class CreatePostmanCollectionPanel {
                 }
                 break;
 
+              case 'dropdownfield':
               case 'field':
                 this._fieldValues[index] = value;
                 break;
@@ -377,6 +383,24 @@ export class CreatePostmanCollectionPanel {
 
   }
 
+  private async _getCarriers() {
+    // get companies and codecompanies from translation file
+    let translationPath = await getWorkspaceFile('**/translations/CarrierToCarrierCode.csv');
+    let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
+
+    for (const translation of translations) {
+      this._carrierCodes.push({
+        carrier: translation.split(',')[0],
+        carriercode: translation.split(',')[1]
+      });
+    }
+
+    // sort
+    this._carrierCodes = uniqueSort(this._carrierCodes).sort((a, b) => (a.carrier > b.carrier) ? 1 : -1);
+  }
+
+
+
   private async _getRestUrls() {
     // get companies and codecompanies from translation file
     let translationPath = await getWorkspaceFile('**/translations/ModuleToTestRestApiUrl.csv');
@@ -432,6 +456,7 @@ export class CreatePostmanCollectionPanel {
       this._integrationObjects = await getAvailableIntegrations('postman');
       await this._getCompanies();
       await this._getRestUrls();
+      await this._getCarriers();
       this._initializeValues();
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
@@ -442,15 +467,20 @@ export class CreatePostmanCollectionPanel {
       this._headers[index] = { name: '', value: '' };
     }
 
+    // choose which type of carriers and modules to show
+    let carriers = this._independent ? this._carrierCodes.map(el => el.carrier) : this._carriers;
+    let modules = this._independent ? this._restUrls.map(el => el.module) : this._modules;
+
     // construct panel html object and retrieve html
     let createPostmanCollectionHtmlObject: CreatePostmanCollectionHtmlObject = new CreatePostmanCollectionHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
       this._fieldValues,
       this._headers,
-      this._carriers,
+      carriers,
       this._apis,
-      this._modules,
+      modules,
       this._codeCompanies.map(el => el.company),
+      this._carrierCodes,
       this._scenarioFieldValues,
       this._availableScenarios,
       this._modularElements,

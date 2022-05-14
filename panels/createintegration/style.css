@@ -26,6 +26,11 @@
 
 .floatleft {
   float: left;
+  padding-right: 2rem;
+}
+
+.floatleftnopadding {
+  float: left;
 }
 
 .rowelement {

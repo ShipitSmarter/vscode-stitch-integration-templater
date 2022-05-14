@@ -311,15 +311,15 @@ export class CreateIntegrationHtmlObject {
 
     let html: string = /*html*/ `
       <section class="component-example">
-        <section class="floatleft">
+        <section class="floatleftnopadding">
           <p>step name</p>
           ${subStepNames}
         </section>
-        <section class="floatleft">
+        <section class="floatleftnopadding">
           <p>test url</p>
           ${subTestUrl}
         </section>
-        <section class="floatleft">
+        <section class="floatleftnopadding">
           <p>prod url</p>
           ${subProdUrl}
         </section>
