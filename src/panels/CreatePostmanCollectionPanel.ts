@@ -187,6 +187,15 @@ export class CreatePostmanCollectionPanel {
                     this._fieldValues[carrierCodeIndex] = this._carrierCodes.filter(el => el.carrier === this._fieldValues[carrierIndex])[0].carriercode;
                     this._updateWebview(extensionUri);
                     break;
+                  case moduleIndex:
+                    getAvailableScenarios(this._fieldValues[moduleIndex]).then(scen => {
+                      this._availableScenarios = scen;
+                      getModularElements(this._fieldValues[moduleIndex]).then(elements => {
+                        this._modularElements = elements;
+                        this._updateWebview(extensionUri);
+                      });
+                    });
+                    break;
                 }
                 break;
               case 'field':
