@@ -303,6 +303,9 @@ export class CreatePostmanCollectionPanel {
     // - ACCOUNTNUMBER
     // - COSTCENTER
 
+    let accountNumberString = isEmpty(this._fieldValues[accountNumberIndex]) ? '' : `ACCOUNTNUMBER       = '${this._fieldValues[accountNumberIndex]}'`;
+    let costCenterString    = isEmpty(this._fieldValues[costCenterIndex])    ? '' : `COSTCENTER          = '${this._fieldValues[costCenterIndex]}'`;
+
     let stringReplaceList = `$StringReplaceList = @{
       CUSTOMERNAME       = '${companyObject.company}'
       CARRIERNAME         = '${this._fieldValues[carrierIndex]}'
@@ -310,8 +313,8 @@ export class CreatePostmanCollectionPanel {
       MODULENAME          = '${this._fieldValues[moduleIndex]}'
       SISRESTAPIURL       = '${restApiUrl}'
       CARRIERCODE         = '${this._fieldValues[carrierCodeIndex]}'
-      ACCOUNTNUMBER       = '${this._fieldValues[accountNumberIndex]}'
-      COSTCENTER          = '${this._fieldValues[costCenterIndex]}'
+      ${accountNumberString}
+      ${costCenterString}      
     }`;
 
     let headers : string = `$Headers = '{
