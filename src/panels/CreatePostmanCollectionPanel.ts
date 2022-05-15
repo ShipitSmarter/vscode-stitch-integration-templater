@@ -303,10 +303,6 @@ export class CreatePostmanCollectionPanel {
     // - ACCOUNTNUMBER
     // - COSTCENTER
 
-    let accountCostCenterString = this._independent ? `
-      ACCOUNTNUMBER       = '${this._fieldValues[accountNumberIndex]}'
-      COSTCENTER          = '${this._fieldValues[costCenterIndex]}'` : '';
-
     let stringReplaceList = `$StringReplaceList = @{
       CUSTOMERNAME       = '${companyObject.company}'
       CARRIERNAME         = '${this._fieldValues[carrierIndex]}'
@@ -314,7 +310,8 @@ export class CreatePostmanCollectionPanel {
       MODULENAME          = '${this._fieldValues[moduleIndex]}'
       SISRESTAPIURL       = '${restApiUrl}'
       CARRIERCODE         = '${this._fieldValues[carrierCodeIndex]}'
-      ${accountCostCenterString}
+      ACCOUNTNUMBER       = '${this._fieldValues[accountNumberIndex]}'
+      COSTCENTER          = '${this._fieldValues[costCenterIndex]}'
     }`;
 
     let headers : string = `$Headers = '{

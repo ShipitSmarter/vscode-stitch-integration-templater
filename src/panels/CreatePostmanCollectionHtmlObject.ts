@@ -63,9 +63,6 @@ export class CreatePostmanCollectionHtmlObject {
             ${this._getCreateButton()}
           </section>
 				</div>
-        
-        
-
 
         <section class="${this._ifDependent('rowsingle')}${this._ifIndependent('row32')}">
 
@@ -82,6 +79,8 @@ export class CreatePostmanCollectionHtmlObject {
 
               ${this._ifIndependent(this._getIndependentCarrierFolderStructureGrid())}
               ${this._ifDependent(this._getCarrierFolderStructureGrid())}
+
+              ${this._getCarrierDetailsGrid()}
 
               <vscode-divider role="separator"></vscode-divider>
 
@@ -157,6 +156,7 @@ export class CreatePostmanCollectionHtmlObject {
   private _getCarrierFolderStructureGrid(): string {
     let carrierFolderStructureGrid = /*html*/ `
       <section class="component-example">
+
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
         <vscode-dropdown id="carriername" class="dropdown" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} position="below">
           ${dropdownOptions(this._carriers)}
@@ -171,13 +171,6 @@ export class CreatePostmanCollectionHtmlObject {
         </vscode-dropdown>
 
       </section>
-      
-      <section class="component-example">
-        <p>Select customer</p>
-        <vscode-dropdown id="company" class="dropdown" index="${companyIndex}" ${this._valueString(this._fieldValues[companyIndex])} position="below">
-            ${dropdownOptions(this._companies)}
-          </vscode-dropdown>
-      </section>     
       `;
 
     return carrierFolderStructureGrid;
@@ -193,16 +186,23 @@ export class CreatePostmanCollectionHtmlObject {
             ${dropdownOptions(this._carriers)}
           </vscode-dropdown>
         </div>
+
         <div class="floatleftnopadding">
           <p>Module</p>
           <vscode-dropdown id="modulename" class="dropdownfield" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
             ${dropdownOptions(this._modules)}
           </vscode-dropdown>
         </div>
-      </section>
 
+      </section>   
+      `;
+
+    return carrierFolderStructureGrid;
+  }
+
+  private _getCarrierDetailsGrid() : string {
+    let carrierDetailsGrid = /*html*/`
       <section class="component-example">
-
         <div class="floatleft">
           <p>Carrier Code</p>
           <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${this._valueString(this._fieldValues[carrierCodeIndex])} readonly></vscode-text-field>
@@ -223,9 +223,9 @@ export class CreatePostmanCollectionHtmlObject {
             ${dropdownOptions(this._companies)}
           </vscode-dropdown>
       </section>     
-      `;
+    `;
 
-    return carrierFolderStructureGrid;
+    return carrierDetailsGrid;
   }
 
   private _getHeadersGrid(): string {
