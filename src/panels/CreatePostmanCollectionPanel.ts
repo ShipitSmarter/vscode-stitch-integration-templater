@@ -53,7 +53,7 @@ export class CreatePostmanCollectionPanel {
 
     // predefine some fixed fields
     this._fieldValues[moduleIndex] = 'booking';
-    this._fieldValues[nofHeadersIndex] = "2";
+    this._fieldValues[nofHeadersIndex] = "3";
     
     // pre-allocate headers array
     for (let index = 0; index < 20; index++) {
@@ -461,6 +461,7 @@ export class CreatePostmanCollectionPanel {
     // set initial headers
     this._headers[0] = {name: 'CodeCompany', value: this._codeCompanies[0].codecompany};
     this._headers[1] = {name: 'Authorization', value: '{{managerlogin}}'};
+    this._headers[2] = {name: 'CustomerHandlingAgent', value: ''};
 
     // default cost center
     this._fieldValues[costCenterIndex] = '000001';
