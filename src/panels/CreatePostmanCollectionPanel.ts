@@ -364,7 +364,7 @@ export class CreatePostmanCollectionPanel {
     }
   
     // execute script write script input
-    terminal.sendText(`cd ${cdDir}`);
+    terminal.sendText(`cd '${cdDir}'`);
     terminal.sendText(command);
   }
 
