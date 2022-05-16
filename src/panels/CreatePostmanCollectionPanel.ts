@@ -357,8 +357,11 @@ export class CreatePostmanCollectionPanel {
 
     // determine filepath
     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-    let cdDir = `${filesPath}/carriers/${this._fieldValues[carrierIndex]}`;
-    //fs.mkdirSync(cdDir, { recursive: true });
+    let subPath = this._independent ? 'carriers' : 'postman';
+    let cdDir = `${filesPath}/${subPath}/${this._fieldValues[carrierIndex]}`;
+    if (this._independent) {
+      fs.mkdirSync(cdDir, { recursive: true });
+    }
   
     // execute script write script input
     terminal.sendText(`cd ${cdDir}`);
