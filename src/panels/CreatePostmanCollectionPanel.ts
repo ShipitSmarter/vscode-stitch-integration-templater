@@ -401,15 +401,17 @@ export class CreatePostmanCollectionPanel {
     let translationPath = await getWorkspaceFile('**/translations/CompanyToCodeCompany.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
-    for (const translation of translations) {
-      this._codeCompanies.push({
-        company: translation.split(',')[0],
-        codecompany: translation.split(',')[1]
-      });
+    this._codeCompanies = new Array<{company: string, codecompany: string}>(translations.length);
+
+    for (let index = 0; index < translations.length; index++) {
+      this._codeCompanies[index] = {
+        company: translations[index].split(',')[0],
+        codecompany: translations[index].split(',')[1]
+      };
     }
 
     // sort
-    this._codeCompanies = uniqueSort(this._codeCompanies).sort((a, b) => (a.company > b.company) ? 1 : -1);
+    this._codeCompanies = this._codeCompanies.sort((a, b) => (a.company > b.company) ? 1 : -1);
 
   }
 
@@ -418,15 +420,17 @@ export class CreatePostmanCollectionPanel {
     let translationPath = await getWorkspaceFile('**/translations/CarrierToCarrierCode.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
-    for (const translation of translations) {
-      this._carrierCodes.push({
-        carrier: translation.split(',')[0],
-        carriercode: translation.split(',')[1]
-      });
+    this._carrierCodes = new Array<{carrier: string, carriercode: string}>(translations.length);
+
+    for (let index = 0; index < translations.length; index++) {
+      this._carrierCodes[index] = {
+        carrier: translations[index].split(',')[0],
+        carriercode: translations[index].split(',')[1]
+      };
     }
 
     // sort
-    this._carrierCodes = uniqueSort(this._carrierCodes).sort((a, b) => (a.carrier > b.carrier) ? 1 : -1);
+    this._carrierCodes = this._carrierCodes.sort((a, b) => (a.carrier > b.carrier) ? 1 : -1);
   }
 
 
@@ -436,11 +440,13 @@ export class CreatePostmanCollectionPanel {
     let translationPath = await getWorkspaceFile('**/translations/ModuleToTestRestApiUrl.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
-    for (const translation of translations) {
-      this._restUrls.push({
-        module: translation.split(',')[0],
-        url: translation.split(',')[1]
-      });
+    this._restUrls = new Array<{module: string, url: string}>(translations.length);
+
+    for (let index = 0; index < translations.length; index++) {
+      this._restUrls[index] = {
+        module: translations[index].split(',')[0],
+        url: translations[index].split(',')[1]
+      };
     }
   }
 
@@ -479,9 +485,9 @@ export class CreatePostmanCollectionPanel {
 
   private async _refreshContent() {
     this._integrationObjects = await getAvailableIntegrations('postman');
-    this._codeCompanies = [];
-    this._carrierCodes = [];
-    this._restUrls = [];
+    // this._codeCompanies = [];
+    // this._carrierCodes = [];
+    // this._restUrls = [];
     await this._getCompanies();
     await this._getRestUrls();
     await this._getCarrierCodes();

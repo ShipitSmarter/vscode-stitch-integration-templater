@@ -38,7 +38,7 @@ export function getExtensionFile(context: ExtensionContext, folder: string, file
 export async function getAvailableScenarios(module:string, withParent:boolean = true): Promise<string[]> {
     let bookingScenarioXmls: string[] = await getWorkspaceFiles('**/scenario-templates/' + module + '/**/*.xml');
 
-    let bookingScenarios: string[] = [];
+    let bookingScenarios: string[] = new Array<string>(bookingScenarioXmls.length);
 
     for (let index = 0; index < bookingScenarioXmls.length; index++) {
       let scenarioName = (cleanPath(bookingScenarioXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
@@ -56,7 +56,7 @@ export async function getAvailableScenarios(module:string, withParent:boolean = 
 export async function getModularElements(module:string): Promise<string[]> {
     let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*.xml');
 
-    let elements: string[] = [];
+    let elements: string[] = new Array<string>(elementXmls.length);
 
     for (let index = 0; index < elementXmls.length; index++) {
       let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
@@ -74,14 +74,15 @@ export async function getModularElements(module:string): Promise<string[]> {
 export async function getAvailableIntegrations(panel:string) : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[]> {
 	// panel input: 'integration' or 'postman'
 
-	// pre-allocate output
-	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
-
 	// integration script path array
 	let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
 
+	// pre-allocate output
+	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = new Array<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}>(integrationScripts.length);
+
 	// build integration array
-	for (const script of integrationScripts) {
+	for (let index = 0; index < integrationScripts.length; index++) {
+		let script = integrationScripts[index];
 		// load script content
 		let scriptContent = fs.readFileSync(script, 'utf8');
 
@@ -117,7 +118,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 		let validScenarios : string [] = integrationScenarios.filter(el => isScenarioValid(el, modular, valids));
 
 		// add array element
-		integrationObjects.push({
+		integrationObjects[index] = {
 			path: 		 script,
 			carrier: 	 carrier,
 			api: 		 api,
@@ -126,7 +127,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 			modular: 	 modular,
 			scenarios:   integrationScenarios,
 			validscenarios: validScenarios
-		});
+		};
 	}
 
 	return integrationObjects;
