@@ -25,8 +25,6 @@ Contributes the following commands, which are available from the *Command Palett
     ![Stitch Create Postman collection](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/pmcollection-use-gif.gif)
 
 
-
-
 ## Dependencies
 This dashboard is a graphical frontend for the ShipitSmarter integration automation PowerShell script, and does not function independently without it.
 
