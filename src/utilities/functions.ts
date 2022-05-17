@@ -81,6 +81,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = new Array<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}>(integrationScripts.length);
 
 	// build integration array
+	let newIndex: number = 0;
 	for (let index = 0; index < integrationScripts.length; index++) {
 		let script = integrationScripts[index];
 		// load script content
@@ -118,7 +119,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 		let validScenarios : string [] = integrationScenarios.filter(el => isScenarioValid(el, modular, valids));
 
 		// add array element
-		integrationObjects[index] = {
+		integrationObjects[newIndex] = {
 			path: 		 script,
 			carrier: 	 carrier,
 			api: 		 api,
@@ -128,9 +129,11 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 			scenarios:   integrationScenarios,
 			validscenarios: validScenarios
 		};
+
+		newIndex++;
 	}
 
-	return integrationObjects;
+	return integrationObjects.slice(0,newIndex);
 }
 
 export function isScenarioValid(scenario:string, modular:boolean, validScenarios: string[]) : boolean {
