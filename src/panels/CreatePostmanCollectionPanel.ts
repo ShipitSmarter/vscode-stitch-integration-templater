@@ -57,12 +57,7 @@ export class CreatePostmanCollectionPanel {
     this._fieldValues[nofHeadersIndex] = "3";
     
     // pre-allocate headers array
-    for (let index = 0; index < 20; index++) {
-      this._headers.push({
-        name: '',
-        value: ''
-      });
-    }
+    this._headers = new Array<{name: string, value: string}>(20);
 
     // set content
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
