@@ -253,6 +253,9 @@ export class CreateIntegrationHtmlObject {
       <section class="component-container">
         <h2>Existing scenarios</h2>
         <p>Check to run again</p>
+        <section class="component-example">
+          <vscode-checkbox id="checkallexisting" class="checkallexisting">Check all</vscode-checkbox>
+        </section>
         ${this._existingScenarios()}
       </section>`;
 
@@ -307,16 +310,16 @@ export class CreateIntegrationHtmlObject {
     }
 
     let html: string = /*html*/ `
-      <section class="row433">
-        <section class="component-example">
+      <section class="component-example">
+        <section class="floatleftnopadding">
           <p>step name</p>
           ${subStepNames}
         </section>
-        <section class="component-example">
+        <section class="floatleftnopadding">
           <p>test url</p>
           ${subTestUrl}
         </section>
-        <section class="component-example">
+        <section class="floatleftnopadding">
           <p>prod url</p>
           ${subProdUrl}
         </section>

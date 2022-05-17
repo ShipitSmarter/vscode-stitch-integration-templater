@@ -23,9 +23,9 @@ function main() {
   }
 
   // checkboxes
-  const checkBoxes = document.querySelectorAll(".modular,.existingscenariocheckbox");
+  const checkBoxes = document.querySelectorAll(".modular,.existingscenariocheckbox,.checkallexisting");
   for (const checkbox of checkBoxes) {
-    checkbox.addEventListener("click", fieldChange);
+    checkbox.addEventListener("change", fieldChange);
   }
 
   // on panel creation: save all dropdown values (if exist)
@@ -128,6 +128,12 @@ function fieldChange(event) {
         scenario.disabled = true;
         scenario.readOnly = false;
       }
+      break;
+
+    case 'checkallexisting':
+      for (const checkbox of document.querySelectorAll(".existingscenariocheckbox")) {
+        checkbox.checked = field.checked;
+      }  
       break;
   }
   

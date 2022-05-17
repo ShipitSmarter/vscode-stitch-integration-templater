@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -10,6 +10,10 @@ const apiIndex = 1;
 const moduleIndex = 2;
 const companyIndex = 3;
 const nofHeadersIndex = 4;
+const accountNumberIndex = 5;
+const costCenterIndex = 6;
+const nofScenariosIndex = 7;
+const carrierCodeIndex = 8;
 
 export class CreatePostmanCollectionPanel {
   // PROPERTIES
@@ -17,11 +21,19 @@ export class CreatePostmanCollectionPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
+  private _initialValues: string[] = [];
   private _headers: {name: string, value: string}[] = [];
   private _carriers: string[] = [];
   private _apis: string[] = [];
   private _modules: string[] = [];
+  private _scenarioFieldValues: string[] = [];
+  private _availableScenarios: string[] = [];
+  private _modularElements: string[] = [];
+  private _independent: boolean = false;
+  private _modularValue: boolean = false;
+
   private _integrationObjects: {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
+  private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
   private _codeCompanies: {
     company: string,
     codecompany: string
@@ -31,13 +43,18 @@ export class CreatePostmanCollectionPanel {
     url: string
   }[] = [];
 
+  private _carrierCodes: {
+    carrier: string,
+    carriercode: string
+  }[] = [];
+
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
     this._panel = panel;
 
     // predefine some fixed fields
     this._fieldValues[moduleIndex] = 'booking';
-    this._fieldValues[nofHeadersIndex] = "2";
+    this._fieldValues[nofHeadersIndex] = "3";
     
     // pre-allocate headers array
     for (let index = 0; index < 20; index++) {
@@ -123,7 +140,6 @@ export class CreatePostmanCollectionPanel {
             var index = +classIndexValue[1];
             var value = classIndexValue[2];
             
-
             // do some updating and refreshing
             switch(clas) {
               case 'dropdown':
@@ -134,6 +150,7 @@ export class CreatePostmanCollectionPanel {
                     let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
                     this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
                     this._fieldValues[apiIndex]         = this._apis[0];
+                    this._fieldValues[carrierCodeIndex] = carrierIOs[0].carriercode;
     
                     // no break: fall-through is intentional!
                   case apiIndex:
@@ -152,9 +169,38 @@ export class CreatePostmanCollectionPanel {
                     this._updateWebview(extensionUri);
                     break;
                   case nofHeadersIndex:
+                    // crop headers array
+                    // --> direct headers array cropping will break it -> instead, tactical cropping in getWebviewContent()
+                    this._updateWebview(extensionUri);
+                    break;
+                  case nofScenariosIndex:
+                    // crop scenarios array
+                    this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
                     this._updateWebview(extensionUri);
                     break;
                 }
+                break;
+
+              case 'dropdownfield':
+                this._fieldValues[index] = value;
+                switch (index) {
+                  case carrierIndex:
+                    this._fieldValues[carrierCodeIndex] = this._carrierCodes.filter(el => el.carrier === this._fieldValues[carrierIndex])[0].carriercode;
+                    this._updateWebview(extensionUri);
+                    break;
+                  case moduleIndex:
+                    getAvailableScenarios(this._fieldValues[moduleIndex]).then(scen => {
+                      this._availableScenarios = scen;
+                      getModularElements(this._fieldValues[moduleIndex]).then(elements => {
+                        this._modularElements = elements;
+                        this._updateWebview(extensionUri);
+                      });
+                    });
+                    break;
+                }
+                break;
+              case 'field':
+                this._fieldValues[index] = value;
                 break;
               
               case 'headername':
@@ -163,6 +209,33 @@ export class CreatePostmanCollectionPanel {
               
               case 'headervalue':
                 this._headers[index].value = value;
+                break;
+
+              case 'independent':
+                this._independent = toBoolean(value);
+                if (this._independent) {
+                  this._fieldValues[carrierIndex] = this._carrierCodes[0].carrier;
+                  this._fieldValues[apiIndex]     = '';
+                  this._fieldValues[moduleIndex]  = 'booking';
+                  this._fieldValues[carrierCodeIndex] = this._carrierCodes[0].carriercode;
+                } else {
+                  this._fieldValues[carrierIndex] = this._initialValues[carrierIndex];
+                  this._fieldValues[apiIndex]     = this._initialValues[apiIndex];
+                  this._fieldValues[moduleIndex]  = this._initialValues[moduleIndex];
+                  this._fieldValues[carrierCodeIndex] = this._initialValues[carrierCodeIndex];
+                }
+                
+                this._updateWebview(extensionUri);
+                break;
+
+              case 'modular':
+                this._modularValue = toBoolean(value);
+                this._scenarioFieldValues = [];
+                this._updateWebview(extensionUri);
+                break;
+
+              case 'scenariofield':
+                this._scenarioFieldValues[index] = value;
                 break;
             }
             
@@ -220,24 +293,56 @@ export class CreatePostmanCollectionPanel {
     }
 
     // string replace list
-    let stringReplaceList: string = `$StringReplaceList = @{
-      COLLECTIONNAME      = '${companyObject.company}_${this._fieldValues[carrierIndex]}_${this._fieldValues[apiIndex]}_${this._fieldValues[moduleIndex]}'
+    // - CUSTOMERNAME
+    // - CARRIERNAME
+    // - APINAME
+    // - MODULENAME
+    // - SISRESTAPIURL
+    // - CARRIERCODE
+
+    // optional:
+    // - ACCOUNTNUMBER
+    // - COSTCENTER
+
+    let accountNumberString = isEmpty(this._fieldValues[accountNumberIndex]) ? '' : `ACCOUNTNUMBER       = '${this._fieldValues[accountNumberIndex]}'`;
+    let costCenterString    = isEmpty(this._fieldValues[costCenterIndex])    ? '' : `COSTCENTER          = '${this._fieldValues[costCenterIndex]}'`;
+
+    let stringReplaceList = `$StringReplaceList = @{
+      CUSTOMERNAME       = '${companyObject.company}'
       CARRIERNAME         = '${this._fieldValues[carrierIndex]}'
-      SISRESTAPIURL       = '${restApiUrl}'
+      APINAME             = '${this._fieldValues[apiIndex]}'
       MODULENAME          = '${this._fieldValues[moduleIndex]}'
-      CARRIERCODE         = '${this._getIntegrationObject().carriercode}'
+      SISRESTAPIURL       = '${restApiUrl}'
+      CARRIERCODE         = '${this._fieldValues[carrierCodeIndex]}'
+      ${accountNumberString}
+      ${costCenterString}      
     }`;
 
     let headers : string = `$Headers = '{
       ${this._getHeaderString()}
     }'`;
 
-    let modulePath = `$ModulePath = '${this._fieldValues[apiIndex]}\\${this._fieldValues[moduleIndex]}'`;
+    // scenarios string
+    let newScenariosString : string = '';
+    let newScenarios = this._getNewScenarios();
+    for (const scenario of newScenarios) {
+      newScenariosString += `\n '${scenario}'`;
+
+      // add comma
+      if (scenario !== newScenarios[newScenarios.length-1]) {
+        newScenariosString += ',';
+      }
+    }
+
+    let defScenariosString = (this._independent) ? `$Scenarios = @( ${newScenariosString} )` : '';
+
+    let applyScenariosString = (this._independent) ? '-Scenarios $Scenarios' : '';
+    let modularString = this._modularValue ? '-Modular' : '';
     let loadFunctions = `. "..\\..\\scenario-templates\\scripts\\functions.ps1"`;
-    let createPostmanCollection = `New-PostmanCollection -StringReplaceList $StringReplaceList -Headers $Headers -ModulePath $ModulePath -Test`;
+    let createPostmanCollection = `New-PostmanCollection -StringReplaceList $StringReplaceList -Headers $Headers ${applyScenariosString} ${modularString} -Test`;
     let nl = '\n';
 
-    return stringReplaceList + nl + headers + nl + modulePath + nl + loadFunctions + nl + createPostmanCollection;
+    return stringReplaceList + nl + headers + nl + defScenariosString + nl + loadFunctions + nl + createPostmanCollection;
   }
 
   private _runScript(terminal: vscode.Terminal, functionsPath: string) {
@@ -251,9 +356,29 @@ export class CreatePostmanCollectionPanel {
       terminal = startScript('', '');
     }
 
+    // determine filepath
+    let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
+    let subPath = this._independent ? 'carriers' : 'postman';
+    let cdDir = `${filesPath}/${subPath}/${this._fieldValues[carrierIndex]}`;
+    if (this._independent) {
+      fs.mkdirSync(cdDir, { recursive: true });
+    }
+  
     // execute script write script input
-    terminal.sendText(`cd ${this._getCarrierPath(functionsPath)}`);
+    terminal.sendText(`cd '${cdDir}'`);
     terminal.sendText(command);
+  }
+
+  private _getNewScenarioValue(fieldValue:string) : string {
+    let newScenarioValue = '';
+    if (!isEmpty(fieldValue)) {
+      newScenarioValue = fieldValue.replace(/[^\>]+\> /g, '');
+    }
+    return newScenarioValue;
+  }
+
+  private _getNewScenarios() : string[] {
+    return this._scenarioFieldValues.map( el => this._getNewScenarioValue(el)).filter(el => !isEmpty(el)).sort();
   }
 
   private _getIntegrationName(): string {
@@ -282,6 +407,24 @@ export class CreatePostmanCollectionPanel {
 
   }
 
+  private async _getCarrierCodes() {
+    // get companies and codecompanies from translation file
+    let translationPath = await getWorkspaceFile('**/translations/CarrierToCarrierCode.csv');
+    let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
+
+    for (const translation of translations) {
+      this._carrierCodes.push({
+        carrier: translation.split(',')[0],
+        carriercode: translation.split(',')[1]
+      });
+    }
+
+    // sort
+    this._carrierCodes = uniqueSort(this._carrierCodes).sort((a, b) => (a.carrier > b.carrier) ? 1 : -1);
+  }
+
+
+
   private async _getRestUrls() {
     // get companies and codecompanies from translation file
     let translationPath = await getWorkspaceFile('**/translations/ModuleToTestRestApiUrl.csv');
@@ -299,23 +442,33 @@ export class CreatePostmanCollectionPanel {
     // set carrier array: just all carriers available (in .ps1 integration script files)
     this._carriers                      = uniqueSort(this._integrationObjects.map(el => el.carrier));
     this._fieldValues[carrierIndex]     = this._carriers[0];
+    this._initialValues[carrierIndex]   = this._carriers[0];
+    this._fieldValues[carrierCodeIndex] = this._integrationObjects.filter(el => el.carrier === this._fieldValues[carrierIndex])[0].carriercode;
+    this._initialValues[carrierCodeIndex] = this._fieldValues[carrierCodeIndex];
 
     // api array: filter on carrier
     let carrierIOs                      = this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier);
     this._apis                          = uniqueSort(carrierIOs.map(el => el.api));
     this._fieldValues[apiIndex]         = this._apis[0];
+    this._initialValues[apiIndex]         = this._apis[0];
 
     // module array: filter on carrier and api
     let carrierApiIOs                   = carrierIOs.filter(el => this._fieldValues[apiIndex] === el.api );
     this._modules                       = uniqueSort(carrierApiIOs.map(el => el.module));
     this._fieldValues[moduleIndex]      = this._modules[0];
+    this._initialValues[moduleIndex]      = this._modules[0];
 
     // set company
     this._fieldValues[companyIndex]     = this._codeCompanies[0].company;
+    this._initialValues[companyIndex]   = this._codeCompanies[0].company;
 
     // set initial headers
     this._headers[0] = {name: 'CodeCompany', value: this._codeCompanies[0].codecompany};
     this._headers[1] = {name: 'Authorization', value: '{{managerlogin}}'};
+    this._headers[2] = {name: 'CustomerHandlingAgent', value: ''};
+
+    // default cost center
+    this._fieldValues[costCenterIndex] = '000001';
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
@@ -330,7 +483,10 @@ export class CreatePostmanCollectionPanel {
       this._integrationObjects = await getAvailableIntegrations('postman');
       await this._getCompanies();
       await this._getRestUrls();
+      await this._getCarrierCodes();
       this._initializeValues();
+      this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
+      this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
     }
 
     // crop flexible header field values
@@ -338,15 +494,25 @@ export class CreatePostmanCollectionPanel {
       this._headers[index] = { name: '', value: '' };
     }
 
+    // choose which type of carriers and modules to show
+    let carriers = this._independent ? this._carrierCodes.map(el => el.carrier) : this._carriers;
+    let modules = this._independent ? this._restUrls.map(el => el.module) : this._modules;
+
     // construct panel html object and retrieve html
     let createPostmanCollectionHtmlObject: CreatePostmanCollectionHtmlObject = new CreatePostmanCollectionHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
       this._fieldValues,
       this._headers,
-      this._carriers,
+      carriers,
       this._apis,
-      this._modules,
-      this._codeCompanies.map(el => el.company)
+      modules,
+      this._codeCompanies.map(el => el.company),
+      this._carrierCodes,
+      this._scenarioFieldValues,
+      this._availableScenarios,
+      this._modularElements,
+      this._independent,
+      this._modularValue
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();

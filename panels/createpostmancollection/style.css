@@ -25,6 +25,11 @@
 
 .floatleft {
   float: left;
+  padding-right: 2rem;
+}
+
+.floatleftnopadding {
+  float: left;
 }
 
 #company {
@@ -100,4 +105,12 @@ h1 {
 #carriername,
 #carrierapiname {
   width: 10rem;
+}
+
+#carriercode {
+  width: 5rem;
+}
+
+.scenariofield {
+  width: 25rem;
 }
