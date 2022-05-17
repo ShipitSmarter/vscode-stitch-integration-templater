@@ -479,6 +479,9 @@ export class CreatePostmanCollectionPanel {
 
   private async _refreshContent() {
     this._integrationObjects = await getAvailableIntegrations('postman');
+    this._codeCompanies = [];
+    this._carrierCodes = [];
+    this._restUrls = [];
     await this._getCompanies();
     await this._getRestUrls();
     await this._getCarrierCodes();
