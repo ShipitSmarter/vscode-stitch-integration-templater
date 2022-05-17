@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.2
+- Postman collection
+  - Bugfix: dropdown doubles after using 'Refresh' button
+
 ## 1.2.1
 - Postman collection
   - Added 'Refresh' button to allow refreshing of all dropdown (and modular) options without needing to close and reopen dashboard.
