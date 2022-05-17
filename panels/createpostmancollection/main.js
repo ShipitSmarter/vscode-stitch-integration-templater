@@ -5,6 +5,7 @@ window.addEventListener("load", main);
 function main() {
   // button onclick event listeners
   document.getElementById("createpostmancollection").addEventListener("click", createPostmanCollection);
+  document.getElementById("refresh").addEventListener("click", refreshContent);
 
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown,.dropdownfield");
@@ -185,6 +186,10 @@ function checkModularScenario(content) {
 
 function refreshPanel(string="") {
   vscodeApi.postMessage({ command: "refreshpanel", text: string });
+}
+
+function refreshContent() {
+  vscodeApi.postMessage({ command: "refreshcontent", text: "" });
 }
 
 function createPostmanCollection() {

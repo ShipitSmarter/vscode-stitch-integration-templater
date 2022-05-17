@@ -122,6 +122,12 @@ export class CreatePostmanCollectionPanel {
             this._updateWebview(extensionUri);
             break;
 
+          case 'refreshcontent':
+            this._refreshContent().then( () => {
+              this._updateWebview(extensionUri);
+            });
+            break;
+
           case 'createpostmancollection':
             this._createPostmanCollection(terminal, extensionUri);
             break;
@@ -469,6 +475,15 @@ export class CreatePostmanCollectionPanel {
 
     // default cost center
     this._fieldValues[costCenterIndex] = '000001';
+  }
+
+  private async _refreshContent() {
+    this._integrationObjects = await getAvailableIntegrations('postman');
+    await this._getCompanies();
+    await this._getRestUrls();
+    await this._getCarrierCodes();
+    this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
+    this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {

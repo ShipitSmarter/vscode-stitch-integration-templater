@@ -69,8 +69,14 @@ export class CreatePostmanCollectionHtmlObject {
           <section class="rowsingle">
             <section class="component-container">
 
+
               <section class="component-example">
-                <vscode-checkbox id="independent" class="independent" ${this._checkedString(this._independent)}>Independent of existing integrations</vscode-checkbox>
+                <div class="floatleft">
+                  <vscode-checkbox id="independent" class="independent" ${this._checkedString(this._independent)}>Independent of existing integrations</vscode-checkbox>
+                </div>
+                <div class="floatleft">
+                  ${this._getRefreshButton()}
+                </div>
               </section>
 
               <vscode-divider role="separator"></vscode-divider>
@@ -151,6 +157,16 @@ export class CreatePostmanCollectionHtmlObject {
       </vscode-button>
       `;
     return createButton;
+  }
+
+  private _getRefreshButton(): string {
+    let refreshButton: string = /*html*/ `
+    <vscode-button id="refresh" appearance="primary">
+      Refresh
+      <span slot="start" class="codicon codicon-refresh"></span>
+    </vscode-button>
+  `;
+    return refreshButton;
   }
 
   private _getCarrierFolderStructureGrid(): string {
