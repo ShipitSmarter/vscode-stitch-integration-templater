@@ -1,5 +1,10 @@
 # Change Log
 
+# 1.2.3
+- Postman collection
+  - Refactor for performance improvement
+  - Collection file and name now contain carrier code instead of carrier name to avoid invalid paths
+
 ## 1.2.2
 - Postman collection
   - Bugfix: dropdown doubles after using 'Refresh' button
