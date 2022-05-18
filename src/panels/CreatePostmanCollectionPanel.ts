@@ -359,8 +359,8 @@ export class CreatePostmanCollectionPanel {
 
     // determine filepath
     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-    let subPath = this._independent ? 'carriers' : 'postman';
-    let cdDir = `${filesPath}/${subPath}/${this._fieldValues[carrierIndex]}`;
+    let subPath = this._independent ? `postman/${this._fieldValues[carrierCodeIndex]}` : `carriers/${this._fieldValues[carrierIndex]}`;
+    let cdDir = `${filesPath}/${subPath}`;
     if (this._independent) {
       fs.mkdirSync(cdDir, { recursive: true });
     }
@@ -427,8 +427,6 @@ export class CreatePostmanCollectionPanel {
     // sort
     this._carrierCodes = this._carrierCodes.sort((a, b) => (a.carrier > b.carrier) ? 1 : -1);
   }
-
-
 
   private async _getRestUrls() {
     // get companies and codecompanies from translation file
