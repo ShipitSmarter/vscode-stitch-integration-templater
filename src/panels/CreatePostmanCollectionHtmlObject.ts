@@ -310,7 +310,9 @@ export class CreatePostmanCollectionHtmlObject {
     if (this._modularValue) {
       let modularTiles = '';
       for (const element of this._modularElements) {
-        modularTiles += this._getModularTile(element);
+        if (element !== 'standard') {
+          modularTiles += this._getModularTile(element);
+        }
       }
 
       html = /*html*/ `
