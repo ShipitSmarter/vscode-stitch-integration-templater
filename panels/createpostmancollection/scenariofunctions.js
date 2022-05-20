@@ -1,5 +1,86 @@
 import { isEmpty } from "./general.js";
 
+// track last selected text field
+let currentInput = document.querySelectorAll(".scenariofield")[0];
+
+export function addScenarioEventListeners(vscodeApi) {
+  // tile buttons
+  for (const tilebutton of document.querySelectorAll(".modulartile")) {
+    tilebutton.addEventListener("click", clickTile(vscodeApi));
+  }
+
+  for (const field of document.querySelectorAll(".scenariofield")) {
+    field.addEventListener("keyup", scenarioFieldChange(vscodeApi));
+    field.addEventListener("change", scenarioFieldChange(vscodeApi));
+    field.addEventListener('focus',modularScenarioFocus);
+  }
+
+  // modular checkbox
+  document.getElementById("modular").addEventListener("change", scenarioFieldChange(vscodeApi));
+}
+
+export var clickTile = function (vscodeApi) { return function (event) {
+    const field = event.target;
+  
+    // add/remove tile content to last selected text field
+    let currentElements = currentInput.value.split('-');
+    if (currentElements.includes(field.id)) {
+      currentInput.value = currentElements.filter(el => el !== field.id).join('-');
+    } else {
+      currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? '' : '-') + field.id;
+    }
+  
+    // save field value
+    saveScenarioValue(currentInput.id, vscodeApi);
+  
+    // trigger 'change' event to save
+    // currentInput.dispatchEvent(new Event('change'));
+  
+    // update appearance on click
+    flipTile(field.id);
+};};
+
+export var scenarioFieldChange = function (vscodeApi) { return  function (event) {
+    // passing parameter and event to listener function
+    // from https://stackoverflow.com/a/8941670/1716283
+    const field = event.target;
+
+    // save field value
+    saveScenarioValue(field.id, vscodeApi);
+    
+    if (!isModular()) {
+    // if not modular: check ALL scenarios
+    for (const sc of document.querySelectorAll(".scenariofield")) {
+        updateScenarioFieldOutlineAndTooltip(sc.id);
+    }
+    } else {
+    // else: just check this one
+    updateScenarioFieldOutlineAndTooltip(field.id);
+    }
+};};
+  
+  
+export function modularScenarioFocus(event) {
+    // track last selected scenario field
+    // from https://stackoverflow.com/a/68176703/1716283
+    const field = event.target;
+  
+    // update currentInput
+    currentInput = field;
+  
+    // update tiles
+    updateTiles(currentInput.value);
+}
+
+
+export function saveScenarioValue(fieldId, vscodeApi) {
+    var field = document.getElementById(fieldId);
+    var attr = 'index';
+    var value = field.checked ?? field.value;
+    var textString = field.classList[0] + '|' + (field.getAttribute(attr) ?? '') + '|' + value;
+    vscodeApi.postMessage({ command: "savevalue", text: textString });
+}
+
 export function flipTile(fieldId) {
     let field = document.getElementById(fieldId);
   
@@ -9,6 +90,17 @@ export function flipTile(fieldId) {
     } else {
       field.setAttribute(app,'primary');
     }
+}
+
+export function checkScenarioFields() {
+    // check if any incorrect field contents and update fields outlining and tooltip in the process
+    var check = true;
+    const fields = document.querySelectorAll(".scenariofield");
+    for (const field of fields) {
+      check = updateScenarioFieldOutlineAndTooltip(field.id) ? check : false;
+    }
+  
+    return check;
 }
   
 export function updateTiles(content) {
