@@ -67,10 +67,10 @@ function clickTile(event) {
   // currentInput.dispatchEvent(new Event('change'));
 
   // update appearance on click
-  //updateTileAppearance(field.id);
+  flipTile(field.id);
 }
 
-function updateTileAppearance(fieldId) {
+function flipTile(fieldId) {
   let field = document.getElementById(fieldId);
 
   let app = 'appearance';
@@ -110,7 +110,7 @@ function updateTiles(content) {
   let currentElements = content.split('-');
   
 
-  if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
+  // if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
     //infoMessage(currentElements.join(' '));
     let tiles = document.querySelectorAll(".modulartile");
     infoMessage(tiles.length+'');
@@ -123,7 +123,7 @@ function updateTiles(content) {
       }
     }
     
-  }
+  // }
 }
 
 function fieldChange(event) {
