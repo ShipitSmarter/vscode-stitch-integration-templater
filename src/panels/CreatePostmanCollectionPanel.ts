@@ -493,8 +493,8 @@ export class CreatePostmanCollectionPanel {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
     const codiconsUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);
-    const mainUri = getUri(webview, extensionUri, ["panels", "createpostmancollection", "main.js"]);
-    const styleUri = getUri(webview, extensionUri, ["panels", "createpostmancollection", "style.css"]);
+    const mainUri = getUri(webview, extensionUri, ["scripts", "createpostmancollection", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["scripts", "createpostmancollection", "style.css"]);
 
     // initialize (first time)
     if (this._integrationObjects.length === 0) {

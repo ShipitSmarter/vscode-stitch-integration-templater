@@ -487,8 +487,8 @@ export class CreateIntegrationPanel {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
     const codiconsUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);
-    const mainUri = getUri(webview, extensionUri, ["panels", "createintegration", "main.js"]);
-    const styleUri = getUri(webview, extensionUri, ["panels", "createintegration", "style.css"]);
+    const mainUri = getUri(webview, extensionUri, ["scripts", "createintegration", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["scripts", "createintegration", "style.css"]);
 
     // first time only: get integrations, available scenarios, modular elements
     if (this._integrationObjects.length === 0) {

@@ -1,4 +1,4 @@
-import { isEmpty } from "./general.js";
+import { isEmpty } from "../general/general.js";
 
 // track last selected text field
 let currentInput = document.querySelectorAll(".scenariofield")[0];

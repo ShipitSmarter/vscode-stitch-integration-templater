@@ -1,5 +1,5 @@
-import { checkScenarioFields, addScenarioEventListeners } from "./scenariofunctions.js";
-import { isEmpty } from "./general.js";
+import { checkScenarioFields, addScenarioEventListeners } from "../general/scenariofunctions.js";
+import { isEmpty } from "../general/general.js";
 
 const vscodeApi = acquireVsCodeApi();
 
