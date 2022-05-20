@@ -1,9 +1,13 @@
+import { flipTile, updateTiles, isModular, updateScenarioFieldOutlineAndTooltip } from "./scenariofunctions.js";
+import { isEmpty } from "./general.js";
+
+// track last selected text field
+let currentInput = document.querySelectorAll(".scenariofield")[0];
+
 const vscodeApi = acquireVsCodeApi();
 
 window.addEventListener("load", main);
 
-// track last selected text field
-let currentInput = document.querySelectorAll(".scenariofield")[0];
 
 function main() {
 
@@ -75,27 +79,6 @@ function clickTile(event) {
   flipTile(field.id);
 }
 
-function flipTile(fieldId) {
-  let field = document.getElementById(fieldId);
-
-  let app = 'appearance';
-  if (field.getAttribute(app) === 'primary'){
-    field.setAttribute(app,'secondary');
-  } else {
-    field.setAttribute(app,'primary');
-  }
-}
-
-function setPrimary(fieldId) {
-  let field = document.getElementById(fieldId);
-  field.setAttribute('appearance','primary');
-}
-
-function setSecondary(fieldId) {
-  let field = document.getElementById(fieldId);
-  field.setAttribute('appearance','secondary');
-}
-
 function modularScenarioFocus(event) {
   const field = event.target;
 
@@ -104,25 +87,6 @@ function modularScenarioFocus(event) {
 
   // update tiles
   updateTiles(currentInput.value);
-
-}
-
-function updateTiles(content) {
-  let currentElements = content.split('-');
-  
-  // if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
-    //infoMessage(currentElements.join(' '));
-    let tiles = document.querySelectorAll(".modulartile");
-    for (const tile of tiles) {
-      //infoMessage(tile.id);
-      if (currentElements.includes(tile.id)) {
-        setPrimary(tile.id);
-      } else {
-        setSecondary(tile.id);
-      }
-    }
-    
-  // }
 }
 
 function fieldChange(event) {
@@ -133,22 +97,15 @@ function fieldChange(event) {
   
   // do some more stuff based on field class
   switch (field.classList[0]) {
-    // input fields:
-    case 'headername':
-    case 'headervalue':
-    case 'dropdown':
-    case 'independent':
-    case 'modular':
-      break;
     case 'scenariofield':
       if (!isModular()) {
         // if not modular: check ALL scenarios
         for (const sc of document.querySelectorAll(".scenariofield")) {
-          updateFieldOutlineAndTooltip(sc.id);
+          updateScenarioFieldOutlineAndTooltip(sc.id);
         }
       } else {
         // else: just check this one
-        updateFieldOutlineAndTooltip(field.id);
+        updateScenarioFieldOutlineAndTooltip(field.id);
       }
       break;
   }
@@ -167,109 +124,15 @@ function saveValue(fieldId) {
   vscodeApi.postMessage({ command: "savevalue", text: textString });
 }
 
-function isEmpty(string) {
-  var empty = false;
-  if (string === '' || string === undefined || string === null) {
-    empty = true;
-  }
-
-  return empty;
-}
-
-function isModular() {
-  return document.getElementById("modular").checked;
-}
-
 function checkFields() {
   // check if any incorrect field contents and update fields outlining and tooltip in the process
   var check = true;
   const fields = document.querySelectorAll(".scenariofield");
   for (const field of fields) {
-    check = updateFieldOutlineAndTooltip(field.id) ? check : false;
+    check = updateScenarioFieldOutlineAndTooltip(field.id) ? check : false;
   }
 
   return check;
-}
-
-function updateFieldDuplicate(fieldId) {
-  let field = document.getElementById(fieldId);
-  field.style.outline = "1px solid red";
-  field.title = 'Scenario is duplicate of other (existing) scenario';
-}
-
-function updateFieldWrongModularScenario(fieldId) {
-  let field = document.getElementById(fieldId);
-  field.style.outline = "1px solid red";
-  field.title = 'Format: \'fromnl-tode-sl1800\'. Elements must be present in scenario-elements/modular.';
-}
-
-function updateFieldRight(fieldId,fieldType) {
-  let field = document.getElementById(fieldId);
-  field.style.outline = "none";
-  field.title = '';
-}
-
-function isScenarioDuplicate(fieldId) {
-  var isDuplicate = false;
-  let field = document.getElementById(fieldId);
-  
-  // check other scenarios
-  var scenarioFields = document.querySelectorAll(".scenariofield");
-  for (const sf of scenarioFields) {
-    if (sf.id !== field.id && sf.value === field.value) {
-      // if scenario equal to other scenario: duplicate
-      isDuplicate = true;
-      break;
-    }
-  }
-
-  return isDuplicate;
-}
-
-function updateFieldOutlineAndTooltip(fieldId) {
-  let isCorrect = true;
-  let field = document.getElementById(fieldId);
-
-  var fieldType = field.className;
-
-  if (field.classList[0] === 'scenariofield') {
-    if (!isModular()) {
-      // check duplicate scenario drop-downs
-      if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
-        isCorrect = false;
-        updateFieldDuplicate(field.id);
-      } else {
-        updateFieldRight(field.id, fieldType);
-      }   
-      
-    } else {
-      // check any 'normal' input field
-      if (!checkModularScenario(field.value)) {
-        updateFieldWrongModularScenario(field.id,fieldType);
-        isCorrect = false;
-      } else {
-        updateFieldRight(field.id, fieldType);
-      }
-    }
-  }
-  
-  return isCorrect;
-}
-
-function checkModularScenario(content) {
-  let currentElements = content.split('-');
-  let modularElements = document.getElementById("modularelements").value.split(',');
-  let isValid = true;
-  if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
-    for (let index = 0; index < currentElements.length; index++) {
-      if (!modularElements.includes(currentElements[index])) {
-        isValid = false;
-        break;
-      }
-    }
-  }
-
-  return isValid;
 }
 
 function refreshPanel(string="") {
