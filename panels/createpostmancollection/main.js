@@ -59,6 +59,12 @@ function updateTile(event) {
   // apply tile content to last selected text field
   currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? '' : '-') + field.id;
 
+  // save field value
+  saveValue(currentInput.id);
+
+  // trigger 'change' event to save
+  // currentInput.dispatchEvent(new Event('change'));
+
   // update appearance on click
   //updateTileAppearance(field.id);
 }
