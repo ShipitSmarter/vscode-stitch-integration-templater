@@ -117,21 +117,11 @@ export class CreatePostmanCollectionHtmlObject {
   }
 
   private _ifIndependent(content: string): string {
-    let outString = '';
-    if (this._independent) {
-      outString = content;
-    }
-
-    return outString;
+    return this._independent ? content : '';
   }
 
   private _ifDependent(content: string): string {
-    let outString = '';
-    if (!this._independent) {
-      outString = content;
-    }
-
-    return outString;
+    return this._independent ? '' : content;
   }
 
   private _getCreateButton(): string {
