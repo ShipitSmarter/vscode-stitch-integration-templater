@@ -13,7 +13,7 @@ function main() {
 
   // tile buttons
   for (const tilebutton of document.querySelectorAll(".modulartile")) {
-    tilebutton.addEventListener("click", updateTile);
+    tilebutton.addEventListener("click", clickTile);
   }
 
   // save dropdowns
@@ -33,11 +33,12 @@ function main() {
 
   // track last selected scenario field
   // from https://stackoverflow.com/a/68176703/1716283
-  for (const scenariofield of document.querySelectorAll(".scenariofield")) {
-    scenariofield.addEventListener('focus',function() {
-      currentInput = this;
-    });
-  }
+  // if (isModular()) {
+    for (const scenariofield of document.querySelectorAll(".scenariofield")) {
+      scenariofield.addEventListener('focus',modularScenarioFocus);
+    }
+  // }
+  
 
    // checkboxes
    const checkBoxes = document.querySelectorAll(".independent,.modular");
@@ -53,7 +54,7 @@ function main() {
    checkFields();
 }
 
-function updateTile(event) {
+function clickTile(event) {
   const field = event.target;
 
   // apply tile content to last selected text field
@@ -79,6 +80,49 @@ function updateTileAppearance(fieldId) {
   } else {
     infoMessage('to primary');
     field.setAttribute(app,'primary');
+  }
+}
+
+function setPrimary(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.setAttribute('appearance','primary');
+}
+
+function setSecondary(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.setAttribute('appearance','secondary');
+}
+
+function modularScenarioFocus(event) {
+  const field = event.target;
+
+  // update currentInput
+  currentInput = field;
+
+  infoMessage('focused');
+
+  // update tiles
+  updateTiles(currentInput.value);
+
+}
+
+function updateTiles(content) {
+  let currentElements = content.split('-');
+  
+
+  if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
+    //infoMessage(currentElements.join(' '));
+    let tiles = document.querySelectorAll(".modulartile");
+    infoMessage(tiles.length+'');
+    for (const tile of tiles) {
+      //infoMessage(tile.id);
+      if (currentElements.includes(tile.id)) {
+        setPrimary(tile.id);
+      } else {
+        setSecondary(tile.id);
+      }
+    }
+    
   }
 }
 
