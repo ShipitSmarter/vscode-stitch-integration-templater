@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, getExtensionFile, startScript, cleanPath, parentPath, nth, dropdownOptions, arrayFrom1, toBoolean, isEmptyStringArray, arrayFrom0 } from "../utilities/functions";
+import { getUri, valueString, checkedString, hiddenString, dropdownOptions, arrayFrom1, toBoolean } from "../utilities/functions";
+import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -39,6 +40,17 @@ export class CreateIntegrationHtmlObject {
     const mainUri       = this._uris[2];
     const styleUri      = this._uris[3];
 
+    // get scenario grid object
+    let scenarioGrid: ScenarioGridObject = new ScenarioGridObject(
+      this._availableScenarios, 
+      this._modularElements, 
+      this._scenarioFieldValues, 
+      this._modularValue, 
+      +this._fieldValues[nofScenariosIndex], 
+      nofScenariosIndex,
+      (this._createUpdateValue === 'update')
+    );
+
     // define panel HTML
     let html =  /*html*/`
 		<!DOCTYPE html>
@@ -77,7 +89,7 @@ export class CreateIntegrationHtmlObject {
           </section>
 
           <section class="rowsingle">
-            ${this._getScenariosGrid(this._availableScenarios, this._modularElements)}
+            ${scenarioGrid.getHtml()}
             ${this._ifUpdate(this._getExistingScenariosGrid())}
           </section>
         </section>
@@ -107,32 +119,6 @@ export class CreateIntegrationHtmlObject {
     return outString;
   }
 
-  private _checkedString(checked: boolean): string {
-    let outString: string = '';
-    if (checked) {
-      outString = 'checked';
-    }
-
-    return outString;
-  }
-  
-  private _valueString(string: string): string {
-    let outString = '';
-    if (string !== undefined && string !== "") {
-      outString = `value="${string}"`;
-    }
-    return outString;
-  }
-
-  private _hiddenString(ifTrue: boolean): string {
-    let hiddenString = 'hidden';
-    if (ifTrue) {
-      hiddenString = '';
-    }
-
-    return hiddenString;
-  }
-
   private _isOther(string: string): boolean {
     let isOther: boolean = false;
     if ((string + "").toLowerCase() === 'other') {
@@ -158,11 +144,11 @@ export class CreateIntegrationHtmlObject {
     let carrierFolderStructureGrid = /*html*/ `
       <section class="component-example">
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
-        <vscode-text-field id="carriername" class="field" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} placeholder="carrier" size="5"></vscode-text-field>
+        <vscode-text-field id="carriername" class="field" index="${carrierIndex}" ${valueString(this._fieldValues[carrierIndex])} placeholder="carrier" size="5"></vscode-text-field>
         /
-        <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
+        <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
         /
-        <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
+        <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${valueString(this._fieldValues[moduleIndex])} position="below">
           ${dropdownOptions(['booking', 'tracking', 'cancel', 'pickup', 'pickup_cancel'])}
         </vscode-dropdown>
 
@@ -183,22 +169,22 @@ export class CreateIntegrationHtmlObject {
         <section class="rowelement">
           <h4>Carrier details</h4>
           <section class="component-example">
-            <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${this._valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD">SiS CarrierCode</vscode-text-field>
+            <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD">SiS CarrierCode</vscode-text-field>
           </section>
 
           <section class="component-example">
-            <vscode-text-field id="carrierapidescription" class="field" index="${apiDescriptionIndex}" ${this._valueString(this._fieldValues[apiDescriptionIndex])} placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
+            <vscode-text-field id="carrierapidescription" class="field" index="${apiDescriptionIndex}" ${valueString(this._fieldValues[apiDescriptionIndex])} placeholder="DPD NL Webservice">Carrier API description</vscode-text-field>
           </section>
         </section>
 
         <section class="rowelement">
           <h4>Carrier TST credentials</h4>
           <section class="component-example">
-            <vscode-text-field id="testuser" class="field" index="${carrierUserIndex}" ${this._valueString(this._fieldValues[carrierUserIndex])} placeholder="DPDTstUser">User</vscode-text-field>
+            <vscode-text-field id="testuser" class="field" index="${carrierUserIndex}" ${valueString(this._fieldValues[carrierUserIndex])} placeholder="DPDTstUser">User</vscode-text-field>
           </section>
 
           <section class="component-example">
-            <vscode-text-field id="testpwd" class="field" index="${carrierPwdIndex}" ${this._valueString(this._fieldValues[carrierPwdIndex])} placeholder="aslfjakl">Pwd</vscode-text-field>
+            <vscode-text-field id="testpwd" class="field" index="${carrierPwdIndex}" ${valueString(this._fieldValues[carrierPwdIndex])} placeholder="aslfjakl">Pwd</vscode-text-field>
           </section>
         </section>
       </section>`;
@@ -213,7 +199,7 @@ export class CreateIntegrationHtmlObject {
 
           <section class="component-example">
             <p>Number of steps</p>
-            <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${this._valueString(this._fieldValues[nofStepsIndex])} position="below">
+            <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${valueString(this._fieldValues[nofStepsIndex])} position="below">
               ${dropdownOptions(arrayFrom1(10))}
             </vscode-dropdown>
           </section>
@@ -222,30 +208,6 @@ export class CreateIntegrationHtmlObject {
         </section>`;
 
     return stepsGrid;
-  }
-
-  private _getScenariosGrid(scenarios: string[], modularElements: string[]): string {
-    let scenariosGrid = /*html*/ `    
-      <section class="component-container">
-        <h2>Scenarios</h2>
-
-        <vscode-text-field id="modularelements" value="${modularElements.join(',')}" hidden></vscode-text-field>
-
-        <section class="component-example">
-          <vscode-checkbox id="modular" class="modular" ${this._checkedString(this._modularValue)} ${this._ifUpdate('readonly')}>Modular</vscode-checkbox>
-        </section>
-
-        <section class="component-example">
-          <p>Number of Scenarios</p>
-          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" ${this._valueString(this._fieldValues[nofScenariosIndex] ?? 1)} position="below">
-            ${dropdownOptions(arrayFrom0(100))}
-          </vscode-dropdown>
-        </section>
-
-        ${this._scenarioInputs(+this._fieldValues[nofScenariosIndex], scenarios)}
-      </section>`;
-
-    return scenariosGrid;
   }
 
   private _getExistingScenariosGrid(): string {
@@ -270,12 +232,11 @@ export class CreateIntegrationHtmlObject {
     for (let step = 0; step < +nofSteps; step++) {
       let thisStepFieldValue = this._stepFieldValues[step];
       let isOther: boolean = this._isOther(thisStepFieldValue);
-      let hiddenString: string = this._hiddenString(isOther);
 
       // set html string addition
       let subStepNamesCurrent = /*html*/`
         <section class="component-example">
-          <vscode-dropdown id="stepname${step}" indexstep="${step}" ${this._valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
+          <vscode-dropdown id="stepname${step}" indexstep="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
             <vscode-option>${(this._fieldValues[moduleIndex] ?? 'booking')}</vscode-option>
             <vscode-option>label</vscode-option>
             <vscode-option>login</vscode-option>
@@ -284,7 +245,7 @@ export class CreateIntegrationHtmlObject {
             <vscode-option>other</vscode-option>
           </vscode-dropdown>
 
-          <vscode-text-field id="otherstepname${step}" indexotherstep="${step}" ${this._valueString(this._otherStepValues[step])} class="otherstepfield" placeholder="step" ${hiddenString}></vscode-text-field>
+          <vscode-text-field id="otherstepname${step}" indexotherstep="${step}" ${valueString(this._otherStepValues[step])} class="otherstepfield" placeholder="step" ${hiddenString(isOther)}></vscode-text-field>
         </section>
       `;
 
@@ -300,12 +261,12 @@ export class CreateIntegrationHtmlObject {
 
       subTestUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${this._valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
         </section>`;
 
       subProdUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${this._valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
         </section>`;
     }
 
@@ -324,31 +285,6 @@ export class CreateIntegrationHtmlObject {
           ${subProdUrl}
         </section>
       </section>`;
-
-    return html;
-  }
-
-  private _scenarioInputs(nofScenarios: number, scenarios: string[]): string {
-    let html: string = ``;
-
-    for (let scenario = 0; scenario < +nofScenarios; scenario++) {
-
-      let scenarioInputField: string = '';
-      if (this._modularValue) {
-        scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
-      } else {
-        scenarioInputField = /*html*/ `
-          <vscode-dropdown id="scenario${scenario}" indexscenario="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
-            <vscode-option></vscode-option>  
-            ${dropdownOptions(scenarios)}
-          </vscode-dropdown>`;
-      }
-
-      html += /*html*/`
-        <section class="component-example">
-          ${scenarioInputField}
-        </section>`;
-    }
 
     return html;
   }

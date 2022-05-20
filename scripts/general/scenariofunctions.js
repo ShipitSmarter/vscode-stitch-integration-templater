@@ -31,10 +31,10 @@ export var clickTile = function (vscodeApi) { return function (event) {
     }
   
     // save field value
-    saveScenarioValue(currentInput.id, vscodeApi);
+    //saveScenarioValue(currentInput.id, vscodeApi);
   
-    // trigger 'change' event to save
-    // currentInput.dispatchEvent(new Event('change'));
+    // trigger 'change' event to save and check content
+    currentInput.dispatchEvent(new Event('change'));
   
     // update appearance on click
     flipTile(field.id);
@@ -48,15 +48,11 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
     // save field value
     saveScenarioValue(field.id, vscodeApi);
     
-    if (!isModular()) {
-    // if not modular: check ALL scenarios
+    // check all scenarios for validity
     for (const sc of document.querySelectorAll(".scenariofield")) {
         updateScenarioFieldOutlineAndTooltip(sc.id);
     }
-    } else {
-    // else: just check this one
-    updateScenarioFieldOutlineAndTooltip(field.id);
-    }
+
 };};
   
   
@@ -71,7 +67,6 @@ export function modularScenarioFocus(event) {
     // update tiles
     updateTiles(currentInput.value);
 }
-
 
 export function saveScenarioValue(fieldId, vscodeApi) {
     var field = document.getElementById(fieldId);
@@ -143,24 +138,16 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
     var fieldType = field.className;
   
     if (field.classList[0] === 'scenariofield') {
-      if (!isModular()) {
-        // check duplicate scenario drop-downs
+        // check for duplicate scenarios
         if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
           isCorrect = false;
           updateScenarioFieldDuplicate(field.id);
-        } else {
-          updateScenarioFieldRight(field.id, fieldType);
-        }   
-        
-      } else {
-        // check any 'normal' input field
-        if (!checkModularScenario(field.value)) {
+        } else if (isModular() && !checkModularScenario(field.value)) {
           updateScenarioFieldWrongModularScenario(field.id,fieldType);
           isCorrect = false;
         } else {
           updateScenarioFieldRight(field.id, fieldType);
         }
-      }
     }
     
     return isCorrect;
@@ -183,21 +170,38 @@ export function updateScenarioFieldRight(fieldId,fieldType) {
     field.style.outline = "none";
     field.title = '';
 }
+
+export function getNewScenarioValue(fieldValue) {
+  return fieldValue.replace(/[^\>]+\> /g, '');
+}
   
 export function isScenarioDuplicate(fieldId) {
-    var isDuplicate = false;
-    let field = document.getElementById(fieldId);
-    
-    // check other scenarios
-    var scenarioFields = document.querySelectorAll(".scenariofield");
-    for (const sf of scenarioFields) {
-      if (sf.id !== field.id && sf.value === field.value) {
-        // if scenario equal to other scenario: duplicate
+  var isDuplicate = false;
+  let field = document.getElementById(fieldId);
+  
+  // check other new scenarios
+  var scenarioFields = document.querySelectorAll(".scenariofield");
+  for (const sf of scenarioFields) {
+    if (sf.id !== field.id && sf.value === field.value && !isEmpty(sf.value)) {
+      // if scenario equal to other scenario: duplicate
+      isDuplicate = true;
+      break;
+    }
+  }
+
+  // check existing scenarios (if present)
+  if (!isDuplicate ) {
+    var actualValue = getNewScenarioValue(field.value);
+    var existingScenarios = document.querySelectorAll(".existingscenariofield");
+    for (const es of existingScenarios) {
+      if (actualValue === es.value ) {
+        // if scenario equal to existing scenario: duplicate
         isDuplicate = true;
         break;
-      }
+      }    
     }
+  }
   
-    return isDuplicate;
+  return isDuplicate;
 }
   

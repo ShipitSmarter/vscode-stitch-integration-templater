@@ -149,6 +149,8 @@ export class CreateIntegrationPanel {
                 break;
               case 'modular':
                 this._modularValue = toBoolean(value);
+                this._scenarioFieldValues = [];
+                this._updateWebview(extensionUri);
                 break;
             }
         }
@@ -175,6 +177,10 @@ export class CreateIntegrationPanel {
       this._createUpdateValue = 'update';
 
       // update modular value from script
+      if (this._modularValue !== this._currentIntegration.modular) {
+        // if modular checkbox switches: clear scenario fields
+        this._scenarioFieldValues = [];
+      }
       this._modularValue = this._currentIntegration.modular;
 
       // update valid existing scenario values from scenario folder instead

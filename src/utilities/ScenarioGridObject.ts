@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString} from "./functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, readonlyString} from "./functions";
 
 
 export class ScenarioGridObject {
@@ -13,7 +13,8 @@ export class ScenarioGridObject {
         private _scenarioFieldValues: string[],
         private _modularValue: boolean,
         private _nofScenarios: number,
-        private _nofScenariosIndex: number
+        private _nofScenariosIndex: number,
+        private _isUpdate: boolean = false
     ) { }
 
     public getHtml(): string {
@@ -27,7 +28,7 @@ export class ScenarioGridObject {
                     <vscode-text-field id="modularelements" value="${this._modularElements.join(',')}" hidden></vscode-text-field>
 
                     <section class="component-example">
-                        <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)}>Modular</vscode-checkbox>
+                        <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)} ${readonlyString(this._isUpdate)}>Modular</vscode-checkbox>
                     </section>
 
                     ${this._getModularTiles()}

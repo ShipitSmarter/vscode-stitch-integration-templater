@@ -271,6 +271,10 @@ export function hiddenString(ifTrue: boolean): string {
 export function checkedString(checked: boolean): string {
     return checked ? 'checked' : '';
 }
+
+export function readonlyString(ifTrue: boolean) : string {
+	return ifTrue ? 'readonly' : '';
+}
   
 export function valueString(string: string): string {
     return !isEmpty(string) ? `value="${string}"` : '' ;
