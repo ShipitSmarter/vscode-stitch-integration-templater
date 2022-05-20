@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth} from "../utilities/functions";
-import { getScenariosGrid } from "../utilities/ScenarioGrid";
+import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -41,6 +41,16 @@ export class CreatePostmanCollectionHtmlObject {
     const codiconsUri = this._uris[1];
     const mainUri     = this._uris[2];
     const styleUri    = this._uris[3];
+
+    // get scenario grid object
+    let scenarioGrid: ScenarioGridObject = new ScenarioGridObject(
+      this._availableScenarios, 
+      this._modularElements, 
+      this._scenarioFieldValues, 
+      this._modularValue, 
+      +this._fieldValues[nofScenariosIndex], 
+      nofScenariosIndex
+    );
 
     // define panel HTML
     let html =  /*html*/`
@@ -96,13 +106,12 @@ export class CreatePostmanCollectionHtmlObject {
             </section> 
           </section>
 
-            ${this._ifIndependent(getScenariosGrid(this._availableScenarios, this._modularElements, this._scenarioFieldValues, this._modularValue, +this._fieldValues[nofScenariosIndex], nofScenariosIndex))}
+            ${this._ifIndependent(scenarioGrid.getHtml())}
         </section>
 
 			</body>
 		</html>
 	  `;
-    // getScenariosGrid(scenarios: string[], modularElements: string[], scenarioFieldValues:string[], modularValue: boolean, nofScenarios: number, nofScenariosIndex: number)
 
     return html;
   }
