@@ -57,8 +57,13 @@ function main() {
 function clickTile(event) {
   const field = event.target;
 
-  // apply tile content to last selected text field
-  currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? '' : '-') + field.id;
+  // add/remove tile content to last selected text field
+  let currentElements = currentInput.value.split('-');
+  if (currentElements.includes(field.id)) {
+    currentInput.value = currentElements.filter(el => el !== field.id).join('-');
+  } else {
+    currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? '' : '-') + field.id;
+  }
 
   // save field value
   saveValue(currentInput.id);
@@ -75,10 +80,8 @@ function flipTile(fieldId) {
 
   let app = 'appearance';
   if (field.getAttribute(app) === 'primary'){
-    infoMessage('to secondary');
     field.setAttribute(app,'secondary');
   } else {
-    infoMessage('to primary');
     field.setAttribute(app,'primary');
   }
 }
@@ -99,8 +102,6 @@ function modularScenarioFocus(event) {
   // update currentInput
   currentInput = field;
 
-  infoMessage('focused');
-
   // update tiles
   updateTiles(currentInput.value);
 
@@ -109,11 +110,9 @@ function modularScenarioFocus(event) {
 function updateTiles(content) {
   let currentElements = content.split('-');
   
-
   // if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
     //infoMessage(currentElements.join(' '));
     let tiles = document.querySelectorAll(".modulartile");
-    infoMessage(tiles.length+'');
     for (const tile of tiles) {
       //infoMessage(tile.id);
       if (currentElements.includes(tile.id)) {
