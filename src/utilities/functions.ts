@@ -264,19 +264,14 @@ export function uniqueSort(array: any[]) : any[] {
 	return uniqueArray(array).sort();
 }
 
-export function checkedString(checked: boolean): string {
-    let outString: string = '';
-    if (checked) {
-      outString = 'checked';
-    }
+export function hiddenString(ifTrue: boolean): string {
+    return ifTrue ? '' : 'hidden' ;
+}
 
-    return outString;
+export function checkedString(checked: boolean): string {
+    return checked ? 'checked' : '';
 }
   
 export function valueString(string: string): string {
-    let outString = '';
-    if (string !== undefined && string !== "") {
-      outString = `value="${string}"`;
-    }
-    return outString;
+    return !isEmpty(string) ? `value="${string}"` : '' ;
 }

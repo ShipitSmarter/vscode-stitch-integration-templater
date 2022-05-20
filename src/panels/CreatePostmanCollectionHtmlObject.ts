@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString} from "../utilities/functions";
 import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
@@ -83,7 +83,7 @@ export class CreatePostmanCollectionHtmlObject {
 
               <section class="component-example">
                 <div class="floatleft">
-                  <vscode-checkbox id="independent" class="independent" ${this._checkedString(this._independent)}>Independent of existing integrations</vscode-checkbox>
+                  <vscode-checkbox id="independent" class="independent" ${checkedString(this._independent)}>Independent of existing integrations</vscode-checkbox>
                 </div>
                 <div class="floatleft">
                   ${this._getRefreshButton()}
@@ -114,32 +114,6 @@ export class CreatePostmanCollectionHtmlObject {
 	  `;
 
     return html;
-  }
-
-  private _checkedString(checked: boolean): string {
-    let outString: string = '';
-    if (checked) {
-      outString = 'checked';
-    }
-
-    return outString;
-  }
-  
-  private _valueString(string: string): string {
-    let outString = '';
-    if (string !== undefined && string !== "") {
-      outString = `value="${string}"`;
-    }
-    return outString;
-  }
-
-  private _hiddenString(ifTrue: boolean): string {
-    let hiddenString = 'hidden';
-    if (ifTrue) {
-      hiddenString = '';
-    }
-
-    return hiddenString;
   }
 
   private _ifIndependent(content: string): string {
@@ -185,15 +159,15 @@ export class CreatePostmanCollectionHtmlObject {
       <section class="component-example">
 
         <p>Folder structure:    <b>carrier / api-name / module</b></p>
-        <vscode-dropdown id="carriername" class="dropdown" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} position="below">
+        <vscode-dropdown id="carriername" class="dropdown" index="${carrierIndex}" ${valueString(this._fieldValues[carrierIndex])} position="below">
           ${dropdownOptions(this._carriers)}
         </vscode-dropdown>
         /
-        <vscode-dropdown id="carrierapiname" class="dropdown" index="${apiIndex}" ${this._valueString(this._fieldValues[apiIndex])} position="below">
+        <vscode-dropdown id="carrierapiname" class="dropdown" index="${apiIndex}" ${valueString(this._fieldValues[apiIndex])} position="below">
           ${dropdownOptions(this._apis)}
         </vscode-dropdown>
         /
-        <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
+        <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${valueString(this._fieldValues[moduleIndex])} position="below">
           ${dropdownOptions(this._modules)}
         </vscode-dropdown>
 
@@ -209,14 +183,14 @@ export class CreatePostmanCollectionHtmlObject {
 
         <div class="floatleft">
           <p>Carrier</p>
-          <vscode-dropdown id="carriername" class="dropdownfield" index="${carrierIndex}" ${this._valueString(this._fieldValues[carrierIndex])} position="below">
+          <vscode-dropdown id="carriername" class="dropdownfield" index="${carrierIndex}" ${valueString(this._fieldValues[carrierIndex])} position="below">
             ${dropdownOptions(this._carriers)}
           </vscode-dropdown>
         </div>
 
         <div class="floatleftnopadding">
           <p>Module</p>
-          <vscode-dropdown id="modulename" class="dropdownfield" index="${moduleIndex}" ${this._valueString(this._fieldValues[moduleIndex])} position="below">
+          <vscode-dropdown id="modulename" class="dropdownfield" index="${moduleIndex}" ${valueString(this._fieldValues[moduleIndex])} position="below">
             ${dropdownOptions(this._modules)}
           </vscode-dropdown>
         </div>
@@ -232,21 +206,21 @@ export class CreatePostmanCollectionHtmlObject {
       <section class="component-example">
         <div class="floatleft">
           <p>Carrier Code</p>
-          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${this._valueString(this._fieldValues[carrierCodeIndex])} readonly></vscode-text-field>
+          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${valueString(this._fieldValues[carrierCodeIndex])} readonly></vscode-text-field>
         </div>
         <div class="floatleft">
           <p>Account number</p>
-          <vscode-text-field id="accountnumber" class="field" index="${accountNumberIndex}" ${this._valueString(this._fieldValues[accountNumberIndex])} placeholder="123456" size="5"></vscode-text-field>
+          <vscode-text-field id="accountnumber" class="field" index="${accountNumberIndex}" ${valueString(this._fieldValues[accountNumberIndex])} placeholder="123456" size="5"></vscode-text-field>
         </div>
         <div class="floatleftnopadding">
           <p>CostCenter</p>
-          <vscode-text-field id="costcenter" class="field" index="${costCenterIndex}" ${this._valueString(this._fieldValues[costCenterIndex])} placeholder="000001" size="5"></vscode-text-field>
+          <vscode-text-field id="costcenter" class="field" index="${costCenterIndex}" ${valueString(this._fieldValues[costCenterIndex])} placeholder="000001" size="5"></vscode-text-field>
         </div>
       </section>
       
       <section class="component-example">
         <p>Select customer</p>
-        <vscode-dropdown id="company" class="dropdown" index="${companyIndex}" ${this._valueString(this._fieldValues[companyIndex])} position="below">
+        <vscode-dropdown id="company" class="dropdown" index="${companyIndex}" ${valueString(this._fieldValues[companyIndex])} position="below">
             ${dropdownOptions(this._companies)}
           </vscode-dropdown>
       </section>     
@@ -262,7 +236,7 @@ export class CreatePostmanCollectionHtmlObject {
 
           <section class="component-example">
             <p>Number of headers</p>
-            <vscode-dropdown id="nofheaders" class="dropdown" index="${nofHeadersIndex}" ${this._valueString(this._fieldValues[nofHeadersIndex])} position="below">
+            <vscode-dropdown id="nofheaders" class="dropdown" index="${nofHeadersIndex}" ${valueString(this._fieldValues[nofHeadersIndex])} position="below">
               ${dropdownOptions(arrayFrom1(10))}
             </vscode-dropdown>
           </section>
@@ -284,12 +258,12 @@ export class CreatePostmanCollectionHtmlObject {
 
       subHeaderName += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="headername${header}" index="${header}" ${this._valueString(hNames[header])} class="headername" placeholder="header name"></vscode-text-field>
+          <vscode-text-field id="headername${header}" index="${header}" ${valueString(hNames[header])} class="headername" placeholder="header name"></vscode-text-field>
         </section>`;
 
         subPHeaderValue += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="headervalue${header}" index="${header}" ${this._valueString(hValues[header] )} class="headervalue" placeholder="header value"></vscode-text-field>
+          <vscode-text-field id="headervalue${header}" index="${header}" ${valueString(hValues[header] )} class="headervalue" placeholder="header value"></vscode-text-field>
         </section>`;
     }
 
@@ -304,89 +278,6 @@ export class CreatePostmanCollectionHtmlObject {
           ${subPHeaderValue}
         </div>
       </section>`;
-
-    return html;
-  }
-
-  private _getModularTile(id:string): string {
-    let testButton: string = /*html*/ `
-      <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
-      `;
-    return testButton;
-  }
-
-  private _getModularTiles() : string {
-    let html : string = ``;
-
-    if (this._modularValue) {
-      let modularTiles = '';
-      for (const element of this._modularElements) {
-        if (element !== 'standard') {
-          modularTiles += this._getModularTile(element);
-        }
-      }
-
-      html = /*html*/ `
-      <section class="component-example">
-        ${modularTiles}
-      </section>`;
-    }
-
-    return html;
-  }
-
-  private _getScenariosGrid(scenarios: string[], modularElements: string[]): string {
-    let scenariosGrid = /*html*/ `    
-    <section class="rowsingle">
-      <section class="component-container">
-        <h2>Scenarios</h2>
-        <vscode-divider role="separator"></vscode-divider>
-
-        <vscode-text-field id="modularelements" value="${modularElements.join(',')}" hidden></vscode-text-field>
-
-        <section class="component-example">
-          <vscode-checkbox id="modular" class="modular" ${this._checkedString(this._modularValue)}>Modular</vscode-checkbox>
-        </section>
-
-        ${this._getModularTiles()}
-
-        <vscode-divider role="separator"></vscode-divider>
-
-        <section class="component-example">
-          <p>Number of Scenarios</p>
-          <vscode-dropdown id="nofscenarios" class="dropdown" index="${nofScenariosIndex}" ${this._valueString(this._fieldValues[nofScenariosIndex] ?? 0)} position="below">
-            ${dropdownOptions(arrayFrom0(100))}
-          </vscode-dropdown>
-        </section>
-
-        ${this._scenarioInputs(+this._fieldValues[nofScenariosIndex], scenarios)}
-      </section>
-    </section>`;
-
-    return scenariosGrid;
-  }
-
-  private _scenarioInputs(nofScenarios: number, scenarios: string[]): string {
-    let html: string = ``;
-
-    for (let scenario = 0; scenario < +nofScenarios; scenario++) {
-
-      let scenarioInputField: string = '';
-      if (this._modularValue) {
-        scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" index="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
-      } else {
-        scenarioInputField = /*html*/ `
-          <vscode-dropdown id="scenario${scenario}" index="${scenario}" ${this._valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
-            <vscode-option></vscode-option>  
-            ${dropdownOptions(scenarios)}
-          </vscode-dropdown>`;
-      }
-
-      html += /*html*/`
-        <section class="component-example">
-          ${scenarioInputField}
-        </section>`;
-    }
 
     return html;
   }
