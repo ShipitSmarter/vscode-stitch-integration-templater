@@ -7,6 +7,11 @@ function main() {
   document.getElementById("createpostmancollection").addEventListener("click", createPostmanCollection);
   document.getElementById("refresh").addEventListener("click", refreshContent);
 
+  // tile buttons
+  for (const tilebutton of document.querySelectorAll(".modulartile")) {
+    tilebutton.addEventListener("click", updateTile);
+  }
+
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown,.dropdownfield");
   for (const field of dropdowns) {
@@ -35,6 +40,26 @@ function main() {
 
    // on panel creation: update field outlines and tooltips
    checkFields();
+}
+
+function updateTile(event) {
+  const field = event.target;
+
+  // update appearance on click
+  updateTileAppearance(field.id);
+}
+
+function updateTileAppearance(fieldId) {
+  let field = document.getElementById(fieldId);
+
+  let app = 'appearance';
+  if (field.getAttribute(app) === 'primary'){
+    infoMessage('to secondary');
+    field.setAttribute(app,'secondary');
+  } else {
+    infoMessage('to primary');
+    field.setAttribute(app,'primary');
+  }
 }
 
 function fieldChange(event) {

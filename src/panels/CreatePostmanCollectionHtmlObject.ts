@@ -159,6 +159,13 @@ export class CreatePostmanCollectionHtmlObject {
     return createButton;
   }
 
+  private _getModularTile(id:string): string {
+    let testButton: string = /*html*/ `
+      <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
+      `;
+    return testButton;
+  }
+
   private _getRefreshButton(): string {
     let refreshButton: string = /*html*/ `
     <vscode-button id="refresh" appearance="primary">
@@ -297,17 +304,40 @@ export class CreatePostmanCollectionHtmlObject {
     return html;
   }
 
+  private _getModularTiles() : string {
+    let html : string = ``;
+
+    if (this._modularValue) {
+      let modularTiles = '';
+      for (const element of this._modularElements) {
+        modularTiles += this._getModularTile(element);
+      }
+
+      html = /*html*/ `
+      <section class="component-example">
+        ${modularTiles}
+      </section>`;
+    }
+
+    return html;
+  }
+
   private _getScenariosGrid(scenarios: string[], modularElements: string[]): string {
     let scenariosGrid = /*html*/ `    
     <section class="rowsingle">
       <section class="component-container">
         <h2>Scenarios</h2>
+        <vscode-divider role="separator"></vscode-divider>
 
         <vscode-text-field id="modularelements" value="${modularElements.join(',')}" hidden></vscode-text-field>
 
         <section class="component-example">
           <vscode-checkbox id="modular" class="modular" ${this._checkedString(this._modularValue)}>Modular</vscode-checkbox>
         </section>
+
+        ${this._getModularTiles()}
+
+        <vscode-divider role="separator"></vscode-divider>
 
         <section class="component-example">
           <p>Number of Scenarios</p>
