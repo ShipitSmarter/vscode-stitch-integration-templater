@@ -2,7 +2,11 @@ const vscodeApi = acquireVsCodeApi();
 
 window.addEventListener("load", main);
 
+// track last selected text field
+let currentInput = document.getElementById('accountnumber');
+
 function main() {
+
   // button onclick event listeners
   document.getElementById("createpostmancollection").addEventListener("click", createPostmanCollection);
   document.getElementById("refresh").addEventListener("click", refreshContent);
@@ -27,6 +31,14 @@ function main() {
     }
   }
 
+  // track last selected scenario field
+  // from https://stackoverflow.com/a/68176703/1716283
+  for (const scenariofield of document.querySelectorAll(".scenariofield")) {
+    scenariofield.addEventListener('focus',function() {
+      currentInput = this;
+    });
+  }
+
    // checkboxes
    const checkBoxes = document.querySelectorAll(".independent,.modular");
    for (const checkbox of checkBoxes) {
@@ -36,7 +48,6 @@ function main() {
   // headers
   // set first header read-only
   document.getElementById('headername0').readOnly = true;
-  //document.getElementById('headervalue0').readOnly = true;
 
    // on panel creation: update field outlines and tooltips
    checkFields();
@@ -45,8 +56,11 @@ function main() {
 function updateTile(event) {
   const field = event.target;
 
+  // apply tile content to last selected text field
+  currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? '' : '-') + field.id;
+
   // update appearance on click
-  updateTileAppearance(field.id);
+  //updateTileAppearance(field.id);
 }
 
 function updateTileAppearance(fieldId) {
