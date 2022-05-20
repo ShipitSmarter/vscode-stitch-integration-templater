@@ -37,7 +37,7 @@ export class ScenarioGridObject {
                     <section class="component-example">
                         <p>Number of Scenarios</p>
                         <vscode-dropdown id="nofscenarios" class="dropdown" index="${this._nofScenariosIndex}" ${valueString(this._nofScenarios+'' ?? '0')} position="below">
-                            ${dropdownOptions(arrayFrom0(100))}
+                            ${dropdownOptions(arrayFrom1(100))}
                         </vscode-dropdown>
                     </section>
 

@@ -55,6 +55,7 @@ export class CreatePostmanCollectionPanel {
     // predefine some fixed fields
     this._fieldValues[moduleIndex] = 'booking';
     this._fieldValues[nofHeadersIndex] = "3";
+    this._fieldValues[nofScenariosIndex] = "1";
     
     // pre-allocate headers array
     this._headers = new Array<{name: string, value: string}>(20);

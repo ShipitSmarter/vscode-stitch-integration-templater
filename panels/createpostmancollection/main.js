@@ -3,7 +3,7 @@ const vscodeApi = acquireVsCodeApi();
 window.addEventListener("load", main);
 
 // track last selected text field
-let currentInput = document.getElementById('accountnumber');
+let currentInput = document.querySelectorAll(".scenariofield")[0];
 
 function main() {
 
