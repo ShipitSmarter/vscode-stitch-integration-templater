@@ -263,3 +263,20 @@ export function uniqueArray(array: any[]) : any[] {
 export function uniqueSort(array: any[]) : any[] {
 	return uniqueArray(array).sort();
 }
+
+export function checkedString(checked: boolean): string {
+    let outString: string = '';
+    if (checked) {
+      outString = 'checked';
+    }
+
+    return outString;
+}
+  
+export function valueString(string: string): string {
+    let outString = '';
+    if (string !== undefined && string !== "") {
+      outString = `value="${string}"`;
+    }
+    return outString;
+}

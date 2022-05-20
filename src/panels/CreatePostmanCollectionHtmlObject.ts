@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth} from "../utilities/functions";
+import { getScenariosGrid } from "../utilities/ScenarioGrid";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -95,12 +96,13 @@ export class CreatePostmanCollectionHtmlObject {
             </section> 
           </section>
 
-            ${this._ifIndependent(this._getScenariosGrid(this._availableScenarios, this._modularElements))}
+            ${this._ifIndependent(getScenariosGrid(this._availableScenarios, this._modularElements, this._scenarioFieldValues, this._modularValue, +this._fieldValues[nofScenariosIndex], nofScenariosIndex))}
         </section>
 
 			</body>
 		</html>
 	  `;
+    // getScenariosGrid(scenarios: string[], modularElements: string[], scenarioFieldValues:string[], modularValue: boolean, nofScenarios: number, nofScenariosIndex: number)
 
     return html;
   }
@@ -157,13 +159,6 @@ export class CreatePostmanCollectionHtmlObject {
       </vscode-button>
       `;
     return createButton;
-  }
-
-  private _getModularTile(id:string): string {
-    let testButton: string = /*html*/ `
-      <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
-      `;
-    return testButton;
   }
 
   private _getRefreshButton(): string {
@@ -302,6 +297,13 @@ export class CreatePostmanCollectionHtmlObject {
       </section>`;
 
     return html;
+  }
+
+  private _getModularTile(id:string): string {
+    let testButton: string = /*html*/ `
+      <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
+      `;
+    return testButton;
   }
 
   private _getModularTiles() : string {
