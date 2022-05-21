@@ -1,0 +1,82 @@
+.component-container {
+  display: grid;
+  grid-template-columns: max-content;
+  margin: 1rem;
+  padding: 1rem;
+  border: 2px dashed #7b61ff;
+  border-radius: 5px;
+}
+  
+.component-sub-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin: 0.25rem 0;
+}
+
+.component-example {
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.component-example > * {
+  margin: 0.25rem;
+}
+  
+.component-example > p {
+  margin-bottom: 0.5rem;
+}
+
+.row11 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+  
+.rowflex{
+  display: grid;
+  grid-template-columns: max-content auto;
+}
+  
+.rowsingle {
+  display: grid;
+  grid-template-columns: auto;
+  /* grid-template-columns: 1fr; */
+}
+  
+.floatleft {
+  float: left;
+  padding-right: 2rem;
+}
+
+.floatleftnopadding {
+  float: left;
+}
+
+h1 {
+  font-size: 2em;
+}
+  
+#farleft {
+  text-align: left;
+}
+  
+#farright {
+  text-align: right;
+  margin-top: 1rem;
+}
+
+#main {
+  margin-top: 1.0rem;
+  /* vertical-align: middle; */
+}
+
+#carriername,
+#carrierapiname {
+  width: 10rem;
+}
+
+.scenariofield {
+  width: 25rem;
+}
+  

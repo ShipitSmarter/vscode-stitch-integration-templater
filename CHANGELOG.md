@@ -1,5 +1,12 @@
 # Change Log
 
+# 1.3.0
+- Carrier Integration & Postman Collection
+  - Modular scenario creation
+    - Added option to create scenarios by selecting/deselecting tiles
+    - Now also checks for doubles in new and existing modular scenarios
+  - Minor style updates
+
 # 1.2.3
 - Postman collection
   - Refactor for performance improvement

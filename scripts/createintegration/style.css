@@ -1,0 +1,33 @@
+@import url("../general/general.css");
+
+
+.rowelement {
+  margin-right: 5rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+#farright {
+  margin-right: 10rem;
+}
+
+#createintegration {
+  width:11rem;
+  height:3rem;
+}
+
+.existingscenariofield {
+  width: 20rem;
+}
+
+.stepfield {
+  width: 12rem;
+}
+
+.otherstepfield {
+  width: 4rem;
+}
+
+.stepdropdown {
+  width: 7rem;
+}

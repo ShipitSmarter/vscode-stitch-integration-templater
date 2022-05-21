@@ -71,6 +71,29 @@ export async function getModularElements(module:string): Promise<string[]> {
     return elements.sort();
 }
 
+export async function getModularElementsWithParents(module:string): Promise<{parent:string, element:string}[]> {
+    let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*.xml');
+
+    let parentsElements: {parent:string, element:string}[] = new Array<{parent:string, element:string}>(elementXmls.length);
+
+    for (let index = 0; index < elementXmls.length; index++) {
+      let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
+      let elementParentName = parentPath(cleanPath(elementXmls[index])).split('/').pop() ?? '';
+      // only show parent indicator if not [module]
+      if (elementParentName === module) {
+        elementParentName = '';
+      }
+
+
+      parentsElements[index] = {
+		parent: elementParentName,
+		element: elementName
+	  };
+    }
+
+    return parentsElements.sort();
+}
+
 export async function getAvailableIntegrations(panel:string) : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[]> {
 	// panel input: 'integration' or 'postman'
 
@@ -262,4 +285,20 @@ export function uniqueArray(array: any[]) : any[] {
 
 export function uniqueSort(array: any[]) : any[] {
 	return uniqueArray(array).sort();
+}
+
+export function hiddenString(ifTrue: boolean): string {
+    return ifTrue ? '' : 'hidden' ;
+}
+
+export function checkedString(checked: boolean): string {
+    return checked ? 'checked' : '';
+}
+
+export function readonlyString(ifTrue: boolean) : string {
+	return ifTrue ? 'readonly' : '';
+}
+  
+export function valueString(string: string): string {
+    return !isEmpty(string) ? `value="${string}"` : '' ;
 }

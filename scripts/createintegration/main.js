@@ -1,3 +1,6 @@
+import { checkScenarioFields, addScenarioEventListeners } from "../general/scenariofunctions.js";
+import { isEmpty } from "../general/general.js";
+
 const vscodeApi = acquireVsCodeApi();
 
 window.addEventListener("load", main);
@@ -8,12 +11,9 @@ function main() {
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
 
   // input fields
-  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield,.scenariofield,.dropdown,.stepdropdown,.modular,.existingscenariocheckbox");
+  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield,.dropdown,.stepdropdown,.existingscenariocheckbox");
   for (const field of fields) {
     field.addEventListener("keyup", fieldChange);
-    if (field.classList[0] === 'scenariofield') {
-      field.addEventListener("change", fieldChange);
-    }
   }
 
   // fixed/step dropdowns
@@ -23,7 +23,7 @@ function main() {
   }
 
   // checkboxes
-  const checkBoxes = document.querySelectorAll(".modular,.existingscenariocheckbox,.checkallexisting");
+  const checkBoxes = document.querySelectorAll(".existingscenariocheckbox,.checkallexisting");
   for (const checkbox of checkBoxes) {
     checkbox.addEventListener("change", fieldChange);
   }
@@ -47,6 +47,9 @@ function main() {
       }
     }
   }
+
+  // scenario grid fields
+  addScenarioEventListeners(vscodeApi);
   
   // on panel creation: update field outlines and tooltips
   checkFields();
@@ -55,10 +58,6 @@ function main() {
 function isCreate() {
   // check if create or update
   return (document.getElementById('createupdate').value === 'create');
-}
-
-function isModular() {
-  return document.getElementById("modular").checked;
 }
 
 function fieldChange(event) {
@@ -75,29 +74,12 @@ function fieldChange(event) {
     case 'otherstepfield':
       updateFieldOutlineAndTooltip(field.id);
       break;
-    case 'scenariofield':
-      if (!isModular()) {
-        // if not modular: check ALL scenarios
-        for (const sc of document.querySelectorAll(".scenariofield")) {
-          updateFieldOutlineAndTooltip(sc.id);
-        }
-      } else {
-        // else: just check this one
-        updateFieldOutlineAndTooltip(field.id);
-      }
-      break;
 
     // dropdown: delete scenarios if module dropdown change, refresh panel
     case 'dropdown':
       if (field.id === 'modulename') {
         vscodeApi.postMessage({ command: "clearscenarios", text: '' });
       }
-      vscodeApi.postMessage({ command: "refreshpanel", text: '' });
-      break;
-
-    // modular: clear scenarios, refresh panel
-    case 'modular':
-      vscodeApi.postMessage({ command: "clearscenarios", text: '' });
       vscodeApi.postMessage({ command: "refreshpanel", text: '' });
       break;
 
@@ -143,10 +125,6 @@ function infoMessage(info) {
   vscodeApi.postMessage({ command: "showinformationmessage", text: info });
 }
 
-function getNewScenarioValue(fieldValue) {
-  return fieldValue.replace(/[^\>]+\> /g, '');
-}
-
 function saveValue(fieldId) {
   var field = document.getElementById(fieldId);
   var attr = '';
@@ -162,15 +140,11 @@ function saveValue(fieldId) {
     case 'otherstepfield':
       attr = 'indexotherstep';
       break;
-    case 'scenariofield':
-      attr = 'indexscenario';
-      break;
+
     case 'existingscenariocheckbox':
       attr = 'indexescheckbox';
       break;
-    case 'modular':
-      attr = '';
-      break;
+
   }
   var value = field.checked ?? field.value;
   var textString = field.classList[0] + '|' + (field.getAttribute(attr) ?? '') + '|' + value;
@@ -180,10 +154,13 @@ function saveValue(fieldId) {
 function checkFields() {
   // check if any incorrect field contents and update fields outlining and tooltip in the process
   var check = true;
-  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield,.scenariofield");
+  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield");
   for (const field of fields) {
     check = updateFieldOutlineAndTooltip(field.id) ? check : false;
   }
+
+  // check scenario fields
+  check = checkScenarioFields() ? check : false;
 
   return check;
 }
@@ -191,10 +168,6 @@ function checkFields() {
 function checkContent(id, value) {
   let isCorrect = true;
 
-  // if this is modular scenario field: return checkModularScenario
-  if (isModular() && id.startsWith('scenario')) {
-    isCorrect = checkModularScenario(value);
-  } else {
     // else: check 'normal'
     let check = '';
     switch (id) {
@@ -233,7 +206,6 @@ function checkContent(id, value) {
     if (check !== '' && check !== null) {
       isCorrect = false;
     }
-  }
 
   return isCorrect;
 }
@@ -264,22 +236,12 @@ function getContentHint(elementid) {
       hint = 'A-Z, a-z, 0-9, :/.?=&-_ (no spaces)';
       break;
 
-    case 'scenariofield':
-      hint = 'Format: \'fromnl-tode-sl1800\'. Elements must be present in scenario-elements/modular.';
-      break;
-
     case 'otherstepfield':
       hint = 'a-z, 0-9, \'_\' (no spaces)';
       break;
   }
 
   return hint;
-}
-
-function updateFieldDuplicate(fieldId) {
-  let field = document.getElementById(fieldId);
-  field.style.outline = "1px solid red";
-  field.title = 'Scenario is duplicate of other (existing) scenario';
 }
 
 function updateFieldWrong(fieldId,fieldType) {
@@ -300,90 +262,24 @@ function updateFieldRight(fieldId,fieldType) {
   field.title = '';
 }
 
-function isScenarioDuplicate(fieldId) {
-  var isDuplicate = false;
-  let field = document.getElementById(fieldId);
-  
-  // check other scenarios
-  var scenarioFields = document.querySelectorAll(".scenariofield");
-  for (const sf of scenarioFields) {
-    if (sf.id !== field.id && sf.value === field.value) {
-      // if scenario equal to other scenario: duplicate
-      isDuplicate = true;
-      break;
-    }
-  }
-
-  // if no duplicate other scenarios: check existing scenarios
-  if (!isDuplicate && !isCreate() ) {
-    var actualValue = getNewScenarioValue(field.value);
-    var existingScenarios = document.querySelectorAll(".existingscenariofield");
-    for (const es of existingScenarios) {
-      if (actualValue === es.value ) {
-        // if scenario equal to existing scenario: duplicate
-        isDuplicate = true;
-        break;
-      }    
-    }
-  }
-
-  return isDuplicate;
-}
-
 function updateFieldOutlineAndTooltip(fieldId) {
   let isCorrect = true;
   let field = document.getElementById(fieldId);
 
   var fieldType = (field.className === 'field') ? field.id : field.className;
 
-  if (!isModular() && (field.classList[0] === 'scenariofield')) {
-    // check duplicate scenario drop-downs
-    if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
-      isCorrect = false;
-      updateFieldDuplicate(field.id);
-    } else {
-      updateFieldRight(field.id, fieldType);
-    }   
-    
+  // check any non-scenario input field
+  if (!checkContent(fieldType, field.value)) {
+    updateFieldWrong(field.id,fieldType);
+    isCorrect = false;
+  } else if (['carriername','carrierapiname','carriercode'].includes(field.id) && isEmpty(field.value)) {
+    updateFieldEmpty(field.id);
+    isCorrect = false;
   } else {
-    // check any 'normal' input field
-    if (!checkContent(fieldType, field.value)) {
-      updateFieldWrong(field.id,fieldType);
-      isCorrect = false;
-    } else if (['carriername','carrierapiname','carriercode'].includes(field.id) && isEmpty(field.value)) {
-      updateFieldEmpty(field.id);
-      isCorrect = false;
-    } else {
-      updateFieldRight(field.id, fieldType);
-    }
+    updateFieldRight(field.id, fieldType);
   }
   
   return isCorrect;
-}
-
-function isEmpty(string) {
-  var empty = false;
-  if (string === '' || string === undefined || string === null) {
-    empty = true;
-  }
-
-  return empty;
-}
-
-function checkModularScenario(content) {
-  let currentElements = content.split('-');
-  let modularElements = document.getElementById("modularelements").value.split(',');
-  let isValid = true;
-  if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
-    for (let index = 0; index < currentElements.length; index++) {
-      if (!modularElements.includes(currentElements[index])) {
-        isValid = false;
-        break;
-      }
-    }
-  }
-
-  return isValid;
 }
 
 function checkIntegrationPath() {

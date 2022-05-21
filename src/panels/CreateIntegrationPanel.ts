@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getAvailableScenarios, getFromScript} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 
@@ -31,7 +31,7 @@ export class CreateIntegrationPanel {
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
   private _currentIntegration :     {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
-  private _modularElements: string[] = [];
+  private _modularElementsWithParents: {parent:string, element:string}[] = [];
   private _functionsPath: string = '';
 
   // constructor
@@ -149,6 +149,8 @@ export class CreateIntegrationPanel {
                 break;
               case 'modular':
                 this._modularValue = toBoolean(value);
+                this._scenarioFieldValues = [];
+                this._updateWebview(extensionUri);
                 break;
             }
         }
@@ -175,6 +177,10 @@ export class CreateIntegrationPanel {
       this._createUpdateValue = 'update';
 
       // update modular value from script
+      if (this._modularValue !== this._currentIntegration.modular) {
+        // if modular checkbox switches: clear scenario fields
+        this._scenarioFieldValues = [];
+      }
       this._modularValue = this._currentIntegration.modular;
 
       // update valid existing scenario values from scenario folder instead
@@ -191,7 +197,7 @@ export class CreateIntegrationPanel {
 
     // refresh available scenarios and module elements
     if (this._modularValue) {
-      this._modularElements = await getModularElements(this._fieldValues[moduleIndex]);
+      this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
     } else {
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     }
@@ -487,15 +493,15 @@ export class CreateIntegrationPanel {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
     const codiconsUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);
-    const mainUri = getUri(webview, extensionUri, ["panels", "createintegration", "main.js"]);
-    const styleUri = getUri(webview, extensionUri, ["panels", "createintegration", "style.css"]);
+    const mainUri = getUri(webview, extensionUri, ["scripts", "createintegration", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["scripts", "createintegration", "style.css"]);
 
     // first time only: get integrations, available scenarios, modular elements
     if (this._integrationObjects.length === 0) {
       this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
       this._integrationObjects = await getAvailableIntegrations('integration');
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
-      this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
+      this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
     }
 
     // crop flexible field arrays
@@ -509,7 +515,7 @@ export class CreateIntegrationPanel {
     let createIntegrationHtmlObject: CreateIntegrationHtmlObject = new CreateIntegrationHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
       reducedAvailableScenarios,
-      this._modularElements,
+      this._modularElementsWithParents,
       this._fieldValues,
       this._stepFieldValues,
       this._otherStepValues,

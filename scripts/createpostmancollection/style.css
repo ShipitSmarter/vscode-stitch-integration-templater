@@ -1,0 +1,18 @@
+@import url("../general/general.css");
+
+#carriercode {
+  width: 5rem;
+}
+
+#company {
+  width: 11rem;
+}
+
+#createpostmancollection {
+  width:15rem;
+  height:3rem;
+}
+
+#farright {
+  margin-right: 5rem;
+}
