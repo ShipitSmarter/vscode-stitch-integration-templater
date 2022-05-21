@@ -29,7 +29,7 @@ export class ScenarioGridObject {
                         <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
 
                         <section class="component-example">
-                            <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)} ${readonlyString(this._isUpdate)}>Modular</vscode-checkbox>
+                            <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)}>Modular</vscode-checkbox>
                         </section>
 
                         ${this._getModularTiles()}
