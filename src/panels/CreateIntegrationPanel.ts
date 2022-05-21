@@ -177,11 +177,11 @@ export class CreateIntegrationPanel {
       this._createUpdateValue = 'update';
 
       // update modular value from script
-      if (this._modularValue !== this._currentIntegration.modular) {
-        // if modular checkbox switches: clear scenario fields
-        this._scenarioFieldValues = [];
-      }
-      this._modularValue = this._currentIntegration.modular;
+      // if (this._modularValue !== this._currentIntegration.modular) {
+      //   // if modular checkbox switches: clear scenario fields
+      //   this._scenarioFieldValues = [];
+      // }
+      // this._modularValue = this._currentIntegration.modular;
 
       // update valid existing scenario values from scenario folder instead
       this._existingScenarioFieldValues = this._currentIntegration.validscenarios;
