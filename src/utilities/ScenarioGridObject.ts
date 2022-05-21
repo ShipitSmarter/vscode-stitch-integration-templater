@@ -32,7 +32,7 @@ export class ScenarioGridObject {
                             <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)}>Modular</vscode-checkbox>
                         </section>
 
-                        ${this._getModularTiles()}
+                        ${this._modularValue ? this._getModularTiles() : ''}
 
                         <vscode-divider role="separator"></vscode-divider>
 
@@ -55,47 +55,46 @@ export class ScenarioGridObject {
         let html: string = ``;
 
         for (let scenario = 0; scenario < +this._nofScenarios; scenario++) {
-
-            let scenarioInputField: string = '';
-            if (this._modularValue) {
-                scenarioInputField = /*html*/ `<vscode-text-field id="scenario${scenario}" index="${scenario}" ${valueString(this._scenarioFieldValues[scenario])} class="scenariofield" placeholder="${(scenario + 1) + nth(scenario + 1)} scenario name..."></vscode-text-field>`;
-            } else {
-                scenarioInputField = /*html*/ `
-                    <vscode-dropdown id="scenario${scenario}" index="${scenario}" ${valueString(this._scenarioFieldValues[scenario])} class="scenariofield" position="below">
-                        <vscode-option></vscode-option>  
-                        ${dropdownOptions(this._availableScenarios)}
-                    </vscode-dropdown>`;
-            }
-
             html += /*html*/`
             <section class="component-example">
-                ${scenarioInputField}
+                ${this._modularValue ? this._getScenarioInputField(scenario) : this._getScenarioDropdown(scenario)}
             </section>`;
         }
 
         return html;
     }
 
+    private _getScenarioInputField(index:number) : string {
+        return /*html*/ `<vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" placeholder="${(index + 1) + nth(index + 1)} scenario name..." readonly></vscode-text-field>`;
+    }
+
+    private _getScenarioDropdown(index:number) : string {
+        return /*html*/ `
+        <vscode-dropdown id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" position="below">
+            <vscode-option></vscode-option>  
+            ${dropdownOptions(this._availableScenarios)}
+        </vscode-dropdown>`;
+    }
+
     private _getModularTiles() : string {
         let html : string = ``;
-        if (this._modularValue) {
             // cycle through modular element parent folders
             let parents = uniqueSort(this._modularElementsWithParents.map(el => el.parent));
             for (const parent of parents) {
                 let modularTiles = '';
+                
                 // cycle through elements in given parent folder
                 let elements = this._modularElementsWithParents.filter(el => el.parent === parent).map(el => el.element).sort();
                 for (const element of elements) {
-                    if (element !== 'm') {
-                        modularTiles += this._getModularTile(element);
-                    }
+                    modularTiles += (element === 'm') ? '' : this._getModularTile(element);
                 }
+
+                // add to html
                 html += /*html*/ `
                     <section class="component-example">
                         ${modularTiles}
                     </section>`;
             }
-        }
         
         return html;
     }

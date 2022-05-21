@@ -9,14 +9,20 @@ export function addScenarioEventListeners(vscodeApi) {
     tilebutton.addEventListener("click", clickTile(vscodeApi));
   }
 
+  // scenario fields
   for (const field of document.querySelectorAll(".scenariofield")) {
     field.addEventListener("keyup", scenarioFieldChange(vscodeApi));
     field.addEventListener("change", scenarioFieldChange(vscodeApi));
-    field.addEventListener('focus',modularScenarioFocus);
+    field.addEventListener('click',modularScenarioFocus);
   }
 
   // modular checkbox
   document.getElementById("modular").addEventListener("change", scenarioFieldChange(vscodeApi));
+
+  // if modular: check currentInput content and update tiles
+  if (isModular()) {
+    updateTiles(currentInput.value);
+  }
 }
 
 export var clickTile = function (vscodeApi) { return function (event) {
@@ -51,22 +57,30 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
     saveScenarioValue(field.id, vscodeApi);
     
     // check all scenarios for validity
-    for (const sc of document.querySelectorAll(".scenariofield")) {
+    if (field.classList[0] === 'scenariofield') {
+      for (const sc of document.querySelectorAll(".scenariofield")) {
         updateScenarioFieldOutlineAndTooltip(sc.id);
+      }
     }
-
 };};
   
 export function modularScenarioFocus(event) {
     // track last selected scenario field
     // from https://stackoverflow.com/a/68176703/1716283
     const field = event.target;
-  
-    // update currentInput
-    currentInput = field;
-  
-    // update tiles
-    updateTiles(currentInput.value);
+
+    if (field.id !== currentInput.id && isModular()) {
+      // update currentInput
+      let previousInput = currentInput;
+      currentInput = field;
+      
+      // update field outlines
+      updateScenarioFieldOutlineAndTooltip(previousInput.id);
+      updateScenarioFieldOutlineAndTooltip(currentInput.id);
+
+      // update tiles
+      updateTiles(currentInput.value);
+    }
 }
 
 export function saveScenarioValue(fieldId, vscodeApi) {
@@ -146,8 +160,10 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
         } else if (isModular() && !checkModularScenario(field.value)) {
           updateScenarioFieldWrongModularScenario(field.id,fieldType);
           isCorrect = false;
+        } else if (field.id === currentInput.id && isModular()) { 
+          updateScenarioFieldFocused(field.id);
         } else {
-          updateScenarioFieldRight(field.id, fieldType);
+          updateScenarioFieldRight(field.id);
         }
     }
     
@@ -166,10 +182,16 @@ export function updateScenarioFieldWrongModularScenario(fieldId) {
     field.title = 'Format: \'fromnl-tode-sl1800\'. Elements must be present in scenario-elements/modular.';
 }
   
-export function updateScenarioFieldRight(fieldId,fieldType) {
+export function updateScenarioFieldRight(fieldId) {
     let field = document.getElementById(fieldId);
     field.style.outline = "none";
     field.title = '';
+}
+
+export function updateScenarioFieldFocused(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid blue";
+  field.title = '';
 }
 
 export function getNewScenarioValue(fieldValue) {
