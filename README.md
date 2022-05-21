@@ -17,13 +17,16 @@ Contributes the following commands, which are available from the *Command Palett
 
     ![Stitch integration templater](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/sit-use-gif.gif)
 
-
-
 ### `Stitch: Create Postman collection`
 - Dashboard for easily generating a postman collection file from an existing scenario.
 
     ![Stitch Create Postman collection](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/pmcollection-use-gif.gif)
 
+
+### Modular scenarios
+- Both Integration and Postman collection panels allow you to create modular scenarios using tile selection:
+
+    ![Modular tiles](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/scenariotiles-use-gif.gif)
 
 ## Dependencies
 This dashboard is a graphical frontend for the ShipitSmarter integration automation PowerShell script, and does not function independently without it.
