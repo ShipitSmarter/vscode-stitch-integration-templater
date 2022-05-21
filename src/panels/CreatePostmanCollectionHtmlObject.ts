@@ -75,34 +75,34 @@ export class CreatePostmanCollectionHtmlObject {
           </section>
 				</div>
 
-        <section class="${this._ifDependent('rowsingle')}${this._ifIndependent('row32')}">
+        <section class="${this._ifDependent('rowsingle')}${this._ifIndependent('rowflex')}">
 
           <section class="rowsingle">
             <section class="component-container">
+              <div class="component-sub-container">
 
+                <section class="component-example">
+                  <div class="floatleft">
+                    <vscode-checkbox id="independent" class="independent" ${checkedString(this._independent)}>Independent of existing integrations</vscode-checkbox>
+                  </div>
+                  <div class="floatleft">
+                    ${this._getRefreshButton()}
+                  </div>
+                </section>
 
-              <section class="component-example">
-                <div class="floatleft">
-                  <vscode-checkbox id="independent" class="independent" ${checkedString(this._independent)}>Independent of existing integrations</vscode-checkbox>
-                </div>
-                <div class="floatleft">
-                  ${this._getRefreshButton()}
-                </div>
-              </section>
+                <vscode-divider role="separator"></vscode-divider>
 
-              <vscode-divider role="separator"></vscode-divider>
+                <h2>Carrier</h2>
 
-              <h2>Carrier</h2>
+                ${this._ifIndependent(this._getIndependentCarrierFolderStructureGrid())}
+                ${this._ifDependent(this._getCarrierFolderStructureGrid())}
 
-              ${this._ifIndependent(this._getIndependentCarrierFolderStructureGrid())}
-              ${this._ifDependent(this._getCarrierFolderStructureGrid())}
+                ${this._getCarrierDetailsGrid()}
 
-              ${this._getCarrierDetailsGrid()}
+                <vscode-divider role="separator"></vscode-divider>
 
-              <vscode-divider role="separator"></vscode-divider>
-
-              ${this._getHeadersGrid()} 
-
+                ${this._getHeadersGrid()} 
+              </div>
             </section> 
           </section>
 

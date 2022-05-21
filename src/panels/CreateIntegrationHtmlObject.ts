@@ -74,13 +74,15 @@ export class CreateIntegrationHtmlObject {
           </section>
 				</div>
         
-        <section class="row32">
+        <section class="rowflex">
 
           <section class="rowsingle">
             <section class="component-container">
-              <h2>Carrier</h2>
-              ${this._getCarrierFolderStructureGrid()}
-              ${this._ifCreate(this._getCarrierDetailsGrid())}
+              <div class="component-sub-container">
+                <h2>Carrier</h2>
+                ${this._getCarrierFolderStructureGrid()}
+                ${this._ifCreate(this._getCarrierDetailsGrid())}
+              </div>
             </section> 
             
             <section  class="rowsingle">
@@ -195,16 +197,18 @@ export class CreateIntegrationHtmlObject {
   private _getStepsGrid(): string {
     let stepsGrid = /*html*/ `
         <section class="component-container">
-          <h2>Steps</h2>
+          <div class="component-sub-container">
+            <h2>Steps</h2>
 
-          <section class="component-example">
-            <p>Number of steps</p>
-            <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${valueString(this._fieldValues[nofStepsIndex])} position="below">
-              ${dropdownOptions(arrayFrom1(10))}
-            </vscode-dropdown>
-          </section>
+            <section class="component-example">
+              <p>Number of steps</p>
+              <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${valueString(this._fieldValues[nofStepsIndex])} position="below">
+                ${dropdownOptions(arrayFrom1(10))}
+              </vscode-dropdown>
+            </section>
 
-          ${this._stepInputs(+this._fieldValues[nofStepsIndex])}
+            ${this._stepInputs(+this._fieldValues[nofStepsIndex])}
+          </div>
         </section>`;
 
     return stepsGrid;
@@ -213,12 +217,14 @@ export class CreateIntegrationHtmlObject {
   private _getExistingScenariosGrid(): string {
     let existingScenariosGrid = /*html*/ `    
       <section class="component-container">
-        <h2>Existing scenarios</h2>
-        <p>Check to run again</p>
-        <section class="component-example">
-          <vscode-checkbox id="checkallexisting" class="checkallexisting">Check all</vscode-checkbox>
-        </section>
-        ${this._existingScenarios()}
+        <div class="component-sub-container">
+          <h2>Existing scenarios</h2>
+          <p>Check to run again</p>
+          <section class="component-example">
+            <vscode-checkbox id="checkallexisting" class="checkallexisting">Check all</vscode-checkbox>
+          </section>
+          ${this._existingScenarios()}
+        </div>
       </section>`;
 
     return existingScenariosGrid;

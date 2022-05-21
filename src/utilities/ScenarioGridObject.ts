@@ -22,27 +22,29 @@ export class ScenarioGridObject {
         let scenariosGrid = /*html*/ `    
             <section class="rowsingle">
                 <section class="component-container">
-                    <h2>Scenarios</h2>
-                    <vscode-divider role="separator"></vscode-divider>
+                    <div class="component-sub-container">
+                        <h2>Scenarios</h2>
+                        <vscode-divider role="separator"></vscode-divider>
 
-                    <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
+                        <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
 
-                    <section class="component-example">
-                        <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)} ${readonlyString(this._isUpdate)}>Modular</vscode-checkbox>
-                    </section>
+                        <section class="component-example">
+                            <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)} ${readonlyString(this._isUpdate)}>Modular</vscode-checkbox>
+                        </section>
 
-                    ${this._getModularTiles()}
+                        ${this._getModularTiles()}
 
-                    <vscode-divider role="separator"></vscode-divider>
+                        <vscode-divider role="separator"></vscode-divider>
 
-                    <section class="component-example">
-                        <p>Number of Scenarios</p>
-                        <vscode-dropdown id="nofscenarios" class="dropdown" index="${this._nofScenariosIndex}" ${valueString(this._nofScenarios+'' ?? '0')} position="below">
-                            ${dropdownOptions(arrayFrom1(100))}
-                        </vscode-dropdown>
-                    </section>
+                        <section class="component-example">
+                            <p>Number of Scenarios</p>
+                            <vscode-dropdown id="nofscenarios" class="dropdown" index="${this._nofScenariosIndex}" ${valueString(this._nofScenarios+'' ?? '0')} position="below">
+                                ${dropdownOptions(arrayFrom1(100))}
+                            </vscode-dropdown>
+                        </section>
 
-                    ${this._scenarioInputs()}
+                        ${this._scenarioInputs()}
+                    </div>
                 </section>
             </section>`;
 

@@ -87,9 +87,9 @@ export class CreatePostmanCollectionPanel {
   // initial rendering
   public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
     if (CreatePostmanCollectionPanel.currentPanel) {
-      CreatePostmanCollectionPanel.currentPanel._panel.reveal(vscode.ViewColumn.Two);
+      CreatePostmanCollectionPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("create-postman-collection", "Create Postman collection", vscode.ViewColumn.Two, {
+      const panel = vscode.window.createWebviewPanel("create-postman-collection", "Create Postman collection", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
