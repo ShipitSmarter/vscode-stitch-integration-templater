@@ -278,6 +278,13 @@ export class CreateIntegrationPanel {
       // replace CreateOrUpdate value
       newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
 
+      // replace New-UpdateIntegration function call
+      let newNewUpdateIntegration = 'New-UpdateIntegration -CarrierName $CarrierName -Module $Module -CarrierAPI $CarrierAPI -Scenarios $Scenarios -StringReplaceList $StringReplaceList -CreateOrUpdate $CreateOrUpdate -Steps $Steps -Test';
+      newScriptContent = newScriptContent.replace(/New-UpdateIntegration\s[\S\s]+$/g,newNewUpdateIntegration);
+
+      // remove modular value if present
+      newScriptContent = newScriptContent.replace(/\$ModularXMLs[^\r\n]+[\r\n]/g, '');
+
       // save to file
       let newScriptPath:string = parentPath(cleanPath(this._currentIntegration.path)) + '/' + this._getScriptName();
       fs.writeFileSync(newScriptPath, newScriptContent, 'utf8');
@@ -391,7 +398,7 @@ export class CreateIntegrationPanel {
     newScriptContent = newScriptContent.replace('[createupdate]', this._createUpdateValue + "");
 
     // modular
-    newScriptContent = newScriptContent.replace('[modular]', this._modularValue + "");
+    // newScriptContent = newScriptContent.replace('[modular]', this._modularValue + "");
 
     // scenarios
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
