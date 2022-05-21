@@ -157,9 +157,9 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
         if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
           isCorrect = false;
           updateScenarioFieldDuplicate(field.id);
-        } else if (isModular() && !checkModularScenario(field.value)) {
-          updateScenarioFieldWrongModularScenario(field.id,fieldType);
-          isCorrect = false;
+        // } else if (isModular() && !checkModularScenario(field.value)) {
+        //   updateScenarioFieldWrongModularScenario(field.id,fieldType);
+        //   isCorrect = false;
         } else if (field.id === currentInput.id && isModular()) { 
           updateScenarioFieldFocused(field.id);
         } else {
