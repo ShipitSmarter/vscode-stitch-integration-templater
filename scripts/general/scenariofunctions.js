@@ -55,7 +55,6 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
 
 };};
   
-  
 export function modularScenarioFocus(event) {
     // track last selected scenario field
     // from https://stackoverflow.com/a/68176703/1716283

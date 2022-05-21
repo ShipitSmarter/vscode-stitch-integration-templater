@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -28,7 +28,7 @@ export class CreatePostmanCollectionPanel {
   private _modules: string[] = [];
   private _scenarioFieldValues: string[] = [];
   private _availableScenarios: string[] = [];
-  private _modularElements: string[] = [];
+  private _modularElementsWithParents: {parent:string, element:string}[] = [];
   private _independent: boolean = false;
   private _modularValue: boolean = false;
 
@@ -193,8 +193,8 @@ export class CreatePostmanCollectionPanel {
                   case moduleIndex:
                     getAvailableScenarios(this._fieldValues[moduleIndex]).then(scen => {
                       this._availableScenarios = scen;
-                      getModularElements(this._fieldValues[moduleIndex]).then(elements => {
-                        this._modularElements = elements;
+                      getModularElementsWithParents(this._fieldValues[moduleIndex]).then(elementsWithParents => {
+                        this._modularElementsWithParents = elementsWithParents;
                         this._updateWebview(extensionUri);
                       });
                     });
@@ -485,8 +485,8 @@ export class CreatePostmanCollectionPanel {
     await this._getCompanies();
     await this._getRestUrls();
     await this._getCarrierCodes();
-    this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
-    this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
+    this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
+    this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
@@ -503,8 +503,8 @@ export class CreatePostmanCollectionPanel {
       await this._getRestUrls();
       await this._getCarrierCodes();
       this._initializeValues();
-      this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
-      this._modularElements    = await getModularElements(this._fieldValues[moduleIndex]);
+      this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
+      this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
     }
 
     // crop flexible header field values
@@ -528,7 +528,7 @@ export class CreatePostmanCollectionPanel {
       this._carrierCodes,
       this._scenarioFieldValues,
       this._availableScenarios,
-      this._modularElements,
+      this._modularElementsWithParents,
       this._independent,
       this._modularValue
     );

@@ -29,7 +29,7 @@ export class CreatePostmanCollectionHtmlObject {
     private _carrierCodes: {carrier: string,  carriercode: string }[] = [],
     private _scenarioFieldValues: string[],
     private _availableScenarios: string[], 
-    private _modularElements: string[],
+    private _modularElementsWithParents: {parent:string, element:string}[],
     private _independent: boolean,
     private _modularValue: boolean
   ) { }
@@ -45,7 +45,7 @@ export class CreatePostmanCollectionHtmlObject {
     // get scenario grid object
     let scenarioGrid: ScenarioGridObject = new ScenarioGridObject(
       this._availableScenarios, 
-      this._modularElements, 
+      this._modularElementsWithParents, 
       this._scenarioFieldValues, 
       this._modularValue, 
       +this._fieldValues[nofScenariosIndex], 

@@ -9,7 +9,7 @@ export class ScenarioGridObject {
     // constructor
     public constructor (
         private _availableScenarios: string[],
-        private _modularElements: string[],
+        private _modularElementsWithParents: {parent:string, element:string}[],
         private _scenarioFieldValues: string[],
         private _modularValue: boolean,
         private _nofScenarios: number,
@@ -25,7 +25,7 @@ export class ScenarioGridObject {
                     <h2>Scenarios</h2>
                     <vscode-divider role="separator"></vscode-divider>
 
-                    <vscode-text-field id="modularelements" value="${this._modularElements.join(',')}" hidden></vscode-text-field>
+                    <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
 
                     <section class="component-example">
                         <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)} ${readonlyString(this._isUpdate)}>Modular</vscode-checkbox>
@@ -76,21 +76,25 @@ export class ScenarioGridObject {
 
     private _getModularTiles() : string {
         let html : string = ``;
-
         if (this._modularValue) {
-        let modularTiles = '';
-        for (const element of this._modularElements) {
-            if (element !== 'standard') {
-            modularTiles += this._getModularTile(element);
+            // cycle through modular element parent folders
+            let parents = uniqueSort(this._modularElementsWithParents.map(el => el.parent));
+            for (const parent of parents) {
+                let modularTiles = '';
+                // cycle through elements in given parent folder
+                let elements = this._modularElementsWithParents.filter(el => el.parent === parent).map(el => el.element).sort();
+                for (const element of elements) {
+                    if (element !== 'standard') {
+                        modularTiles += this._getModularTile(element);
+                    }
+                }
+                html += /*html*/ `
+                    <section class="component-example">
+                        ${modularTiles}
+                    </section>`;
             }
         }
-
-        html = /*html*/ `
-        <section class="component-example">
-            ${modularTiles}
-        </section>`;
-        }
-
+        
         return html;
     }
 
