@@ -86,7 +86,7 @@ export class ScenarioGridObject {
                 // cycle through elements in given parent folder
                 let elements = this._modularElementsWithParents.filter(el => el.parent === parent).map(el => el.element).sort();
                 for (const element of elements) {
-                    if (element !== 'standard') {
+                    if (element !== 'm') {
                         modularTiles += this._getModularTile(element);
                     }
                 }

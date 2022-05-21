@@ -177,11 +177,11 @@ export class CreateIntegrationPanel {
       this._createUpdateValue = 'update';
 
       // update modular value from script
-      if (this._modularValue !== this._currentIntegration.modular) {
-        // if modular checkbox switches: clear scenario fields
-        this._scenarioFieldValues = [];
-      }
-      this._modularValue = this._currentIntegration.modular;
+      // if (this._modularValue !== this._currentIntegration.modular) {
+      //   // if modular checkbox switches: clear scenario fields
+      //   this._scenarioFieldValues = [];
+      // }
+      // this._modularValue = this._currentIntegration.modular;
 
       // update valid existing scenario values from scenario folder instead
       this._existingScenarioFieldValues = this._currentIntegration.validscenarios;
@@ -277,6 +277,13 @@ export class CreateIntegrationPanel {
 
       // replace CreateOrUpdate value
       newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
+
+      // replace New-UpdateIntegration function call
+      let newNewUpdateIntegration = 'New-UpdateIntegration -CarrierName $CarrierName -Module $Module -CarrierAPI $CarrierAPI -Scenarios $Scenarios -StringReplaceList $StringReplaceList -CreateOrUpdate $CreateOrUpdate -Steps $Steps -Test';
+      newScriptContent = newScriptContent.replace(/New-UpdateIntegration\s[\S\s]+$/g,newNewUpdateIntegration);
+
+      // remove modular value if present
+      newScriptContent = newScriptContent.replace(/\$ModularXMLs[^\r\n]+[\r\n]/g, '');
 
       // save to file
       let newScriptPath:string = parentPath(cleanPath(this._currentIntegration.path)) + '/' + this._getScriptName();
@@ -391,7 +398,7 @@ export class CreateIntegrationPanel {
     newScriptContent = newScriptContent.replace('[createupdate]', this._createUpdateValue + "");
 
     // modular
-    newScriptContent = newScriptContent.replace('[modular]', this._modularValue + "");
+    // newScriptContent = newScriptContent.replace('[modular]', this._modularValue + "");
 
     // scenarios
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());

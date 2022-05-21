@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.3.1
+- Carrier Integration
+  - When updating existing integrations, switching 'modular' checkbox is no longer restricted
+    - Mixing new modular with existing non-modular scenarios is now allowed
+    - When loading existing integration, modular checkbox is no longer updated
+    - When loading existing integration, scenario fields are no longer cleared
+  - Refactor: Script no longer needs 'Modular' flag input -> Modularity is determined on scenario level
+  - Updated along with PowerShell script
+
 ## 1.3.0
 - Carrier Integration & Postman Collection
   - Modular scenario creation

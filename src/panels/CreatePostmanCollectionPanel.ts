@@ -339,9 +339,8 @@ export class CreatePostmanCollectionPanel {
     let defScenariosString = (this._independent) ? `$Scenarios = @( ${newScenariosString} )` : '';
 
     let applyScenariosString = (this._independent) ? '-Scenarios $Scenarios' : '';
-    let modularString = this._modularValue ? '-Modular' : '';
     let loadFunctions = `. "..\\..\\scenario-templates\\scripts\\functions.ps1"`;
-    let createPostmanCollection = `New-PostmanCollection -StringReplaceList $StringReplaceList -Headers $Headers ${applyScenariosString} ${modularString} -Test`;
+    let createPostmanCollection = `New-PostmanCollection -StringReplaceList $StringReplaceList -Headers $Headers ${applyScenariosString} -Test`;
     let nl = '\n';
 
     return stringReplaceList + nl + headers + nl + defScenariosString + nl + loadFunctions + nl + createPostmanCollection;

@@ -138,8 +138,9 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 		let integrationScenarios = scenarioDir.filter(el => !el.includes('.')).sort();
 
 		// filter on valid scenarios
-		let valids : string[] = modular ? await getModularElements(module) : await getAvailableScenarios(module, false);
-		let validScenarios : string [] = integrationScenarios.filter(el => isScenarioValid(el, modular, valids));
+		let availableScenarios = await getAvailableScenarios(module, false);
+		let modularElements = await getModularElements(module);
+		let validScenarios : string [] = integrationScenarios.filter(el => isScenarioValid(el, availableScenarios, modularElements));
 
 		// add array element
 		integrationObjects[newIndex] = {
@@ -159,11 +160,11 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 	return integrationObjects.slice(0,newIndex);
 }
 
-export function isScenarioValid(scenario:string, modular:boolean, validScenarios: string[]) : boolean {
+export function isScenarioValid(scenario:string, availableScenarios: string[], modularElements: string[]) : boolean {
 	let isValid = true;
+	let modular = scenario.startsWith('m-');
 	if (modular) {
 		let currentElements = scenario.split('-');
-		let modularElements = validScenarios;
 		for (const element of currentElements) {
 			if (!modularElements.includes(element)) {
 				isValid = false;
@@ -171,7 +172,7 @@ export function isScenarioValid(scenario:string, modular:boolean, validScenarios
 			}
 		}
 	} else {
-		isValid = validScenarios.includes(scenario);
+		isValid = availableScenarios.includes(scenario);
 	}
 
 	return isValid;
