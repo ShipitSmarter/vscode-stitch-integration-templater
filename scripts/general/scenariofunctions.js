@@ -21,13 +21,15 @@ export function addScenarioEventListeners(vscodeApi) {
 
 export var clickTile = function (vscodeApi) { return function (event) {
     const field = event.target;
+    const base = 'm';
   
     // add/remove tile content to last selected text field
     let currentElements = currentInput.value.split('-');
     if (currentElements.includes(field.id)) {
-      currentInput.value = currentElements.filter(el => el !== field.id).join('-');
+      let newValue = currentElements.filter(el => el !== field.id).join('-');
+      currentInput.value = (newValue === base) ? '' : newValue;
     } else {
-      currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? '' : '-') + field.id;
+      currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? (base + '-') : '-') + field.id;
     }
   
     // save field value
