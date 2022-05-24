@@ -20,6 +20,11 @@
   width: 100%;
 }
 
+.component-nomargin {
+  width: 100%;
+}
+
+
 .component-example > * {
   margin: 0.25rem;
 }
@@ -47,6 +52,11 @@
 .floatleft {
   float: left;
   padding-right: 2rem;
+}
+
+.floatleftlesspadding {
+  float: left;
+  padding-right: 1rem;
 }
 
 .floatleftnopadding {

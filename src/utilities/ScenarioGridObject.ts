@@ -22,6 +22,7 @@ export class ScenarioGridObject {
         let scenariosGrid = /*html*/ `    
             <section class="rowsingle">
                 <section class="component-container">
+                ${this._modularValue ? '<section class="component-nomargin"><div class="floatleft">' : ''}
                     <div class="component-sub-container">
                         <h2>Scenarios</h2>
                         <vscode-divider role="separator"></vscode-divider>
@@ -31,8 +32,6 @@ export class ScenarioGridObject {
                         <section class="component-example">
                             <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)}>Modular</vscode-checkbox>
                         </section>
-
-                        ${this._modularValue ? this._getModularTiles() : ''}
 
                         <vscode-divider role="separator"></vscode-divider>
 
@@ -44,7 +43,12 @@ export class ScenarioGridObject {
                         </section>
 
                         ${this._scenarioInputs()}
-                    </div>
+                    </div>                    
+                ${this._modularValue ? '</div>' : ''}
+                ${this._modularValue ? '<div class="floatleft">' : ''}
+                    ${this._modularValue ? this._getModularTiles() : ''}
+                ${this._modularValue ? '</div></section>' : ''}
+
                 </section>
             </section>`;
 
@@ -91,9 +95,12 @@ export class ScenarioGridObject {
 
                 // add to html
                 html += /*html*/ `
-                    <section class="component-example">
-                        ${modularTiles}
-                    </section>`;
+                    <div class="floatleftlesspadding">
+                        <section class="component-example">
+                            <h3>${parent.replace(/[\s\S]*\_/g,'')}</h3>
+                        </section>
+                            ${modularTiles}
+                    </div>`;
             }
         
         return html;
@@ -101,7 +108,9 @@ export class ScenarioGridObject {
 
     private _getModularTile(id:string): string {
         let testButton: string = /*html*/ `
-        <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
+        <section class="component-example">
+            <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
+        </section>
         `;
         return testButton;
     }
