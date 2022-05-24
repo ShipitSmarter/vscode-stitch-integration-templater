@@ -95,9 +95,10 @@ export class ScenarioGridObject {
 
                 // add to html
                 html += /*html*/ `
-                    <section class="component-example">
-                        ${modularTiles}
-                    </section>`;
+                    <div class="floatleftlesspadding">
+                        <h3>${parent.replace(/[\s\S]*\_/g,'')}</h3>
+                            ${modularTiles}
+                    </div>`;
             }
         
         return html;
@@ -105,7 +106,9 @@ export class ScenarioGridObject {
 
     private _getModularTile(id:string): string {
         let testButton: string = /*html*/ `
-        <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
+        <section class="component-example">
+            <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
+        </section>
         `;
         return testButton;
     }
