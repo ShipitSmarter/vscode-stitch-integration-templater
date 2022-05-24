@@ -96,7 +96,9 @@ export class ScenarioGridObject {
                 // add to html
                 html += /*html*/ `
                     <div class="floatleftlesspadding">
-                        <h3>${parent.replace(/[\s\S]*\_/g,'')}</h3>
+                        <section class="component-example">
+                            <h3>${parent.replace(/[\s\S]*\_/g,'')}</h3>
+                        </section>
                             ${modularTiles}
                     </div>`;
             }
