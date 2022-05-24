@@ -20,6 +20,11 @@
   width: 100%;
 }
 
+.component-nomargin {
+  width: 100%;
+}
+
+
 .component-example > * {
   margin: 0.25rem;
 }
