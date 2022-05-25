@@ -47,8 +47,7 @@ export class CreateIntegrationHtmlObject {
       this._scenarioFieldValues, 
       this._modularValue, 
       +this._fieldValues[nofScenariosIndex], 
-      nofScenariosIndex,
-      (this._createUpdateValue === 'update')
+      nofScenariosIndex
     );
 
     // define panel HTML

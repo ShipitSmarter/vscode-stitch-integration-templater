@@ -13,8 +13,7 @@ export class ScenarioGridObject {
         private _scenarioFieldValues: string[],
         private _modularValue: boolean,
         private _nofScenarios: number,
-        private _nofScenariosIndex: number,
-        private _isUpdate: boolean = false
+        private _nofScenariosIndex: number
     ) { }
 
     public getHtml(): string {
@@ -83,14 +82,14 @@ export class ScenarioGridObject {
     private _getModularTiles() : string {
         let html : string = ``;
             // cycle through modular element parent folders
-            let parents = uniqueSort(this._modularElementsWithParents.map(el => el.parent));
+            let parents = uniqueSort(this._modularElementsWithParents.map(el => el.parent)).filter(el => el !== '');
             for (const parent of parents) {
                 let modularTiles = '';
                 
                 // cycle through elements in given parent folder
                 let elements = this._modularElementsWithParents.filter(el => el.parent === parent).map(el => el.element).sort();
                 for (const element of elements) {
-                    modularTiles += (element === 'm') ? '' : this._getModularTile(element);
+                    modularTiles += this._getModularTile(element);
                 }
 
                 // add to html
