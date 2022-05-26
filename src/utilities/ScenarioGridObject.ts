@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, readonlyString} from "./functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, readonlyString, hiddenString} from "./functions";
 
 
 export class ScenarioGridObject {
@@ -13,7 +13,10 @@ export class ScenarioGridObject {
         private _scenarioFieldValues: string[],
         private _modularValue: boolean,
         private _nofScenarios: number,
-        private _nofScenariosIndex: number
+        private _nofScenariosIndex: number,
+        private _multiValue: boolean = true,
+        private _nofPackages: number = 5,
+        private _nofPackagesIndex: number = 10
     ) { }
 
     public getHtml(): string {
@@ -30,6 +33,8 @@ export class ScenarioGridObject {
 
                         <section class="component-example">
                             <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)}>Modular</vscode-checkbox>
+                            <vscode-checkbox id="multi" class="multi" ${checkedString(this._multiValue)} ${hiddenString(this._modularValue)}>Multi</vscode-checkbox>
+                            <vscode-text-field id="nofpackages" index="${this._nofPackagesIndex}" ${valueString(this._nofPackages + '')} class="field" ${hiddenString(this._multiValue)}></vscode-text-field>
                         </section>
 
                         <vscode-divider role="separator"></vscode-divider>
@@ -109,6 +114,7 @@ export class ScenarioGridObject {
         let testButton: string = /*html*/ `
         <section class="component-example">
             <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
+            
         </section>
         `;
         return testButton;

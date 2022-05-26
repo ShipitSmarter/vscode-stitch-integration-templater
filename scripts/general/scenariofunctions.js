@@ -94,12 +94,31 @@ export function saveScenarioValue(fieldId, vscodeApi) {
 export function flipTile(fieldId) {
     let field = document.getElementById(fieldId);
   
-    let app = 'appearance';
-    if (field.getAttribute(app) === 'primary'){
-      field.setAttribute(app,'secondary');
+    if (field.getAttribute('appearance') === 'primary'){
+      setSecondary(field.id);
     } else {
-      field.setAttribute(app,'primary');
+      setPrimary(field.id);
     }
+}
+
+export function setPrimary(fieldId) {
+  let field = document.getElementById(fieldId);
+
+  // change appearance
+  field.setAttribute('appearance','primary');
+
+  //TODO: calculate multi value (lowest unused digit or 1)
+  //TODO: show multi field
+}
+
+export function setSecondary(fieldId) {
+  let field = document.getElementById(fieldId);
+
+  // change appearance
+  field.setAttribute('appearance','secondary');
+
+  //TODO: clear multi value
+  //TODO: hide multi field
 }
 
 export function checkScenarioFields() {
@@ -119,9 +138,9 @@ export function updateTiles(content) {
     let tiles = document.querySelectorAll(".modulartile");
     for (const tile of tiles) {
       if (currentElements.includes(tile.id)) {
-        tile.setAttribute('appearance','primary');
+        setPrimary(tile.id);
       } else {
-        tile.setAttribute('appearance','secondary');
+        setSecondary(tile.id);
       }
     }
 }
