@@ -29,7 +29,7 @@ export class CreatePostmanCollectionPanel {
   private _modules: string[] = [];
   private _scenarioFieldValues: string[] = [];
   private _availableScenarios: string[] = [];
-  private _modularElementsWithParents: {parent:string, element:string}[] = [];
+  private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
   private _independent: boolean = false;
   private _modularValue: boolean = false;
   private _multiFieldValues: {[details: string] : string;} = {};

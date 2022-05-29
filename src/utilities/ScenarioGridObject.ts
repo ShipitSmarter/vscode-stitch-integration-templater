@@ -5,12 +5,11 @@ import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, array
 export class ScenarioGridObject {
     // PROPERTIES
     public static currentScenarioGridObject: ScenarioGridObject | undefined;
-    private _multiParents: string[] = ['dangerous'];
 
     // constructor
     public constructor (
         private _availableScenarios: string[],
-        private _modularElementsWithParents: {parent:string, element:string}[],
+        private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
         private _scenarioFieldValues: string[],
         private _modularValue: boolean,
         private _nofScenarios: number,
@@ -102,10 +101,14 @@ export class ScenarioGridObject {
                 // cycle through elements in given parent folder
                 let elements = this._modularElementsWithParents.filter(el => el.parent === parent).map(el => el.element).sort();
                 for (const element of elements) {
+                    // get current modularElements object
+                    let currentElementObject = this._modularElementsWithParents.filter(el => el.parent === parent && el.element === element)[0];
+
+                    // build modular tile (and add multifield, if appropriate)
                     modularTiles += /*html*/ `
                     <section class="component-example">
                         <vscode-button id="${element}" class="modulartile" appearance="secondary">${element}</vscode-button>
-                        ${this._multiParents.includes(this._getCleanParent(parent)) ? /*html*/ `<vscode-text-field id="multifield${element}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" disabled></vscode-text-field>` : ''}
+                        ${ currentElementObject.multi ? /*html*/ `<vscode-text-field id="multifield${element}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" disabled></vscode-text-field>` : ''}
                     </section>
                     `;
                 }

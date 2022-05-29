@@ -32,7 +32,7 @@ export class CreateIntegrationPanel {
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
   private _currentIntegration :     {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
-  private _modularElementsWithParents: {parent:string, element:string}[] = [];
+  private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
   private _functionsPath: string = '';
   private _multiFieldValues: {[details: string] : string;} = {};
 

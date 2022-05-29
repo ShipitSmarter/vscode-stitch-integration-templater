@@ -22,7 +22,7 @@ export class CreateIntegrationHtmlObject {
   public constructor(  
     private _uris: vscode.Uri[],  
     private _availableScenarios: string[], 
-    private _modularElementsWithParents: {parent:string, element:string}[],
+    private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
     private _fieldValues: string[],
     private _stepFieldValues: string[],
     private _otherStepValues: string[],

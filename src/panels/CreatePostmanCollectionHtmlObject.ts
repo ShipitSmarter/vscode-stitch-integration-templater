@@ -30,7 +30,7 @@ export class CreatePostmanCollectionHtmlObject {
     private _carrierCodes: {carrier: string,  carriercode: string }[] = [],
     private _scenarioFieldValues: string[],
     private _availableScenarios: string[], 
-    private _modularElementsWithParents: {parent:string, element:string}[],
+    private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
     private _independent: boolean,
     private _modularValue: boolean,
     private _multiFieldValues: {[details: string] : string;}
