@@ -45,7 +45,7 @@ export class ScenarioGridObject {
                             </vscode-dropdown>
                         </section>
 
-                        ${this._scenarioInputs()}
+                        ${this._modularValue ? this._modularScenarioInputs() : this._fixedScenarioInputs()}
                     </div>                    
                 ${this._modularValue ? '</div>' : ''}
                 ${this._modularValue ? '<div class="floatleft">' : ''}
@@ -58,17 +58,44 @@ export class ScenarioGridObject {
         return scenariosGrid;
     }
 
-    private _scenarioInputs(): string {
+    private _fixedScenarioInputs(): string {
         let html: string = ``;
 
         for (let scenario = 0; scenario < +this._nofScenarios; scenario++) {
             html += /*html*/`
             <section class="component-example">
-                ${this._modularValue ? this._getScenarioInputField(scenario) : this._getScenarioDropdown(scenario)}
+                ${this._getScenarioDropdown(scenario)}
             </section>`;
         }
 
         return html;
+    }
+
+    private _modularScenarioInputs(): string {
+        
+        let scenarioNames: string = ``;
+        let multiDropdowns: string = ``;
+        for (let scenario = 0; scenario < +this._nofScenarios; scenario++) {
+            scenarioNames += this._getScenarioInputField(scenario);
+            multiDropdowns += /*html*/ `
+                <section class="component-example">
+                    <vscode-dropdown id="nofpackages${scenario}" index="${scenario}" ${valueString("1")} position="below">
+                        ${dropdownOptions(arrayFrom1(9))}
+                    </vscode-dropdown>
+                </section>`;
+        }
+
+        return /*html*/`
+        <section class="component-example">
+            <section class="floatleftnopadding">
+                <p># Packages</p>
+                ${multiDropdowns}
+            </section>
+            <section class="floatleftnopadding">
+                <p>Scenario name</p>
+                ${scenarioNames}
+            </section>
+        </section>`;
     }
 
     private _nofPackagesField() : string {
@@ -79,7 +106,10 @@ export class ScenarioGridObject {
     }
 
     private _getScenarioInputField(index:number) : string {
-        return /*html*/ `<vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" placeholder="${(index + 1) + nth(index + 1)} scenario name..." readonly></vscode-text-field>`;
+        return /*html*/ `
+        <section class="component-example">
+            <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" placeholder="${(index + 1) + nth(index + 1)} scenario name..." readonly></vscode-text-field>
+        </section>`;
     }
 
     private _getScenarioDropdown(index:number) : string {
