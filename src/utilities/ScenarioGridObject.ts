@@ -126,16 +126,6 @@ export class ScenarioGridObject {
         return html;
     }
 
-    private _getModularTile(id:string): string {
-        let testButton: string = /*html*/ `
-        <section class="component-example">
-            <vscode-button id="${id}" class="modulartile" appearance="secondary">${id}</vscode-button>
-            
-        </section>
-        `;
-        return testButton;
-    }
-
     private _getCleanParent(parent:string) : string {
         return parent.replace(/[\s\S]*\_/g,'');
     }

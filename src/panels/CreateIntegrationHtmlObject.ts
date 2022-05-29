@@ -313,7 +313,7 @@ export class CreateIntegrationHtmlObject {
       html += /*html*/`
         <section class="component-example">
           <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" indexescheckbox="${index}" ${checked}></vscode-checkbox>
-          <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" ${disabledReadonly}></vscode-text-field>
+          <vscode-text-field id="existingscenario${index}" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" ${disabledReadonly}></vscode-text-field>
         </section>
       `;
     }
