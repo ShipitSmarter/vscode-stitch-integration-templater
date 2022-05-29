@@ -273,22 +273,6 @@ export function updateTiles(content) {
     }
 }
 
-export function checkModularScenario(content) {
-    let currentElements = content.split('-');
-    let modularElements = document.getElementById("modularelements").value.split(',');
-    let isValid = true;
-    if (currentElements !== null && !(currentElements.length === 1 && currentElements[0] === '')) {
-      for (let index = 0; index < currentElements.length; index++) {
-        if (!modularElements.includes(currentElements[index])) {
-          isValid = false;
-          break;
-        }
-      }
-    }
-  
-    return isValid;
-}
-
 export function isModular() {
     return document.getElementById("modular").checked;
 }
@@ -322,6 +306,25 @@ export function containsHigherDigits(string, maxdigit) {
   }
 
   return containsHigher;
+}
+
+export function checkModularScenario(content) {
+  let isCorrect = true;
+
+  // check if modular scenario contains invalid multi strings
+  let currentElements = content.split('-');
+  let maxValue = document.getElementById("nofpackages").value;
+
+  for (const element of currentElements) {
+    let multiValue = element.replace(/[^\_]+\_/g,'');
+
+    if (element.includes('_') && (multiValue.includes('0') || containsHigherDigits(multiValue, maxValue) || containsRepeatingDigits(multiValue, maxValue))) {
+      isCorrect = false;
+      break;
+    }
+  }
+
+  return isCorrect;
 }
 
 export function updateMultiFieldOutlineAndTooltip(fieldId) {
@@ -361,16 +364,14 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
     let isCorrect = true;
     let field = document.getElementById(fieldId);
   
-    var fieldType = field.className;
-  
     if (field.classList[0] === 'scenariofield') {
         // check for duplicate scenarios
         if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
           isCorrect = false;
           updateScenarioFieldDuplicate(field.id);
-        // } else if (isModular() && !checkModularScenario(field.value)) {
-        //   updateScenarioFieldWrongModularScenario(field.id,fieldType);
-        //   isCorrect = false;
+        } else if (isModular() && !checkModularScenario(field.value)) {
+          updateScenarioFieldWrongModularScenario(field.id);
+          isCorrect = false;
         } else if (field.id === currentInput.id && isModular()) { 
           updateScenarioFieldFocused(field.id);
         } else {
@@ -390,7 +391,7 @@ export function updateScenarioFieldDuplicate(fieldId) {
 export function updateScenarioFieldWrongModularScenario(fieldId) {
     let field = document.getElementById(fieldId);
     field.style.outline = "1px solid red";
-    field.title = 'Format: \'fromnl-tode-sl1800\'. Elements must be present in scenario-elements/modular.';
+    field.title = 'One or more modular element fields are invalid. select scenario to see more details.';
 }
   
 export function updateScenarioFieldRight(fieldId, info="") {
