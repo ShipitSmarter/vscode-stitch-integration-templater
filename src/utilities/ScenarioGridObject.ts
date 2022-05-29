@@ -74,7 +74,7 @@ export class ScenarioGridObject {
 
     private _nofPackagesField() : string {
         return /*html*/ ` Number of packages: 
-        <vscode-dropdown id="nofpackages" index="${this._nofPackagesIndex}" ${valueString(this._nofPackages + '')} class="dropdown" position="below">
+        <vscode-dropdown id="nofpackages" index="${this._nofPackagesIndex}" ${valueString(this._nofPackages + '')} position="below">
             ${dropdownOptions(arrayFrom1(9))}
         </vscode-dropdown>`;
     }

@@ -249,6 +249,10 @@ export class CreatePostmanCollectionPanel {
                 this._updateWebview(extensionUri);
                 break;
 
+              case 'nofpackages':
+                this._fieldValues[index] = value;
+                break;
+
               case 'scenariofield':
                 this._scenarioFieldValues[index] = value;
                 break;

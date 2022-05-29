@@ -169,6 +169,9 @@ export class CreateIntegrationPanel {
                 this._scenarioFieldValues = [];
                 this._updateWebview(extensionUri);
                 break;
+              case 'nofpackages':
+                this._fieldValues[index] = value;
+                break;
             }
         }
       },

@@ -21,7 +21,7 @@ export function addScenarioEventListeners(vscodeApi) {
 
   // nofPackages
   for (const field of document.querySelectorAll("#nofpackages")) {
-    field.addEventListener("change", changePackages);
+    field.addEventListener("change", changePackages(vscodeApi));
   }
 
   // multi fields
@@ -55,8 +55,13 @@ export var multiFieldChange = function (vscodeApi) { return  function (event) {
   var textString = field.id + '|' + (field.getAttribute('index') ?? '') + '|' + field.value;
   vscodeApi.postMessage({ command: "savemultivalue", text: textString });
 
-  //TODO: update scenario in currentInput
-  
+  // update scenario in currentInput
+  let element = field.id.replace('multifield','');
+  let multiregex = new RegExp('-' + element + '_\\d+(-|$)');
+  currentInput.value = currentInput.value.replace(multiregex, '-' + element + '_' + value + '$1');
+
+  // trigger 'change' event to save and check content
+  currentInput.dispatchEvent(new Event('change')); 
 };};
 
 
@@ -76,17 +81,21 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
     }
 };};
   
-export function changePackages(event) {
-  const nofPackages = event.target.value;
+export var changePackages = function (vscodeApi) { return  function (event) {
+    const nofPackagesField = event.target;
+    const nofPackages = nofPackagesField.value;
 
-  // cycle through al scenario fields, and update with new nofPackages
-  for (const field of document.querySelectorAll(".scenariofield")) {
-    field.value = field.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
+    // save
+    vscodeApi.postMessage({ command: "savevalue", text: 'nofpackages|' + nofPackagesField.getAttribute('index') + '|' + nofPackages });
 
-    // trigger 'change' event to save and check content
-    field.dispatchEvent(new Event('change'));
-  }
-}
+    // cycle through al scenario fields, and update with new nofPackages
+    for (const field of document.querySelectorAll(".scenariofield")) {
+      field.value = field.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
+
+      // trigger 'change' event to save and check content
+      field.dispatchEvent(new Event('change'));
+    }
+};};
 
 export function modularScenarioFocus(event) {
     // track last selected scenario field
@@ -142,9 +151,9 @@ export function setPrimary(fieldId,vscodeApi) {
   // change appearance
   field.setAttribute('appearance','primary');
 
-  // set multifield if present
+  // set multifield if present (and not already set)
   let multifield = document.querySelectorAll("#multifield" + fieldId);
-  // vscodeApi.postMessage({ command: "setprime", text: multifield[0].id });
+
   if (multifield.length > 0) {
     //calculate multi value (lowest unused digit or 1) unless already set
     if (multifield[0].value === '') {
@@ -159,7 +168,7 @@ export function setPrimary(fieldId,vscodeApi) {
   }
 
   // add tile content to last selected scenario field
-  let currentElements = currentInput.value.split('-');
+  // let currentElements = currentInput.value.split('-');
   let regex = new RegExp('-' + field.id + '([-_]|$)',"g");
   let check = currentInput.value.match(regex);
   let addstring = field.id + (multifield.length > 0 ? '_' + multifield[0].value : '');
@@ -193,11 +202,9 @@ export function setSecondary(fieldId,vscodeApi) {
   }
 
   // remove tile content from last selected scenario field
-  let currentElements = currentInput.value.split('-');
   let regex = new RegExp('-' + field.id + '([-_]|$)');
   let check = currentInput.value.match(regex);
   if (check) {
-    //let newValue = currentElements.filter(el => el !== field.id &&).join('-');
     // replace if multi, else replace if not multi
     let multiregex = new RegExp('-' + field.id + '_\\d+(-|$)');
     let newValue = currentInput.value.replace(multiregex, '$1').replace(regex, check[1]);
@@ -220,7 +227,7 @@ export function checkScenarioFields() {
 }
   
 export function updateTiles(content) {
-    let currentElements = content.split('-');
+    // let currentElements = content.split('-');
     
     let tiles = document.querySelectorAll(".modulartile");
     for (const tile of tiles) {
