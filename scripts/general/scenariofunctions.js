@@ -184,8 +184,8 @@ export function setPrimary(fieldId,vscodeApi) {
     }
 
     //show multi field
-    //multifield[0].hidden = false;
-    multifield[0].disabled = false;
+    multifield[0].hidden = false;
+    // multifield[0].disabled = false;
   }
 
   // add tile content to last selected scenario field
@@ -218,8 +218,8 @@ export function setSecondary(fieldId,vscodeApi) {
     multifield[0].dispatchEvent(new Event('keyup'));
 
     //hide multi field
-    //multifield[0].hidden = true;
-    multifield[0].disabled = true;
+    multifield[0].hidden = true;
+    // multifield[0].disabled = true;
 
     // update validity check
     updateMultiFieldOutlineAndTooltip(multifield[0].id);
@@ -332,7 +332,8 @@ export function updateMultiFieldOutlineAndTooltip(fieldId) {
   let field = document.getElementById(fieldId);
   let maxValue = document.getElementById("nofpackages").value;
 
-  if (field.value === '' && field.disabled === false) {
+  // if (field.value === '' && field.disabled === false) {
+  if (field.value === '' && field.hidden === false) {
     updateMultiFieldEmpty(field.id);
   } else if (field.value.includes('0')) {
     updateMultiFieldWrong(field.id, 'May not contain 0 (only 1-9, and no higher than number of packages)');
