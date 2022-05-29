@@ -60,7 +60,7 @@ export var multiFieldChange = function (vscodeApi) { return  function (event) {
 
   // update scenario in currentInput
   let element = field.id.replace('multifield','');
-  let multiregex = new RegExp('-' + element + '_\\d+(-|$)');
+  let multiregex = new RegExp('-' + element + '_\\d*(-|$)');
   currentInput.value = currentInput.value.replace(multiregex, '-' + element + '_' + value + '$1');
 
   // trigger 'change' event to save and check content
@@ -207,18 +207,24 @@ export function setSecondary(fieldId,vscodeApi) {
     //hide multi field
     //multifield[0].hidden = true;
     multifield[0].disabled = true;
+
+    // update validity check
+    updateMultiFieldOutlineAndTooltip(multifield[0].id);
   }
 
   // remove tile content from last selected scenario field
-  let regex = new RegExp('-' + field.id + '([-_]|$)');
-  let check = currentInput.value.match(regex);
-  if (check) {
-    // replace if multi, else replace if not multi
-    let multiregex = new RegExp('-' + field.id + '_\\d+(-|$)');
-    let newValue = currentInput.value.replace(multiregex, '$1').replace(regex, check[1] === '-' ? '-' : '');
-    currentInput.value = (newValue === base) ? '' : newValue;
+  let oldValue = currentInput.value;
+  let nonmultiregex = new RegExp('-' + field.id + '(-|$)');
+  let multiregex = new RegExp('-' + field.id + '_\\d*(-|$)');
 
-    // trigger 'change' event to save and check content
+  // replace if multi, else replace if not multi
+  let newValue = currentInput.value.replace(multiregex, '$1').replace(nonmultiregex, '$1');
+
+  // remove base if all tiles deselected
+  currentInput.value = (newValue === base) ? '' : newValue;
+
+  // if updated: trigger 'change' event to save and check content
+  if (currentInput.value !== oldValue) {
     currentInput.dispatchEvent(new Event('change'));
   }
 }
