@@ -15,9 +15,8 @@ export class ScenarioGridObject {
         private _modularValue: boolean,
         private _nofScenarios: number,
         private _nofScenariosIndex: number,
-        private _multiValue: boolean = true,
-        private _nofPackages: number = 5,
-        private _nofPackagesIndex: number = 10,
+        private _nofPackages: number,
+        private _nofPackagesIndex: number,
         private _multiFieldValues: string[] = []
     ) { }
 
@@ -35,8 +34,7 @@ export class ScenarioGridObject {
 
                         <section class="component-example">
                             <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)}>Modular</vscode-checkbox>
-                            <vscode-checkbox id="multi" class="multi" ${checkedString(this._multiValue)} ${hiddenString(this._modularValue)}>Multi</vscode-checkbox>
-                            <vscode-text-field id="nofpackages" index="${this._nofPackagesIndex}" ${valueString(this._nofPackages + '')} class="field" ${hiddenString(this._multiValue)}></vscode-text-field>
+                            ${this._modularValue ? this._nofPackagesField() : ''}
                         </section>
 
                         <vscode-divider role="separator"></vscode-divider>
@@ -72,6 +70,12 @@ export class ScenarioGridObject {
         }
 
         return html;
+    }
+
+    private _nofPackagesField() : string {
+        return /*html*/ `
+        <p>Number of Packages</p>
+        <vscode-text-field id="nofpackages" index="${this._nofPackagesIndex}" ${valueString(this._nofPackages + '')} class="field"></vscode-text-field>`;
     }
 
     private _getScenarioInputField(index:number) : string {

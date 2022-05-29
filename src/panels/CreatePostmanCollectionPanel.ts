@@ -14,6 +14,7 @@ const accountNumberIndex = 5;
 const costCenterIndex = 6;
 const nofScenariosIndex = 7;
 const carrierCodeIndex = 8;
+const nofPackagesIndex = 10;
 
 export class CreatePostmanCollectionPanel {
   // PROPERTIES

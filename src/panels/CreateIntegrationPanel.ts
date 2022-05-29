@@ -13,6 +13,7 @@ const nofStepsIndex = 5;
 const nofScenariosIndex = 6;
 const carrierUserIndex = 7;
 const carrierPwdIndex = 8;
+const nofPackagesIndex = 10;
 
 export class CreateIntegrationPanel {
   // PROPERTIES
@@ -42,6 +43,7 @@ export class CreateIntegrationPanel {
     this._fieldValues[moduleIndex] = 'booking';
     this._fieldValues[nofStepsIndex] = "1";
     this._fieldValues[nofScenariosIndex] = "1";
+    this._fieldValues[nofPackagesIndex] = "1";
 
     // set content
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
