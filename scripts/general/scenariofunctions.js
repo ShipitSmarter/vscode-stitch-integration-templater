@@ -119,8 +119,11 @@ export function setPrimary(fieldId,vscodeApi) {
 
   // add tile content to last selected scenario field
   let currentElements = currentInput.value.split('-');
-  if (!currentElements.includes(field.id)) {
-    currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? (base + '-') : '-') + field.id;
+  let regex = new RegExp('-' + field.id + '([-_]|$)',"g");
+  let check = currentInput.value.match(regex);
+  let addstring = field.id + (multifield.length > 0 ? '_' + multifield[0].value : '');
+  if (!check) {
+    currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? (base + '-') : '-') + addstring;
 
     // trigger 'change' event to save and check content
     currentInput.dispatchEvent(new Event('change'));
@@ -148,8 +151,13 @@ export function setSecondary(fieldId,vscodeApi) {
 
   // remove tile content from last selected scenario field
   let currentElements = currentInput.value.split('-');
-  if (currentElements.includes(field.id)) {
-    let newValue = currentElements.filter(el => el !== field.id).join('-');
+  let regex = new RegExp('-' + field.id + '([-_]|$)');
+  let check = currentInput.value.match(regex);
+  if (check) {
+    //let newValue = currentElements.filter(el => el !== field.id &&).join('-');
+    // replace if multi, else replace if not multi
+    let multiregex = new RegExp('-' + field.id + '_\\d+(-|$)');
+    let newValue = currentInput.value.replace(multiregex, '$1').replace(regex, check[1]);
     currentInput.value = (newValue === base) ? '' : newValue;
 
     // trigger 'change' event to save and check content
@@ -173,7 +181,9 @@ export function updateTiles(content) {
     
     let tiles = document.querySelectorAll(".modulartile");
     for (const tile of tiles) {
-      if (currentElements.includes(tile.id)) {
+      let regex = new RegExp('-' + tile.id + '([-_]|$)');
+      // if (currentElements.includes(tile.id)) {
+      if (content.match(regex)) {
         setPrimary(tile.id);
       } else {
         setSecondary(tile.id);
