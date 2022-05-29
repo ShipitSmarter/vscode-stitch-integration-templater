@@ -21,7 +21,7 @@ export function addScenarioEventListeners(vscodeApi) {
 
   // nofPackages dropdowns
   for (const field of document.querySelectorAll(".nofpackages")) {
-    field.addEventListener("change", changePackagesDropdown(vscodeApi));
+    field.addEventListener("change", changePackages(vscodeApi));
   }
 
   // multi fields
@@ -84,7 +84,7 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
     }
 };};
 
-export var changePackagesDropdown = function (vscodeApi) { return  function (event) {
+export var changePackages = function (vscodeApi) { return  function (event) {
     const nofPackagesField = event.target;
     const nofPackages = nofPackagesField.value;
     const index = nofPackagesField.getAttribute('index');
@@ -99,8 +99,11 @@ export var changePackagesDropdown = function (vscodeApi) { return  function (eve
     // update scenario field with new nofPackages
     scenarioField.value = scenarioField.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
 
+    // trigger 'change' event to save and check content
+    scenarioField.dispatchEvent(new Event('change')); 
+
     // update scenario field validity check
-    updateScenarioFieldOutlineAndTooltip(scenarioField.id);
+    //updateScenarioFieldOutlineAndTooltip(scenarioField.id);
 
     // check all multifield values
     for (const field of document.querySelectorAll(".multifield")) {
