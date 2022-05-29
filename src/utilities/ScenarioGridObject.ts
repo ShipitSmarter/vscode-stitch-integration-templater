@@ -73,9 +73,10 @@ export class ScenarioGridObject {
     }
 
     private _nofPackagesField() : string {
-        return /*html*/ `
-        <p>Number of Packages</p>
-        <vscode-text-field id="nofpackages" index="${this._nofPackagesIndex}" ${valueString(this._nofPackages + '')} class="field"></vscode-text-field>`;
+        return /*html*/ ` Number of packages: 
+        <vscode-dropdown id="nofpackages" index="${this._nofPackagesIndex}" ${valueString(this._nofPackages + '')} class="dropdown" position="below">
+            ${dropdownOptions(arrayFrom1(9))}
+        </vscode-dropdown>`;
     }
 
     private _getScenarioInputField(index:number) : string {

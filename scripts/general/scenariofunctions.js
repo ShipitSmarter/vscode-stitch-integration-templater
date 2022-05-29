@@ -19,6 +19,11 @@ export function addScenarioEventListeners(vscodeApi) {
   // modular checkbox
   document.getElementById("modular").addEventListener("change", scenarioFieldChange(vscodeApi));
 
+  // nofPackages
+  for (const field of document.querySelectorAll("#nofpackages")) {
+    field.addEventListener("change", changePackages);
+  }
+
   // if modular: check currentInput content and update tiles
   if (isModular()) {
     updateTiles(currentInput.value);
@@ -52,6 +57,18 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
     }
 };};
   
+export function changePackages(event) {
+  const nofPackages = event.target.value;
+
+  // cycle through al scenario fields, and update with new nofPackages
+  for (const field of document.querySelectorAll(".scenariofield")) {
+    field.value = field.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
+
+    // trigger 'change' event to save and check content
+    field.dispatchEvent(new Event('change'));
+  }
+}
+
 export function modularScenarioFocus(event) {
     // track last selected scenario field
     // from https://stackoverflow.com/a/68176703/1716283
@@ -81,14 +98,15 @@ export function saveScenarioValue(fieldId, vscodeApi) {
 
 export function lowestUnusedDigitOr1() {
   let multifields = document.querySelectorAll(".multifield");
+  let maxValue = +document.getElementById("nofpackages").value;
   let concatenatedValues = '';
   let lowestUnused = 0;
   for (const multifield of multifields) {
     concatenatedValues += multifield.value;
   }
 
-  //TODO: max should be nofPackages value OR 1
-  for (const digit of [...Array(9).keys()].map(x => ++x)) {
+  // get lowest unused digit (max is nofPackages)
+  for (const digit of [...Array(maxValue).keys()].map(x => ++x)) {
     if (!concatenatedValues.includes(digit+"")) {
       lowestUnused = digit;
       break;
@@ -100,7 +118,7 @@ export function lowestUnusedDigitOr1() {
 
 export function setPrimary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm';
+  const base = 'm-multi_' + document.getElementById("nofpackages").value ;
 
   // change appearance
   field.setAttribute('appearance','primary');
@@ -132,7 +150,7 @@ export function setPrimary(fieldId,vscodeApi) {
 
 export function setSecondary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm';
+  const base = 'm-multi_' + document.getElementById("nofpackages").value ;
 
   // change appearance
   field.setAttribute('appearance','secondary');

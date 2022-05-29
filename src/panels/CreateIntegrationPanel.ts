@@ -133,6 +133,9 @@ export class CreateIntegrationPanel {
             var value = classIndexValue[2];
             switch (classIndexValue[0]) {
               case 'dropdown':
+                this._fieldValues[index] = value;
+                this._updateWebview(extensionUri);
+                break;
               case 'field':
                 this._fieldValues[index] = value;
                 break;
