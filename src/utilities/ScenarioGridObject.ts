@@ -133,7 +133,9 @@ export class ScenarioGridObject {
                     modularTiles += /*html*/ `
                     <section class="component-example">
                         <vscode-button id="${element}" class="modulartile" appearance="secondary">${element}</vscode-button>
-                        ${ currentElementObject.multi ? /*html*/ `<vscode-text-field id="multifield${element}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" placeholder="packages..." hidden></vscode-text-field>` : ''}
+                        ${ currentElementObject.multi ? /*html*/ `
+                            <vscode-text-field id="multifield${element}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" placeholder="packages..." hidden></vscode-text-field>
+                        ` : ''}
                     </section>
                     `;
                 }
