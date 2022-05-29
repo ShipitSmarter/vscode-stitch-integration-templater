@@ -27,25 +27,13 @@ export function addScenarioEventListeners(vscodeApi) {
 
 export var clickTile = function (vscodeApi) { return function (event) {
     const field = event.target;
-    const base = 'm';
   
-    // add/remove tile content to last selected text field
-    let currentElements = currentInput.value.split('-');
-    if (currentElements.includes(field.id)) {
-      let newValue = currentElements.filter(el => el !== field.id).join('-');
-      currentInput.value = (newValue === base) ? '' : newValue;
+    // update tile appearance and possibly set multi field
+    if (field.getAttribute('appearance') === 'primary'){
+      setSecondary(field.id,vscodeApi);
     } else {
-      currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? (base + '-') : '-') + field.id;
+      setPrimary(field.id,vscodeApi);
     }
-  
-    // save field value
-    //saveScenarioValue(currentInput.id, vscodeApi);
-  
-    // trigger 'change' event to save and check content
-    currentInput.dispatchEvent(new Event('change'));
-  
-    // update appearance on click
-    flipTile(field.id, vscodeApi);
 };};
 
 export var scenarioFieldChange = function (vscodeApi) { return  function (event) {
@@ -91,16 +79,6 @@ export function saveScenarioValue(fieldId, vscodeApi) {
     vscodeApi.postMessage({ command: "savevalue", text: textString });
 }
 
-export function flipTile(fieldId, vscodeApi) {
-    let field = document.getElementById(fieldId);
-  
-    if (field.getAttribute('appearance') === 'primary'){
-      setSecondary(field.id,vscodeApi);
-    } else {
-      setPrimary(field.id,vscodeApi);
-    }
-}
-
 export function lowestUnusedDigitOr1() {
   let multifields = document.querySelectorAll(".multifield");
   let concatenatedValues = '';
@@ -109,6 +87,7 @@ export function lowestUnusedDigitOr1() {
     concatenatedValues += multifield.value;
   }
 
+  //TODO: max should be nofPackages value OR 1
   for (const digit of [...Array(9).keys()].map(x => ++x)) {
     if (!concatenatedValues.includes(digit+"")) {
       lowestUnused = digit;
@@ -121,36 +100,60 @@ export function lowestUnusedDigitOr1() {
 
 export function setPrimary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
+  const base = 'm';
 
   // change appearance
   field.setAttribute('appearance','primary');
 
+  // set multifield if present
   let multifield = document.querySelectorAll("#multifield" + fieldId);
   // vscodeApi.postMessage({ command: "setprime", text: multifield[0].id });
   if (multifield.length > 0) {
-    //TODO: calculate multi value (lowest unused digit or 1)
+    //calculate multi value (lowest unused digit or 1)
     multifield[0].value = lowestUnusedDigitOr1() + "";
 
     //show multi field
     //multifield[0].hidden = false;
     multifield[0].disabled = false;
   }
+
+  // add tile content to last selected scenario field
+  let currentElements = currentInput.value.split('-');
+  if (!currentElements.includes(field.id)) {
+    currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? (base + '-') : '-') + field.id;
+
+    // trigger 'change' event to save and check content
+    currentInput.dispatchEvent(new Event('change'));
+  }
 }
 
 export function setSecondary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
+  const base = 'm';
 
   // change appearance
   field.setAttribute('appearance','secondary');
 
+  // clear multifield if present
   let multifield = document.querySelectorAll("#multifield" + fieldId);
   if (multifield.length > 0) {
 
-    //TODO: clear multi value
+    //clear multi value
     multifield[0].value = '';
+
     //hide multi field
     //multifield[0].hidden = true;
     multifield[0].disabled = true;
+  }
+
+  // remove tile content from last selected scenario field
+  let currentElements = currentInput.value.split('-');
+  if (currentElements.includes(field.id)) {
+    let newValue = currentElements.filter(el => el !== field.id).join('-');
+    currentInput.value = (newValue === base) ? '' : newValue;
+
+    // trigger 'change' event to save and check content
+    currentInput.dispatchEvent(new Event('change'));
   }
 }
 
