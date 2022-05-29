@@ -12,7 +12,6 @@ const nofStepsIndex = 5;
 const nofScenariosIndex = 6;
 const carrierUserIndex = 7;
 const carrierPwdIndex = 8;
-const nofPackagesIndex = 10;
 
 export class CreateIntegrationHtmlObject {
   // PROPERTIES
@@ -51,8 +50,6 @@ export class CreateIntegrationHtmlObject {
       this._modularValue, 
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
-      +this._fieldValues[nofPackagesIndex],
-      nofPackagesIndex,
       this._multiFieldValues,
       this._nofPackages
     );

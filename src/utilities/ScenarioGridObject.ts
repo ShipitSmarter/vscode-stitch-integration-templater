@@ -14,10 +14,8 @@ export class ScenarioGridObject {
         private _modularValue: boolean,
         private _nofScenarios: number,
         private _nofScenariosIndex: number,
-        private _nofPackages: number,
-        private _nofPackagesIndex: number,
         private _multiFieldValues: {[details: string] : string;},
-        private _nofPackagesDropdowns: string[]
+        private _nofPackages: string[]
     ) { }
 
     public getHtml(): string {
@@ -34,7 +32,6 @@ export class ScenarioGridObject {
 
                         <section class="component-example">
                             <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)}>Modular</vscode-checkbox>
-                            ${this._modularValue ? this._nofPackagesField() : ''}
                         </section>
 
                         <vscode-divider role="separator"></vscode-divider>
@@ -80,7 +77,7 @@ export class ScenarioGridObject {
             scenarioNames += this._getScenarioInputField(scenario);
             multiDropdowns += /*html*/ `
                 <section class="component-example">
-                    <vscode-dropdown id="nofpackages${scenario}" class ="nofpackages" index="${scenario}" ${valueString(this._nofPackagesDropdowns[scenario] ?? '1')} position="below">
+                    <vscode-dropdown id="nofpackages${scenario}" class ="nofpackages" index="${scenario}" ${valueString(this._nofPackages[scenario] ?? '1')} position="below">
                         ${dropdownOptions(arrayFrom1(9))}
                     </vscode-dropdown>
                 </section>`;
@@ -101,13 +98,6 @@ export class ScenarioGridObject {
                 ${scenarioNames}
             </section>
         </section>`;
-    }
-
-    private _nofPackagesField() : string {
-        return /*html*/ ` Number of packages: 
-        <vscode-dropdown id="nofpackages" index="${this._nofPackagesIndex}" ${valueString(this._nofPackages + '')} position="below">
-            ${dropdownOptions(arrayFrom1(9))}
-        </vscode-dropdown>`;
     }
 
     private _getScenarioInputField(index:number) : string {

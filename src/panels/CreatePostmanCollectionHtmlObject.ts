@@ -12,7 +12,6 @@ const accountNumberIndex = 5;
 const costCenterIndex = 6;
 const nofScenariosIndex = 7;
 const carrierCodeIndex = 8;
-const nofPackagesIndex = 10;
 
 export class CreatePostmanCollectionHtmlObject {
   // PROPERTIES
@@ -53,8 +52,6 @@ export class CreatePostmanCollectionHtmlObject {
       this._modularValue, 
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
-      +this._fieldValues[nofPackagesIndex],
-      nofPackagesIndex,
       this._multiFieldValues,
       this._nofPackages
     );

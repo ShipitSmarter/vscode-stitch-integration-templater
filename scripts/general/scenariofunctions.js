@@ -19,11 +19,6 @@ export function addScenarioEventListeners(vscodeApi) {
   // modular checkbox
   document.getElementById("modular").addEventListener("change", scenarioFieldChange(vscodeApi));
 
-  // nofPackages
-  for (const field of document.querySelectorAll("#nofpackages")) {
-    field.addEventListener("change", changePackages(vscodeApi));
-  }
-
   // nofPackages dropdowns
   for (const field of document.querySelectorAll(".nofpackages")) {
     field.addEventListener("change", changePackagesDropdown(vscodeApi));
@@ -92,32 +87,26 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
 export var changePackagesDropdown = function (vscodeApi) { return  function (event) {
     const nofPackagesField = event.target;
     const nofPackages = nofPackagesField.value;
+    const index = nofPackagesField.getAttribute('index');
 
     // save
-    vscodeApi.postMessage({ command: "savevalue", text: 'nofpackagesdropdown|' + nofPackagesField.getAttribute('index') + '|' + nofPackages });
+    vscodeApi.postMessage({ command: "savevalue", text: 'nofpackagesdropdown|' + index + '|' + nofPackages });
 
+    // select associated scenario field
+    const scenarioField = document.getElementById("scenario" + index);
+    scenarioField.dispatchEvent(new Event('click'));
 
-};};
-  
-export var changePackages = function (vscodeApi) { return  function (event) {
-    const nofPackagesField = event.target;
-    const nofPackages = nofPackagesField.value;
+    // update scenario field with new nofPackages
+    scenarioField.value = scenarioField.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
 
-    // save
-    vscodeApi.postMessage({ command: "savevalue", text: 'nofpackages|' + nofPackagesField.getAttribute('index') + '|' + nofPackages });
-
-    // cycle through al scenario fields, and update with new nofPackages
-    for (const field of document.querySelectorAll(".scenariofield")) {
-      field.value = field.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
-
-      // trigger 'change' event to save and check content
-      field.dispatchEvent(new Event('change'));
-    }
+    // update scenario field validity check
+    updateScenarioFieldOutlineAndTooltip(scenarioField.id);
 
     // check all multifield values
     for (const field of document.querySelectorAll(".multifield")) {
       updateMultiFieldOutlineAndTooltip(field.id);
     }
+
 };};
 
 export function modularScenarioFocus(event) {
@@ -152,9 +141,22 @@ export function saveScenarioValue(fieldId, vscodeApi) {
     vscodeApi.postMessage({ command: "savevalue", text: textString });
 }
 
+export function getNofPackages(scenarioFieldId) {
+  let nofPackages = 1;
+
+  let scenarioField = document.getElementById(scenarioFieldId);
+  let nofPackagesField = document.querySelectorAll("#nofpackages" + scenarioField.getAttribute('index'));
+
+  if (nofPackagesField.length > 0) {
+    nofPackages = nofPackagesField[0].value;
+  }
+
+  return +nofPackages;
+}
+
 export function lowestUnusedDigitOr1() {
   let multifields = document.querySelectorAll(".multifield");
-  let maxValue = +document.getElementById("nofpackages").value;
+  let maxValue = getNofPackages(currentInput.id);
   let concatenatedValues = '';
   let lowestUnused = 0;
   for (const multifield of multifields) {
@@ -174,7 +176,7 @@ export function lowestUnusedDigitOr1() {
 
 export function setPrimary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm-multi_' + document.getElementById("nofpackages").value ;
+  const base = 'm-multi_' + getNofPackages(currentInput.id) ;
 
   // change appearance
   field.setAttribute('appearance','primary');
@@ -218,7 +220,7 @@ export function setPrimary(fieldId,vscodeApi) {
 
 export function setSecondary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm-multi_' + document.getElementById("nofpackages").value ;
+  const base = 'm-multi_' + getNofPackages(currentInput.id) ;
 
   // change appearance
   field.setAttribute('appearance','secondary');
@@ -323,12 +325,14 @@ export function containsHigherDigits(string, maxdigit) {
   return containsHigher;
 }
 
-export function checkModularScenario(content) {
+export function checkModularScenario(fieldId) {
   let isCorrect = true;
+  let field = document.getElementById(fieldId);
+  let content = field.value;
 
   // check if modular scenario contains invalid multi strings
   let currentElements = content.split('-');
-  let maxValue = document.getElementById("nofpackages").value;
+  let maxValue = getNofPackages(field.id)+"";
 
   for (const element of currentElements) {
     let multiValue = element.replace(/[^\_]+\_/g,'');
@@ -345,7 +349,7 @@ export function checkModularScenario(content) {
 export function updateMultiFieldOutlineAndTooltip(fieldId) {
   let isCorrect = false;
   let field = document.getElementById(fieldId);
-  let maxValue = document.getElementById("nofpackages").value;
+  let maxValue = getNofPackages(currentInput.id)+"";
 
   // if (field.value === '' && field.disabled === false) {
   if (field.value === '' && field.hidden === false) {
@@ -385,7 +389,7 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
         if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
           isCorrect = false;
           updateScenarioFieldDuplicate(field.id);
-        } else if (isModular() && !checkModularScenario(field.value)) {
+        } else if (isModular() && !checkModularScenario(field.id)) {
           updateScenarioFieldWrongModularScenario(field.id);
           isCorrect = false;
         } else if (field.id === currentInput.id && isModular()) { 

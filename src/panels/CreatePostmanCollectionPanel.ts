@@ -14,7 +14,6 @@ const accountNumberIndex = 5;
 const costCenterIndex = 6;
 const nofScenariosIndex = 7;
 const carrierCodeIndex = 8;
-const nofPackagesIndex = 10;
 
 export class CreatePostmanCollectionPanel {
   // PROPERTIES
@@ -247,10 +246,6 @@ export class CreatePostmanCollectionPanel {
                 this._modularValue = toBoolean(value);
                 this._scenarioFieldValues = [];
                 this._updateWebview(extensionUri);
-                break;
-
-              case 'nofpackages':
-                this._fieldValues[index] = value;
                 break;
 
               case 'nofpackagesdropdown':
