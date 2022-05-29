@@ -54,44 +54,36 @@ export async function getAvailableScenarios(module:string, withParent:boolean = 
 }
 
 export async function getModularElements(module:string): Promise<string[]> {
-    let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*.xml');
-
-    let elements: string[] = new Array<string>(elementXmls.length);
-
-    for (let index = 0; index < elementXmls.length; index++) {
-      let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
-      let elementParentName = parentPath(cleanPath(elementXmls[index])).split('/').pop() ?? '';
-      // only show parent indicator if not [module]
-      if (elementParentName === module) {
-        elementParentName = '';
-      }
-      elements[index] = elementName;
-    }
-
-    return elements.sort();
+    return (await getModularElementsWithParents(module)).map(el => el.element).sort();
 }
 
-export async function getModularElementsWithParents(module:string): Promise<{parent:string, element:string}[]> {
+export async function getModularElementsWithParents(module:string): Promise<{parent:string, element:string, multi:boolean}[]> {
     let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*.xml');
-
-    let parentsElements: {parent:string, element:string}[] = new Array<{parent:string, element:string}>(elementXmls.length);
+    let parentsElementsMulti: {parent:string, element:string, multi:boolean}[] = new Array<{parent:string, element:string, multi:boolean}>(elementXmls.length);
 
     for (let index = 0; index < elementXmls.length; index++) {
+	  // element, parent
       let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
       let elementParentName = parentPath(cleanPath(elementXmls[index])).split('/').pop() ?? '';
-      // only show parent indicator if not [module]
+
+	  // only show parent indicator if not [module]
       if (elementParentName === module) {
         elementParentName = '';
       }
 
-
-      parentsElements[index] = {
+	  // read file to extract multi
+	  let elementContent = fs.readFileSync(elementXmls[index], 'utf8');
+	  let multi = elementContent.includes('<ShipmentPackage>');
+      
+	  // build output
+      parentsElementsMulti[index] = {
 		parent: elementParentName,
-		element: elementName
+		element: elementName, 
+		multi: multi
 	  };
     }
 
-    return parentsElements.sort();
+    return parentsElementsMulti.sort();
 }
 
 export async function getAvailableIntegrations(panel:string) : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[]> {
@@ -131,7 +123,6 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 				continue;
 			}
 		}
-		
 
 		// obtain valid scenarios from scenarios folder
 		let scenarioDir = fs.readdirSync(parentPath(cleanPath(script)) + `/${api}/${module}/scenarios`);
@@ -166,7 +157,7 @@ export function isScenarioValid(scenario:string, availableScenarios: string[], m
 	if (modular) {
 		let currentElements = scenario.split('-');
 		for (const element of currentElements) {
-			if (!modularElements.includes(element)) {
+			if (!modularElements.includes(element.replace(/\_\d+/g,''))) {
 				isValid = false;
 				break;
 			}

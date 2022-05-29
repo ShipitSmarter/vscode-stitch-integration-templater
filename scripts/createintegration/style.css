@@ -17,7 +17,8 @@
 }
 
 .existingscenariofield {
-  width: 20rem;
+  width: 25rem;
+  resize: true;
 }
 
 .stepfield {

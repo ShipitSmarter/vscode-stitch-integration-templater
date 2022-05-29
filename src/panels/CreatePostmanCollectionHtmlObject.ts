@@ -29,9 +29,11 @@ export class CreatePostmanCollectionHtmlObject {
     private _carrierCodes: {carrier: string,  carriercode: string }[] = [],
     private _scenarioFieldValues: string[],
     private _availableScenarios: string[], 
-    private _modularElementsWithParents: {parent:string, element:string}[],
+    private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
     private _independent: boolean,
-    private _modularValue: boolean
+    private _modularValue: boolean,
+    private _multiFieldValues: {[details: string] : string;},
+    private _nofPackages: string[]
   ) { }
 
   // METHODS
@@ -49,7 +51,9 @@ export class CreatePostmanCollectionHtmlObject {
       this._scenarioFieldValues, 
       this._modularValue, 
       +this._fieldValues[nofScenariosIndex], 
-      nofScenariosIndex
+      nofScenariosIndex,
+      this._multiFieldValues,
+      this._nofPackages
     );
 
     // define panel HTML

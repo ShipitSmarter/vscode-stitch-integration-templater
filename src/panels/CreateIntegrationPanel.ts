@@ -31,8 +31,10 @@ export class CreateIntegrationPanel {
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
   private _currentIntegration :     {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
-  private _modularElementsWithParents: {parent:string, element:string}[] = [];
+  private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
   private _functionsPath: string = '';
+  private _multiFieldValues: {[details: string] : string;} = {};
+  private _nofPackages: string[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -125,12 +127,26 @@ export class CreateIntegrationPanel {
             this._scenarioFieldValues = [];
             break;
 
+          case "savemultivalue":
+            // extract
+            var idIndexValue = text.split('|');
+            var id = idIndexValue[0];
+            var index = +idIndexValue[1];
+            var value = idIndexValue[2];
+
+            // save
+            this._multiFieldValues[id] = value;
+            
+            break;
           case "savevalue":
             var classIndexValue = text.split('|');
             var index = +classIndexValue[1];
             var value = classIndexValue[2];
             switch (classIndexValue[0]) {
               case 'dropdown':
+                this._fieldValues[index] = value;
+                this._updateWebview(extensionUri);
+                break;
               case 'field':
                 this._fieldValues[index] = value;
                 break;
@@ -151,6 +167,9 @@ export class CreateIntegrationPanel {
                 this._modularValue = toBoolean(value);
                 this._scenarioFieldValues = [];
                 this._updateWebview(extensionUri);
+                break;
+              case 'nofpackagesdropdown':
+                this._nofPackages[index] = value;
                 break;
             }
         }
@@ -530,7 +549,9 @@ export class CreateIntegrationPanel {
       this._existingScenarioFieldValues,
       this._existingScenarioCheckboxValues,
       this._createUpdateValue,
-      this._modularValue
+      this._modularValue,
+      this._multiFieldValues,
+      this._nofPackages
     );
 
     let html =  createIntegrationHtmlObject.getHtml();

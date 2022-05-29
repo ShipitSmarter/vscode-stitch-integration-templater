@@ -18,6 +18,7 @@
 .component-example {
   margin-bottom: 0.5rem;
   width: 100%;
+  /* vertical-align: text-top; */
 }
 
 .component-nomargin {
@@ -89,4 +90,16 @@ h1 {
 .scenariofield {
   width: 25rem;
 }
-  
+
+#nofpackages{
+  width: 7rem;
+}
+
+.multifield {
+  width: 7rem;
+}
+
+.modulartile,
+.multifield {
+  vertical-align: middle;
+}  

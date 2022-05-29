@@ -80,7 +80,7 @@ function fieldChange(event) {
       if (field.id === 'modulename') {
         vscodeApi.postMessage({ command: "clearscenarios", text: '' });
       }
-      vscodeApi.postMessage({ command: "refreshpanel", text: '' });
+      //vscodeApi.postMessage({ command: "refreshpanel", text: '' });
       break;
 
     // stepdropdown: show/hide other step field

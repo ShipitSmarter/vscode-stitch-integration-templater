@@ -21,7 +21,7 @@ export class CreateIntegrationHtmlObject {
   public constructor(  
     private _uris: vscode.Uri[],  
     private _availableScenarios: string[], 
-    private _modularElementsWithParents: {parent:string, element:string}[],
+    private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
     private _fieldValues: string[],
     private _stepFieldValues: string[],
     private _otherStepValues: string[],
@@ -29,7 +29,9 @@ export class CreateIntegrationHtmlObject {
     private _existingScenarioFieldValues: string[],
     private _existingScenarioCheckboxValues: boolean[],
     private _createUpdateValue: string,
-    private _modularValue: boolean 
+    private _modularValue: boolean,
+    private _multiFieldValues: {[details: string] : string;},
+    private _nofPackages: string[]
     ) { }
 
   // METHODS
@@ -48,7 +50,8 @@ export class CreateIntegrationHtmlObject {
       this._modularValue, 
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
-      (this._createUpdateValue === 'update')
+      this._multiFieldValues,
+      this._nofPackages
     );
 
     // define panel HTML
@@ -309,7 +312,7 @@ export class CreateIntegrationHtmlObject {
       html += /*html*/`
         <section class="component-example">
           <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" indexescheckbox="${index}" ${checked}></vscode-checkbox>
-          <vscode-text-field id="existingscenario${index}" size="40" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" ${disabledReadonly}></vscode-text-field>
+          <vscode-text-field id="existingscenario${index}" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" ${disabledReadonly}></vscode-text-field>
         </section>
       `;
     }

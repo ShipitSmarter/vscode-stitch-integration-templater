@@ -28,10 +28,11 @@ export class CreatePostmanCollectionPanel {
   private _modules: string[] = [];
   private _scenarioFieldValues: string[] = [];
   private _availableScenarios: string[] = [];
-  private _modularElementsWithParents: {parent:string, element:string}[] = [];
+  private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
   private _independent: boolean = false;
   private _modularValue: boolean = false;
-
+  private _multiFieldValues: {[details: string] : string;} = {};
+  private _nofPackages: string[] = [];
   private _integrationObjects: {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
   private _codeCompanies: {
@@ -136,6 +137,17 @@ export class CreatePostmanCollectionPanel {
             vscode.window.showInformationMessage(text);
             break;
 
+          case "savemultivalue":
+            // extract
+            var idIndexValue = text.split('|');
+            var id = idIndexValue[0];
+            var index = +idIndexValue[1];
+            var value = idIndexValue[2];
+
+            // save
+            this._multiFieldValues[id] = value;
+            
+            break;
           case "savevalue":
             var classIndexValue = text.split('|');
             var clas = classIndexValue[0];
@@ -234,6 +246,10 @@ export class CreatePostmanCollectionPanel {
                 this._modularValue = toBoolean(value);
                 this._scenarioFieldValues = [];
                 this._updateWebview(extensionUri);
+                break;
+
+              case 'nofpackagesdropdown':
+                this._nofPackages[index] = value;
                 break;
 
               case 'scenariofield':
@@ -529,7 +545,9 @@ export class CreatePostmanCollectionPanel {
       this._availableScenarios,
       this._modularElementsWithParents,
       this._independent,
-      this._modularValue
+      this._modularValue,
+      this._multiFieldValues,
+      this._nofPackages
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();
