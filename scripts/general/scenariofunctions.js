@@ -24,6 +24,12 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener("change", changePackages);
   }
 
+  // multi fields
+  for (const field of document.querySelectorAll(".multifield")) {
+    // field.addEventListener("change",multiFieldChange(vscodeApi));
+    field.addEventListener("keyup",multiFieldChange(vscodeApi));
+  }
+
   // if modular: check currentInput content and update tiles
   if (isModular()) {
     updateTiles(currentInput.value);
@@ -40,6 +46,19 @@ export var clickTile = function (vscodeApi) { return function (event) {
       setPrimary(field.id,vscodeApi);
     }
 };};
+
+export var multiFieldChange = function (vscodeApi) { return  function (event) {
+  const field = event.target;
+
+  // save field value
+  var value = field.value;
+  var textString = field.id + '|' + (field.getAttribute('index') ?? '') + '|' + field.value;
+  vscodeApi.postMessage({ command: "savemultivalue", text: textString });
+
+  //TODO: update scenario in currentInput
+  
+};};
+
 
 export var scenarioFieldChange = function (vscodeApi) { return  function (event) {
     // passing parameter and event to listener function
@@ -127,8 +146,12 @@ export function setPrimary(fieldId,vscodeApi) {
   let multifield = document.querySelectorAll("#multifield" + fieldId);
   // vscodeApi.postMessage({ command: "setprime", text: multifield[0].id });
   if (multifield.length > 0) {
-    //calculate multi value (lowest unused digit or 1)
-    multifield[0].value = lowestUnusedDigitOr1() + "";
+    //calculate multi value (lowest unused digit or 1) unless already set
+    if (multifield[0].value === '') {
+      multifield[0].value = lowestUnusedDigitOr1() + "";
+      // trigger 'keyup' event to save and check content
+      multifield[0].dispatchEvent(new Event('keyup'));
+    }
 
     //show multi field
     //multifield[0].hidden = false;
@@ -161,6 +184,8 @@ export function setSecondary(fieldId,vscodeApi) {
 
     //clear multi value
     multifield[0].value = '';
+    // trigger 'keyup' event to save and check content
+    multifield[0].dispatchEvent(new Event('keyup'));
 
     //hide multi field
     //multifield[0].hidden = true;

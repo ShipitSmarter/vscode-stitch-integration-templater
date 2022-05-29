@@ -17,7 +17,7 @@ export class ScenarioGridObject {
         private _nofScenariosIndex: number,
         private _nofPackages: number,
         private _nofPackagesIndex: number,
-        private _multiFieldValues: string[] = []
+        private _multiFieldValues: {[details: string] : string;}
     ) { }
 
     public getHtml(): string {
@@ -96,7 +96,6 @@ export class ScenarioGridObject {
             // cycle through modular element parent folders
             let parents = uniqueSort(this._modularElementsWithParents.map(el => el.parent)).filter(el => el !== '');
 
-            let multiFieldIndex = 0;
             for (const parent of parents) {
                 let modularTiles = '';
                 
@@ -106,14 +105,9 @@ export class ScenarioGridObject {
                     modularTiles += /*html*/ `
                     <section class="component-example">
                         <vscode-button id="${element}" class="modulartile" appearance="secondary">${element}</vscode-button>
-                        ${this._multiParents.includes(this._getCleanParent(parent)) ? /*html*/ `<vscode-text-field id="multifield${element}" index="${multiFieldIndex}" ${valueString(this._multiFieldValues[multiFieldIndex])} class="multifield" disabled></vscode-text-field>` : ''}
+                        ${this._multiParents.includes(this._getCleanParent(parent)) ? /*html*/ `<vscode-text-field id="multifield${element}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" disabled></vscode-text-field>` : ''}
                     </section>
                     `;
-
-                    // up counter if necessary
-                    if(this._multiParents.includes(this._getCleanParent(parent))) {
-                        multiFieldIndex++;
-                    }
                 }
 
                 // add to html

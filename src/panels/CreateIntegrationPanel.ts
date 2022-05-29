@@ -34,6 +34,7 @@ export class CreateIntegrationPanel {
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: {parent:string, element:string}[] = [];
   private _functionsPath: string = '';
+  private _multiFieldValues: {[details: string] : string;} = {};
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -127,6 +128,17 @@ export class CreateIntegrationPanel {
             this._scenarioFieldValues = [];
             break;
 
+          case "savemultivalue":
+            // extract
+            var idIndexValue = text.split('|');
+            var id = idIndexValue[0];
+            var index = +idIndexValue[1];
+            var value = idIndexValue[2];
+
+            // save
+            this._multiFieldValues[id] = value;
+            
+            break;
           case "savevalue":
             var classIndexValue = text.split('|');
             var index = +classIndexValue[1];
@@ -535,7 +547,8 @@ export class CreateIntegrationPanel {
       this._existingScenarioFieldValues,
       this._existingScenarioCheckboxValues,
       this._createUpdateValue,
-      this._modularValue
+      this._modularValue,
+      this._multiFieldValues
     );
 
     let html =  createIntegrationHtmlObject.getHtml();
