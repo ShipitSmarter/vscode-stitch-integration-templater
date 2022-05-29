@@ -50,6 +50,9 @@ export var clickTile = function (vscodeApi) { return function (event) {
 export var multiFieldChange = function (vscodeApi) { return  function (event) {
   const field = event.target;
 
+  // check content validity
+  updateMultiFieldOutlineAndTooltip(field.id);
+
   // save field value
   var value = field.value;
   var textString = field.id + '|' + (field.getAttribute('index') ?? '') + '|' + field.value;
@@ -94,6 +97,11 @@ export var changePackages = function (vscodeApi) { return  function (event) {
 
       // trigger 'change' event to save and check content
       field.dispatchEvent(new Event('change'));
+    }
+
+    // check all multifield values
+    for (const field of document.querySelectorAll(".multifield")) {
+      updateMultiFieldOutlineAndTooltip(field.id);
     }
 };};
 
@@ -222,6 +230,11 @@ export function checkScenarioFields() {
     for (const field of fields) {
       check = updateScenarioFieldOutlineAndTooltip(field.id) ? check : false;
     }
+
+    // check all multifield values
+    for (const field of document.querySelectorAll(".multifield")) {
+      check = updateMultiFieldOutlineAndTooltip(field.id) ? check : false;
+    }
   
     return check;
 }
@@ -261,6 +274,70 @@ export function isModular() {
     return document.getElementById("modular").checked;
 }
 
+export function countInString(string, element) {
+  let l1 = string.length;
+  let l2 = string.replace(new RegExp(element, 'g'), '').length;
+
+  return (l1 - l2) / element.length;
+}
+
+export function containsRepeatingDigits(string, maxdigit) {
+  let containsRepeating = false;
+  for (let index = 1; index <= +maxdigit; index++) {
+    if (countInString(string,index+"") > 1) {
+      containsRepeating = true;
+      break;
+    }
+  }
+
+  return containsRepeating;
+}
+
+export function containsHigherDigits(string, maxdigit) {
+  let containsHigher = false;
+  for (let index = +maxdigit+1; index <= 9; index++) {
+    if (string.includes(index+"")) {
+      containsHigher = true;
+      break;
+    }
+  }
+
+  return containsHigher;
+}
+
+export function updateMultiFieldOutlineAndTooltip(fieldId) {
+  let isCorrect = false;
+  let field = document.getElementById(fieldId);
+  let maxValue = document.getElementById("nofpackages").value;
+
+  if (field.value === '' && field.disabled === false) {
+    updateMultiFieldEmpty(field.id);
+  } else if (field.value.includes('0')) {
+    updateMultiFieldWrong(field.id, 'May not contain 0 (only 1-9, and no higher than number of packages)');
+  } else if (containsHigherDigits(field.value, maxValue)) {
+    updateMultiFieldWrong(field.id, 'May not contain digits higher than number of packages');
+  } else if (containsRepeatingDigits(field.value, maxValue)) {
+    updateMultiFieldWrong(field.id, 'May not contain repeating digits');
+  } else {
+    updateScenarioFieldRight(field.id);
+    isCorrect = true;
+  }
+
+  return isCorrect;
+}
+
+function updateMultiFieldWrong(fieldId,hint) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid red";
+  field.title = hint;
+}
+
+function updateMultiFieldEmpty(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid cyan";
+  field.title = 'Field is mandatory';
+}
+
 export function updateScenarioFieldOutlineAndTooltip(fieldId) {
     let isCorrect = true;
     let field = document.getElementById(fieldId);
@@ -297,10 +374,10 @@ export function updateScenarioFieldWrongModularScenario(fieldId) {
     field.title = 'Format: \'fromnl-tode-sl1800\'. Elements must be present in scenario-elements/modular.';
 }
   
-export function updateScenarioFieldRight(fieldId) {
+export function updateScenarioFieldRight(fieldId, info="") {
     let field = document.getElementById(fieldId);
     field.style.outline = "none";
-    field.title = '';
+    field.title = info;
 }
 
 export function updateScenarioFieldFocused(fieldId) {
