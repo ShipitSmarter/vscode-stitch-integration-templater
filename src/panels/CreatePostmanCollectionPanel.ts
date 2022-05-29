@@ -33,7 +33,7 @@ export class CreatePostmanCollectionPanel {
   private _independent: boolean = false;
   private _modularValue: boolean = false;
   private _multiFieldValues: {[details: string] : string;} = {};
-
+  private _nofPackages: string[] = [];
   private _integrationObjects: {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
   private _codeCompanies: {
@@ -251,6 +251,10 @@ export class CreatePostmanCollectionPanel {
 
               case 'nofpackages':
                 this._fieldValues[index] = value;
+                break;
+
+              case 'nofpackagesdropdown':
+                this._nofPackages[index] = value;
                 break;
 
               case 'scenariofield':
@@ -547,7 +551,8 @@ export class CreatePostmanCollectionPanel {
       this._modularElementsWithParents,
       this._independent,
       this._modularValue,
-      this._multiFieldValues
+      this._multiFieldValues,
+      this._nofPackages
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();

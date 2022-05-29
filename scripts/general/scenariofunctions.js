@@ -24,6 +24,11 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener("change", changePackages(vscodeApi));
   }
 
+  // nofPackages dropdowns
+  for (const field of document.querySelectorAll(".nofpackages")) {
+    field.addEventListener("change", changePackagesDropdown(vscodeApi));
+  }
+
   // multi fields
   for (const field of document.querySelectorAll(".multifield")) {
     // field.addEventListener("change",multiFieldChange(vscodeApi));
@@ -82,6 +87,16 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
         updateScenarioFieldOutlineAndTooltip(sc.id);
       }
     }
+};};
+
+export var changePackagesDropdown = function (vscodeApi) { return  function (event) {
+    const nofPackagesField = event.target;
+    const nofPackages = nofPackagesField.value;
+
+    // save
+    vscodeApi.postMessage({ command: "savevalue", text: 'nofpackagesdropdown|' + nofPackagesField.getAttribute('index') + '|' + nofPackages });
+
+
 };};
   
 export var changePackages = function (vscodeApi) { return  function (event) {

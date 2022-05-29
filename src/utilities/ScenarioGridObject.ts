@@ -16,7 +16,8 @@ export class ScenarioGridObject {
         private _nofScenariosIndex: number,
         private _nofPackages: number,
         private _nofPackagesIndex: number,
-        private _multiFieldValues: {[details: string] : string;}
+        private _multiFieldValues: {[details: string] : string;},
+        private _nofPackagesDropdowns: string[]
     ) { }
 
     public getHtml(): string {
@@ -79,7 +80,7 @@ export class ScenarioGridObject {
             scenarioNames += this._getScenarioInputField(scenario);
             multiDropdowns += /*html*/ `
                 <section class="component-example">
-                    <vscode-dropdown id="nofpackages${scenario}" index="${scenario}" ${valueString("1")} position="below">
+                    <vscode-dropdown id="nofpackages${scenario}" class ="nofpackages" index="${scenario}" ${valueString(this._nofPackagesDropdowns[scenario] ?? '1')} position="below">
                         ${dropdownOptions(arrayFrom1(9))}
                     </vscode-dropdown>
                 </section>`;
@@ -88,11 +89,15 @@ export class ScenarioGridObject {
         return /*html*/`
         <section class="component-example">
             <section class="floatleftnopadding">
-                <p># Packages</p>
+                <section class="component-example">
+                    <p># Packages</p>
+                </section>
                 ${multiDropdowns}
             </section>
             <section class="floatleftnopadding">
-                <p>Scenario name</p>
+                <section class="component-example">
+                    <p>Scenario name</p>
+                </section>
                 ${scenarioNames}
             </section>
         </section>`;

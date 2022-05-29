@@ -31,7 +31,8 @@ export class CreateIntegrationHtmlObject {
     private _existingScenarioCheckboxValues: boolean[],
     private _createUpdateValue: string,
     private _modularValue: boolean,
-    private _multiFieldValues: {[details: string] : string;}
+    private _multiFieldValues: {[details: string] : string;},
+    private _nofPackages: string[]
     ) { }
 
   // METHODS
@@ -52,7 +53,8 @@ export class CreateIntegrationHtmlObject {
       nofScenariosIndex,
       +this._fieldValues[nofPackagesIndex],
       nofPackagesIndex,
-      this._multiFieldValues
+      this._multiFieldValues,
+      this._nofPackages
     );
 
     // define panel HTML

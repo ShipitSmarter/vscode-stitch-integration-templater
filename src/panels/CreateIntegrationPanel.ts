@@ -35,6 +35,7 @@ export class CreateIntegrationPanel {
   private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
   private _functionsPath: string = '';
   private _multiFieldValues: {[details: string] : string;} = {};
+  private _nofPackages: string[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -171,6 +172,9 @@ export class CreateIntegrationPanel {
                 break;
               case 'nofpackages':
                 this._fieldValues[index] = value;
+                break;
+              case 'nofpackagesdropdown':
+                this._nofPackages[index] = value;
                 break;
             }
         }
@@ -551,7 +555,8 @@ export class CreateIntegrationPanel {
       this._existingScenarioCheckboxValues,
       this._createUpdateValue,
       this._modularValue,
-      this._multiFieldValues
+      this._multiFieldValues,
+      this._nofPackages
     );
 
     let html =  createIntegrationHtmlObject.getHtml();
