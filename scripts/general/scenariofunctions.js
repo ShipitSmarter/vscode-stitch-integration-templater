@@ -45,7 +45,7 @@ export var clickTile = function (vscodeApi) { return function (event) {
     currentInput.dispatchEvent(new Event('change'));
   
     // update appearance on click
-    flipTile(field.id);
+    flipTile(field.id, vscodeApi);
 };};
 
 export var scenarioFieldChange = function (vscodeApi) { return  function (event) {
@@ -91,34 +91,67 @@ export function saveScenarioValue(fieldId, vscodeApi) {
     vscodeApi.postMessage({ command: "savevalue", text: textString });
 }
 
-export function flipTile(fieldId) {
+export function flipTile(fieldId, vscodeApi) {
     let field = document.getElementById(fieldId);
   
     if (field.getAttribute('appearance') === 'primary'){
-      setSecondary(field.id);
+      setSecondary(field.id,vscodeApi);
     } else {
-      setPrimary(field.id);
+      setPrimary(field.id,vscodeApi);
     }
 }
 
-export function setPrimary(fieldId) {
+export function lowestUnusedDigitOr1() {
+  let multifields = document.querySelectorAll(".multifield");
+  let concatenatedValues = '';
+  let lowestUnused = 0;
+  for (const multifield of multifields) {
+    concatenatedValues += multifield.value;
+  }
+
+  for (const digit of [...Array(9).keys()].map(x => ++x)) {
+    if (!concatenatedValues.includes(digit+"")) {
+      lowestUnused = digit;
+      break;
+    }
+  }
+
+  return (lowestUnused === 0) ? 1 : lowestUnused;
+}
+
+export function setPrimary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
 
   // change appearance
   field.setAttribute('appearance','primary');
 
-  //TODO: calculate multi value (lowest unused digit or 1)
-  //TODO: show multi field
+  let multifield = document.querySelectorAll("#multifield" + fieldId);
+  // vscodeApi.postMessage({ command: "setprime", text: multifield[0].id });
+  if (multifield.length > 0) {
+    //TODO: calculate multi value (lowest unused digit or 1)
+    multifield[0].value = lowestUnusedDigitOr1() + "";
+
+    //show multi field
+    //multifield[0].hidden = false;
+    multifield[0].disabled = false;
+  }
 }
 
-export function setSecondary(fieldId) {
+export function setSecondary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
 
   // change appearance
   field.setAttribute('appearance','secondary');
 
-  //TODO: clear multi value
-  //TODO: hide multi field
+  let multifield = document.querySelectorAll("#multifield" + fieldId);
+  if (multifield.length > 0) {
+
+    //TODO: clear multi value
+    multifield[0].value = '';
+    //hide multi field
+    //multifield[0].hidden = true;
+    multifield[0].disabled = true;
+  }
 }
 
 export function checkScenarioFields() {
