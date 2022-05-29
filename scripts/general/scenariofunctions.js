@@ -121,6 +121,11 @@ export function modularScenarioFocus(event) {
 
       // update tiles
       updateTiles(currentInput.value);
+
+      // check all multifield values
+      for (const field of document.querySelectorAll(".multifield")) {
+        updateMultiFieldOutlineAndTooltip(field.id);
+      }
     }
 }
 
@@ -163,9 +168,17 @@ export function setPrimary(fieldId,vscodeApi) {
   let multifield = document.querySelectorAll("#multifield" + fieldId);
 
   if (multifield.length > 0) {
-    //calculate multi value (lowest unused digit or 1) unless already set
+    
+    // extract current value from scenario field (if present)
+    let multiregex = new RegExp('-' + field.id + '_(\\d*)(-|$)');
+    let matchMultiInScenario = currentInput.value.match(multiregex);
+    if (matchMultiInScenario) {
+      multifield[0].value = matchMultiInScenario[1];
+    } else 
     if (multifield[0].value === '') {
+      //calculate multi value (lowest unused digit or 1) unless already set
       multifield[0].value = lowestUnusedDigitOr1() + "";
+
       // trigger 'keyup' event to save and check content
       multifield[0].dispatchEvent(new Event('keyup'));
     }
