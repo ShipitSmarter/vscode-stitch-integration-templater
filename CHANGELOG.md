@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.4.0 
+- Modular Scenarios (general)
+  - Modular scenario generation is now multi-package compatible
+    - Supports up to 9 packages per scenario
+    - Number of packages settable per scenario
+      - Auto-adds and updates `multi` element with set number of packages to each scenario
+    - Auto-detects which elements contain a `<ShipmentPackage>` node, and auto-adds package indices field upon tile selection
+    - Field value checks on scenario and package indices field levels
+      - checks if package indices between 1 and scenario-set number of packages, and no doubles present (and not empty)
+      - Adds appropriate red field outline and hover-over tooltips
+      - Does not allow integration creation/update or postman collection creation if any invalid fields
+  - Updated tile view
+    - Now lined up vertically to the right of the scenario list, with parent folder name auto-added as tile list header
+    - Any element in root folder is not shown (reserved for auto-added elements like `m` and `multi`)
+
 ## 1.3.1
 - Modular Scenarios (general)
   - Modular scenario fields can now only be updated using the tiles (no more free typing)
