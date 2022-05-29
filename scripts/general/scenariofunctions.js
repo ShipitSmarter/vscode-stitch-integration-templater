@@ -207,7 +207,7 @@ export function setSecondary(fieldId,vscodeApi) {
   if (check) {
     // replace if multi, else replace if not multi
     let multiregex = new RegExp('-' + field.id + '_\\d+(-|$)');
-    let newValue = currentInput.value.replace(multiregex, '$1').replace(regex, check[1]);
+    let newValue = currentInput.value.replace(multiregex, '$1').replace(regex, check[1] === '-' ? '-' : '');
     currentInput.value = (newValue === base) ? '' : newValue;
 
     // trigger 'change' event to save and check content
