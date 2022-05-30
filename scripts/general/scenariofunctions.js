@@ -60,7 +60,7 @@ export var multiFieldChange = function (vscodeApi) { return  function (event) {
 
   // update scenario in currentInput
   let element = field.id.replace('multifield','');
-  let multiregex = new RegExp('-' + element + '_\\d*(-|$)');
+  let multiregex = new RegExp('-' + element + '_[^-]*(-|$)');
   currentInput.value = currentInput.value.replace(multiregex, '-' + element + '_' + value + '$1');
 
   // trigger 'change' event to save and check content
@@ -190,7 +190,7 @@ export function setPrimary(fieldId,vscodeApi) {
   if (multifield.length > 0) {
     
     // extract current value from scenario field (if present)
-    let multiregex = new RegExp('-' + field.id + '_(\\d*)(-|$)');
+    let multiregex = new RegExp('-' + field.id + '_([^-]*)(-|$)');
     let matchMultiInScenario = currentInput.value.match(multiregex);
     if (matchMultiInScenario) {
       multifield[0].value = matchMultiInScenario[1];
@@ -248,7 +248,7 @@ export function setSecondary(fieldId,vscodeApi) {
   // remove tile content from last selected scenario field
   let oldValue = currentInput.value;
   let nonmultiregex = new RegExp('-' + field.id + '(-|$)');
-  let multiregex = new RegExp('-' + field.id + '_\\d*(-|$)');
+  let multiregex = new RegExp('-' + field.id + '_[^-]*(-|$)');
 
   // replace if multi, else replace if not multi
   let newValue = currentInput.value.replace(multiregex, '$1').replace(nonmultiregex, '$1');
@@ -340,7 +340,7 @@ export function checkModularScenario(fieldId) {
   for (const element of currentElements) {
     let multiValue = element.replace(/[^\_]+\_/g,'');
 
-    if (element.includes('_') && (multiValue.includes('0') || containsHigherDigits(multiValue, maxValue) || containsRepeatingDigits(multiValue, maxValue))) {
+    if (element.includes('_') && (multiValue.match(/\D/g) || multiValue.includes('0') || containsHigherDigits(multiValue, maxValue) || containsRepeatingDigits(multiValue, maxValue))) {
       isCorrect = false;
       break;
     }
@@ -357,12 +357,14 @@ export function updateMultiFieldOutlineAndTooltip(fieldId) {
   // if (field.value === '' && field.disabled === false) {
   if (field.value === '' && field.hidden === false) {
     updateMultiFieldEmpty(field.id);
+  } else if (field.value.match(/\D/g)) {
+    updateMultiFieldWrong(field.id, 'Should contain only digits (1-9)');
   } else if (field.value.includes('0')) {
-    updateMultiFieldWrong(field.id, 'May not contain 0 (only 1-9, and no higher than number of packages)');
+    updateMultiFieldWrong(field.id, 'Should not contain 0 (only 1-9)');
   } else if (containsHigherDigits(field.value, maxValue)) {
-    updateMultiFieldWrong(field.id, 'May not contain digits higher than number of packages');
+    updateMultiFieldWrong(field.id, 'Should not contain digits higher than number of packages');
   } else if (containsRepeatingDigits(field.value, maxValue)) {
-    updateMultiFieldWrong(field.id, 'May not contain repeating digits');
+    updateMultiFieldWrong(field.id, 'Should not contain repeating digits');
   } else {
     updateScenarioFieldRight(field.id);
     isCorrect = true;
