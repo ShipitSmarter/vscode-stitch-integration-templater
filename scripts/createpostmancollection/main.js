@@ -10,6 +10,7 @@ function main() {
   // button onclick event listeners
   document.getElementById("createpostmancollection").addEventListener("click", createPostmanCollection);
   document.getElementById("refresh").addEventListener("click", refreshContent);
+  document.getElementById("load").addEventListener("click",loadPmc);
 
   // independent checkbox
   document.getElementById("independent").addEventListener("change", fieldChange);
@@ -42,11 +43,15 @@ function fieldChange(event) {
 
   // save field value
   saveValue(field.id);
-  
 }
 
 function infoMessage(info) {
   vscodeApi.postMessage({ command: "showinformationmessage", text: info });
+}
+
+function loadPmc() {
+  var path = document.getElementById("pmcs").value;
+  vscodeApi.postMessage({ command: "loadpmc", text: path });
 }
 
 function saveValue(fieldId) {

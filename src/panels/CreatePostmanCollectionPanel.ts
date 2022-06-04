@@ -131,6 +131,11 @@ export class CreatePostmanCollectionPanel {
             this._createPostmanCollection(terminal, extensionUri);
             break;
 
+          case 'loadpmc':
+            this._loadPmc(text);
+            this._updateWebview(extensionUri);
+            break;
+
           case 'showerrormessage':
             vscode.window.showErrorMessage(text);
             break;
@@ -268,6 +273,40 @@ export class CreatePostmanCollectionPanel {
 
   private _getIntegrationObject() : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} {
     return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0];
+  }
+
+  private _loadPmc(path:string) {
+    var pmc = JSON.parse(fs.readFileSync(path, 'utf8'));
+
+    // update fields
+    this._fieldValues[carrierIndex]     = pmc.info.carrier;
+    this._fieldValues[apiIndex]         = pmc.info.api;
+    this._fieldValues[moduleIndex]      = pmc.info.module;
+    this._fieldValues[companyIndex]     = pmc.info.customer;
+    this._fieldValues[accountNumberIndex] = pmc.info.account;
+    this._fieldValues[costCenterIndex]  = pmc.info.costcenter;
+    this._fieldValues[carrierCodeIndex] = pmc.info.carriercode;
+
+    this._independent = pmc.info.api === '';
+
+    // update headers
+    var header = pmc.item[0].request.header;
+    this._fieldValues[nofHeadersIndex] = header.length;
+    this._headers = new Array<{name: string, value: string}>(header.length);
+    this._headers[0] = {
+      name: header.filter(el => el.key === 'CodeCompany')[0].key,
+      value: header.filter(el => el.key === 'CodeCompany')[0].value
+    };
+
+    var remainingHeaders = header.filter(el => el.key !== 'CodeCompany');
+    for (let index = 0; index < remainingHeaders.length; index++) {
+      this._headers[index+1] = {
+        name: remainingHeaders[index].key,
+        value: remainingHeaders[index].value
+      };
+    }
+
+    var henk = 'test';
   }
 
   private _createPostmanCollection(terminal: vscode.Terminal, extensionUri: vscode.Uri) {

@@ -87,9 +87,17 @@ export class CreatePostmanCollectionHtmlObject {
               <div class="component-sub-container">
 
                 <section class="component-example">
-                  <vscode-dropdown id="pmcs" class="pmcs" position="below">
-                    ${dropdownOptions(this._pmcObjects.map(el => el.path))}
-                  </vscode-dropdown>
+                  <div class="floatleft">
+                    <vscode-dropdown id="pmcs" class="pmcs" position="below">
+                      ${dropdownOptions(this._pmcObjects.map(el => el.path))}
+                    </vscode-dropdown>
+                  </div>
+                  <div class="floatleft">
+                    <vscode-button id="load" appearance="primary">
+                      Load
+                      <span slot="start" class="codicon codicon-arrow-up"></span>
+                    </vscode-button>
+                  </div>
                 </section>
 
                 <section class="component-example">
