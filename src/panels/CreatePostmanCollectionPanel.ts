@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles, isModular} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -276,6 +276,7 @@ export class CreatePostmanCollectionPanel {
   }
 
   private _loadPmc(path:string) {
+    // load pmc file
     var pmc = JSON.parse(fs.readFileSync(path, 'utf8'));
 
     // update fields
@@ -304,6 +305,21 @@ export class CreatePostmanCollectionPanel {
         name: remainingHeaders[index].key,
         value: remainingHeaders[index].value
       };
+    }
+
+    // update scenarios
+    this._modularValue = isModular(pmc.item[0].name);
+    this._fieldValues[nofScenariosIndex] = pmc.item.length;
+    this._scenarioFieldValues = [];
+    this._nofPackages = [];
+    for (let index = 0; index < pmc.item.length; index++) {
+      this._scenarioFieldValues[index] = pmc.item[index].name;
+
+      // extract nofPackages
+      var nofPackages = pmc.item[index].name.match('(?<=multi_)\\d+');
+      if (nofPackages) {
+        this._nofPackages[index] = nofPackages[0];
+      }
     }
 
     var henk = 'test';

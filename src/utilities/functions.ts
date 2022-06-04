@@ -267,6 +267,10 @@ export function arrayFrom1(max:number) : number[] {
 	return arrayFrom0(max).map(x => ++x);
 }
 
+export function isModular(scenario:string) : boolean {
+	return scenario.startsWith('m-');
+}
+
 export function toBoolean(string:string) : boolean {
 	let outString : boolean = false;
 	if (string.toLowerCase() === 'true') {
