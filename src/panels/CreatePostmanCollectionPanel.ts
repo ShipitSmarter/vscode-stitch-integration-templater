@@ -14,6 +14,7 @@ const accountNumberIndex = 5;
 const costCenterIndex = 6;
 const nofScenariosIndex = 7;
 const carrierCodeIndex = 8;
+const pmcIndex = 9;
 
 export class CreatePostmanCollectionPanel {
   // PROPERTIES
@@ -37,6 +38,8 @@ export class CreatePostmanCollectionPanel {
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
   
   private _pmcObjects : {parent:string, file:string, path:string}[] = [];
+
+  private _showLoad : boolean = false;
   private _codeCompanies: {
     company: string,
     codecompany: string
@@ -262,6 +265,13 @@ export class CreatePostmanCollectionPanel {
               case 'scenariofield':
                 this._scenarioFieldValues[index] = value;
                 break;
+
+              case 'showload':
+                this._showLoad = toBoolean(value);
+                break;
+
+              case 'pmcs':
+                this._fieldValues[pmcIndex] = value;
             }
             
         }
@@ -275,7 +285,11 @@ export class CreatePostmanCollectionPanel {
     return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0];
   }
 
-  private _loadPmc(path:string) {
+  private _loadPmc(file:string) {
+    // extract file path
+    var fileName = file.replace(/[\s\S]*\s/g,'');
+    var path = this._pmcObjects.filter(el => el.file === fileName)[0].path;
+
     // load pmc file
     var pmc = JSON.parse(fs.readFileSync(path, 'utf8'));
 
@@ -614,7 +628,8 @@ export class CreatePostmanCollectionPanel {
       this._modularValue,
       this._multiFieldValues,
       this._nofPackages,
-      this._pmcObjects
+      this._pmcObjects,
+      this._showLoad
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();
