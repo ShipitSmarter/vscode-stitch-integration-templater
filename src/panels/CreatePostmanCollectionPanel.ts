@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -35,6 +35,8 @@ export class CreatePostmanCollectionPanel {
   private _nofPackages: string[] = [];
   private _integrationObjects: {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
+  
+  private _pmcObjects : {parent:string, file:string, path:string}[] = [];
   private _codeCompanies: {
     company: string,
     codecompany: string
@@ -502,6 +504,7 @@ export class CreatePostmanCollectionPanel {
     await this._getCarrierCodes();
     this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+    this._pmcObjects                  = await getPostmanCollectionFiles();
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
@@ -520,6 +523,7 @@ export class CreatePostmanCollectionPanel {
       this._initializeValues();
       this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+      this._pmcObjects                  = await getPostmanCollectionFiles();
     }
 
     // crop flexible header field values
@@ -547,7 +551,8 @@ export class CreatePostmanCollectionPanel {
       this._independent,
       this._modularValue,
       this._multiFieldValues,
-      this._nofPackages
+      this._nofPackages,
+      this._pmcObjects
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();

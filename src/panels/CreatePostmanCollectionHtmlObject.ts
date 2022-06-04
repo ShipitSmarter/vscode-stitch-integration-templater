@@ -33,7 +33,8 @@ export class CreatePostmanCollectionHtmlObject {
     private _independent: boolean,
     private _modularValue: boolean,
     private _multiFieldValues: {[details: string] : string;},
-    private _nofPackages: string[]
+    private _nofPackages: string[],
+    private _pmcObjects : {parent:string, file:string, path:string}[]
   ) { }
 
   // METHODS
@@ -84,6 +85,12 @@ export class CreatePostmanCollectionHtmlObject {
           <section class="rowsingle">
             <section class="component-container">
               <div class="component-sub-container">
+
+                <section class="component-example">
+                  <vscode-dropdown id="pmcs" class="pmcs" position="below">
+                    ${dropdownOptions(this._pmcObjects.map(el => el.path))}
+                  </vscode-dropdown>
+                </section>
 
                 <section class="component-example">
                   <div class="floatleft">
