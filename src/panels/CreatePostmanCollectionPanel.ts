@@ -309,11 +309,11 @@ export class CreatePostmanCollectionPanel {
     this._fieldValues[nofHeadersIndex] = header.length;
     this._headers = new Array<{name: string, value: string}>(header.length);
     this._headers[0] = {
-      name: header.filter(el => el.key === 'CodeCompany')[0].key,
-      value: header.filter(el => el.key === 'CodeCompany')[0].value
+      name: header.filter((el:any) => el.key === 'CodeCompany')[0].key,
+      value: header.filter((el:any) => el.key === 'CodeCompany')[0].value
     };
 
-    var remainingHeaders = header.filter(el => el.key !== 'CodeCompany');
+    var remainingHeaders = header.filter((el:any) => el.key !== 'CodeCompany');
     for (let index = 0; index < remainingHeaders.length; index++) {
       this._headers[index+1] = {
         name: remainingHeaders[index].key,
