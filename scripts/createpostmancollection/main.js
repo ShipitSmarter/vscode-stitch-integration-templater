@@ -10,15 +10,22 @@ function main() {
   // button onclick event listeners
   document.getElementById("createpostmancollection").addEventListener("click", createPostmanCollection);
   document.getElementById("refresh").addEventListener("click", refreshContent);
+  document.getElementById("load").addEventListener("click",loadPmc);
 
   // independent checkbox
   document.getElementById("independent").addEventListener("change", fieldChange);
+
+  // load file checkbox
+  document.getElementById("showload").addEventListener("change", showLoadChange);
 
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown,.dropdownfield");
   for (const field of dropdowns) {
     field.addEventListener("change", fieldChange);
   }
+
+  // save pmc dropdown
+  document.getElementById("pmcs").addEventListener("change",fieldChange);
 
   // save input fields
   const fields = document.querySelectorAll(".field,.headername,.headervalue");
@@ -42,11 +49,29 @@ function fieldChange(event) {
 
   // save field value
   saveValue(field.id);
-  
 }
 
 function infoMessage(info) {
   vscodeApi.postMessage({ command: "showinformationmessage", text: info });
+}
+
+function loadPmc() {
+  var path = document.getElementById("pmcs").value;
+  vscodeApi.postMessage({ command: "loadpmc", text: path });
+}
+
+function showLoadChange(event) {
+  const field = event.target;
+
+  saveValue(field.id);
+
+  if (field.checked) {
+    document.getElementById("pmcs").hidden = false;
+    document.getElementById("load").hidden = false;
+  } else {
+    document.getElementById("pmcs").hidden = true;
+    document.getElementById("load").hidden = true;
+  }
 }
 
 function saveValue(fieldId) {

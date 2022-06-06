@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString} from "../utilities/functions";
 import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
@@ -12,6 +12,7 @@ const accountNumberIndex = 5;
 const costCenterIndex = 6;
 const nofScenariosIndex = 7;
 const carrierCodeIndex = 8;
+const pmcIndex = 9;
 
 export class CreatePostmanCollectionHtmlObject {
   // PROPERTIES
@@ -33,7 +34,9 @@ export class CreatePostmanCollectionHtmlObject {
     private _independent: boolean,
     private _modularValue: boolean,
     private _multiFieldValues: {[details: string] : string;},
-    private _nofPackages: string[]
+    private _nofPackages: string[],
+    private _pmcObjects : {parent:string, file:string, path:string}[],
+    private _showLoad: boolean
   ) { }
 
   // METHODS
@@ -96,6 +99,26 @@ export class CreatePostmanCollectionHtmlObject {
 
                 <vscode-divider role="separator"></vscode-divider>
 
+                <section class="component-example">
+                  <vscode-checkbox id="showload" class="showload" ${checkedString(this._showLoad)}>Load from file</vscode-checkbox>
+                </section>
+
+                <section class="component-example">
+                  <div class="floatleft">
+                    <vscode-dropdown id="pmcs" class="pmcs" position="below" ${valueString(this._fieldValues[pmcIndex])} ${hiddenString(this._showLoad)}>
+                      ${dropdownOptions(this._getFileLoadOptions())}
+                    </vscode-dropdown>
+                  </div>
+                  <div class="floatleft">
+                    <vscode-button id="load" appearance="primary" ${hiddenString(this._showLoad)}>
+                      Load
+                      <span slot="start" class="codicon codicon-arrow-up"></span>
+                    </vscode-button>
+                  </div>
+                </section>
+
+                <vscode-divider role="separator"></vscode-divider>
+
                 <h2>Carrier</h2>
 
                 ${this._ifIndependent(this._getIndependentCarrierFolderStructureGrid())}
@@ -118,6 +141,18 @@ export class CreatePostmanCollectionHtmlObject {
 	  `;
 
     return html;
+  }
+
+  private _getFileLoadOptions() : string[] {
+    //this._pmcObjects.map(el => el.path);
+    var options: string[] = [];
+
+    for (let index = 0; index < this._pmcObjects.length; index++) {
+      let pmc = this._pmcObjects[index];
+      options[index] = pmc.parent + ' > ' + pmc.file;
+    }
+
+    return options.sort();
   }
 
   private _ifIndependent(content: string): string {

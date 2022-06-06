@@ -86,6 +86,25 @@ export async function getModularElementsWithParents(module:string): Promise<{par
     return parentsElementsMulti.sort();
 }
 
+export async function getPostmanCollectionFiles(): Promise<{parent:string, file:string, path:string}[]> {
+	let pmcPaths: string[] = (await getWorkspaceFiles('**/postman/**/*.json')).map(el => cleanPath(el));
+
+	// pre-allocate output
+	let pmcObjects : {parent:string, file:string, path:string}[] = new Array<{parent:string, file:string, path:string}>(pmcPaths.length);
+
+	// build pmcObjects array
+	for (let index = 0; index < pmcPaths.length; index++) {
+
+		pmcObjects[index] = {
+			parent: nameFromPath(parentPath(pmcPaths[index])),
+			file: nameFromPath(pmcPaths[index]),
+			path: pmcPaths[index]
+		};
+	}
+
+	return pmcObjects;
+}
+
 export async function getAvailableIntegrations(panel:string) : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[]> {
 	// panel input: 'integration' or 'postman'
 
@@ -207,6 +226,10 @@ export function parentPath (path: string) : string {
 	return path.replace(/\/[^\/]+$/,'');
 }
 
+export function nameFromPath (path: string) : string {
+	return path.replace(/^[\s\S]*[\/\\]/g,'');
+}
+
 export function nth(num:number): string {
 	let after:string = '';
 	switch (num) {
@@ -242,6 +265,10 @@ export function arrayFrom0(max:number) : number[] {
 
 export function arrayFrom1(max:number) : number[] {
 	return arrayFrom0(max).map(x => ++x);
+}
+
+export function isModular(scenario:string) : boolean {
+	return scenario.startsWith('m-');
 }
 
 export function toBoolean(string:string) : boolean {
