@@ -28,17 +28,10 @@ function main() {
     checkbox.addEventListener("change", fieldChange);
   }
 
-  // on panel creation: save all dropdown values (if exist)
-  saveValue("modulename");
-  saveValue("nofscenarios");
-  if(isCreate()) {
-    saveValue("nofsteps");
-  }
-
   // stepDropdowns (if create)
   if(isCreate()) {
     for (const stepDropDown of document.querySelectorAll(".stepdropdown")) {
-      saveValue(stepDropDown.id);
+      //saveValue(stepDropDown.id);
   
       // if 'other': reveal other step field
       if (stepDropDown.value === 'other') {

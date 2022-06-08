@@ -31,7 +31,9 @@ export class CreateIntegrationHtmlObject {
     private _createUpdateValue: string,
     private _modularValue: boolean,
     private _multiFieldValues: {[details: string] : string;},
-    private _nofPackages: string[]
+    private _nofPackages: string[],
+    private _moduleOptions: string[],
+    private _stepOptions: string[]
     ) { }
 
   // METHODS
@@ -154,7 +156,7 @@ export class CreateIntegrationHtmlObject {
         <vscode-text-field id="carrierapiname" class="field" index="${apiIndex}" ${valueString(this._fieldValues[apiIndex])} placeholder="api-name" size="5"></vscode-text-field>
         /
         <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${valueString(this._fieldValues[moduleIndex])} position="below">
-          ${dropdownOptions(['booking', 'tracking', 'cancel', 'pickup', 'pickup_cancel'])}
+          ${dropdownOptions(this._moduleOptions)}
         </vscode-dropdown>
 
         <section class="component-example">
@@ -248,12 +250,8 @@ export class CreateIntegrationHtmlObject {
       let subStepNamesCurrent = /*html*/`
         <section class="component-example">
           <vscode-dropdown id="stepname${step}" indexstep="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
-            <vscode-option>${(this._fieldValues[moduleIndex] ?? 'booking')}</vscode-option>
-            <vscode-option>label</vscode-option>
-            <vscode-option>login</vscode-option>
-            <vscode-option>get_token</vscode-option>
-            <vscode-option>save_token</vscode-option>
-            <vscode-option>other</vscode-option>
+            <vscode-option>${this._fieldValues[moduleIndex]}</vscode-option>
+            ${dropdownOptions(this._stepOptions)}
           </vscode-dropdown>
 
           <vscode-text-field id="otherstepname${step}" indexotherstep="${step}" ${valueString(this._otherStepValues[step])} class="otherstepfield" placeholder="step" ${hiddenString(isOther)}></vscode-text-field>
