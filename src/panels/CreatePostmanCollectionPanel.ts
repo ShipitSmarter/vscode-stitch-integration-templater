@@ -488,7 +488,7 @@ export class CreatePostmanCollectionPanel {
 
   private async _getCompanies() {
     // get companies and codecompanies from translation file
-    let translationPath = await getWorkspaceFile('**/templater/CompanyToCodeCompany.csv');
+    let translationPath = await getWorkspaceFile('**/templater/postman/CompanyToCodeCompany.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
     this._codeCompanies = new Array<{company: string, codecompany: string}>(translations.length);
@@ -507,7 +507,7 @@ export class CreatePostmanCollectionPanel {
 
   private async _getCarrierCodes() {
     // get companies and codecompanies from translation file
-    let translationPath = await getWorkspaceFile('**/templater/CarrierToCarrierCode.csv');
+    let translationPath = await getWorkspaceFile('**/templater/postman/CarrierToCarrierCode.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
     this._carrierCodes = new Array<{carrier: string, carriercode: string}>(translations.length);
@@ -525,7 +525,7 @@ export class CreatePostmanCollectionPanel {
 
   private async _getRestUrls() {
     // get companies and codecompanies from translation file
-    let translationPath = await getWorkspaceFile('**/templater/ModuleToTestRestApiUrl.csv');
+    let translationPath = await getWorkspaceFile('**/templater/postman/ModuleToTestRestApiUrl.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
     this._restUrls = new Array<{module: string, url: string}>(translations.length);

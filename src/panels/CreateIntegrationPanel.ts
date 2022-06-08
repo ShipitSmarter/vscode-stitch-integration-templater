@@ -484,13 +484,13 @@ export class CreateIntegrationPanel {
 
   private async _getModuleOptions() {
     // get module dropdown options from txt file
-    let moduleOptionsPath = await getWorkspaceFile('**/templater/ModuleOptions.txt');
+    let moduleOptionsPath = await getWorkspaceFile('**/templater/integration/ModuleOptions.txt');
     this._moduleOptions = fs.readFileSync(moduleOptionsPath, 'utf8').split("\n").map(el => el.trim()).sort();
   }
 
   private async _getStepOptions() {
     // get module dropdown options from txt file
-    let stepOptionsPath = await getWorkspaceFile('**/templater/StepOptions.txt');
+    let stepOptionsPath = await getWorkspaceFile('**/templater/integration/StepOptions.txt');
     this._stepOptions = fs.readFileSync(stepOptionsPath, 'utf8').split("\n").map(el => el.trim()).sort();
   }
 
