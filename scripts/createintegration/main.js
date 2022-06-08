@@ -288,6 +288,14 @@ function checkIntegrationPath() {
 }
 
 function createIntegration() {
+  // for all empty step urls: save placeholder
+  for (const field of document.querySelectorAll('.stepfield')) {
+    if ((field.id.startsWith('testurl') || field.id.startsWith('produrl')) && isEmpty(field.value)) {
+      field.value = field.getAttribute('placeholder');
+      field.dispatchEvent(new Event('keyup'));
+    }
+  }
+
   // check field content
   if (checkFields()) {
     vscodeApi.postMessage({ command: "createintegration", text: "real fast!" });

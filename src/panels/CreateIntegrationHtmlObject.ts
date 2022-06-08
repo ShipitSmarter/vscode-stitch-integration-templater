@@ -275,14 +275,17 @@ export class CreateIntegrationHtmlObject {
       let testUrl = `https://test.${carrierName}.com/${realStepName ?? 'booking'}`;
       let prodUrl = `https://prod.${carrierName}.com/${realStepName ?? 'booking'}`;
 
+      // this._stepFieldValues[step + 10] = this._stepFieldValues[step + 10] ?? testUrl;
+      // this._stepFieldValues[step + 20] = this._stepFieldValues[step + 20] ?? prodUrl;
+
       subTestUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${valueString(this._stepFieldValues[step + 10] ?? testUrl)} class="stepfield" placeholder="${testUrl}"></vscode-text-field>
+          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="${testUrl}"></vscode-text-field>
         </section>`;
 
       subProdUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${valueString(this._stepFieldValues[step + 20] ?? prodUrl)} class="stepfield" placeholder="${prodUrl}"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="${prodUrl}"></vscode-text-field>
         </section>`;
     }
 
