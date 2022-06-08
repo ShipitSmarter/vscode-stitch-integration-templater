@@ -31,7 +31,7 @@ function main() {
   // stepDropdowns (if create)
   if(isCreate()) {
     for (const stepDropDown of document.querySelectorAll(".stepdropdown")) {
-      //saveValue(stepDropDown.id);
+      saveValue(stepDropDown.id);
   
       // if 'other': reveal other step field
       if (stepDropDown.value === 'other') {
