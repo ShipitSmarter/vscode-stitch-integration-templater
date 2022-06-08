@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.4.1 
+- Postman Collection
+  - Added option to load existing Postman Collection file
+    * Only if compatible (i.e. generated using the appropriate PowerShell script version)
+
 ## 1.4.0 
 - Modular Scenarios (general)
   - Modular scenario generation is now multi-package compatible

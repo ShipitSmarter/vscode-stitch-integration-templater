@@ -293,57 +293,58 @@ export class CreatePostmanCollectionPanel {
     // load pmc file
     var pmc = JSON.parse(fs.readFileSync(path, 'utf8'));
 
-    // update fields
-    this._fieldValues[carrierIndex]     = pmc.info.carrier;
-    this._fieldValues[apiIndex]         = pmc.info.api;
-    this._fieldValues[moduleIndex]      = pmc.info.module;
-    this._fieldValues[companyIndex]     = pmc.info.customer;
-    this._fieldValues[accountNumberIndex] = pmc.info.account;
-    this._fieldValues[costCenterIndex]  = pmc.info.costcenter;
-    this._fieldValues[carrierCodeIndex] = pmc.info.carriercode;
-
-    this._independent = pmc.info.api === '';
-
-    // update headers
-    var header = pmc.item[0].request.header;
-    this._fieldValues[nofHeadersIndex] = header.length;
-    this._headers = new Array<{name: string, value: string}>(header.length);
-    this._headers[0] = {
-      name: header.filter(el => el.key === 'CodeCompany')[0].key,
-      value: header.filter(el => el.key === 'CodeCompany')[0].value
-    };
-
-    var remainingHeaders = header.filter(el => el.key !== 'CodeCompany');
-    for (let index = 0; index < remainingHeaders.length; index++) {
-      this._headers[index+1] = {
-        name: remainingHeaders[index].key,
-        value: remainingHeaders[index].value
+    if (!pmc.info.carrier) {
+      vscode.window.showErrorMessage('Selected Postman Collection file is not compatible.');
+    } else {
+      // update fields
+      this._fieldValues[carrierIndex]     = pmc.info.carrier;
+      this._fieldValues[apiIndex]         = pmc.info.api;
+      this._fieldValues[moduleIndex]      = pmc.info.module;
+      this._fieldValues[companyIndex]     = pmc.info.customer;
+      this._fieldValues[accountNumberIndex] = pmc.info.account;
+      this._fieldValues[costCenterIndex]  = pmc.info.costcenter;
+      this._fieldValues[carrierCodeIndex] = pmc.info.carriercode;
+  
+      this._independent = pmc.info.api === '';
+  
+      // update headers
+      var header = pmc.item[0].request.header;
+      this._fieldValues[nofHeadersIndex] = header.length;
+      this._headers = new Array<{name: string, value: string}>(header.length);
+      this._headers[0] = {
+        name: header.filter((el:any) => el.key === 'CodeCompany')[0].key,
+        value: header.filter((el:any) => el.key === 'CodeCompany')[0].value
       };
-    }
-
-    // update scenarios
-    this._modularValue = isModular(pmc.item[0].name);
-    this._fieldValues[nofScenariosIndex] = pmc.item.length;
-    this._scenarioFieldValues = [];
-    this._nofPackages = [];
-    for (let index = 0; index < pmc.item.length; index++) {
-
-      if (this._modularValue) {
-        this._scenarioFieldValues[index] = pmc.item[index].name;
-
-        // extract nofPackages
-        var nofPackages = pmc.item[index].name.match('(?<=multi_)\\d+');
-        if (nofPackages) {
-          this._nofPackages[index] = nofPackages[0];
-        }
-      } else {
-        this._scenarioFieldValues[index] = this._availableScenarios.filter(el => el.match(' ' + pmc.item[index].name + '$'))[0];
+  
+      var remainingHeaders = header.filter((el:any) => el.key !== 'CodeCompany');
+      for (let index = 0; index < remainingHeaders.length; index++) {
+        this._headers[index+1] = {
+          name: remainingHeaders[index].key,
+          value: remainingHeaders[index].value
+        };
       }
-
-      
+  
+      // update scenarios
+      this._modularValue = isModular(pmc.item[0].name);
+      this._fieldValues[nofScenariosIndex] = pmc.item.length;
+      this._scenarioFieldValues = [];
+      this._nofPackages = [];
+      for (let index = 0; index < pmc.item.length; index++) {
+  
+        if (this._modularValue) {
+          this._scenarioFieldValues[index] = pmc.item[index].name;
+  
+          // extract nofPackages
+          var nofPackages = pmc.item[index].name.match('(?<=multi_)\\d+');
+          if (nofPackages) {
+            this._nofPackages[index] = nofPackages[0];
+          }
+        } else {
+          this._scenarioFieldValues[index] = this._availableScenarios.filter(el => el.match(' ' + pmc.item[index].name + '$'))[0];
+        }
+      }
     }
 
-    var henk = 'test';
   }
 
   private _createPostmanCollection(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
