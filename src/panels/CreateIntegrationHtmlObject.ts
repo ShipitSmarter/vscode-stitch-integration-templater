@@ -234,6 +234,7 @@ export class CreateIntegrationHtmlObject {
   }
 
   private _stepInputs(nofSteps: number): string {
+    let carrierName = (this._fieldValues[carrierIndex] ?? 'carrier').toLowerCase();
 
     let subStepNames: string = '';
     let subTestUrl: string = '';
@@ -241,6 +242,7 @@ export class CreateIntegrationHtmlObject {
     for (let step = 0; step < +nofSteps; step++) {
       let thisStepFieldValue = this._stepFieldValues[step];
       let isOther: boolean = this._isOther(thisStepFieldValue);
+      let realStepName = isOther ? this._otherStepValues[step] : thisStepFieldValue;
 
       // set html string addition
       let subStepNamesCurrent = /*html*/`
@@ -268,14 +270,19 @@ export class CreateIntegrationHtmlObject {
 
       subStepNames += subStepNamesCurrent;
 
+
+      // url fields
+      let testUrl = `https://test.${carrierName}.com/${realStepName ?? 'booking'}`;
+      let prodUrl = `https://prod.${carrierName}.com/${realStepName ?? 'booking'}`;
+
       subTestUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${valueString(this._stepFieldValues[step + 10])} class="stepfield" placeholder="https://test-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="testurl${step}" indexstep="${step + 10}" ${valueString(this._stepFieldValues[step + 10] ?? testUrl)} class="stepfield" placeholder="${testUrl}"></vscode-text-field>
         </section>`;
 
       subProdUrl += /*html*/ `
         <section class="component-example">
-          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${valueString(this._stepFieldValues[step + 20])} class="stepfield" placeholder="https://prod-dpd.com/booking"></vscode-text-field>
+          <vscode-text-field id="produrl${step}" indexstep="${step + 20}" ${valueString(this._stepFieldValues[step + 20] ?? prodUrl)} class="stepfield" placeholder="${prodUrl}"></vscode-text-field>
         </section>`;
     }
 
