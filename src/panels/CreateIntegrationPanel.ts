@@ -21,7 +21,6 @@ export class CreateIntegrationPanel {
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
   private _stepFieldValues: string[] = [];
-  private _otherStepValues: string[] = [];
   private _scenarioFieldValues: string[] = [];
   private _existingScenarioFieldValues: string[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
@@ -147,6 +146,15 @@ export class CreateIntegrationPanel {
             switch (classIndexValue[0]) {
               case 'dropdown':
                 this._fieldValues[index] = value;
+                switch (index) {
+                  case nofStepsIndex :
+                    for (let ii = 0; ii < value; ii++) {
+                      if (!this._stepFieldValues[ii]) {
+                        this._stepFieldValues[ii] = [this._fieldValues[carrierIndex]].concat(this._stepOptions)[ii % (this._stepOptions.length + 1)];
+                      }
+                    }
+                    break;
+                }
                 this._updateWebview(extensionUri);
                 break;
               case 'field':
@@ -155,9 +163,9 @@ export class CreateIntegrationPanel {
               case 'stepdropdown':
               case 'stepfield':
                 this._stepFieldValues[index] = value;
-                break;
-              case 'otherstepfield':
-                this._otherStepValues[index] = value;
+                if (index < 10) {
+                  this._updateWebview(extensionUri);
+                }
                 break;
               case 'scenariofield':
                 this._scenarioFieldValues[index] = value;
@@ -427,14 +435,7 @@ export class CreateIntegrationPanel {
     let testUrlsString: string = '';
     let prodUrlsString: string = '';
     for (let index = 0; index < +nofSteps; index++) {
-      let step: string = '';
-
-      // if 'other': take alternative value
-      if (this._stepFieldValues[index] === 'other') {
-        step = this._otherStepValues[index] + '';
-      } else {
-        step = this._stepFieldValues[index] + '';
-      }
+      let step: string = this._stepFieldValues[index] + '';
 
       // steps
       stepsString += '\n    "' + step + '"';
@@ -495,17 +496,12 @@ export class CreateIntegrationPanel {
   }
 
   private _cropFlexFields() {
-    // crop steps, othersteps arrays
+    // crop steps array
     let newStepFieldValues: string[] = [];
-    let newOtherStepValues: string[] = [];
     for (let index = 0; index < +this._fieldValues[nofStepsIndex]; index++) {
-      // stepname, other step
+      // stepname
       if (this._stepFieldValues[index] !== undefined) {
         newStepFieldValues[index] = this._stepFieldValues[index];
-
-        if (this._stepFieldValues[index] === 'other') {
-          newOtherStepValues[index] = this._otherStepValues[index];
-        }
       }
 
       // testurl
@@ -520,7 +516,6 @@ export class CreateIntegrationPanel {
 
     }
     this._stepFieldValues = newStepFieldValues;
-    this._otherStepValues = newOtherStepValues;
 
     // crop scenarios array
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
@@ -557,7 +552,6 @@ export class CreateIntegrationPanel {
       this._modularElementsWithParents,
       this._fieldValues,
       this._stepFieldValues,
-      this._otherStepValues,
       this._scenarioFieldValues,
       this._existingScenarioFieldValues,
       this._existingScenarioCheckboxValues,

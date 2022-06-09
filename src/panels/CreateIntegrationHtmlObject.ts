@@ -24,7 +24,6 @@ export class CreateIntegrationHtmlObject {
     private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
     private _fieldValues: string[],
     private _stepFieldValues: string[],
-    private _otherStepValues: string[],
     private _scenarioFieldValues: string[],
     private _existingScenarioFieldValues: string[],
     private _existingScenarioCheckboxValues: boolean[],
@@ -124,15 +123,6 @@ export class CreateIntegrationHtmlObject {
     }
 
     return outString;
-  }
-
-  private _isOther(string: string): boolean {
-    let isOther: boolean = false;
-    if ((string + "").toLowerCase() === 'other') {
-      isOther = true;
-    }
-
-    return isOther;
   }
 
   private _getCreateUpdateButton(): string {
@@ -236,15 +226,11 @@ export class CreateIntegrationHtmlObject {
   }
 
   private _stepInputs(nofSteps: number): string {
-    let carrierName = (this._fieldValues[carrierIndex] ?? 'carrier').toLowerCase();
-
     let subStepNames: string = '';
     let subTestUrl: string = '';
     let subProdUrl: string = '';
     for (let step = 0; step < +nofSteps; step++) {
       let thisStepFieldValue = this._stepFieldValues[step];
-      let isOther: boolean = this._isOther(thisStepFieldValue);
-      let realStepName = isOther ? this._otherStepValues[step] : thisStepFieldValue;
 
       // set html string addition
       let subStepNamesCurrent = /*html*/`
@@ -253,28 +239,15 @@ export class CreateIntegrationHtmlObject {
             <vscode-option>${this._fieldValues[moduleIndex]}</vscode-option>
             ${dropdownOptions(this._stepOptions)}
           </vscode-dropdown>
-
-          <vscode-text-field id="otherstepname${step}" indexotherstep="${step}" ${valueString(this._otherStepValues[step])} class="otherstepfield" placeholder="step" ${hiddenString(isOther)}></vscode-text-field>
         </section>
       `;
-
-      // replace nth <vscode-option> occurrence to pre-set different selected for each step 
-      // BUT: only if not already set in _stepFieldValues
-      if (this._stepFieldValues[step] === undefined) {
-        // from https://stackoverflow.com/a/44568739/1716283
-        let t: number = 0;
-        subStepNamesCurrent = subStepNamesCurrent.replace(/<vscode-option>/g, match => ++t === (step + 1) ? '<vscode-option selected>' : match);
-      }
 
       subStepNames += subStepNamesCurrent;
 
 
       // url fields
-      let testUrl = `https://test.${carrierName}.com/${realStepName ?? 'booking'}`;
-      let prodUrl = `https://prod.${carrierName}.com/${realStepName ?? 'booking'}`;
-
-      // this._stepFieldValues[step + 10] = this._stepFieldValues[step + 10] ?? testUrl;
-      // this._stepFieldValues[step + 20] = this._stepFieldValues[step + 20] ?? prodUrl;
+      let testUrl = `https://test.carrier.com/${thisStepFieldValue ?? 'booking'}`;
+      let prodUrl = `https://prod.carrier.com/${thisStepFieldValue ?? 'booking'}`;
 
       subTestUrl += /*html*/ `
         <section class="component-example">

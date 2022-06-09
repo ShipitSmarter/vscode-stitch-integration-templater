@@ -11,7 +11,7 @@ function main() {
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
 
   // input fields
-  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield,.dropdown,.stepdropdown,.existingscenariocheckbox");
+  const fields = document.querySelectorAll(".field,.stepfield,.dropdown,.stepdropdown,.existingscenariocheckbox");
   for (const field of fields) {
     field.addEventListener("keyup", fieldChange);
   }
@@ -26,19 +26,6 @@ function main() {
   const checkBoxes = document.querySelectorAll(".existingscenariocheckbox,.checkallexisting");
   for (const checkbox of checkBoxes) {
     checkbox.addEventListener("change", fieldChange);
-  }
-
-  // stepDropdowns (if create)
-  if(isCreate()) {
-    for (const stepDropDown of document.querySelectorAll(".stepdropdown")) {
-      saveValue(stepDropDown.id);
-  
-      // if 'other': reveal other step field
-      if (stepDropDown.value === 'other') {
-        var index = stepDropDown.getAttribute('indexstep');
-        document.getElementById("otherstepname" + index).style.display = 'inline-table';
-      }
-    }
   }
 
   // scenario grid fields
@@ -64,7 +51,6 @@ function fieldChange(event) {
     // input fields: check contents
     case 'field':
     case 'stepfield':
-    case 'otherstepfield':
       updateFieldOutlineAndTooltip(field.id);
       break;
 
@@ -74,22 +60,6 @@ function fieldChange(event) {
         vscodeApi.postMessage({ command: "clearscenarios", text: '' });
       }
       //vscodeApi.postMessage({ command: "refreshpanel", text: '' });
-      break;
-
-    // stepdropdown: show/hide other step field
-    case 'stepdropdown':
-      var index = field.getAttribute('indexstep');
-      var otherStepField = document.getElementById("otherstepname" + index);
-
-      if (field.value === 'other') {
-        // if 'other': show other step field 
-        otherStepField.style.display = 'inline-table';
-      } else {
-        // not other: hide other step field and delete value
-        otherStepField.style.display = 'none';
-        otherStepField.value = '';
-        saveValue(otherStepField.id);
-      }
       break;
     
     // existingscenariocheckbox: update associated existing scenario field
@@ -130,9 +100,6 @@ function saveValue(fieldId) {
     case 'stepfield':
       attr = 'indexstep';
       break;
-    case 'otherstepfield':
-      attr = 'indexotherstep';
-      break;
 
     case 'existingscenariocheckbox':
       attr = 'indexescheckbox';
@@ -147,7 +114,7 @@ function saveValue(fieldId) {
 function checkFields() {
   // check if any incorrect field contents and update fields outlining and tooltip in the process
   var check = true;
-  const fields = document.querySelectorAll(".field,.stepfield,.otherstepfield");
+  const fields = document.querySelectorAll(".field,.stepfield");
   for (const field of fields) {
     check = updateFieldOutlineAndTooltip(field.id) ? check : false;
   }
@@ -189,10 +156,6 @@ function checkContent(id, value) {
       case 'stepfield':
         check = value.match(/[^A-Za-z0-9\:\/\.\?\=\&\-\_]/);
         break;
-
-      case 'otherstepfield':
-        check = value.match(/[^a-z0-9\_]/);
-        break;
     }
 
     // if invalid content: return false
@@ -227,10 +190,6 @@ function getContentHint(elementid) {
 
     case 'stepfield':
       hint = 'A-Z, a-z, 0-9, :/.?=&-_ (no spaces)';
-      break;
-
-    case 'otherstepfield':
-      hint = 'a-z, 0-9, \'_\' (no spaces)';
       break;
   }
 
