@@ -83,7 +83,7 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
     saveScenarioValue(field.id, vscodeApi);
     
     // check all scenarios for validity
-    if (field.classList[0] === 'scenariofield') {
+    if (['scenariofield','scenariocustomfield'].includes(field.classList[0])) {
       for (const sc of document.querySelectorAll(".scenariofield")) {
         updateScenarioFieldOutlineAndTooltip(sc.id);
       }
@@ -356,6 +356,21 @@ export function checkModularScenario(fieldId) {
   return isCorrect;
 }
 
+export function checkCustomName(fieldId) {
+  let isCorrect = true;
+  let field = document.getElementById(fieldId);
+
+  // check if custom name is correct
+  let check = field.value.match(/[^A-Za-z0-9\_\-]/);
+
+  // if invalid content: return false
+  if (check !== '' && check !== null) {
+    isCorrect = false;
+  }
+
+  return isCorrect;
+}
+
 export function updateMultiFieldOutlineAndTooltip(fieldId) {
   let isCorrect = false;
   let field = document.getElementById(fieldId);
@@ -363,33 +378,21 @@ export function updateMultiFieldOutlineAndTooltip(fieldId) {
 
   // if (field.value === '' && field.disabled === false) {
   if (field.value === '' && field.hidden === false) {
-    updateMultiFieldEmpty(field.id);
+    updateEmpty(field.id);
   } else if (field.value.match(/\D/g)) {
-    updateMultiFieldWrong(field.id, 'Should contain only digits (1-9)');
+    updateWrong(field.id, 'Should contain only digits (1-9)');
   } else if (field.value.includes('0')) {
-    updateMultiFieldWrong(field.id, 'Should not contain 0 (only 1-9)');
+    updateWrong(field.id, 'Should not contain 0 (only 1-9)');
   } else if (containsHigherDigits(field.value, maxValue)) {
-    updateMultiFieldWrong(field.id, 'Should not contain digits higher than number of packages');
+    updateWrong(field.id, 'Should not contain digits higher than number of packages');
   } else if (containsRepeatingDigits(field.value, maxValue)) {
-    updateMultiFieldWrong(field.id, 'Should not contain repeating digits');
+    updateWrong(field.id, 'Should not contain repeating digits');
   } else {
-    updateScenarioFieldRight(field.id);
+    updateRight(field.id);
     isCorrect = true;
   }
 
   return isCorrect;
-}
-
-function updateMultiFieldWrong(fieldId,hint) {
-  let field = document.getElementById(fieldId);
-  field.style.outline = "1px solid red";
-  field.title = hint;
-}
-
-function updateMultiFieldEmpty(fieldId) {
-  let field = document.getElementById(fieldId);
-  field.style.outline = "1px solid cyan";
-  field.title = 'Field is mandatory';
 }
 
 export function updateScenarioFieldOutlineAndTooltip(fieldId) {
@@ -398,42 +401,62 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
   
     if (field.classList[0] === 'scenariofield') {
         let customfield = document.getElementById(field.id.replace('scenario','scenariocustom'));
-        // check for duplicate scenarios
-        if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
+
+        // check if scenario is correct
+        // if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
+        //   isCorrect = false;
+        //   updateWrong(customfield.id,'Scenario is duplicate of other (existing) scenario');
+        // } else 
+        if (isModular() && !checkModularScenario(field.id)) {
+          updateWrong(customfield.id,'One or more modular element fields are invalid. select scenario to see more details.');
           isCorrect = false;
-          updateScenarioFieldDuplicate(customfield.id);
-        } else if (isModular() && !checkModularScenario(field.id)) {
-          updateScenarioFieldWrongModularScenario(customfield.id);
+         
+        // check if custom name is correct
+        } else if (!checkCustomName(customfield.id)) {
+          updateWrong(customfield.id,'Allowed: A-Z, a-z, 0-9, -, _ (no spaces)');
           isCorrect = false;
+        } else if (isCustomNameDuplicate(customfield.id) && !isEmpty(customfield.value)) { 
+          updateWrong(customfield.id,'Name is duplicate of other (existing) scenario');
+          isCorrect = false;
+
+        // check if combination is correct
+        } else if (isEmpty(field.value) && !isEmpty(customfield.value)) {
+          updateWrong(customfield.id,'No tiles selected');
+          isCorrect = false;
+        } else if (!isEmpty(field.value) && isEmpty(customfield.value)) {
+          updateWrong(customfield.id,'Must specify name if tiles selected');
+          isCorrect = false;
+
+        // check focused or correct
         } else if (field.id === currentInput.id && isModular()) { 
-          updateScenarioFieldFocused(customfield.id);
+          updateFocused(customfield.id);
         } else {
-          updateScenarioFieldRight(customfield.id);
+          updateRight(customfield.id);
         }
     }
     
     return isCorrect;
 }
 
-export function updateScenarioFieldDuplicate(fieldId) {
-    let field = document.getElementById(fieldId);
-    field.style.outline = "1px solid red";
-    field.title = 'Scenario is duplicate of other (existing) scenario';
-}
-  
-export function updateScenarioFieldWrongModularScenario(fieldId) {
-    let field = document.getElementById(fieldId);
-    field.style.outline = "1px solid red";
-    field.title = 'One or more modular element fields are invalid. select scenario to see more details.';
-}
-  
-export function updateScenarioFieldRight(fieldId, info="") {
-    let field = document.getElementById(fieldId);
-    field.style.outline = "none";
-    field.title = info;
+function updateWrong(fieldId,title="Wrong") {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid red";
+  field.title = title;
 }
 
-export function updateScenarioFieldFocused(fieldId) {
+function updateEmpty(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid cyan";
+  field.title = 'Field is mandatory';
+}
+
+export function updateRight(fieldId) {
+    let field = document.getElementById(fieldId);
+    field.style.outline = "none";
+    field.title = '';
+}
+
+export function updateFocused(fieldId) {
   let field = document.getElementById(fieldId);
   field.style.outline = "1px solid blue";
   field.title = '';
@@ -450,6 +473,36 @@ export function isScenarioDuplicate(fieldId) {
   // check other new scenarios
   var scenarioFields = document.querySelectorAll(".scenariofield");
   for (const sf of scenarioFields) {
+    if (sf.id !== field.id && sf.value === field.value && !isEmpty(sf.value)) {
+      // if scenario equal to other scenario: duplicate
+      isDuplicate = true;
+      break;
+    }
+  }
+
+  // check existing scenarios (if present)
+  if (!isDuplicate ) {
+    var actualValue = getNewScenarioValue(field.value);
+    var existingScenarios = document.querySelectorAll(".existingscenariofield");
+    for (const es of existingScenarios) {
+      if (actualValue === es.value ) {
+        // if scenario equal to existing scenario: duplicate
+        isDuplicate = true;
+        break;
+      }    
+    }
+  }
+  
+  return isDuplicate;
+}
+
+export function isCustomNameDuplicate(fieldId) {
+  var isDuplicate = false;
+  let field = document.getElementById(fieldId);
+  
+  // check other new scenarios
+  var customFields = document.querySelectorAll(".scenariocustomfield");
+  for (const sf of customFields) {
     if (sf.id !== field.id && sf.value === field.value && !isEmpty(sf.value)) {
       // if scenario equal to other scenario: duplicate
       isDuplicate = true;
