@@ -36,7 +36,8 @@ export class CreatePostmanCollectionHtmlObject {
     private _multiFieldValues: {[details: string] : string;},
     private _nofPackages: string[],
     private _pmcObjects : {parent:string, file:string, path:string}[],
-    private _showLoad: boolean
+    private _showLoad: boolean,
+    private _scenarioCustomFields: string[]
   ) { }
 
   // METHODS
@@ -56,7 +57,8 @@ export class CreatePostmanCollectionHtmlObject {
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
       this._multiFieldValues,
-      this._nofPackages
+      this._nofPackages,
+      this._scenarioCustomFields
     );
 
     // define panel HTML

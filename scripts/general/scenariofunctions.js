@@ -17,6 +17,8 @@ export function addScenarioEventListeners(vscodeApi) {
 
   // scenario custom fields
   for (const field of document.querySelectorAll(".scenariocustomfield")) {
+    field.addEventListener("keyup", scenarioFieldChange(vscodeApi));
+    field.addEventListener("change", scenarioFieldChange(vscodeApi));
     field.addEventListener('focus',modularScenarioFocus);
   }
 

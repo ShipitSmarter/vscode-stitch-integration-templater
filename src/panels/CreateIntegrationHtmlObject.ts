@@ -33,7 +33,8 @@ export class CreateIntegrationHtmlObject {
     private _stepTypeOptions: string[],
     private _stepTypes: string[],
     private _stepMethodOptions: string[],
-    private _stepMethods: string[]
+    private _stepMethods: string[],
+    private _scenarioCustomFields: string[]
     ) { }
 
   // METHODS
@@ -53,7 +54,8 @@ export class CreateIntegrationHtmlObject {
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
       this._multiFieldValues,
-      this._nofPackages
+      this._nofPackages,
+      this._scenarioCustomFields
     );
 
     // define panel HTML

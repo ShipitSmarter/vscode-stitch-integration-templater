@@ -37,6 +37,7 @@ export class CreateIntegrationPanel {
   private _stepTypes: string[] = [];
   private _stepMethodOptions: string[] = [];
   private _stepMethods: string[] = [];
+  private _scenarioCustomFields: string[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -187,6 +188,9 @@ export class CreateIntegrationPanel {
                 break;
               case 'scenariofield':
                 this._scenarioFieldValues[index] = value;
+                break;
+              case 'scenariocustomfield':
+                this._scenarioCustomFields[index] = value;
                 break;
               case 'existingscenariocheckbox':
                 this._existingScenarioCheckboxValues[index] = toBoolean(value);
@@ -582,7 +586,8 @@ export class CreateIntegrationPanel {
       this._stepTypeOptions,
       this._stepTypes,
       this._stepMethodOptions,
-      this._stepMethods
+      this._stepMethods,
+      this._scenarioCustomFields
     );
 
     let html =  createIntegrationHtmlObject.getHtml();

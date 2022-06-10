@@ -15,7 +15,8 @@ export class ScenarioGridObject {
         private _nofScenarios: number,
         private _nofScenariosIndex: number,
         private _multiFieldValues: {[details: string] : string;},
-        private _nofPackages: string[]
+        private _nofPackages: string[],
+        private _scenarioCustomFields: string[]
     ) { }
 
     public getHtml(): string {
@@ -106,7 +107,7 @@ export class ScenarioGridObject {
             <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" readonly></vscode-text-field>
         </section>
         <section class="component-example">
-            <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString('')} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
+            <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
         </section>`;
     }
 

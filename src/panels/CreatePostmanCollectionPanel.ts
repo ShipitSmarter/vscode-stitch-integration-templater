@@ -40,6 +40,7 @@ export class CreatePostmanCollectionPanel {
   private _pmcObjects : {parent:string, file:string, path:string}[] = [];
 
   private _showLoad : boolean = false;
+  private _scenarioCustomFields: string[] = [];
   private _codeCompanies: {
     company: string,
     codecompany: string
@@ -264,6 +265,10 @@ export class CreatePostmanCollectionPanel {
 
               case 'scenariofield':
                 this._scenarioFieldValues[index] = value;
+                break;
+              
+              case 'scenariocustomfield':
+                this._scenarioCustomFields[index] = value;
                 break;
 
               case 'showload':
@@ -630,7 +635,8 @@ export class CreatePostmanCollectionPanel {
       this._multiFieldValues,
       this._nofPackages,
       this._pmcObjects,
-      this._showLoad
+      this._showLoad,
+      this._scenarioCustomFields
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();
