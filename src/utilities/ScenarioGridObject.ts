@@ -138,7 +138,7 @@ export class ScenarioGridObject {
                     <section class="component-example">
                         <vscode-button id="${this._getCleanParent(parent) + element}" name="${element}" class="modulartile" parent="${this._getCleanParent(parent)}" appearance="secondary">${element}</vscode-button>
                         ${ currentElementObject.multi ? /*html*/ `
-                            <vscode-text-field id="multifield${this._getCleanParent(parent) + element}" name="${element}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" placeholder="packages..." hidden></vscode-text-field>
+                            <vscode-text-field id="multifield${this._getCleanParent(parent) + element}" name="${element}" parent="${this._getCleanParent(parent)}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" placeholder="packages..." hidden></vscode-text-field>
                         ` : ''}
                     </section>
                     `;

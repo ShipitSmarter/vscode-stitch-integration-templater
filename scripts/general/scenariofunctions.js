@@ -65,9 +65,11 @@ export var multiFieldChange = function (vscodeApi) { return  function (event) {
   vscodeApi.postMessage({ command: "savemultivalue", text: textString });
 
   // update scenario in currentInput
-  let element = field.getAttribute('name');
-  let multiregex = new RegExp('-' + element + '_[^-]*(-|$)');
-  let newValue = currentInput.value.replace(multiregex, '-' + element + '_' + value + '$1');
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
+  let multiregex = new RegExp('-' + fullName + '_[^-]*(-|$)');
+  let newValue = currentInput.value.replace(multiregex, '-' + fullName + '_' + value + '$1');
   updateModularValue(currentInput.id, newValue);
 
   // trigger 'change' event to save and check content
@@ -320,7 +322,10 @@ export function updateTiles(content) {
     
     let tiles = document.querySelectorAll(".modulartile");
     for (const tile of tiles) {
-      let regex = new RegExp('-' + tile.id + '([-_]|$)');
+      let element = tile.getAttribute('name');
+      let parent = tile.getAttribute('parent');
+      let fullName = parent + ':' + element;
+      let regex = new RegExp('-' + fullName + '([-_]|$)');
       // if (currentElements.includes(tile.id)) {
       if (content.match(regex)) {
         setPrimary(tile.id);
