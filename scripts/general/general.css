@@ -93,9 +93,12 @@ h1 {
   width: 10rem;
 }
 
-.scenariofield,
-.scenariocustomfield {
+.scenariofield {
   width: 25rem;
+}
+
+.scenariocustomfield {
+  width: 23rem;
 }
 
 #nofpackages{

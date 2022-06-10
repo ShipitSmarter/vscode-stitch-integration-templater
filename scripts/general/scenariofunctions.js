@@ -65,7 +65,7 @@ export var multiFieldChange = function (vscodeApi) { return  function (event) {
   vscodeApi.postMessage({ command: "savemultivalue", text: textString });
 
   // update scenario in currentInput
-  let element = field.id.replace('multifield','');
+  let element = field.getAttribute('name');
   let multiregex = new RegExp('-' + element + '_[^-]*(-|$)');
   let newValue = currentInput.value.replace(multiregex, '-' + element + '_' + value + '$1');
   updateModularValue(currentInput.id, newValue);
@@ -194,26 +194,30 @@ function updateModularValue(fieldId, newValue) {
   field.value = newValue;
 
   // update custom name if necessary
+  let curCleanValue = curValue.replace(/\:/g,'');
+  let newCleanValue = newValue.replace(/\:/g,'');
   let custom = document.getElementById(field.id.replace('scenario','scenariocustom'));
-  if (isEmpty(custom.value) || (custom.value === curValue) ) {
-    custom.value = newValue;
+  if (isEmpty(custom.value) || (custom.value === curCleanValue) ) {
+    custom.value = newCleanValue;
   }
 }
 
 export function setPrimary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm-multi_' + getNofPackages(currentInput.id) ;
+  const base = 'm-multi_' + getNofPackages(currentInput.id);
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
 
   // change appearance
   field.setAttribute('appearance','primary');
 
   // set multifield if present (and not already set)
-  let multifield = document.querySelectorAll("#multifield" + fieldId);
+  let multifield = document.querySelectorAll("#multifield" + parent + element);
 
   if (multifield.length > 0) {
     
     // extract current value from scenario field (if present)
-    let multiregex = new RegExp('-' + field.id + '_([^-]*)(-|$)');
+    let multiregex = new RegExp('-' + element + '_([^-]*)(-|$)');
     let matchMultiInScenario = currentInput.value.match(multiregex);
     if (matchMultiInScenario) {
       multifield[0].value = matchMultiInScenario[1];
@@ -233,9 +237,10 @@ export function setPrimary(fieldId,vscodeApi) {
 
   // add tile content to last selected scenario field
   // let currentElements = currentInput.value.split('-');
-  let regex = new RegExp('-' + field.id + '([-_]|$)',"g");
+  let fullName = parent + ':' + element;
+  let regex = new RegExp('-' + fullName + '([-_]|$)',"g");
   let check = currentInput.value.match(regex);
-  let addstring = field.id + (multifield.length > 0 ? '_' + multifield[0].value : '');
+  let addstring = fullName + (multifield.length > 0 ? '_' + multifield[0].value : '');
   if (!check) {
     let curValue = currentInput.value;
     let newValue = currentInput.value + (isEmpty(curValue) ? (base + '-') : '-') + addstring;
@@ -250,13 +255,15 @@ export function setPrimary(fieldId,vscodeApi) {
 
 export function setSecondary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm-multi_' + getNofPackages(currentInput.id) ;
+  const base = 'm-multi_' + getNofPackages(currentInput.id);
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
 
   // change appearance
   field.setAttribute('appearance','secondary');
 
   // clear multifield if present
-  let multifield = document.querySelectorAll("#multifield" + fieldId);
+  let multifield = document.querySelectorAll("#multifield" + parent + element);
   if (multifield.length > 0) {
 
     //clear multi value
@@ -273,9 +280,10 @@ export function setSecondary(fieldId,vscodeApi) {
   }
 
   // remove tile content from last selected scenario field
+  let fullName = parent + ':' + element;
   let oldValue = currentInput.value;
-  let nonmultiregex = new RegExp('-' + field.id + '(-|$)');
-  let multiregex = new RegExp('-' + field.id + '_[^-]*(-|$)');
+  let nonmultiregex = new RegExp('-' + fullName + '(-|$)');
+  let multiregex = new RegExp('-' + fullName + '_[^-]*(-|$)');
 
   // replace if multi, else replace if not multi
   let curValue = currentInput.value;
