@@ -11,7 +11,7 @@ function main() {
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
 
   // input fields
-  const fields = document.querySelectorAll(".field,.stepfield,.dropdown,.stepdropdown,.existingscenariocheckbox");
+  const fields = document.querySelectorAll(".field,.dropdown,.stepdropdown,.existingscenariocheckbox");
   for (const field of fields) {
     field.addEventListener("keyup", fieldChange);
   }
@@ -50,7 +50,6 @@ function fieldChange(event) {
   switch (field.classList[0]) {
     // input fields: check contents
     case 'field':
-    case 'stepfield':
       updateFieldOutlineAndTooltip(field.id);
       break;
 
@@ -90,22 +89,7 @@ function infoMessage(info) {
 
 function saveValue(fieldId) {
   var field = document.getElementById(fieldId);
-  var attr = '';
-  switch (field.classList[0]) {
-    case 'dropdown':
-    case 'field':
-      attr = 'index';
-      break;
-    case 'stepdropdown':
-    case 'stepfield':
-      attr = 'indexstep';
-      break;
-
-    case 'existingscenariocheckbox':
-      attr = 'indexescheckbox';
-      break;
-
-  }
+  var attr = 'index';
   var value = field.checked ?? field.value;
   var textString = field.classList[0] + '|' + (field.getAttribute(attr) ?? '') + '|' + value;
   vscodeApi.postMessage({ command: "savevalue", text: textString });
@@ -114,7 +98,7 @@ function saveValue(fieldId) {
 function checkFields() {
   // check if any incorrect field contents and update fields outlining and tooltip in the process
   var check = true;
-  const fields = document.querySelectorAll(".field,.stepfield");
+  const fields = document.querySelectorAll(".field");
   for (const field of fields) {
     check = updateFieldOutlineAndTooltip(field.id) ? check : false;
   }
@@ -143,19 +127,6 @@ function checkContent(id, value) {
           check = 'invalid';
         }
         break;
-      case 'carrierapidescription':
-        check = value.match(/[^A-Za-z0-9\-\:\(\) ]/);
-        break;
-      case 'testuser':
-        check = value.match(/[^A-Za-z0-9\-\_]/);
-        break;
-      case 'testpwd':
-        check = '';
-        break;
-
-      case 'stepfield':
-        check = value.match(/[^A-Za-z0-9\:\/\.\?\=\&\-\_]/);
-        break;
     }
 
     // if invalid content: return false
@@ -177,19 +148,6 @@ function getContentHint(elementid) {
       break;
     case 'carriercode':
       hint = 'A-Z, 0-9 (only capitals); exactly 3 characters';
-      break;
-    case 'carrierapidescription':
-      hint = 'A-Z, a-z, 0-9, \':\', \'(\', \')\' (spaces allowed)';
-      break;
-    case 'testuser':
-      hint = 'A-Z, a-z, 0-9, \'-\', \'_\' (no spaces)';
-      break;
-    case 'testpwd':
-      hint = 'Any character allowed';
-      break;
-
-    case 'stepfield':
-      hint = 'A-Z, a-z, 0-9, :/.?=&-_ (no spaces)';
       break;
   }
 
@@ -240,14 +198,6 @@ function checkIntegrationPath() {
 }
 
 function createIntegration() {
-  // for all empty step urls: save placeholder
-  for (const field of document.querySelectorAll('.stepfield')) {
-    if ((field.id.startsWith('testurl') || field.id.startsWith('produrl')) && isEmpty(field.value)) {
-      field.value = field.getAttribute('placeholder');
-      field.dispatchEvent(new Event('keyup'));
-    }
-  }
-
   // check field content
   if (checkFields()) {
     vscodeApi.postMessage({ command: "createintegration", text: "real fast!" });

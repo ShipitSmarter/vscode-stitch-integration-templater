@@ -8,11 +8,8 @@ const carrierIndex = 0;
 const apiIndex = 1;
 const moduleIndex = 2;
 const carrierCodeIndex = 3;
-const apiDescriptionIndex = 4;
 const nofStepsIndex = 5;
 const nofScenariosIndex = 6;
-const carrierUserIndex = 7;
-const carrierPwdIndex = 8;
 
 export class CreateIntegrationPanel {
   // PROPERTIES
@@ -45,6 +42,7 @@ export class CreateIntegrationPanel {
     this._fieldValues[moduleIndex] = 'booking';
     this._fieldValues[nofStepsIndex] = "1";
     this._fieldValues[nofScenariosIndex] = "1";
+    this._stepFieldValues[0] = this._fieldValues[moduleIndex];
 
     // set content
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
@@ -161,11 +159,8 @@ export class CreateIntegrationPanel {
                 this._fieldValues[index] = value;
                 break;
               case 'stepdropdown':
-              case 'stepfield':
                 this._stepFieldValues[index] = value;
-                if (index < 10) {
-                  this._updateWebview(extensionUri);
-                }
+                //this._updateWebview(extensionUri);
                 break;
               case 'scenariofield':
                 this._scenarioFieldValues[index] = value;
@@ -429,11 +424,9 @@ export class CreateIntegrationPanel {
     // scenarios
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
 
-    // steps fields: step name, testurls, produrls
+    // steps fields: step name
     let nofSteps = this._fieldValues[nofStepsIndex];
     let stepsString: string = '';
-    let testUrlsString: string = '';
-    let prodUrlsString: string = '';
     for (let index = 0; index < +nofSteps; index++) {
       let step: string = this._stepFieldValues[index] + '';
 
@@ -442,19 +435,9 @@ export class CreateIntegrationPanel {
       if (index !== +nofSteps - 1) {
         stepsString += ',';
       }
-      // testurls
-      if (this._stepFieldValues[index + 10] !== undefined) {
-        testUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERTESTENDPOINT = "' + this._stepFieldValues[index + 10] + '"';
-      }
-      // produrls
-      if (this._stepFieldValues[index + 20] !== undefined) {
-        prodUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERPRODUCTIONENDPOINT = "' + this._stepFieldValues[index + 20] + '"';
-      }
     }
     // replace
     newScriptContent = newScriptContent.replace('[steps]', stepsString);
-    newScriptContent = newScriptContent.replace('[testurls]', testUrlsString);
-    newScriptContent = newScriptContent.replace('[produrls]', prodUrlsString);
 
     // return script content
     return newScriptContent;
@@ -502,16 +485,6 @@ export class CreateIntegrationPanel {
       // stepname
       if (this._stepFieldValues[index] !== undefined) {
         newStepFieldValues[index] = this._stepFieldValues[index];
-      }
-
-      // testurl
-      if (this._stepFieldValues[index + 10] !== undefined) {
-        newStepFieldValues[index + 10] = this._stepFieldValues[index + 10];
-      }
-
-      // produrl
-      if (this._stepFieldValues[index + 20] !== undefined) {
-        newStepFieldValues[index + 20] = this._stepFieldValues[index + 20];
       }
 
     }
