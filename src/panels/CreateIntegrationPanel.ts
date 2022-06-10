@@ -312,8 +312,9 @@ export class CreateIntegrationPanel {
       // replace CreateOrUpdate value
       newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
 
-      // replace New-UpdateIntegration function call
-      let newNewUpdateIntegration = 'New-UpdateIntegration -CarrierName $CarrierName -Module $Module -CarrierAPI $CarrierAPI -Scenarios $Scenarios -StringReplaceList $StringReplaceList -CreateOrUpdate $CreateOrUpdate -Steps $Steps -Test';
+      // replace New-UpdateIntegration function call -> should be last line from template
+      let templateContent = fs.readFileSync(this._getTemplatePath(this._functionsPath), 'utf8');
+      let newNewUpdateIntegration = (templateContent.match(/\r?\n[^\r\n]*\s*$/) ?? [''])[0].trim();
       newScriptContent = newScriptContent.replace(/New-UpdateIntegration\s[\S\s]+$/g,newNewUpdateIntegration);
 
       // remove modular value if present
