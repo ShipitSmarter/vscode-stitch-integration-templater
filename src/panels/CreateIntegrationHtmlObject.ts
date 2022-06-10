@@ -31,7 +31,9 @@ export class CreateIntegrationHtmlObject {
     private _moduleOptions: string[],
     private _stepOptions: string[],
     private _stepTypeOptions: string[],
-    private _stepTypes: string[]
+    private _stepTypes: string[],
+    private _stepMethodOptions: string[],
+    private _stepMethods: string[]
     ) { }
 
   // METHODS
@@ -202,6 +204,7 @@ export class CreateIntegrationHtmlObject {
   private _stepInputs(nofSteps: number): string {
     let subStepNames: string = '';
     let subStepTypes: string = '';
+    let subStepMethods: string = '';
     for (let step = 0; step < +nofSteps; step++) {
 
       // step name dropdown
@@ -223,6 +226,15 @@ export class CreateIntegrationHtmlObject {
           </vscode-dropdown>
         </section>
       `;
+
+      // step method dropdown
+      subStepMethods += /*html*/`
+        <section class="component-vmargin">
+          <vscode-dropdown id="stepmethod${step}" index="${step}" ${valueString(this._stepMethods[step])} class="stepmethoddropdown" ${hiddenString(this._stepTypes[step] === 'http')} position="below">
+            ${dropdownOptions(this._stepMethodOptions)}
+          </vscode-dropdown>
+        </section>
+      `;
     }
 
     let html: string = /*html*/ `
@@ -236,7 +248,8 @@ export class CreateIntegrationHtmlObject {
           ${subStepTypes}
         </section>
         <section class="floatleftnopadding">
-          <p></p>
+          <p>Method</p>
+          ${subStepMethods}
         </section>
       </section>`;
 

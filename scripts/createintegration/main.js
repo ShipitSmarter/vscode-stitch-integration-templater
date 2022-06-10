@@ -17,7 +17,7 @@ function main() {
   }
 
   // fixed/step dropdowns
-  const dropDowns = document.querySelectorAll(".dropdown,.stepdropdown,.steptypedropdown");
+  const dropDowns = document.querySelectorAll(".dropdown,.stepdropdown,.steptypedropdown,.stepmethoddropdown");
   for (const dropDown of dropDowns) {
     dropDown.addEventListener("change", fieldChange);
   }

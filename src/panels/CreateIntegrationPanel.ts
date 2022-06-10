@@ -35,6 +35,8 @@ export class CreateIntegrationPanel {
   private _stepOptions: string[] = [];
   private _stepTypeOptions: string[] = [];
   private _stepTypes: string[] = [];
+  private _stepMethodOptions: string[] = [];
+  private _stepMethods: string[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -172,6 +174,10 @@ export class CreateIntegrationPanel {
                 break;
               case 'steptypedropdown':
                 this._stepTypes[index] = value;
+                this._updateWebview(extensionUri);
+                break;
+              case 'stepmethoddropdown':
+                this._stepMethods[index] = value;
                 //this._updateWebview(extensionUri);
                 break;
               case 'scenariofield':
@@ -235,6 +241,7 @@ export class CreateIntegrationPanel {
     await this._getModuleOptions();
     await this._getStepOptions();
     await this._getStepTypeOptions();
+    await this._getStepMethodOptions();
 
     // update panel
     this._updateWebview(extensionUri);
@@ -498,6 +505,12 @@ export class CreateIntegrationPanel {
     this._stepTypeOptions = fs.readFileSync(stepTypeOptionsPath, 'utf8').split("\n").map(el => el.trim());
   }
 
+  private async _getStepMethodOptions() {
+    // get module dropdown options from txt file
+    let stepMethodOptionsPath = await getWorkspaceFile('**/templater/integration/StepMethodOptions.txt');
+    this._stepMethodOptions = fs.readFileSync(stepMethodOptionsPath, 'utf8').split("\n").map(el => el.trim());
+  }
+
   private _cropFlexFields() {
     // crop steps array
     let newStepFieldValues: string[] = [];
@@ -526,6 +539,7 @@ export class CreateIntegrationPanel {
       await this._getModuleOptions();
       await this._getStepOptions();
       await this._getStepTypeOptions();
+      await this._getStepMethodOptions();
       this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
       this._integrationObjects = await getAvailableIntegrations('integration');
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
@@ -557,7 +571,9 @@ export class CreateIntegrationPanel {
       this._moduleOptions,
       this._stepOptions,
       this._stepTypeOptions,
-      this._stepTypes
+      this._stepTypes,
+      this._stepMethodOptions,
+      this._stepMethods
     );
 
     let html =  createIntegrationHtmlObject.getHtml();
