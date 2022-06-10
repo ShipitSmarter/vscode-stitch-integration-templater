@@ -209,6 +209,7 @@ export function setPrimary(fieldId,vscodeApi) {
   const base = 'm-multi_' + getNofPackages(currentInput.id);
   const parent = field.getAttribute('parent');
   const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
 
   // change appearance
   field.setAttribute('appearance','primary');
@@ -219,7 +220,7 @@ export function setPrimary(fieldId,vscodeApi) {
   if (multifield.length > 0) {
     
     // extract current value from scenario field (if present)
-    let multiregex = new RegExp('-' + element + '_([^-]*)(-|$)');
+    let multiregex = new RegExp('-' + fullName + '_([^-]*)(-|$)');
     let matchMultiInScenario = currentInput.value.match(multiregex);
     if (matchMultiInScenario) {
       multifield[0].value = matchMultiInScenario[1];
@@ -239,7 +240,6 @@ export function setPrimary(fieldId,vscodeApi) {
 
   // add tile content to last selected scenario field
   // let currentElements = currentInput.value.split('-');
-  let fullName = parent + ':' + element;
   let regex = new RegExp('-' + fullName + '([-_]|$)',"g");
   let check = currentInput.value.match(regex);
   let addstring = fullName + (multifield.length > 0 ? '_' + multifield[0].value : '');
@@ -260,6 +260,7 @@ export function setSecondary(fieldId,vscodeApi) {
   const base = 'm-multi_' + getNofPackages(currentInput.id);
   const parent = field.getAttribute('parent');
   const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
 
   // change appearance
   field.setAttribute('appearance','secondary');
@@ -282,7 +283,6 @@ export function setSecondary(fieldId,vscodeApi) {
   }
 
   // remove tile content from last selected scenario field
-  let fullName = parent + ':' + element;
   let oldValue = currentInput.value;
   let nonmultiregex = new RegExp('-' + fullName + '(-|$)');
   let multiregex = new RegExp('-' + fullName + '_[^-]*(-|$)');
