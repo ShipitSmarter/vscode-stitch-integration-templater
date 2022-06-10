@@ -13,7 +13,11 @@ export function addScenarioEventListeners(vscodeApi) {
   for (const field of document.querySelectorAll(".scenariofield")) {
     field.addEventListener("keyup", scenarioFieldChange(vscodeApi));
     field.addEventListener("change", scenarioFieldChange(vscodeApi));
-    field.addEventListener('click',modularScenarioFocus);
+  }
+
+  // scenario custom fields
+  for (const field of document.querySelectorAll(".scenariocustomfield")) {
+    field.addEventListener('focus',modularScenarioFocus);
   }
 
   // modular checkbox
@@ -115,7 +119,8 @@ export var changePackages = function (vscodeApi) { return  function (event) {
 export function modularScenarioFocus(event) {
     // track last selected scenario field
     // from https://stackoverflow.com/a/68176703/1716283
-    const field = event.target;
+    const customfield = event.target;
+    const field = document.getElementById(customfield.id.replace('scenariocustom','scenario'));
 
     if (field.id !== currentInput.id && isModular()) {
       // update currentInput
@@ -390,17 +395,18 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
     let field = document.getElementById(fieldId);
   
     if (field.classList[0] === 'scenariofield') {
+        let customfield = document.getElementById(field.id.replace('scenario','scenariocustom'));
         // check for duplicate scenarios
         if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
           isCorrect = false;
-          updateScenarioFieldDuplicate(field.id);
+          updateScenarioFieldDuplicate(customfield.id);
         } else if (isModular() && !checkModularScenario(field.id)) {
-          updateScenarioFieldWrongModularScenario(field.id);
+          updateScenarioFieldWrongModularScenario(customfield.id);
           isCorrect = false;
         } else if (field.id === currentInput.id && isModular()) { 
-          updateScenarioFieldFocused(field.id);
+          updateScenarioFieldFocused(customfield.id);
         } else {
-          updateScenarioFieldRight(field.id);
+          updateScenarioFieldRight(customfield.id);
         }
     }
     
