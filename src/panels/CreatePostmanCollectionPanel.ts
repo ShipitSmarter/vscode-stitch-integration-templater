@@ -425,18 +425,8 @@ export class CreatePostmanCollectionPanel {
     }'`;
 
     // scenarios string
-    let newScenariosString : string = '';
-    let newScenarios = this._getNewScenarios();
-    for (const scenario of newScenarios) {
-      newScenariosString += `\n '${scenario}'`;
-
-      // add comma
-      if (scenario !== newScenarios[newScenarios.length-1]) {
-        newScenariosString += ',';
-      }
-    }
-
-    let defScenariosString = (this._independent) ? `$Scenarios = @( ${newScenariosString} )` : '';
+    let newScenariosString =  this._getNewScenarios().join(`",\n"`);
+    let defScenariosString = (this._independent) ? `$Scenarios = @( \n "${newScenariosString}" \n)` : '';
 
     let applyScenariosString = (this._independent) ? '-Scenarios $Scenarios' : '';
     let loadFunctions = `. "..\\..\\scenario-templates\\scripts\\functions.ps1"`;
@@ -479,7 +469,19 @@ export class CreatePostmanCollectionPanel {
   }
 
   private _getNewScenarios() : string[] {
-    return this._scenarioFieldValues.map( el => this._getNewScenarioValue(el)).filter(el => !isEmpty(el)).sort();
+    let newScenarios: string[] = [];
+    // if modular: combine with custom names
+    if (this._modularValue) {
+      for (let index = 0; index < this._scenarioFieldValues.length; index++) {
+        if (!isEmpty(this._scenarioFieldValues[index])) {
+          newScenarios[index] = this._scenarioFieldValues[index] + '|' + this._scenarioCustomFields[index];
+        }
+      }
+    } else {
+      newScenarios =  this._scenarioFieldValues.map( el => this._getNewScenarioValue(el));
+    }
+
+    return newScenarios.filter(el => !isEmpty(el)).sort();
   }
 
   private _getIntegrationName(): string {
