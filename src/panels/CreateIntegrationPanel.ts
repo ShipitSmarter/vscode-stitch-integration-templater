@@ -8,11 +8,8 @@ const carrierIndex = 0;
 const apiIndex = 1;
 const moduleIndex = 2;
 const carrierCodeIndex = 3;
-const apiDescriptionIndex = 4;
 const nofStepsIndex = 5;
 const nofScenariosIndex = 6;
-const carrierUserIndex = 7;
-const carrierPwdIndex = 8;
 
 export class CreateIntegrationPanel {
   // PROPERTIES
@@ -21,7 +18,6 @@ export class CreateIntegrationPanel {
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
   private _stepFieldValues: string[] = [];
-  private _otherStepValues: string[] = [];
   private _scenarioFieldValues: string[] = [];
   private _existingScenarioFieldValues: string[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
@@ -35,6 +31,12 @@ export class CreateIntegrationPanel {
   private _functionsPath: string = '';
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
+  private _moduleOptions: string[] = [];
+  private _stepOptions: string[] = [];
+  private _stepTypeOptions: string[] = [];
+  private _stepTypes: string[] = [];
+  private _stepMethodOptions: string[] = [];
+  private _stepMethods: string[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -44,6 +46,7 @@ export class CreateIntegrationPanel {
     this._fieldValues[moduleIndex] = 'booking';
     this._fieldValues[nofStepsIndex] = "1";
     this._fieldValues[nofScenariosIndex] = "1";
+    this._stepFieldValues[0] = this._fieldValues[moduleIndex];
 
     // set content
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
@@ -145,17 +148,42 @@ export class CreateIntegrationPanel {
             switch (classIndexValue[0]) {
               case 'dropdown':
                 this._fieldValues[index] = value;
+                switch (index) {
+                  case nofStepsIndex :
+                    for (let ii = 0; ii < value; ii++) {
+                      // pre-fill empty step names
+                      if (!this._stepFieldValues[ii]) {
+                        this._stepFieldValues[ii] = [this._fieldValues[carrierIndex]].concat(this._stepOptions)[ii % (this._stepOptions.length + 1)];
+                      }
+
+                      // pre-fill empty step types
+                      if (!this._stepTypes[ii]) {
+                        this._stepTypes[ii] = this._stepTypeOptions[0];
+                      }
+
+                      // pre-fill empty step methods
+                      if (!this._stepMethods[ii]) {
+                        this._stepMethods[ii] = this._stepMethodOptions[0];
+                      }
+                    }
+                    break;
+                }
                 this._updateWebview(extensionUri);
                 break;
               case 'field':
                 this._fieldValues[index] = value;
                 break;
               case 'stepdropdown':
-              case 'stepfield':
                 this._stepFieldValues[index] = value;
+                //this._updateWebview(extensionUri);
                 break;
-              case 'otherstepfield':
-                this._otherStepValues[index] = value;
+              case 'steptypedropdown':
+                this._stepTypes[index] = value;
+                this._updateWebview(extensionUri);
+                break;
+              case 'stepmethoddropdown':
+                this._stepMethods[index] = value;
+                //this._updateWebview(extensionUri);
                 break;
               case 'scenariofield':
                 this._scenarioFieldValues[index] = value;
@@ -195,13 +223,6 @@ export class CreateIntegrationPanel {
       // set 'update' if integration path exists
       this._createUpdateValue = 'update';
 
-      // update modular value from script
-      // if (this._modularValue !== this._currentIntegration.modular) {
-      //   // if modular checkbox switches: clear scenario fields
-      //   this._scenarioFieldValues = [];
-      // }
-      // this._modularValue = this._currentIntegration.modular;
-
       // update valid existing scenario values from scenario folder instead
       this._existingScenarioFieldValues = this._currentIntegration.validscenarios;
 
@@ -220,6 +241,12 @@ export class CreateIntegrationPanel {
     } else {
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     }
+
+    // update dropdown options
+    await this._getModuleOptions();
+    await this._getStepOptions();
+    await this._getStepTypeOptions();
+    await this._getStepMethodOptions();
 
     // update panel
     this._updateWebview(extensionUri);
@@ -297,8 +324,9 @@ export class CreateIntegrationPanel {
       // replace CreateOrUpdate value
       newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
 
-      // replace New-UpdateIntegration function call
-      let newNewUpdateIntegration = 'New-UpdateIntegration -CarrierName $CarrierName -Module $Module -CarrierAPI $CarrierAPI -Scenarios $Scenarios -StringReplaceList $StringReplaceList -CreateOrUpdate $CreateOrUpdate -Steps $Steps -Test';
+      // replace New-UpdateIntegration function call -> should be last line from template
+      let templateContent = fs.readFileSync(this._getTemplatePath(this._functionsPath), 'utf8');
+      let newNewUpdateIntegration = (templateContent.match(/\r?\n[^\r\n]*\s*$/) ?? [''])[0].trim();
       newScriptContent = newScriptContent.replace(/New-UpdateIntegration\s[\S\s]+$/g,newNewUpdateIntegration);
 
       // remove modular value if present
@@ -422,39 +450,23 @@ export class CreateIntegrationPanel {
     // scenarios
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
 
-    // steps fields: step name, testurls, produrls
+    // steps fields: step name
     let nofSteps = this._fieldValues[nofStepsIndex];
     let stepsString: string = '';
-    let testUrlsString: string = '';
-    let prodUrlsString: string = '';
     for (let index = 0; index < +nofSteps; index++) {
-      let step: string = '';
-
-      // if 'other': take alternative value
-      if (this._stepFieldValues[index] === 'other') {
-        step = this._otherStepValues[index] + '';
-      } else {
-        step = this._stepFieldValues[index] + '';
-      }
+      let step: string = this._stepFieldValues[index] + '';
+      let type: string = this._stepTypes[index] + '';
+      let method: string = this._stepMethods[index] + '';
+      let methodString = (type === 'http') ? ('-' + method) : '';
 
       // steps
-      stepsString += '\n    "' + step + '"';
+      stepsString += '\n    "' + step + ':' + type + methodString + '"';
       if (index !== +nofSteps - 1) {
         stepsString += ',';
-      }
-      // testurls
-      if (this._stepFieldValues[index + 10] !== undefined) {
-        testUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERTESTENDPOINT = "' + this._stepFieldValues[index + 10] + '"';
-      }
-      // produrls
-      if (this._stepFieldValues[index + 20] !== undefined) {
-        prodUrlsString += '\n    ' + step.toUpperCase() + '_CARRIERPRODUCTIONENDPOINT = "' + this._stepFieldValues[index + 20] + '"';
       }
     }
     // replace
     newScriptContent = newScriptContent.replace('[steps]', stepsString);
-    newScriptContent = newScriptContent.replace('[testurls]', testUrlsString);
-    newScriptContent = newScriptContent.replace('[produrls]', prodUrlsString);
 
     // return script content
     return newScriptContent;
@@ -483,33 +495,41 @@ export class CreateIntegrationPanel {
     return filesPath + '/carriers/' + this._fieldValues[carrierIndex];
   }
 
+  private async _getModuleOptions() {
+    // get module dropdown options from txt file
+    let moduleOptionsPath = await getWorkspaceFile('**/templater/integration/ModuleOptions.txt');
+    this._moduleOptions = fs.readFileSync(moduleOptionsPath, 'utf8').split("\n").map(el => el.trim());
+  }
+
+  private async _getStepOptions() {
+    // get module dropdown options from txt file
+    let stepOptionsPath = await getWorkspaceFile('**/templater/integration/StepNameOptions.txt');
+    this._stepOptions = fs.readFileSync(stepOptionsPath, 'utf8').split("\n").map(el => el.trim());
+  }
+
+  private async _getStepTypeOptions() {
+    // get module dropdown options from txt file
+    let stepTypeOptionsPath = await getWorkspaceFile('**/templater/integration/StepTypeOptions.txt');
+    this._stepTypeOptions = fs.readFileSync(stepTypeOptionsPath, 'utf8').split("\n").map(el => el.trim());
+  }
+
+  private async _getStepMethodOptions() {
+    // get module dropdown options from txt file
+    let stepMethodOptionsPath = await getWorkspaceFile('**/templater/integration/StepMethodOptions.txt');
+    this._stepMethodOptions = fs.readFileSync(stepMethodOptionsPath, 'utf8').split("\n").map(el => el.trim());
+  }
+
   private _cropFlexFields() {
-    // crop steps, othersteps arrays
+    // crop steps array
     let newStepFieldValues: string[] = [];
-    let newOtherStepValues: string[] = [];
     for (let index = 0; index < +this._fieldValues[nofStepsIndex]; index++) {
-      // stepname, other step
+      // stepname
       if (this._stepFieldValues[index] !== undefined) {
         newStepFieldValues[index] = this._stepFieldValues[index];
-
-        if (this._stepFieldValues[index] === 'other') {
-          newOtherStepValues[index] = this._otherStepValues[index];
-        }
-      }
-
-      // testurl
-      if (this._stepFieldValues[index + 10] !== undefined) {
-        newStepFieldValues[index + 10] = this._stepFieldValues[index + 10];
-      }
-
-      // produrl
-      if (this._stepFieldValues[index + 20] !== undefined) {
-        newStepFieldValues[index + 20] = this._stepFieldValues[index + 20];
       }
 
     }
     this._stepFieldValues = newStepFieldValues;
-    this._otherStepValues = newOtherStepValues;
 
     // crop scenarios array
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
@@ -524,10 +544,16 @@ export class CreateIntegrationPanel {
 
     // first time only: get integrations, available scenarios, modular elements
     if (this._integrationObjects.length === 0) {
+      await this._getModuleOptions();
+      await this._getStepOptions();
+      await this._getStepTypeOptions();
+      await this._getStepMethodOptions();
       this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
       this._integrationObjects = await getAvailableIntegrations('integration');
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+      this._stepTypes[0] = this._stepTypeOptions[0];
+      this._stepMethods[0] = this._stepMethodOptions[0];
     }
 
     // crop flexible field arrays
@@ -544,14 +570,19 @@ export class CreateIntegrationPanel {
       this._modularElementsWithParents,
       this._fieldValues,
       this._stepFieldValues,
-      this._otherStepValues,
       this._scenarioFieldValues,
       this._existingScenarioFieldValues,
       this._existingScenarioCheckboxValues,
       this._createUpdateValue,
       this._modularValue,
       this._multiFieldValues,
-      this._nofPackages
+      this._nofPackages,
+      this._moduleOptions,
+      this._stepOptions,
+      this._stepTypeOptions,
+      this._stepTypes,
+      this._stepMethodOptions,
+      this._stepMethods
     );
 
     let html =  createIntegrationHtmlObject.getHtml();

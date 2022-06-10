@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.5.0 
+- Integration
+  - Removed unused fields (urls, apy description, test user/pwd)
+  - Added option to specify step types (http, sftp, mail, render) and for http, specify method (post, get, delete) in step names
+  - Gets dropdown options (module, steps, step types, step methods) now from file in scenario-templates/templater/integration
+
 ## 1.4.1 
 - Postman Collection
   - Added option to load existing Postman Collection file

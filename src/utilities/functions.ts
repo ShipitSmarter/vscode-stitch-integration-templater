@@ -310,6 +310,10 @@ export function hiddenString(ifTrue: boolean): string {
     return ifTrue ? '' : 'hidden' ;
 }
 
+export function disabledString(ifTrue: boolean): string {
+    return ifTrue ? '' : 'disabled' ;
+}
+
 export function checkedString(checked: boolean): string {
     return checked ? 'checked' : '';
 }

@@ -21,14 +21,7 @@
   resize: true;
 }
 
-.stepfield {
-  width: 12rem;
-}
-
-.otherstepfield {
-  width: 4rem;
-}
-
-.stepdropdown {
+.stepdropdown,
+#carriercode {
   width: 7rem;
 }
