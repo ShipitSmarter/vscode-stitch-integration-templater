@@ -33,6 +33,8 @@ export class CreateIntegrationPanel {
   private _nofPackages: string[] = [];
   private _moduleOptions: string[] = [];
   private _stepOptions: string[] = [];
+  private _stepTypeOptions: string[] = [];
+  private _stepTypes: string[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
@@ -147,8 +149,14 @@ export class CreateIntegrationPanel {
                 switch (index) {
                   case nofStepsIndex :
                     for (let ii = 0; ii < value; ii++) {
+                      // pre-fill empty step names
                       if (!this._stepFieldValues[ii]) {
                         this._stepFieldValues[ii] = [this._fieldValues[carrierIndex]].concat(this._stepOptions)[ii % (this._stepOptions.length + 1)];
+                      }
+
+                      // pre-fill empty step types
+                      if (!this._stepTypes[ii]) {
+                        this._stepTypes[ii] = this._stepTypeOptions[0];
                       }
                     }
                     break;
@@ -160,6 +168,10 @@ export class CreateIntegrationPanel {
                 break;
               case 'stepdropdown':
                 this._stepFieldValues[index] = value;
+                //this._updateWebview(extensionUri);
+                break;
+              case 'steptypedropdown':
+                this._stepTypes[index] = value;
                 //this._updateWebview(extensionUri);
                 break;
               case 'scenariofield':
@@ -222,6 +234,7 @@ export class CreateIntegrationPanel {
     // update dropdown options
     await this._getModuleOptions();
     await this._getStepOptions();
+    await this._getStepTypeOptions();
 
     // update panel
     this._updateWebview(extensionUri);
@@ -469,13 +482,19 @@ export class CreateIntegrationPanel {
   private async _getModuleOptions() {
     // get module dropdown options from txt file
     let moduleOptionsPath = await getWorkspaceFile('**/templater/integration/ModuleOptions.txt');
-    this._moduleOptions = fs.readFileSync(moduleOptionsPath, 'utf8').split("\n").map(el => el.trim()).sort();
+    this._moduleOptions = fs.readFileSync(moduleOptionsPath, 'utf8').split("\n").map(el => el.trim());
   }
 
   private async _getStepOptions() {
     // get module dropdown options from txt file
-    let stepOptionsPath = await getWorkspaceFile('**/templater/integration/StepOptions.txt');
-    this._stepOptions = fs.readFileSync(stepOptionsPath, 'utf8').split("\n").map(el => el.trim()).sort();
+    let stepOptionsPath = await getWorkspaceFile('**/templater/integration/StepNameOptions.txt');
+    this._stepOptions = fs.readFileSync(stepOptionsPath, 'utf8').split("\n").map(el => el.trim());
+  }
+
+  private async _getStepTypeOptions() {
+    // get module dropdown options from txt file
+    let stepTypeOptionsPath = await getWorkspaceFile('**/templater/integration/StepTypeOptions.txt');
+    this._stepTypeOptions = fs.readFileSync(stepTypeOptionsPath, 'utf8').split("\n").map(el => el.trim());
   }
 
   private _cropFlexFields() {
@@ -505,10 +524,12 @@ export class CreateIntegrationPanel {
     if (this._integrationObjects.length === 0) {
       await this._getModuleOptions();
       await this._getStepOptions();
+      await this._getStepTypeOptions();
       this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
       this._integrationObjects = await getAvailableIntegrations('integration');
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+      this._stepTypes[0] = this._stepTypeOptions[0];
     }
 
     // crop flexible field arrays
@@ -533,7 +554,9 @@ export class CreateIntegrationPanel {
       this._multiFieldValues,
       this._nofPackages,
       this._moduleOptions,
-      this._stepOptions
+      this._stepOptions,
+      this._stepTypeOptions,
+      this._stepTypes
     );
 
     let html =  createIntegrationHtmlObject.getHtml();

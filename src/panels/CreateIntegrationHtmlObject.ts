@@ -29,7 +29,9 @@ export class CreateIntegrationHtmlObject {
     private _multiFieldValues: {[details: string] : string;},
     private _nofPackages: string[],
     private _moduleOptions: string[],
-    private _stepOptions: string[]
+    private _stepOptions: string[],
+    private _stepTypeOptions: string[],
+    private _stepTypes: string[]
     ) { }
 
   // METHODS
@@ -199,9 +201,10 @@ export class CreateIntegrationHtmlObject {
 
   private _stepInputs(nofSteps: number): string {
     let subStepNames: string = '';
+    let subStepTypes: string = '';
     for (let step = 0; step < +nofSteps; step++) {
 
-      // set html string addition
+      // step name dropdown
       subStepNames += /*html*/`
         <section class="component-vmargin">
           <vscode-dropdown id="stepname${step}" index="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
@@ -210,17 +213,27 @@ export class CreateIntegrationHtmlObject {
           </vscode-dropdown>
         </section>
       `;
+
+
+      // step type dropdown
+      subStepTypes += /*html*/`
+        <section class="component-vmargin">
+          <vscode-dropdown id="steptype${step}" index="${step}" ${valueString(this._stepTypes[step])} class="steptypedropdown" position="below">
+            ${dropdownOptions(this._stepTypeOptions)}
+          </vscode-dropdown>
+        </section>
+      `;
     }
 
     let html: string = /*html*/ `
       <section class="component-example">
         <section class="floatleftnopadding">
-          <p>step name</p>
+          <p>Name</p>
           ${subStepNames}
         </section>
         <section class="floatleftnopadding">
-          <p></p>
-          
+          <p>Type</p>
+          ${subStepTypes}
         </section>
         <section class="floatleftnopadding">
           <p></p>
