@@ -67,7 +67,8 @@ export var multiFieldChange = function (vscodeApi) { return  function (event) {
   // update scenario in currentInput
   let element = field.id.replace('multifield','');
   let multiregex = new RegExp('-' + element + '_[^-]*(-|$)');
-  currentInput.value = currentInput.value.replace(multiregex, '-' + element + '_' + value + '$1');
+  let newValue = currentInput.value.replace(multiregex, '-' + element + '_' + value + '$1');
+  updateModularValue(currentInput.id, newValue);
 
   // trigger 'change' event to save and check content
   currentInput.dispatchEvent(new Event('change')); 
@@ -103,7 +104,8 @@ export var changePackages = function (vscodeApi) { return  function (event) {
     scenarioField.dispatchEvent(new Event('click'));
 
     // update scenario field with new nofPackages
-    scenarioField.value = scenarioField.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
+    let newValue = scenarioField.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
+    updateModularValue(scenarioField.id, newValue);
 
     // trigger 'change' event to save and check content
     scenarioField.dispatchEvent(new Event('change')); 
@@ -184,6 +186,20 @@ export function lowestUnusedDigitOr1() {
   return (lowestUnused === 0) ? 1 : lowestUnused;
 }
 
+function updateModularValue(fieldId, newValue) {
+  let field = document.getElementById(fieldId);
+  let curValue = field.value;
+
+  // update modular scenario field
+  field.value = newValue;
+
+  // update custom name if necessary
+  let custom = document.getElementById(field.id.replace('scenario','scenariocustom'));
+  if (isEmpty(custom.value) || (custom.value === curValue) ) {
+    custom.value = newValue;
+  }
+}
+
 export function setPrimary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
   const base = 'm-multi_' + getNofPackages(currentInput.id) ;
@@ -221,7 +237,11 @@ export function setPrimary(fieldId,vscodeApi) {
   let check = currentInput.value.match(regex);
   let addstring = field.id + (multifield.length > 0 ? '_' + multifield[0].value : '');
   if (!check) {
-    currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? (base + '-') : '-') + addstring;
+    let curValue = currentInput.value;
+    let newValue = currentInput.value + (isEmpty(curValue) ? (base + '-') : '-') + addstring;
+
+    // update value
+    updateModularValue(currentInput.id, newValue);
 
     // trigger 'change' event to save and check content
     currentInput.dispatchEvent(new Event('change'));
@@ -258,10 +278,12 @@ export function setSecondary(fieldId,vscodeApi) {
   let multiregex = new RegExp('-' + field.id + '_[^-]*(-|$)');
 
   // replace if multi, else replace if not multi
-  let newValue = currentInput.value.replace(multiregex, '$1').replace(nonmultiregex, '$1');
+  let curValue = currentInput.value;
+  let tempNewValue = curValue.replace(multiregex, '$1').replace(nonmultiregex, '$1');
 
-  // remove base if all tiles deselected
-  currentInput.value = (newValue === base) ? '' : newValue;
+  // update field
+  let newValue = (tempNewValue === base) ? '' : tempNewValue;
+  updateModularValue(currentInput.id, newValue);
 
   // if updated: trigger 'change' event to save and check content
   if (currentInput.value !== oldValue) {
