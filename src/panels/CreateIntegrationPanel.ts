@@ -160,6 +160,11 @@ export class CreateIntegrationPanel {
                       if (!this._stepTypes[ii]) {
                         this._stepTypes[ii] = this._stepTypeOptions[0];
                       }
+
+                      // pre-fill empty step methods
+                      if (!this._stepMethods[ii]) {
+                        this._stepMethods[ii] = this._stepMethodOptions[0];
+                      }
                     }
                     break;
                 }
@@ -450,9 +455,12 @@ export class CreateIntegrationPanel {
     let stepsString: string = '';
     for (let index = 0; index < +nofSteps; index++) {
       let step: string = this._stepFieldValues[index] + '';
+      let type: string = this._stepTypes[index] + '';
+      let method: string = this._stepMethods[index] + '';
+      let methodString = (type === 'http') ? ('-' + method) : '';
 
       // steps
-      stepsString += '\n    "' + step + '"';
+      stepsString += '\n    "' + step + ':' + type + methodString + '"';
       if (index !== +nofSteps - 1) {
         stepsString += ',';
       }
@@ -545,6 +553,7 @@ export class CreateIntegrationPanel {
       this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
       this._stepTypes[0] = this._stepTypeOptions[0];
+      this._stepMethods[0] = this._stepMethodOptions[0];
     }
 
     // crop flexible field arrays

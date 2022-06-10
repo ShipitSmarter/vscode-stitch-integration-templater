@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, valueString, checkedString, hiddenString, dropdownOptions, arrayFrom1, toBoolean } from "../utilities/functions";
+import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean } from "../utilities/functions";
 import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
@@ -230,7 +230,7 @@ export class CreateIntegrationHtmlObject {
       // step method dropdown
       subStepMethods += /*html*/`
         <section class="component-vmargin">
-          <vscode-dropdown id="stepmethod${step}" index="${step}" ${valueString(this._stepMethods[step])} class="stepmethoddropdown" ${hiddenString(this._stepTypes[step] === 'http')} position="below">
+          <vscode-dropdown id="stepmethod${step}" index="${step}" ${valueString(this._stepMethods[step])} class="stepmethoddropdown" ${disabledString(this._stepTypes[step] === 'http')} position="below">
             ${dropdownOptions(this._stepMethodOptions)}
           </vscode-dropdown>
         </section>
