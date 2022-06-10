@@ -384,7 +384,19 @@ export class CreateIntegrationPanel {
   }
 
   private _getNewScenarios() : string[] {
-    return this._scenarioFieldValues.map( el => this._getNewScenarioValue(el)).filter(el => !isEmpty(el)).sort();
+    let newScenarios: string[] = [];
+    // if modular: combine with custom names
+    if (this._modularValue) {
+      for (let index = 0; index < this._scenarioFieldValues.length; index++) {
+        if (!isEmpty(this._scenarioFieldValues[index])) {
+          newScenarios[index] = this._scenarioFieldValues[index] + '|' + this._scenarioCustomFields[index];
+        }
+      }
+    } else {
+      newScenarios =  this._scenarioFieldValues.map( el => this._getNewScenarioValue(el));
+    }
+
+    return newScenarios.filter(el => !isEmpty(el)).sort();
   }
 
   private _getScenariosString(): string {

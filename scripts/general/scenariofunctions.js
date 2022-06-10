@@ -201,6 +201,8 @@ function updateModularValue(fieldId, newValue) {
   let custom = document.getElementById(field.id.replace('scenario','scenariocustom'));
   if (isEmpty(custom.value) || (custom.value === curCleanValue) ) {
     custom.value = newCleanValue;
+    // trigger 'keyup' event to save and check content
+    custom.dispatchEvent(new Event('keyup'));
   }
 }
 
