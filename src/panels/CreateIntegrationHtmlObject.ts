@@ -94,12 +94,12 @@ export class CreateIntegrationHtmlObject {
             
             <section  class="rowsingle">
               ${this._ifCreate(this._getStepsGrid())}
+              ${this._ifUpdate(this._getExistingScenariosGrid())}
             </section>
           </section>
 
           <section class="rowsingle">
             ${scenarioGrid.getHtml()}
-            ${this._ifUpdate(this._getExistingScenariosGrid())}
           </section>
         </section>
 
