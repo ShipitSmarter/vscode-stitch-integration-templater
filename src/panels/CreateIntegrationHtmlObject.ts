@@ -160,12 +160,17 @@ export class CreateIntegrationHtmlObject {
         </section>
       </section>
 
-      <section class="component-example">
-        <p>SiS CarrierCode</p>
-        <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD"></vscode-text-field>
-      </section>`;
+      ${this._ifCreate(this._getCarrierCodeField())}`;
 
     return carrierFolderStructureGrid;
+  }
+
+  private _getCarrierCodeField() : string {
+    return /*html*/ `
+    <section class="component-example">
+      <p>SiS CarrierCode</p>
+      <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD"></vscode-text-field>
+    </section>`;
   }
 
   private _getStepsGrid(): string {
