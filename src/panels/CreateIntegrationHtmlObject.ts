@@ -34,7 +34,8 @@ export class CreateIntegrationHtmlObject {
     private _stepTypes: string[],
     private _stepMethodOptions: string[],
     private _stepMethods: string[],
-    private _scenarioCustomFields: string[]
+    private _scenarioCustomFields: string[],
+    private _existingScenarioCustomFields: string[]
     ) { }
 
   // METHODS
@@ -273,6 +274,7 @@ export class CreateIntegrationHtmlObject {
         <section class="component-example">
           <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" index="${index}" ${checked}></vscode-checkbox>
           <vscode-text-field id="existingscenario${index}" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" ${disabledReadonly}></vscode-text-field>
+          <vscode-text-field id="existingscenariocustom${index}" class="existingscenariocustomfield" value="${this._existingScenarioCustomFields[index]}" ${disabledReadonly}></vscode-text-field>
         </section>
       `;
     }
