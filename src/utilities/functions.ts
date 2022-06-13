@@ -173,7 +173,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 
 		// filter on valid scenarios
 		let availableScenarios = await getAvailableScenarios(module, false);
-		let modularElements = await getModularElements(module);
+		let modularElements = (await getModularElementsWithParents(module)).map(el => (isEmpty(el.parent) ? '' : (el.parent.replace(/[^_]*_/g,'') + ':')) + el.element);
 		let validScenarios : {name:string, structure:string}[] = scenarioNameStructures.filter(el => isScenarioValid(el.structure, availableScenarios, modularElements));
 
 		// add array element
