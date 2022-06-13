@@ -556,7 +556,7 @@ export function isCustomNameDuplicate(fieldId) {
   // check existing scenarios (if present)
   if (!isDuplicate ) {
     var actualValue = getNewScenarioValue(field.value);
-    var existingScenarios = document.querySelectorAll(".existingscenariofield");
+    var existingScenarios = document.querySelectorAll(".existingscenariocustomfield");
     for (const es of existingScenarios) {
       if (actualValue === es.value ) {
         // if scenario equal to existing scenario: duplicate
