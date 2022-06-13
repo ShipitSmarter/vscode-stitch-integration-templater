@@ -438,20 +438,16 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
   
     if (field.classList[0] === 'scenariofield') {
         let customfields = document.querySelectorAll('#' + field.id.replace('scenario','scenariocustom'));
-        let customfield = (customfields.length > 0) ? customfields[0] : field;
-
-        // check if scenario is correct
-        // if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
-        //   isCorrect = false;
-        //   updateWrong(customfield.id,'Scenario is duplicate of other (existing) scenario');
-        // } else 
-        if (isModular() && !checkModularScenario(field.id)) {
-          updateWrong(customfield.id,'One or more modular element fields are invalid. select scenario to see more details.');
-          isCorrect = false;
-         
-        // check if custom name is correct
-        } else if (isModular()) {
-          if (!checkCustomName(customfield.id)) {
+        let customfield = (customfields.length > 0) ? customfields[0] : field;         
+        
+        if (isModular()) {
+          // check if modular element fields are correct
+          if (!checkModularScenario(field.id)) {
+            updateWrong(customfield.id,'One or more modular element fields are invalid. select scenario to see more details.');
+            isCorrect = false;
+          
+          // check if custom name is correct
+          } else if (!checkCustomName(customfield.id)) {
             updateWrong(customfield.id,'Allowed: A-Z, a-z, 0-9, -, _ (no spaces)');
             isCorrect = false;
           } else if (isCustomNameDuplicate(customfield.id) && !isEmpty(customfield.value)) { 
@@ -473,8 +469,15 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
             updateRight(customfield.id);
           }
 
+        // else if not modular
         } else {
-          updateRight(customfield.id);
+           // check if scenario is not duplicate
+          if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
+            isCorrect = false;
+            updateWrong(customfield.id,'Scenario is duplicate of other (existing) scenario');
+          } else {
+            updateRight(customfield.id);
+          }
         }
     }
     
@@ -513,7 +516,7 @@ export function isScenarioDuplicate(fieldId) {
   var isDuplicate = false;
   let field = document.getElementById(fieldId);
   
-  // check other new scenarios
+  // compare other new scenarios 
   var scenarioFields = document.querySelectorAll(".scenariofield");
   for (const sf of scenarioFields) {
     if (sf.id !== field.id && sf.value === field.value && !isEmpty(sf.value)) {
@@ -522,11 +525,11 @@ export function isScenarioDuplicate(fieldId) {
       break;
     }
   }
-
-  // check existing scenarios (if present)
+  
+  // compare existing scenario names (if present)
   if (!isDuplicate ) {
     var actualValue = getNewScenarioValue(field.value);
-    var existingScenarios = document.querySelectorAll(".existingscenariofield");
+    var existingScenarios = document.querySelectorAll(".existingscenariocustomfield");
     for (const es of existingScenarios) {
       if (actualValue === es.value ) {
         // if scenario equal to existing scenario: duplicate
