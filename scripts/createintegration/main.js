@@ -65,12 +65,17 @@ function fieldChange(event) {
     case 'existingscenariocheckbox':
       var scenarioId = field.id.slice(3, field.id.length);
       var scenario = document.getElementById(scenarioId);
+      var scenarioname = document.getElementById(scenarioId.replace('scenario','scenariocustom'));
       if (field.checked) {
         scenario.readOnly = true;
+        scenarioname.readOnly = true;
         scenario.disabled = false;
+        scenarioname.disabled = false;
       } else {
         scenario.disabled = true;
+        scenarioname.disabled = true;
         scenario.readOnly = false;
+        scenarioname.readOnly = false;
       }
       break;
 

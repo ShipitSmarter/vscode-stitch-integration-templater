@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 
@@ -431,9 +431,12 @@ export class CreateIntegrationPanel {
     // add existing scenarios (if 'update')
     if (this._createUpdateValue === 'update') {
       for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
+        var structure = this._existingScenarioFieldValues[index];
+        var customName = this._existingScenarioCustomFields[index];
+ 
         scenarioObjectArray.push( {
           execute: this._existingScenarioCheckboxValues[index],
-          name: this._existingScenarioFieldValues[index]
+          name: structure + (isModular(structure) ? ('|' + customName  ) : '' )
         });
       }
     }
