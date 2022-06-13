@@ -329,14 +329,16 @@ export class CreatePostmanCollectionPanel {
       }
   
       // update scenarios
-      this._modularValue = isModular(pmc.item[0].name);
+      this._modularValue = isModular(pmc.item[0].structure);
       this._fieldValues[nofScenariosIndex] = pmc.item.length;
       this._scenarioFieldValues = [];
+      this._scenarioCustomFields = [];
       this._nofPackages = [];
       for (let index = 0; index < pmc.item.length; index++) {
   
         if (this._modularValue) {
-          this._scenarioFieldValues[index] = pmc.item[index].name;
+          this._scenarioFieldValues[index] = pmc.item[index].structure;
+          this._scenarioCustomFields[index] = pmc.item[index].name;
   
           // extract nofPackages
           var nofPackages = pmc.item[index].name.match('(?<=multi_)\\d+');
