@@ -302,6 +302,7 @@ export class CreateIntegrationPanel {
       // refresh window
       this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
+      this._scenarioCustomFields = [];
       this._checkIntegrationExists(extensionUri);
   }
 

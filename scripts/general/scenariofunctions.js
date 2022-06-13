@@ -437,7 +437,8 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
     let field = document.getElementById(fieldId);
   
     if (field.classList[0] === 'scenariofield') {
-        let customfield = document.getElementById(field.id.replace('scenario','scenariocustom'));
+        let customfields = document.querySelectorAll('#' + field.id.replace('scenario','scenariocustom'));
+        let customfield = (customfields.length > 0) ? customfields[0] : field;
 
         // check if scenario is correct
         // if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
@@ -449,24 +450,29 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
           isCorrect = false;
          
         // check if custom name is correct
-        } else if (!checkCustomName(customfield.id)) {
-          updateWrong(customfield.id,'Allowed: A-Z, a-z, 0-9, -, _ (no spaces)');
-          isCorrect = false;
-        } else if (isCustomNameDuplicate(customfield.id) && !isEmpty(customfield.value)) { 
-          updateWrong(customfield.id,'Name is duplicate of other (existing) scenario');
-          isCorrect = false;
+        } else if (isModular()) {
+          if (!checkCustomName(customfield.id)) {
+            updateWrong(customfield.id,'Allowed: A-Z, a-z, 0-9, -, _ (no spaces)');
+            isCorrect = false;
+          } else if (isCustomNameDuplicate(customfield.id) && !isEmpty(customfield.value)) { 
+            updateWrong(customfield.id,'Name is duplicate of other (existing) scenario');
+            isCorrect = false;
 
-        // check if combination is correct
-        } else if (isEmpty(field.value) && !isEmpty(customfield.value)) {
-          updateWrong(customfield.id,'No tiles selected');
-          isCorrect = false;
-        } else if (!isEmpty(field.value) && isEmpty(customfield.value)) {
-          updateWrong(customfield.id,'Must specify name if tiles selected');
-          isCorrect = false;
+          // check if combination is correct
+          } else if (isEmpty(field.value) && !isEmpty(customfield.value)) {
+            updateWrong(customfield.id,'No tiles selected');
+            isCorrect = false;
+          } else if (!isEmpty(field.value) && isEmpty(customfield.value)) {
+            updateWrong(customfield.id,'Must specify name if tiles selected');
+            isCorrect = false;
 
-        // check focused or correct
-        } else if (field.id === currentInput.id && isModular()) { 
-          updateFocused(customfield.id);
+          // check focused or correct
+          } else if (field.id === currentInput.id) { 
+            updateFocused(customfield.id);
+          } else {
+            updateRight(customfield.id);
+          }
+
         } else {
           updateRight(customfield.id);
         }
