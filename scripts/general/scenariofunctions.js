@@ -22,6 +22,11 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener('focus',modularScenarioFocus);
   }
 
+  // existing scenario custom fields
+  for (const field of document.querySelectorAll(".existingscenariocustomfield")) {
+    field.addEventListener('focus',modularScenarioFocus);
+  }
+
   // modular checkbox
   document.getElementById("modular").addEventListener("change", scenarioFieldChange(vscodeApi));
 
@@ -122,29 +127,57 @@ export var changePackages = function (vscodeApi) { return  function (event) {
 
 };};
 
+function isModularScenario(scenario) {
+  return scenario.startsWith('m-');
+}
+
 export function modularScenarioFocus(event) {
-    // track last selected scenario field
-    // from https://stackoverflow.com/a/68176703/1716283
-    const customfield = event.target;
-    const field = document.getElementById(customfield.id.replace('scenariocustom','scenario'));
+  // track last selected scenario field
+  // from https://stackoverflow.com/a/68176703/1716283
+  const customfield = event.target;
+  const field = document.getElementById(customfield.id.replace('scenariocustom','scenario'));
 
-    if (field.id !== currentInput.id && isModular()) {
-      // update currentInput
-      let previousInput = currentInput;
-      currentInput = field;
-      
-      // update field outlines
+  if (field.id !== currentInput.id && isModular() && (isModularScenario(field.value) || !field.id.startsWith('existing'))) {
+    // update currentInput
+    let previousInput = currentInput;
+    const previouscustomfield = document.getElementById(previousInput.id.replace('scenario','scenariocustom'));
+    currentInput = field;
+    
+    // update field outlines
+    if (previousInput.id.startsWith('existing')) {
+      updateRight(previouscustomfield.id);
+    } else {
       updateScenarioFieldOutlineAndTooltip(previousInput.id);
+    }
+    
+    if (currentInput.id.startsWith('existing')) {
+      updateFocused(customfield.id);
+    } else {
       updateScenarioFieldOutlineAndTooltip(currentInput.id);
+    }
+    
+    // update tiles
+    updateTiles(currentInput.value);
 
-      // update tiles
-      updateTiles(currentInput.value);
+    // set all tiles enabled
+    if (previousInput.id.startsWith('existing') && !currentInput.id.startsWith('existing')) {
+      for (const tilebutton of document.querySelectorAll(".modulartile,.multifield")) {
+        tilebutton.disabled = false;
+      }
+    } else if(currentInput.id.startsWith('existing') && !previousInput.id.startsWith('existing')) {
+      for (const tilebutton of document.querySelectorAll(".modulartile,.multifield")) {
+        tilebutton.disabled = true;
+      }
+    }
 
-      // check all multifield values
+    // check all multifield values
+    if (!currentInput.id.startsWith('existing')) {
       for (const field of document.querySelectorAll(".multifield")) {
         updateMultiFieldOutlineAndTooltip(field.id);
       }
     }
+    
+  }
 }
 
 export function saveScenarioValue(fieldId, vscodeApi) {
