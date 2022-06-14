@@ -137,7 +137,7 @@ export function modularScenarioFocus(event) {
   const customfield = event.target;
   const field = document.getElementById(customfield.id.replace('scenariocustom','scenario'));
 
-  if (field.id !== currentInput.id && isModular() && (isModularScenario(field.value) || !field.id.startsWith('existing'))) {
+  if (field.id !== currentInput.id && isModular() && (isModularScenario(field.value) || field.classList[0] === 'scenariofield')) {
     // update currentInput
     let previousInput = currentInput;
     const previouscustomfield = document.getElementById(previousInput.id.replace('scenario','scenariocustom'));
