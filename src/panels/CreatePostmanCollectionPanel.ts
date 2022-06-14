@@ -200,6 +200,8 @@ export class CreatePostmanCollectionPanel {
                   case nofScenariosIndex:
                     // crop scenarios array
                     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
+                    this._scenarioCustomFields = this._scenarioCustomFields.slice(0, +this._fieldValues[nofScenariosIndex]);
+                    this._nofPackages = this._nofPackages.slice(0, +this._fieldValues[nofScenariosIndex]);
                     this._updateWebview(extensionUri);
                     break;
                 }

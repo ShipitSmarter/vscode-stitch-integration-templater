@@ -575,6 +575,8 @@ export class CreateIntegrationPanel {
 
     // crop scenarios array
     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
+    this._scenarioCustomFields = this._scenarioCustomFields.slice(0, +this._fieldValues[nofScenariosIndex]);
+    this._nofPackages = this._nofPackages.slice(0, +this._fieldValues[nofScenariosIndex]);
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
