@@ -105,14 +105,30 @@ export async function getPostmanCollectionFiles(): Promise<{parent:string, file:
 	return pmcObjects;
 }
 
-export async function getAvailableIntegrations(panel:string) : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[]> {
+export function getScenarioAndStructure(path:string) : {name:string, structure:string} {
+	// name
+	let name = nameFromPath(path);
+
+	// structure
+	let structurePath = path + '/structure.jsonc';
+	let structureExists: boolean = fs.existsSync(structurePath);
+	let structure = structureExists ? JSON.parse(fs.readFileSync(structurePath, 'utf8')).structure : name;
+
+	// return as object
+	return {
+		name: name,
+		structure: structure
+	};
+}
+
+export async function getAvailableIntegrations(panel:string) : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[]> {
 	// panel input: 'integration' or 'postman'
 
 	// integration script path array
 	let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
 
 	// pre-allocate output
-	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = new Array<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}>(integrationScripts.length);
+	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios: string[], validscenarios: {name:string, structure:string}[]}[] = new Array<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios: string[], validscenarios: {name:string, structure:string}[]}>(integrationScripts.length);
 
 	// build integration array
 	let newIndex: number = 0;
@@ -144,13 +160,21 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 		}
 
 		// obtain valid scenarios from scenarios folder
-		let scenarioDir = fs.readdirSync(parentPath(cleanPath(script)) + `/${api}/${module}/scenarios`);
+		let scenariosDir: string = parentPath(cleanPath(script)) + `/${api}/${module}/scenarios`;
+		let scenarioDir = fs.readdirSync(scenariosDir);
 		let integrationScenarios = scenarioDir.filter(el => !el.includes('.')).sort();
+
+		let scenarioNameStructures: {name:string, structure:string}[] = new Array<{name:string, structure:string}>(integrationScenarios.length);
+		for (let index = 0; index < scenarioNameStructures.length; index++) {
+			scenarioNameStructures[index] = getScenarioAndStructure(scenariosDir + '/' + integrationScenarios[index]);
+		}
+
+		//let scenarioStructures = scenarioDir.map((el) => fs.existsSync(scenariosDir + '/' + el + '/structure.jsonc') ? JSON.parse(fs.readFileSync(scenariosDir + '/' + el + '/structure.jsonc', 'utf8')).structure : el);
 
 		// filter on valid scenarios
 		let availableScenarios = await getAvailableScenarios(module, false);
-		let modularElements = await getModularElements(module);
-		let validScenarios : string [] = integrationScenarios.filter(el => isScenarioValid(el, availableScenarios, modularElements));
+		let modularElements = (await getModularElementsWithParents(module)).map(el => (isEmpty(el.parent) ? '' : (el.parent.replace(/[^_]*_/g,'') + ':')) + el.element);
+		let validScenarios : {name:string, structure:string}[] = scenarioNameStructures.filter(el => isScenarioValid(el.structure, availableScenarios, modularElements));
 
 		// add array element
 		integrationObjects[newIndex] = {
@@ -160,7 +184,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 			module: 	 module,
 			carriercode: getFromScript(scriptContent,'CARRIERCODE'),
 			modular: 	 modular,
-			scenarios:   integrationScenarios,
+			scenarios:   scenarioNameStructures.map(el => el.name),
 			validscenarios: validScenarios
 		};
 

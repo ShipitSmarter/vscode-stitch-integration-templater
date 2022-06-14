@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean } from "../utilities/functions";
+import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean, isModular } from "../utilities/functions";
 import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
@@ -33,7 +33,9 @@ export class CreateIntegrationHtmlObject {
     private _stepTypeOptions: string[],
     private _stepTypes: string[],
     private _stepMethodOptions: string[],
-    private _stepMethods: string[]
+    private _stepMethods: string[],
+    private _scenarioCustomFields: string[],
+    private _existingScenarioCustomFields: string[]
     ) { }
 
   // METHODS
@@ -53,7 +55,8 @@ export class CreateIntegrationHtmlObject {
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
       this._multiFieldValues,
-      this._nofPackages
+      this._nofPackages,
+      this._scenarioCustomFields
     );
 
     // define panel HTML
@@ -91,12 +94,12 @@ export class CreateIntegrationHtmlObject {
             
             <section  class="rowsingle">
               ${this._ifCreate(this._getStepsGrid())}
+              ${this._ifUpdate(this._getExistingScenariosGrid())}
             </section>
           </section>
 
           <section class="rowsingle">
             ${scenarioGrid.getHtml()}
-            ${this._ifUpdate(this._getExistingScenariosGrid())}
           </section>
         </section>
 
@@ -157,12 +160,17 @@ export class CreateIntegrationHtmlObject {
         </section>
       </section>
 
-      <section class="component-example">
-        <p>SiS CarrierCode</p>
-        <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD"></vscode-text-field>
-      </section>`;
+      ${this._ifCreate(this._getCarrierCodeField())}`;
 
     return carrierFolderStructureGrid;
+  }
+
+  private _getCarrierCodeField() : string {
+    return /*html*/ `
+    <section class="component-example">
+      <p>SiS CarrierCode</p>
+      <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${valueString(this._fieldValues[carrierCodeIndex])} placeholder="DPD"></vscode-text-field>
+    </section>`;
   }
 
   private _getStepsGrid(): string {
@@ -260,6 +268,8 @@ export class CreateIntegrationHtmlObject {
     let html: string = ``;
 
     for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
+      const modularOutline = 'style="outline:1px solid cyan"';
+      let outlineString = isModular(this._existingScenarioFieldValues[index]) ? modularOutline : '';
       let checked = '';
       let disabledReadonly = 'disabled';
       if (this._existingScenarioCheckboxValues[index] === true) {
@@ -270,7 +280,8 @@ export class CreateIntegrationHtmlObject {
       html += /*html*/`
         <section class="component-example">
           <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" index="${index}" ${checked}></vscode-checkbox>
-          <vscode-text-field id="existingscenario${index}" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" ${disabledReadonly}></vscode-text-field>
+          <vscode-text-field id="existingscenario${index}" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" hidden></vscode-text-field>
+          <vscode-text-field id="existingscenariocustom${index}" class="existingscenariocustomfield" value="${this._existingScenarioCustomFields[index]}" ${outlineString} ${disabledReadonly}></vscode-text-field>
         </section>
       `;
     }

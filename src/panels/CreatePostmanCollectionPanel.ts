@@ -34,12 +34,12 @@ export class CreatePostmanCollectionPanel {
   private _modularValue: boolean = false;
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
-  private _integrationObjects: {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]}[] = [];
-  private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios:[]};
-  
+  private _integrationObjects:      {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[] = [];
+
   private _pmcObjects : {parent:string, file:string, path:string}[] = [];
 
   private _showLoad : boolean = false;
+  private _scenarioCustomFields: string[] = [];
   private _codeCompanies: {
     company: string,
     codecompany: string
@@ -200,6 +200,8 @@ export class CreatePostmanCollectionPanel {
                   case nofScenariosIndex:
                     // crop scenarios array
                     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
+                    this._scenarioCustomFields = this._scenarioCustomFields.slice(0, +this._fieldValues[nofScenariosIndex]);
+                    this._nofPackages = this._nofPackages.slice(0, +this._fieldValues[nofScenariosIndex]);
                     this._updateWebview(extensionUri);
                     break;
                 }
@@ -265,6 +267,10 @@ export class CreatePostmanCollectionPanel {
               case 'scenariofield':
                 this._scenarioFieldValues[index] = value;
                 break;
+              
+              case 'scenariocustomfield':
+                this._scenarioCustomFields[index] = value;
+                break;
 
               case 'showload':
                 this._showLoad = toBoolean(value);
@@ -281,7 +287,7 @@ export class CreatePostmanCollectionPanel {
     );
   }
 
-  private _getIntegrationObject() : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:string[]} {
+  private _getIntegrationObject() : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:{name:string, structure:string}[]} {
     return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0];
   }
 
@@ -325,14 +331,16 @@ export class CreatePostmanCollectionPanel {
       }
   
       // update scenarios
-      this._modularValue = isModular(pmc.item[0].name);
+      this._modularValue = isModular(pmc.item[0].structure);
       this._fieldValues[nofScenariosIndex] = pmc.item.length;
       this._scenarioFieldValues = [];
+      this._scenarioCustomFields = [];
       this._nofPackages = [];
       for (let index = 0; index < pmc.item.length; index++) {
   
         if (this._modularValue) {
-          this._scenarioFieldValues[index] = pmc.item[index].name;
+          this._scenarioFieldValues[index] = pmc.item[index].structure;
+          this._scenarioCustomFields[index] = pmc.item[index].name;
   
           // extract nofPackages
           var nofPackages = pmc.item[index].name.match('(?<=multi_)\\d+');
@@ -420,18 +428,8 @@ export class CreatePostmanCollectionPanel {
     }'`;
 
     // scenarios string
-    let newScenariosString : string = '';
-    let newScenarios = this._getNewScenarios();
-    for (const scenario of newScenarios) {
-      newScenariosString += `\n '${scenario}'`;
-
-      // add comma
-      if (scenario !== newScenarios[newScenarios.length-1]) {
-        newScenariosString += ',';
-      }
-    }
-
-    let defScenariosString = (this._independent) ? `$Scenarios = @( ${newScenariosString} )` : '';
+    let newScenariosString =  this._getNewScenarios().join(`",\n"`);
+    let defScenariosString = (this._independent) ? `$Scenarios = @( \n "${newScenariosString}" \n)` : '';
 
     let applyScenariosString = (this._independent) ? '-Scenarios $Scenarios' : '';
     let loadFunctions = `. "..\\..\\scenario-templates\\scripts\\functions.ps1"`;
@@ -474,7 +472,19 @@ export class CreatePostmanCollectionPanel {
   }
 
   private _getNewScenarios() : string[] {
-    return this._scenarioFieldValues.map( el => this._getNewScenarioValue(el)).filter(el => !isEmpty(el)).sort();
+    let newScenarios: string[] = [];
+    // if modular: combine with custom names
+    if (this._modularValue) {
+      for (let index = 0; index < this._scenarioFieldValues.length; index++) {
+        if (!isEmpty(this._scenarioFieldValues[index])) {
+          newScenarios[index] = this._scenarioFieldValues[index] + '|' + this._scenarioCustomFields[index];
+        }
+      }
+    } else {
+      newScenarios =  this._scenarioFieldValues.map( el => this._getNewScenarioValue(el));
+    }
+
+    return newScenarios.filter(el => !isEmpty(el)).sort();
   }
 
   private _getIntegrationName(): string {
@@ -630,7 +640,8 @@ export class CreatePostmanCollectionPanel {
       this._multiFieldValues,
       this._nofPackages,
       this._pmcObjects,
-      this._showLoad
+      this._showLoad,
+      this._scenarioCustomFields
     );
 
     let html =  createPostmanCollectionHtmlObject.getHtml();

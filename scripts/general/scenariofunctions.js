@@ -13,7 +13,18 @@ export function addScenarioEventListeners(vscodeApi) {
   for (const field of document.querySelectorAll(".scenariofield")) {
     field.addEventListener("keyup", scenarioFieldChange(vscodeApi));
     field.addEventListener("change", scenarioFieldChange(vscodeApi));
-    field.addEventListener('click',modularScenarioFocus);
+  }
+
+  // scenario custom fields
+  for (const field of document.querySelectorAll(".scenariocustomfield")) {
+    field.addEventListener("keyup", scenarioFieldChange(vscodeApi));
+    field.addEventListener("change", scenarioFieldChange(vscodeApi));
+    field.addEventListener('focus',modularScenarioFocus);
+  }
+
+  // existing scenario custom fields
+  for (const field of document.querySelectorAll(".existingscenariocustomfield")) {
+    field.addEventListener('focus',modularScenarioFocus);
   }
 
   // modular checkbox
@@ -59,9 +70,12 @@ export var multiFieldChange = function (vscodeApi) { return  function (event) {
   vscodeApi.postMessage({ command: "savemultivalue", text: textString });
 
   // update scenario in currentInput
-  let element = field.id.replace('multifield','');
-  let multiregex = new RegExp('-' + element + '_[^-]*(-|$)');
-  currentInput.value = currentInput.value.replace(multiregex, '-' + element + '_' + value + '$1');
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
+  let multiregex = new RegExp('-' + fullName + '_[^-]*(-|$)');
+  let newValue = currentInput.value.replace(multiregex, '-' + fullName + '_' + value + '$1');
+  updateModularValue(currentInput.id, newValue);
 
   // trigger 'change' event to save and check content
   currentInput.dispatchEvent(new Event('change')); 
@@ -77,7 +91,7 @@ export var scenarioFieldChange = function (vscodeApi) { return  function (event)
     saveScenarioValue(field.id, vscodeApi);
     
     // check all scenarios for validity
-    if (field.classList[0] === 'scenariofield') {
+    if (['scenariofield','scenariocustomfield'].includes(field.classList[0])) {
       for (const sc of document.querySelectorAll(".scenariofield")) {
         updateScenarioFieldOutlineAndTooltip(sc.id);
       }
@@ -97,7 +111,8 @@ export var changePackages = function (vscodeApi) { return  function (event) {
     scenarioField.dispatchEvent(new Event('click'));
 
     // update scenario field with new nofPackages
-    scenarioField.value = scenarioField.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
+    let newValue = scenarioField.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
+    updateModularValue(scenarioField.id, newValue);
 
     // trigger 'change' event to save and check content
     scenarioField.dispatchEvent(new Event('change')); 
@@ -112,28 +127,57 @@ export var changePackages = function (vscodeApi) { return  function (event) {
 
 };};
 
+function isModularScenario(scenario) {
+  return scenario.startsWith('m-');
+}
+
 export function modularScenarioFocus(event) {
-    // track last selected scenario field
-    // from https://stackoverflow.com/a/68176703/1716283
-    const field = event.target;
+  // track last selected scenario field
+  // from https://stackoverflow.com/a/68176703/1716283
+  const customfield = event.target;
+  const field = document.getElementById(customfield.id.replace('scenariocustom','scenario'));
 
-    if (field.id !== currentInput.id && isModular()) {
-      // update currentInput
-      let previousInput = currentInput;
-      currentInput = field;
-      
-      // update field outlines
+  if (field.id !== currentInput.id && isModular() && (isModularScenario(field.value) || field.classList[0] === 'scenariofield')) {
+    // update currentInput
+    let previousInput = currentInput;
+    const previouscustomfield = document.getElementById(previousInput.id.replace('scenario','scenariocustom'));
+    currentInput = field;
+    
+    // update field outlines
+    if (previousInput.id.startsWith('existing')) {
+      updateModular(previouscustomfield.id);
+    } else {
       updateScenarioFieldOutlineAndTooltip(previousInput.id);
+    }
+    
+    if (currentInput.id.startsWith('existing')) {
+      updateFocused(customfield.id);
+    } else {
       updateScenarioFieldOutlineAndTooltip(currentInput.id);
+    }
+    
+    // update tiles
+    updateTiles(currentInput.value);
 
-      // update tiles
-      updateTiles(currentInput.value);
+    // set all tiles enabled
+    if (previousInput.id.startsWith('existing') && !currentInput.id.startsWith('existing')) {
+      for (const tilebutton of document.querySelectorAll(".modulartile,.multifield")) {
+        tilebutton.disabled = false;
+      }
+    } else if(currentInput.id.startsWith('existing') && !previousInput.id.startsWith('existing')) {
+      for (const tilebutton of document.querySelectorAll(".modulartile,.multifield")) {
+        tilebutton.disabled = true;
+      }
+    }
 
-      // check all multifield values
+    // check all multifield values
+    if (!currentInput.id.startsWith('existing')) {
       for (const field of document.querySelectorAll(".multifield")) {
         updateMultiFieldOutlineAndTooltip(field.id);
       }
     }
+    
+  }
 }
 
 export function saveScenarioValue(fieldId, vscodeApi) {
@@ -177,20 +221,41 @@ export function lowestUnusedDigitOr1() {
   return (lowestUnused === 0) ? 1 : lowestUnused;
 }
 
+function updateModularValue(fieldId, newValue) {
+  let field = document.getElementById(fieldId);
+  let curValue = field.value;
+
+  // update modular scenario field
+  field.value = newValue;
+
+  // update custom name if necessary
+  let curCleanValue = curValue.replace(/\:/g,'');
+  let newCleanValue = newValue.replace(/\:/g,'');
+  let custom = document.getElementById(field.id.replace('scenario','scenariocustom'));
+  if (isEmpty(custom.value) || (custom.value === curCleanValue) ) {
+    custom.value = newCleanValue;
+    // trigger 'keyup' event to save and check content
+    custom.dispatchEvent(new Event('keyup'));
+  }
+}
+
 export function setPrimary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm-multi_' + getNofPackages(currentInput.id) ;
+  const base = 'm-multi_' + getNofPackages(currentInput.id);
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
 
   // change appearance
   field.setAttribute('appearance','primary');
 
   // set multifield if present (and not already set)
-  let multifield = document.querySelectorAll("#multifield" + fieldId);
+  let multifield = document.querySelectorAll("#multifield" + parent + element);
 
   if (multifield.length > 0) {
     
     // extract current value from scenario field (if present)
-    let multiregex = new RegExp('-' + field.id + '_([^-]*)(-|$)');
+    let multiregex = new RegExp('-' + fullName + '_([^-]*)(-|$)');
     let matchMultiInScenario = currentInput.value.match(multiregex);
     if (matchMultiInScenario) {
       multifield[0].value = matchMultiInScenario[1];
@@ -210,11 +275,15 @@ export function setPrimary(fieldId,vscodeApi) {
 
   // add tile content to last selected scenario field
   // let currentElements = currentInput.value.split('-');
-  let regex = new RegExp('-' + field.id + '([-_]|$)',"g");
+  let regex = new RegExp('-' + fullName + '([-_]|$)',"g");
   let check = currentInput.value.match(regex);
-  let addstring = field.id + (multifield.length > 0 ? '_' + multifield[0].value : '');
+  let addstring = fullName + (multifield.length > 0 ? '_' + multifield[0].value : '');
   if (!check) {
-    currentInput.value = currentInput.value + (isEmpty(currentInput.value) ? (base + '-') : '-') + addstring;
+    let curValue = currentInput.value;
+    let newValue = currentInput.value + (isEmpty(curValue) ? (base + '-') : '-') + addstring;
+
+    // update value
+    updateModularValue(currentInput.id, newValue);
 
     // trigger 'change' event to save and check content
     currentInput.dispatchEvent(new Event('change'));
@@ -223,13 +292,16 @@ export function setPrimary(fieldId,vscodeApi) {
 
 export function setSecondary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm-multi_' + getNofPackages(currentInput.id) ;
+  const base = 'm-multi_' + getNofPackages(currentInput.id);
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
 
   // change appearance
   field.setAttribute('appearance','secondary');
 
   // clear multifield if present
-  let multifield = document.querySelectorAll("#multifield" + fieldId);
+  let multifield = document.querySelectorAll("#multifield" + parent + element);
   if (multifield.length > 0) {
 
     //clear multi value
@@ -247,14 +319,16 @@ export function setSecondary(fieldId,vscodeApi) {
 
   // remove tile content from last selected scenario field
   let oldValue = currentInput.value;
-  let nonmultiregex = new RegExp('-' + field.id + '(-|$)');
-  let multiregex = new RegExp('-' + field.id + '_[^-]*(-|$)');
+  let nonmultiregex = new RegExp('-' + fullName + '(-|$)');
+  let multiregex = new RegExp('-' + fullName + '_[^-]*(-|$)');
 
   // replace if multi, else replace if not multi
-  let newValue = currentInput.value.replace(multiregex, '$1').replace(nonmultiregex, '$1');
+  let curValue = currentInput.value;
+  let tempNewValue = curValue.replace(multiregex, '$1').replace(nonmultiregex, '$1');
 
-  // remove base if all tiles deselected
-  currentInput.value = (newValue === base) ? '' : newValue;
+  // update field
+  let newValue = (tempNewValue === base) ? '' : tempNewValue;
+  updateModularValue(currentInput.id, newValue);
 
   // if updated: trigger 'change' event to save and check content
   if (currentInput.value !== oldValue) {
@@ -283,7 +357,10 @@ export function updateTiles(content) {
     
     let tiles = document.querySelectorAll(".modulartile");
     for (const tile of tiles) {
-      let regex = new RegExp('-' + tile.id + '([-_]|$)');
+      let element = tile.getAttribute('name');
+      let parent = tile.getAttribute('parent');
+      let fullName = parent + ':' + element;
+      let regex = new RegExp('-' + fullName + '([-_]|$)');
       // if (currentElements.includes(tile.id)) {
       if (content.match(regex)) {
         setPrimary(tile.id);
@@ -349,6 +426,21 @@ export function checkModularScenario(fieldId) {
   return isCorrect;
 }
 
+export function checkCustomName(fieldId) {
+  let isCorrect = true;
+  let field = document.getElementById(fieldId);
+
+  // check if custom name is correct
+  let check = field.value.match(/[^A-Za-z0-9\_\-]/);
+
+  // if invalid content: return false
+  if (check !== '' && check !== null) {
+    isCorrect = false;
+  }
+
+  return isCorrect;
+}
+
 export function updateMultiFieldOutlineAndTooltip(fieldId) {
   let isCorrect = false;
   let field = document.getElementById(fieldId);
@@ -356,33 +448,21 @@ export function updateMultiFieldOutlineAndTooltip(fieldId) {
 
   // if (field.value === '' && field.disabled === false) {
   if (field.value === '' && field.hidden === false) {
-    updateMultiFieldEmpty(field.id);
+    updateEmpty(field.id);
   } else if (field.value.match(/\D/g)) {
-    updateMultiFieldWrong(field.id, 'Should contain only digits (1-9)');
+    updateWrong(field.id, 'Should contain only digits (1-9)');
   } else if (field.value.includes('0')) {
-    updateMultiFieldWrong(field.id, 'Should not contain 0 (only 1-9)');
+    updateWrong(field.id, 'Should not contain 0 (only 1-9)');
   } else if (containsHigherDigits(field.value, maxValue)) {
-    updateMultiFieldWrong(field.id, 'Should not contain digits higher than number of packages');
+    updateWrong(field.id, 'Should not contain digits higher than number of packages');
   } else if (containsRepeatingDigits(field.value, maxValue)) {
-    updateMultiFieldWrong(field.id, 'Should not contain repeating digits');
+    updateWrong(field.id, 'Should not contain repeating digits');
   } else {
-    updateScenarioFieldRight(field.id);
+    updateRight(field.id);
     isCorrect = true;
   }
 
   return isCorrect;
-}
-
-function updateMultiFieldWrong(fieldId,hint) {
-  let field = document.getElementById(fieldId);
-  field.style.outline = "1px solid red";
-  field.title = hint;
-}
-
-function updateMultiFieldEmpty(fieldId) {
-  let field = document.getElementById(fieldId);
-  field.style.outline = "1px solid cyan";
-  field.title = 'Field is mandatory';
 }
 
 export function updateScenarioFieldOutlineAndTooltip(fieldId) {
@@ -390,44 +470,80 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
     let field = document.getElementById(fieldId);
   
     if (field.classList[0] === 'scenariofield') {
-        // check for duplicate scenarios
-        if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
-          isCorrect = false;
-          updateScenarioFieldDuplicate(field.id);
-        } else if (isModular() && !checkModularScenario(field.id)) {
-          updateScenarioFieldWrongModularScenario(field.id);
-          isCorrect = false;
-        } else if (field.id === currentInput.id && isModular()) { 
-          updateScenarioFieldFocused(field.id);
+        let customfields = document.querySelectorAll('#' + field.id.replace('scenario','scenariocustom'));
+        let customfield = (customfields.length > 0) ? customfields[0] : field;         
+        
+        if (isModular()) {
+          // check if modular element fields are correct
+          if (!checkModularScenario(field.id)) {
+            updateWrong(customfield.id,'One or more modular element fields are invalid. select scenario to see more details.');
+            isCorrect = false;
+          
+          // check if custom name is correct
+          } else if (!checkCustomName(customfield.id)) {
+            updateWrong(customfield.id,'Allowed: A-Z, a-z, 0-9, -, _ (no spaces)');
+            isCorrect = false;
+          } else if (isCustomNameDuplicate(customfield.id) && !isEmpty(customfield.value)) { 
+            updateWrong(customfield.id,'Name is duplicate of other (existing) scenario');
+            isCorrect = false;
+
+          // check if combination is correct
+          } else if (isEmpty(field.value) && !isEmpty(customfield.value)) {
+            updateWrong(customfield.id,'No tiles selected');
+            isCorrect = false;
+          } else if (!isEmpty(field.value) && isEmpty(customfield.value)) {
+            updateWrong(customfield.id,'Must specify name if tiles selected');
+            isCorrect = false;
+
+          // check focused or correct
+          } else if (field.id === currentInput.id) { 
+            updateFocused(customfield.id);
+          } else {
+            updateRight(customfield.id);
+          }
+
+        // else if not modular
         } else {
-          updateScenarioFieldRight(field.id);
+           // check if scenario is not duplicate
+          if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
+            isCorrect = false;
+            updateWrong(customfield.id,'Scenario is duplicate of other (existing) scenario');
+          } else {
+            updateRight(customfield.id);
+          }
         }
     }
     
     return isCorrect;
 }
 
-export function updateScenarioFieldDuplicate(fieldId) {
-    let field = document.getElementById(fieldId);
-    field.style.outline = "1px solid red";
-    field.title = 'Scenario is duplicate of other (existing) scenario';
-}
-  
-export function updateScenarioFieldWrongModularScenario(fieldId) {
-    let field = document.getElementById(fieldId);
-    field.style.outline = "1px solid red";
-    field.title = 'One or more modular element fields are invalid. select scenario to see more details.';
-}
-  
-export function updateScenarioFieldRight(fieldId, info="") {
-    let field = document.getElementById(fieldId);
-    field.style.outline = "none";
-    field.title = info;
+function updateWrong(fieldId,title="Wrong") {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid red";
+  field.title = title;
 }
 
-export function updateScenarioFieldFocused(fieldId) {
+function updateEmpty(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid cyan";
+  field.title = 'Field is mandatory';
+}
+
+export function updateRight(fieldId) {
+    let field = document.getElementById(fieldId);
+    field.style.outline = "none";
+    field.title = '';
+}
+
+export function updateFocused(fieldId) {
   let field = document.getElementById(fieldId);
   field.style.outline = "1px solid blue";
+  field.title = '';
+}
+
+export function updateModular(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid cyan";
   field.title = '';
 }
 
@@ -439,9 +555,39 @@ export function isScenarioDuplicate(fieldId) {
   var isDuplicate = false;
   let field = document.getElementById(fieldId);
   
-  // check other new scenarios
+  // compare other new scenarios 
   var scenarioFields = document.querySelectorAll(".scenariofield");
   for (const sf of scenarioFields) {
+    if (sf.id !== field.id && sf.value === field.value && !isEmpty(sf.value)) {
+      // if scenario equal to other scenario: duplicate
+      isDuplicate = true;
+      break;
+    }
+  }
+  
+  // compare existing scenario names (if present)
+  if (!isDuplicate ) {
+    var actualValue = getNewScenarioValue(field.value);
+    var existingScenarios = document.querySelectorAll(".existingscenariocustomfield");
+    for (const es of existingScenarios) {
+      if (actualValue === es.value ) {
+        // if scenario equal to existing scenario: duplicate
+        isDuplicate = true;
+        break;
+      }    
+    }
+  }
+  
+  return isDuplicate;
+}
+
+export function isCustomNameDuplicate(fieldId) {
+  var isDuplicate = false;
+  let field = document.getElementById(fieldId);
+  
+  // check other new scenarios
+  var customFields = document.querySelectorAll(".scenariocustomfield");
+  for (const sf of customFields) {
     if (sf.id !== field.id && sf.value === field.value && !isEmpty(sf.value)) {
       // if scenario equal to other scenario: duplicate
       isDuplicate = true;
@@ -452,7 +598,7 @@ export function isScenarioDuplicate(fieldId) {
   // check existing scenarios (if present)
   if (!isDuplicate ) {
     var actualValue = getNewScenarioValue(field.value);
-    var existingScenarios = document.querySelectorAll(".existingscenariofield");
+    var existingScenarios = document.querySelectorAll(".existingscenariocustomfield");
     for (const es of existingScenarios) {
       if (actualValue === es.value ) {
         // if scenario equal to existing scenario: duplicate

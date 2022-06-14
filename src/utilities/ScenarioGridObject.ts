@@ -15,7 +15,8 @@ export class ScenarioGridObject {
         private _nofScenarios: number,
         private _nofScenariosIndex: number,
         private _multiFieldValues: {[details: string] : string;},
-        private _nofPackages: string[]
+        private _nofPackages: string[],
+        private _scenarioCustomFields: string[]
     ) { }
 
     public getHtml(): string {
@@ -103,7 +104,10 @@ export class ScenarioGridObject {
     private _getScenarioInputField(index:number) : string {
         return /*html*/ `
         <section class="component-example">
-            <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" placeholder="${(index + 1) + nth(index + 1)} scenario name..." readonly></vscode-text-field>
+            <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" hidden></vscode-text-field>
+        </section>
+        <section class="component-example">
+            <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
         </section>`;
     }
 
@@ -132,9 +136,9 @@ export class ScenarioGridObject {
                     // build modular tile (and add multifield, if appropriate)
                     modularTiles += /*html*/ `
                     <section class="component-example">
-                        <vscode-button id="${element}" class="modulartile" appearance="secondary">${element}</vscode-button>
+                        <vscode-button id="${this._getCleanParent(parent) + element}" name="${element}" class="modulartile" parent="${this._getCleanParent(parent)}" appearance="secondary">${element}</vscode-button>
                         ${ currentElementObject.multi ? /*html*/ `
-                            <vscode-text-field id="multifield${element}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" placeholder="packages..." hidden></vscode-text-field>
+                            <vscode-text-field id="multifield${this._getCleanParent(parent) + element}" name="${element}" parent="${this._getCleanParent(parent)}" ${valueString(this._multiFieldValues["multifield" + element])} class="multifield" placeholder="packages..." hidden></vscode-text-field>
                         ` : ''}
                     </section>
                     `;
