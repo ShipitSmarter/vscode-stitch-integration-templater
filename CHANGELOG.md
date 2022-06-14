@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.5.1
+- Modular scenarios
+  - Now allows customised modular scenario names
+  - Now allows multiple modular tiles with the same name (as long as they are in different subfolders)
+  - Integration: existing scenarios
+    - Now shows which existing scenarios are modular (since cannot be deduced anymore from name)
+    - When existing modular scenario is checked, selecting the existing scenario name field will show which modular tiles it consists of
+
+- fix
+  - Now checks if new fixed scenario is not selected twice
+  - Integration: now hides carrier code field on 'update'
+- style
+  - Integration: on 'update', existing scenarios are now on the left, right under the carrier details
+
 ## 1.5.0 
 - Integration
   - Removed unused fields (urls, apy description, test user/pwd)
