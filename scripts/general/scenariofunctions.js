@@ -145,7 +145,7 @@ export function modularScenarioFocus(event) {
     
     // update field outlines
     if (previousInput.id.startsWith('existing')) {
-      updateRight(previouscustomfield.id);
+      updateModular(previouscustomfield.id);
     } else {
       updateScenarioFieldOutlineAndTooltip(previousInput.id);
     }
@@ -538,6 +538,12 @@ export function updateRight(fieldId) {
 export function updateFocused(fieldId) {
   let field = document.getElementById(fieldId);
   field.style.outline = "1px solid blue";
+  field.title = '';
+}
+
+export function updateModular(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid cyan";
   field.title = '';
 }
 

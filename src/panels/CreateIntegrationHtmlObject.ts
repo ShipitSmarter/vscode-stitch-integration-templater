@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean } from "../utilities/functions";
+import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean, isModular } from "../utilities/functions";
 import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
@@ -268,6 +268,8 @@ export class CreateIntegrationHtmlObject {
     let html: string = ``;
 
     for (let index = 0; index < this._existingScenarioFieldValues.length; index++) {
+      const modularOutline = 'style="outline:1px solid cyan"';
+      let outlineString = isModular(this._existingScenarioFieldValues[index]) ? modularOutline : '';
       let checked = '';
       let disabledReadonly = 'disabled';
       if (this._existingScenarioCheckboxValues[index] === true) {
@@ -279,7 +281,7 @@ export class CreateIntegrationHtmlObject {
         <section class="component-example">
           <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" index="${index}" ${checked}></vscode-checkbox>
           <vscode-text-field id="existingscenario${index}" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" hidden></vscode-text-field>
-          <vscode-text-field id="existingscenariocustom${index}" class="existingscenariocustomfield" value="${this._existingScenarioCustomFields[index]}" ${disabledReadonly}></vscode-text-field>
+          <vscode-text-field id="existingscenariocustom${index}" class="existingscenariocustomfield" value="${this._existingScenarioCustomFields[index]}" ${outlineString} ${disabledReadonly}></vscode-text-field>
         </section>
       `;
     }
