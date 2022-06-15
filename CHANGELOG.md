@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.5.2
+- Postman collection
+  - fix: now correctly loads number of packages fields from existing postman collection file
+
 ## 1.5.1
 - Modular scenarios
   - Now allows customised modular scenario names
