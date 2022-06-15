@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.5.3
+- Carrier Integration
+  - style: increased existing scenario name fields for clarity
+
 ## 1.5.2
 - Postman collection
   - fix: now correctly loads number of packages fields from existing postman collection file
