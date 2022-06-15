@@ -343,7 +343,7 @@ export class CreatePostmanCollectionPanel {
           this._scenarioCustomFields[index] = pmc.item[index].name;
   
           // extract nofPackages
-          var nofPackages = pmc.item[index].name.match('(?<=multi_)\\d+');
+          var nofPackages = pmc.item[index].structure.match('(?<=multi_)\\d+');
           if (nofPackages) {
             this._nofPackages[index] = nofPackages[0];
           }
