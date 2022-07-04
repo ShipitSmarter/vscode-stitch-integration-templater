@@ -11,7 +11,6 @@ export class ScenarioGridObject {
         private _availableScenarios: string[],
         private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
         private _scenarioFieldValues: string[],
-        private _modularValue: boolean,
         private _nofScenarios: number,
         private _nofScenariosIndex: number,
         private _multiFieldValues: {[details: string] : string;},
@@ -29,10 +28,6 @@ export class ScenarioGridObject {
                             <div class="component-sub-container">
                                 <h2>Scenarios</h2>
                                 <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
-
-                                <section class="component-example">
-                                    <vscode-checkbox id="modular" class="modular" ${checkedString(true)} hidden>Modular</vscode-checkbox>
-                                </section>
 
                                 <section class="component-example">
                                     <p>Number of Scenarios</p>

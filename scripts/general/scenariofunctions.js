@@ -27,9 +27,6 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener('focus',modularScenarioFocus);
   }
 
-  // modular checkbox
-  document.getElementById("modular").addEventListener("change", scenarioFieldChange(vscodeApi));
-
   // nofPackages dropdowns
   for (const field of document.querySelectorAll(".nofpackages")) {
     field.addEventListener("change", changePackages(vscodeApi));
@@ -41,10 +38,8 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener("keyup",multiFieldChange(vscodeApi));
   }
 
-  // if modular: check currentInput content and update tiles
-  if (isModular()) {
-    updateTiles(currentInput.value);
-  }
+  // check currentInput content and update tiles
+  updateTiles(currentInput.value);
 }
 
 export var clickTile = function (vscodeApi) { return function (event) {
@@ -137,7 +132,7 @@ export function modularScenarioFocus(event) {
   const customfield = event.target;
   const field = document.getElementById(customfield.id.replace('scenariocustom','scenario'));
 
-  if (field.id !== currentInput.id && isModular() && (isModularScenario(field.value) || field.classList[0] === 'scenariofield')) {
+  if (field.id !== currentInput.id && (isModularScenario(field.value) || field.classList[0] === 'scenariofield')) {
     // update currentInput
     let previousInput = currentInput;
     const previouscustomfield = document.getElementById(previousInput.id.replace('scenario','scenariocustom'));
@@ -370,10 +365,6 @@ export function updateTiles(content) {
     }
 }
 
-export function isModular() {
-    return document.getElementById("modular").checked;
-}
-
 export function countInString(string, element) {
   let l1 = string.length;
   let l2 = string.replace(new RegExp(element, 'g'), '').length;
@@ -473,45 +464,33 @@ export function updateScenarioFieldOutlineAndTooltip(fieldId) {
         let customfields = document.querySelectorAll('#' + field.id.replace('scenario','scenariocustom'));
         let customfield = (customfields.length > 0) ? customfields[0] : field;         
         
-        if (isModular()) {
-          // check if modular element fields are correct
-          if (!checkModularScenario(field.id)) {
-            updateWrong(customfield.id,'One or more modular element fields are invalid. select scenario to see more details.');
-            isCorrect = false;
-          
-          // check if custom name is correct
-          } else if (!checkCustomName(customfield.id)) {
-            updateWrong(customfield.id,'Allowed: A-Z, a-z, 0-9, -, _ (no spaces)');
-            isCorrect = false;
-          } else if (isCustomNameDuplicate(customfield.id) && !isEmpty(customfield.value)) { 
-            updateWrong(customfield.id,'Name is duplicate of other (existing) scenario');
-            isCorrect = false;
+        // check if modular element fields are correct
+        if (!checkModularScenario(field.id)) {
+          updateWrong(customfield.id,'One or more modular element fields are invalid. select scenario to see more details.');
+          isCorrect = false;
+        
+        // check if custom name is correct
+        } else if (!checkCustomName(customfield.id)) {
+          updateWrong(customfield.id,'Allowed: A-Z, a-z, 0-9, -, _ (no spaces)');
+          isCorrect = false;
+        } else if (isCustomNameDuplicate(customfield.id) && !isEmpty(customfield.value)) { 
+          updateWrong(customfield.id,'Name is duplicate of other (existing) scenario');
+          isCorrect = false;
 
-          // check if combination is correct
-          } else if (isEmpty(field.value) && !isEmpty(customfield.value)) {
-            updateWrong(customfield.id,'No tiles selected');
-            isCorrect = false;
-          } else if (!isEmpty(field.value) && isEmpty(customfield.value)) {
-            updateWrong(customfield.id,'Must specify name if tiles selected');
-            isCorrect = false;
+        // check if combination is correct
+        } else if (isEmpty(field.value) && !isEmpty(customfield.value)) {
+          updateWrong(customfield.id,'No tiles selected');
+          isCorrect = false;
+        } else if (!isEmpty(field.value) && isEmpty(customfield.value)) {
+          updateWrong(customfield.id,'Must specify name if tiles selected');
+          isCorrect = false;
 
-          // check focused or correct
-          } else if (field.id === currentInput.id) { 
-            updateFocused(customfield.id);
-          } else {
-            updateRight(customfield.id);
-          }
-
-        // else if not modular
+        // check focused or correct
+        } else if (field.id === currentInput.id) { 
+          updateFocused(customfield.id);
         } else {
-           // check if scenario is not duplicate
-          if (isScenarioDuplicate(field.id) && !isEmpty(field.value)) {
-            isCorrect = false;
-            updateWrong(customfield.id,'Scenario is duplicate of other (existing) scenario');
-          } else {
-            updateRight(customfield.id);
-          }
-        }
+          updateRight(customfield.id);
+        }  
     }
     
     return isCorrect;

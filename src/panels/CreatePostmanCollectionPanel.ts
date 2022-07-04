@@ -31,7 +31,7 @@ export class CreatePostmanCollectionPanel {
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
   private _independent: boolean = false;
-  private _modularValue: boolean = false;
+  private _modularValue: boolean = true;
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
   private _integrationObjects:      {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[] = [];
@@ -636,7 +636,6 @@ export class CreatePostmanCollectionPanel {
       this._availableScenarios,
       this._modularElementsWithParents,
       this._independent,
-      this._modularValue,
       this._multiFieldValues,
       this._nofPackages,
       this._pmcObjects,

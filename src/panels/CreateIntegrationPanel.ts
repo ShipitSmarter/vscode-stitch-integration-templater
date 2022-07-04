@@ -22,7 +22,7 @@ export class CreateIntegrationPanel {
   private _existingScenarioFieldValues: string[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: string = 'create';      // pre-allocate with 'create'
-  private _modularValue: boolean = false;             // pre-allocate with 'false'  
+  private _modularValue: boolean = true;             // pre-allocate with 'true'  
   private _integrationObjects:      {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[] = [];
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios: [{name:'', structure:''}]};
   private _currentIntegration :     {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]} = this._emptyIntegrationObject;
@@ -611,7 +611,6 @@ export class CreateIntegrationPanel {
       this._existingScenarioFieldValues,
       this._existingScenarioCheckboxValues,
       this._createUpdateValue,
-      this._modularValue,
       this._multiFieldValues,
       this._nofPackages,
       this._moduleOptions,
