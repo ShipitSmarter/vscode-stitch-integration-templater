@@ -24,50 +24,36 @@ export class ScenarioGridObject {
         let scenariosGrid = /*html*/ `    
             <section class="rowsingle">
                 <section class="component-container">
-                ${this._modularValue ? '<section class="component-nomargin"><div class="floatleft">' : ''}
-                    <div class="component-sub-container">
-                        <h2>Scenarios</h2>
-                        <vscode-divider role="separator"></vscode-divider>
+                    <section class="component-nomargin">
+                        <div class="floatleft">
+                            <div class="component-sub-container">
+                                <h2>Scenarios</h2>
+                                <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
 
-                        <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
+                                <section class="component-example">
+                                    <vscode-checkbox id="modular" class="modular" ${checkedString(true)} hidden>Modular</vscode-checkbox>
+                                </section>
 
-                        <section class="component-example">
-                            <vscode-checkbox id="modular" class="modular" ${checkedString(this._modularValue)}>Modular</vscode-checkbox>
-                        </section>
+                                <section class="component-example">
+                                    <p>Number of Scenarios</p>
+                                    <vscode-dropdown id="nofscenarios" class="dropdown" index="${this._nofScenariosIndex}" ${valueString(this._nofScenarios+'' ?? '0')} position="below">
+                                        ${dropdownOptions(arrayFrom1(100))}
+                                    </vscode-dropdown>
+                                </section>
 
-                        <vscode-divider role="separator"></vscode-divider>
-
-                        <section class="component-example">
-                            <p>Number of Scenarios</p>
-                            <vscode-dropdown id="nofscenarios" class="dropdown" index="${this._nofScenariosIndex}" ${valueString(this._nofScenarios+'' ?? '0')} position="below">
-                                ${dropdownOptions(arrayFrom1(100))}
-                            </vscode-dropdown>
-                        </section>
-
-                        ${this._modularValue ? this._modularScenarioInputs() : this._fixedScenarioInputs()}
-                    </div>                    
-                ${this._modularValue ? '</div>' : ''}
-                ${this._modularValue ? '<div class="floatleft">' : ''}
-                    ${this._modularValue ? this._getModularTiles() : ''}
-                ${this._modularValue ? '</div></section>' : ''}
+                                ${this._modularScenarioInputs()}
+                            </div>                    
+                        </div>
+                        
+                        <div class="floatleft">
+                            ${this._getModularTiles()}
+                        </div>
+                    </section>
 
                 </section>
             </section>`;
 
         return scenariosGrid;
-    }
-
-    private _fixedScenarioInputs(): string {
-        let html: string = ``;
-
-        for (let scenario = 0; scenario < +this._nofScenarios; scenario++) {
-            html += /*html*/`
-            <section class="component-example">
-                ${this._getScenarioDropdown(scenario)}
-            </section>`;
-        }
-
-        return html;
     }
 
     private _modularScenarioInputs(): string {
@@ -109,14 +95,6 @@ export class ScenarioGridObject {
         <section class="component-example">
             <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
         </section>`;
-    }
-
-    private _getScenarioDropdown(index:number) : string {
-        return /*html*/ `
-        <vscode-dropdown id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" position="below">
-            <vscode-option></vscode-option>  
-            ${dropdownOptions(this._availableScenarios)}
-        </vscode-dropdown>`;
     }
 
     private _getModularTiles() : string {
