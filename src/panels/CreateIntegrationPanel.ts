@@ -109,7 +109,7 @@ export class CreateIntegrationPanel {
             break;
 
           case 'checkintegrationexists':
-            this._checkIntegrationExists(extensionUri);
+            this._checkIntegrationExists(extensionUri, 'check');
             break;
 
           case 'createintegration':
@@ -216,9 +216,11 @@ export class CreateIntegrationPanel {
     return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0] ?? this._emptyIntegrationObject;
   }
 
-  private async _checkIntegrationExists(extensionUri: vscode.Uri) {
-    // refresh integration object presence (in case deletes)
-    this._integrationObjects = this._integrationObjects.filter(el => fs.existsSync(el.path));
+  private async _checkIntegrationExists(extensionUri: vscode.Uri, source:string = '') {
+    // refresh content
+    if (source === 'check') {
+      await this._refresh();
+    }
 
     // get current integration
     this._currentIntegration = this._getIntegrationObject();
@@ -241,18 +243,6 @@ export class CreateIntegrationPanel {
     // clean existing scenario checkbox values upon clicking 'check' button
     this._existingScenarioCheckboxValues = [];
 
-    // refresh available scenarios and module elements
-    if (this._modularValue) {
-      this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
-    } else {
-      this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
-    }
-
-    // update dropdown options
-    await this._getModuleOptions();
-    await this._getStepOptions();
-    await this._getStepTypeOptions();
-    await this._getStepMethodOptions();
 
     // update panel
     this._updateWebview(extensionUri);
@@ -579,6 +569,17 @@ export class CreateIntegrationPanel {
     this._nofPackages = this._nofPackages.slice(0, +this._fieldValues[nofScenariosIndex]);
   }
 
+  private async _refresh() {
+    await this._getModuleOptions();
+    await this._getStepOptions();
+    await this._getStepTypeOptions();
+    await this._getStepMethodOptions();
+    this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
+    this._integrationObjects = await getAvailableIntegrations('integration');
+    this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
+    this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+  }
+
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
@@ -588,14 +589,7 @@ export class CreateIntegrationPanel {
 
     // first time only: get integrations, available scenarios, modular elements
     if (this._integrationObjects.length === 0) {
-      await this._getModuleOptions();
-      await this._getStepOptions();
-      await this._getStepTypeOptions();
-      await this._getStepMethodOptions();
-      this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
-      this._integrationObjects = await getAvailableIntegrations('integration');
-      this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
-      this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+      await this._refresh();
       this._stepTypes[0] = this._stepTypeOptions[0];
       this._stepMethods[0] = this._stepMethodOptions[0];
     }
