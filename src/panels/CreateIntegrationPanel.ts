@@ -22,7 +22,6 @@ export class CreateIntegrationPanel {
   private _existingScenarioFieldValues: string[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: string = 'create';      // pre-allocate with 'create'
-  private _modularValue: boolean = false;             // pre-allocate with 'false'  
   private _integrationObjects:      {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[] = [];
   private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios: [{name:'', structure:''}]};
   private _currentIntegration :     {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]} = this._emptyIntegrationObject;
@@ -196,11 +195,6 @@ export class CreateIntegrationPanel {
               case 'existingscenariocheckbox':
                 this._existingScenarioCheckboxValues[index] = toBoolean(value);
                 break;
-              case 'modular':
-                this._modularValue = toBoolean(value);
-                this._scenarioFieldValues = [];
-                this._updateWebview(extensionUri);
-                break;
               case 'nofpackagesdropdown':
                 this._nofPackages[index] = value;
                 break;
@@ -279,7 +273,7 @@ export class CreateIntegrationPanel {
 
       // update integration objects
       let scenarios : string[] = this._getNewScenarios();
-      let scenarioNames:string[] =  this._modularValue ? this._scenarioCustomFields.filter(el => !isEmpty(el)) : scenarios;
+      let scenarioNames:string[] =  this._scenarioCustomFields.filter(el => !isEmpty(el));
 
       let scenarioObjects :  {name:string, structure:string}[] = new Array< {name:string, structure:string}>(scenarios.length);
       for (let index=0; index < scenarios.length; index++) {
@@ -295,7 +289,7 @@ export class CreateIntegrationPanel {
         api: this._fieldValues[apiIndex], 
         module: this._fieldValues[moduleIndex], 
         carriercode: this._fieldValues[carrierCodeIndex], 
-        modular: this._modularValue, 
+        modular: true, 
         scenarios: scenarioNames, 
         validscenarios: scenarioObjects
       };
@@ -353,7 +347,7 @@ export class CreateIntegrationPanel {
 
       // update integration objects
       let newScenarios : string[] = this._getNewScenarios();
-      let newScenarioNames : string[] =  this._modularValue ? this._scenarioCustomFields.filter(el => !isEmpty(el)) : newScenarios;
+      let newScenarioNames : string[] =  this._scenarioCustomFields.filter(el => !isEmpty(el));
 
       let scenarioObjects :  {name:string, structure:string}[] = new Array< {name:string, structure:string}>(newScenarios.length);
       for (let index=0; index < newScenarios.length; index++) {
@@ -398,15 +392,11 @@ export class CreateIntegrationPanel {
 
   private _getNewScenarios() : string[] {
     let newScenarios: string[] = [];
-    // if modular: combine with custom names
-    if (this._modularValue) {
-      for (let index = 0; index < this._scenarioFieldValues.length; index++) {
-        if (!isEmpty(this._scenarioFieldValues[index])) {
-          newScenarios[index] = this._scenarioFieldValues[index] + '|' + this._scenarioCustomFields[index];
-        }
+    // combine with custom names
+    for (let index = 0; index < this._scenarioFieldValues.length; index++) {
+      if (!isEmpty(this._scenarioFieldValues[index])) {
+        newScenarios[index] = this._scenarioFieldValues[index] + '|' + this._scenarioCustomFields[index];
       }
-    } else {
-      newScenarios =  this._scenarioFieldValues.map( el => this._getNewScenarioValue(el));
     }
 
     return newScenarios.filter(el => !isEmpty(el));
@@ -611,7 +601,6 @@ export class CreateIntegrationPanel {
       this._existingScenarioFieldValues,
       this._existingScenarioCheckboxValues,
       this._createUpdateValue,
-      this._modularValue,
       this._multiFieldValues,
       this._nofPackages,
       this._moduleOptions,

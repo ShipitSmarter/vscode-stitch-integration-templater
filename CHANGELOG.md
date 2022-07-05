@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.5.4
+- Carrier integration
+  - 'Check' button click now does a full refresh
+    - Pro: takes into account scenario renaming
+    - Con: hitting 'check' takes a couple of seconds
+- Scenarios
+  - For both integration and Postman collection, new scenarios can only be modular
+  - For integration, fixed scenarios may still show up as 'existing scenarios' and may still be re-run
+
 ## 1.5.3
 - Carrier Integration
   - style: increased existing scenario name fields for clarity

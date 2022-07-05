@@ -31,7 +31,6 @@ export class CreatePostmanCollectionPanel {
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
   private _independent: boolean = false;
-  private _modularValue: boolean = false;
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
   private _integrationObjects:      {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[] = [];
@@ -254,12 +253,6 @@ export class CreatePostmanCollectionPanel {
                 this._updateWebview(extensionUri);
                 break;
 
-              case 'modular':
-                this._modularValue = toBoolean(value);
-                this._scenarioFieldValues = [];
-                this._updateWebview(extensionUri);
-                break;
-
               case 'nofpackagesdropdown':
                 this._nofPackages[index] = value;
                 break;
@@ -331,25 +324,21 @@ export class CreatePostmanCollectionPanel {
       }
   
       // update scenarios
-      this._modularValue = isModular(pmc.item[0].structure);
       this._fieldValues[nofScenariosIndex] = pmc.item.length;
       this._scenarioFieldValues = [];
       this._scenarioCustomFields = [];
       this._nofPackages = [];
       for (let index = 0; index < pmc.item.length; index++) {
   
-        if (this._modularValue) {
-          this._scenarioFieldValues[index] = pmc.item[index].structure;
-          this._scenarioCustomFields[index] = pmc.item[index].name;
-  
-          // extract nofPackages
-          var nofPackages = pmc.item[index].structure.match('(?<=multi_)\\d+');
-          if (nofPackages) {
-            this._nofPackages[index] = nofPackages[0];
-          }
-        } else {
-          this._scenarioFieldValues[index] = this._availableScenarios.filter(el => el.match(' ' + pmc.item[index].name + '$'))[0];
+        this._scenarioFieldValues[index] = pmc.item[index].structure;
+        this._scenarioCustomFields[index] = pmc.item[index].name;
+
+        // extract nofPackages
+        var nofPackages = pmc.item[index].structure.match('(?<=multi_)\\d+');
+        if (nofPackages) {
+          this._nofPackages[index] = nofPackages[0];
         }
+
       }
     }
 
@@ -473,16 +462,13 @@ export class CreatePostmanCollectionPanel {
 
   private _getNewScenarios() : string[] {
     let newScenarios: string[] = [];
-    // if modular: combine with custom names
-    if (this._modularValue) {
+    // combine with custom names
       for (let index = 0; index < this._scenarioFieldValues.length; index++) {
         if (!isEmpty(this._scenarioFieldValues[index])) {
           newScenarios[index] = this._scenarioFieldValues[index] + '|' + this._scenarioCustomFields[index];
         }
       }
-    } else {
-      newScenarios =  this._scenarioFieldValues.map( el => this._getNewScenarioValue(el));
-    }
+
 
     return newScenarios.filter(el => !isEmpty(el)).sort();
   }
@@ -636,7 +622,6 @@ export class CreatePostmanCollectionPanel {
       this._availableScenarios,
       this._modularElementsWithParents,
       this._independent,
-      this._modularValue,
       this._multiFieldValues,
       this._nofPackages,
       this._pmcObjects,
