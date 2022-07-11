@@ -32,7 +32,8 @@
   ],
   "activationEvents": [
     "onCommand:stitch.integration-templater",
-    "onCommand:stitch.postman-collection"
+    "onCommand:stitch.postman-collection",
+    "onCommand:stitch.parameters"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -44,6 +45,10 @@
       {
         "command": "stitch.postman-collection",
         "title": "Stitch: Create Postman collection"
+      },
+      {
+        "command": "stitch.parameters",
+        "title": "Stitch: Get/Set parameters"
       }
     ]
   },
