@@ -2,14 +2,14 @@ import * as vscode from "vscode";
 import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString} from "../utilities/functions";
 
 // fixed fields indices
-const parameterIndex = 0;
-const codecompanyIndex = 1;
-const handlingagentIndex = 2;
-const environmentIndex = 3;
+const variable0Index = 0;
+const variable1Index = 1;
+const variable2Index = 2;
+const variable3Index = 3;
 
-export class ParameterHtmlObject {
+export class NEWNAMEHtmlObject {
   // PROPERTIES
-  public static currentHtmlObject: ParameterHtmlObject | undefined;
+  public static currentHtmlObject: NEWNAMEHtmlObject | undefined;
 
   // constructor
   public constructor(  
@@ -41,10 +41,10 @@ export class ParameterHtmlObject {
 
 				<div class="row11" id="main">
           <section id="farleft">
-					  <h1>Get parameters</h1> 
+					  <h1>New Name Title</h1> 
           </section>
           <section id="farright">
-            
+            ${this._getExecuteButton()}
           </section>
 				</div>
         
@@ -53,13 +53,14 @@ export class ParameterHtmlObject {
           <section class="rowsingle">
             <section class="component-container">
               <div class="component-sub-container">
-                <h2>Parameter details</h2>
-                ${this._getParametersGrid()}
+                <div class="floatleft">
+                    <h2>Some details</h2>
+                    ${this._getDetailsGrid()}
+                </div>
               </div>
             </section> 
           </section>
 
-          
         </section>
 
 			</body>
@@ -69,9 +70,9 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  private _getParametersButton(): string {
+  private _getExecuteButton(): string {
     let getParametersButton: string = /*html*/ `
-      <vscode-button id="getparameters" appearance="primary" >
+      <vscode-button id="execute" appearance="primary" >
         Get Parameters
         <span slot="start" class="codicon codicon-add"></span>
       </vscode-button>
@@ -79,29 +80,39 @@ export class ParameterHtmlObject {
     return getParametersButton;
   }
 
-  private _getParametersGrid(): string {
+  private _getRefreshButton(): string {
+    let refreshButton: string = /*html*/ `
+    <vscode-button id="refresh" appearance="primary">
+      Refresh
+      <span slot="start" class="codicon codicon-refresh"></span>
+    </vscode-button>
+  `;
+    return refreshButton;
+  }
+
+  private _getDetailsGrid(): string {
     let getParametersGrid = /*html*/ `
       <section class="component-example">
-        <vscode-text-field id="parametername" class="field" index="${parameterIndex}" ${valueString(this._fieldValues[parameterIndex])} placeholder="parameter name" size="15"></vscode-text-field>
+        <vscode-text-field id="variable0" class="field" index="${variable0Index}" ${valueString(this._fieldValues[variable0Index])} placeholder="parameter name" size="15"></vscode-text-field>
       </section>
 
       <section class="component-example">
-        <vscode-text-field id="codecompany" class="field" index="${codecompanyIndex}" ${valueString(this._fieldValues[codecompanyIndex])} placeholder="CodeCompany" size="15"></vscode-text-field>
+        <vscode-text-field id="variable1" class="field" index="${variable1Index}" ${valueString(this._fieldValues[variable1Index])} placeholder="CodeCompany" size="15"></vscode-text-field>
       </section>
 
       <section class="component-example">
-        <vscode-text-field id="handlingagent" class="field" index="${handlingagentIndex}" ${valueString(this._fieldValues[handlingagentIndex])} placeholder="handling agent" size="15"></vscode-text-field>
+        <vscode-text-field id="variable2" class="field" index="${variable2Index}" ${valueString(this._fieldValues[variable2Index])} placeholder="handling agent" size="15"></vscode-text-field>
       </section>
 
 
       <section class="component-example">
-        <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${valueString(this._fieldValues[environmentIndex])} position="below">
+        <vscode-dropdown id="variable3" class="dropdown" index="${variable3Index}" ${valueString(this._fieldValues[variable3Index])} position="below">
             ${dropdownOptions(['ACC','PROD'])}
         </vscode-dropdown>
       </section>
       
 
-      ${this._getParametersButton()}
+      ${this._getRefreshButton()}
 
       `;
 

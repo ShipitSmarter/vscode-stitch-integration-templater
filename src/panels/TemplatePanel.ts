@@ -1,16 +1,17 @@
 import * as vscode from "vscode";
-import { getUri } from "../utilities/functions";
-import { ParameterHtmlObject } from "./ParameterHtmlObject";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles, isModular} from "../utilities/functions";
+import * as fs from 'fs';
+import { NEWNAMEHtmlObject } from "./TemplateHtmlObject";
 
 // fixed fields indices
-const parameterIndex = 0;
-const codecompanyIndex = 1;
-const handlingagentIndex = 2;
-const environmentIndex = 3;
+const variable0Index = 0;
+const variable1Index = 1;
+const variable2Index = 2;
+const variable3Index = 3;
 
-export class ParameterPanel {
+export class NEWNAMEPanel {
   // PROPERTIES
-  public static currentPanel: ParameterPanel | undefined;
+  public static currentPanel: NEWNAMEPanel | undefined;
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
@@ -19,14 +20,17 @@ export class ParameterPanel {
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
     this._panel = panel;
 
+    // predefine some fixed fields
+    // this._fieldValues[variable1Index] = 'USER_CONTENT';
+
     // set content
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
 
     // set message listener
     this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
 
-     // set ondidchangeviewstate
-     this._panel.onDidChangeViewState(e => {
+    // set ondidchangeviewstate: reload panel fields on show
+    this._panel.onDidChangeViewState(e => {
       const panel = e.webviewPanel;
       let isVisible = panel.visible;
 
@@ -43,24 +47,29 @@ export class ParameterPanel {
   }
 
   // METHODS
-  public static render(extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
-    if (ParameterPanel.currentPanel) {
-      ParameterPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
+  // initial rendering
+  public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
+    if (NEWNAMEPanel.currentPanel) {
+      NEWNAMEPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("hello-world", "Hello World!", vscode.ViewColumn.One, {
+      const panel = vscode.window.createWebviewPanel("new-name", "New Name", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
-      ParameterPanel.currentPanel = new ParameterPanel(panel, extensionUri, context);
+      NEWNAMEPanel.currentPanel = new NEWNAMEPanel(panel, extensionUri, context);
     }
   }
 
-   // update panel
-   private _updateWebview(extensionUri: vscode.Uri) {
+  // update panel
+  private _updateWebview(extensionUri: vscode.Uri) {
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
   }
 
+  // message listener
   private _setWebviewMessageListener(extensionUri: vscode.Uri, webview: vscode.Webview, context: vscode.ExtensionContext) {
+    // Pre-allocate terminal and terminalExists
+    let terminal: vscode.Terminal;
+
     webview.onDidReceiveMessage(
       (message: any) => {
         const command = message.command;
@@ -72,16 +81,15 @@ export class ParameterPanel {
             this._updateWebview(extensionUri);
             break;
 
-          case 'refreshcontent':
-            // this._refreshContent().then( () => {
-            //   this._updateWebview(extensionUri);
-            // });
+          case 'refreshbutton':
+            this._refreshButton().then( () => {
+              this._updateWebview(extensionUri);
+            });
             break;
 
-          case 'getparameters':
-            
+          case 'executebutton':
+            this._executeButton(terminal, extensionUri);
             break;
-
 
           case 'showerrormessage':
             vscode.window.showErrorMessage(text);
@@ -102,18 +110,26 @@ export class ParameterPanel {
               case 'dropdown':
                 this._fieldValues[index] = value;
                 switch (index) {
-                  case environmentIndex:
-
+                  case variable0Index:
+                    
                     break;
+                  case variable1Index:
+                   
+                    break;
+                
                 }
                 break;
 
               case 'field':
                 this._fieldValues[index] = value;
                 switch (index) {
-                  case parameterIndex:
-
+                  case variable2Index:
+                    
                     break;
+                  case variable3Index:
+                   
+                    break;
+                
                 }
                 break;
             }
@@ -126,15 +142,41 @@ export class ParameterPanel {
     );
   }
 
+  private _executeButton(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
+    // execute someting
+
+    // getWorkspaceFile('**/scripts/functions.ps1').then(functionsPath => {
+    //   // show info message
+    //   vscode.window.showInformationMessage('Creating Postman Collection for ' + this._getIntegrationName());
+
+    //   // execute powershell
+    //   this._runScript(terminal, functionsPath);
+    // });
+  }
+
+  private async _refreshButton() {
+    // reload dropdowns and field values from local file system
+    
+    // this._codeCompanies = [];
+    // this._carrierCodes = [];
+    // this._restUrls = [];
+    // await this._getCompanies();
+    // await this._getRestUrls();
+    // await this._getCarrierCodes();
+    // this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
+    // this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+    // this._pmcObjects                  = await getPostmanCollectionFiles();
+  }
+
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
     const codiconsUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "codicons", "dist", "codicon.css"]);
-    const mainUri = getUri(webview, extensionUri, ["scripts", "parameter", "main.js"]);
-    const styleUri = getUri(webview, extensionUri, ["scripts", "parameter", "style.css"]);
+    const mainUri = getUri(webview, extensionUri, ["scripts", "newname", "main.js"]);
+    const styleUri = getUri(webview, extensionUri, ["scripts", "newname", "style.css"]);
 
     // construct panel html object and retrieve html
-    let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
+    let parameterHtmlObject: NEWNAMEHtmlObject = new NEWNAMEHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
       this._fieldValues
     );
@@ -146,7 +188,7 @@ export class ParameterPanel {
 
   // dispose
   public dispose() {
-    ParameterPanel.currentPanel = undefined;
+    NEWNAMEPanel.currentPanel = undefined;
 
     this._panel.dispose();
 

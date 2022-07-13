@@ -129,6 +129,7 @@ export class CreatePostmanCollectionHtmlObject {
                 <vscode-divider role="separator"></vscode-divider>
 
                 ${this._getHeadersGrid()} 
+                
               </div>
             </section> 
           </section>
