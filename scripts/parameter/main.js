@@ -14,6 +14,9 @@ function main() {
   // previous checkbox
   document.getElementById("previous").addEventListener("change", previousChange);
 
+  // load file checkbox
+  document.getElementById("showload").addEventListener("change", showLoadChange);
+
 
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown");
@@ -44,6 +47,20 @@ function previousChange(event) {
   saveValue(field.id);
 
   updateHighlightSet();
+}
+
+function showLoadChange(event) {
+  const field = event.target;
+
+  saveValue(field.id);
+
+  if (field.checked) {
+    document.getElementById("files").hidden = false;
+    document.getElementById("load").hidden = false;
+  } else {
+    document.getElementById("files").hidden = true;
+    document.getElementById("load").hidden = true;
+  }
 }
 
 function updateHighlightSet() {

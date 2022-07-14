@@ -22,6 +22,7 @@ export class ParameterHtmlObject {
     private _newValues: string[],
     private _currentValues: string[],
     private _previous: boolean,
+    private _showLoad: boolean,
     private _environmentOptions: string[]
   ) { }
 
@@ -56,6 +57,8 @@ export class ParameterHtmlObject {
             
           </section>
 				</div>
+
+        ${this._getLoadItems()}
         
         <section class="rowflex">
           <section class="rowsingle">
@@ -98,7 +101,7 @@ export class ParameterHtmlObject {
     let getParametersButton: string = /*html*/ `
       <vscode-button id="setparameters" appearance="primary" >
         Set Parameters
-        <span slot="start" class="codicon codicon-arrow-up"></span>
+        <span slot="start" class="codicon codicon-arrow-right"></span>
       </vscode-button>
       `;
     return getParametersButton;
@@ -130,6 +133,51 @@ export class ParameterHtmlObject {
     return getParametersGrid;
   }
 
+  private _getLoadItems(): string {
+    let html: string = /*html*/ `
+
+    <section class="rowsingle">
+      <vscode-divider role="separator"></vscode-divider>
+
+      <section class="component-example">
+        <vscode-checkbox id="showload" class="showload" ${checkedString(this._showLoad)}>Load from file</vscode-checkbox>
+      </section>
+
+      <section class="component-example">
+        <div class="floatleft">
+          <vscode-dropdown id="files" class="files" position="below" ${hiddenString(this._showLoad)}>
+            ${dropdownOptions(this._getFileLoadOptions())}
+          </vscode-dropdown>
+        </div>
+        <div class="floatleft">
+          <vscode-button id="load" appearance="primary" ${hiddenString(this._showLoad)}>
+            Load
+            <span slot="start" class="codicon codicon-arrow-up"></span>
+          </vscode-button>
+        </div>
+      </section>
+
+      <vscode-divider role="separator"></vscode-divider>
+    </section>
+    
+    `;
+
+    return html;
+  }
+
+  private _getFileLoadOptions() : string[] {
+    //this._pmcObjects.map(el => el.path);
+    var options: string[] = [];
+
+    // for (let index = 0; index < this._pmcObjects.length; index++) {
+    //   let pmc = this._pmcObjects[index];
+    //   options[index] = pmc.parent + ' > ' + pmc.file;
+    // }
+
+    // return options.sort();
+    return ['file1.csv','file2.csv','file3.csv'];
+  }
+
   private _getCurrentValues(): string {
     let currentValues: string = ``;
 
@@ -137,7 +185,7 @@ export class ParameterHtmlObject {
       let curValue = this._currentValues[index] ?? '';
 
       currentValues += /*html*/`
-        <section class="component-nomargin">
+        <section class="component-minvmargin">
           <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${curValue}" readonly></vscode-text-field>
         </section>
       `;
@@ -171,35 +219,35 @@ export class ParameterHtmlObject {
 
       // code company
       codeCompanys += /*html*/`
-        <section class="component-nomargin">
+        <section class="component-minvmargin">
         <vscode-text-field id="codecompany${row}" class="codecompanyfield" index="${row}" ${valueString(this._codeCompanyValues[row])} placeholder="CodeCompany"></vscode-text-field>
         </section>
       `;
 
       // handling agent
       handlingAgents += /*html*/`
-        <section class="component-nomargin">
+        <section class="component-minvmargin">
           <vscode-text-field id="handlingagent${row}" class="handlingagentfield" index="${row}" ${valueString(this._handlingAgentValues[row])} placeholder="handling agent"></vscode-text-field>
         </section>
       `;
 
       // parameter name
       parameterNames += /*html*/`
-        <section class="component-nomargin">
+        <section class="component-minvmargin">
           <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name"></vscode-text-field>
         </section>
       `;
 
       // previous parameter value
       previousValues += /*html*/`
-        <section class="component-nomargin">
+        <section class="component-minvmargin">
           <vscode-text-field id="previousvalue${row}" class="previousvaluefield" index="${row}" ${valueString(this._previousValues[row])} readonly></vscode-text-field>
         </section>
       `;
 
       // new parameter value
       newValues += /*html*/`
-        <section class="component-nomargin">
+        <section class="component-minvmargin">
           <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" ${valueString(this._newValues[row])} placeholder="new parameter value"></vscode-text-field>
         </section>
       `;

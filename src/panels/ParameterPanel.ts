@@ -22,6 +22,7 @@ export class ParameterPanel {
   private _newValues: string[] = [];
   private _currentValues: string[] = [];
   private _previous: boolean = false;
+  private _showLoad: boolean = false;
   private _managerAuth: string = '';
   private _urls: {type:string, acc:string, prod:string}[] = [];
   private _environmentOptions: string[] = [];
@@ -215,6 +216,7 @@ export class ParameterPanel {
       this._newValues,
       this._currentValues,
       this._previous,
+      this._showLoad,
       this._environmentOptions
     );
 

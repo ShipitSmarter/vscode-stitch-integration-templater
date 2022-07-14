@@ -27,6 +27,12 @@
   margin-bottom: 1.5rem;
 }
 
+.component-minvmargin {
+  width: 100%;
+  margin-top: 0.5rem;
+  /* margin-bottom: 1.5rem; */
+}
+
 .component-nomargin {
   width: 100%;
 }
