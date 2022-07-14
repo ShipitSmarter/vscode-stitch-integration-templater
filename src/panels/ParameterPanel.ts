@@ -17,7 +17,8 @@ export class ParameterPanel {
   private _fieldValues: string[] = [];
   private _codeCompanyValues: string[] = ['','',''];
   private _handlingAgentValues: string[] = [];
-  private _parameterValues: string[] = [];
+  private _parameterNameValues: string[] = [];
+  private _newValues: string[] = [];
   private _currentValues: string[] = [];
   private _managerAuth: string = '';
   private _urls: {type:string, acc:string, prod:string}[] = [];
@@ -126,7 +127,10 @@ export class ParameterPanel {
                 this._handlingAgentValues[index] = value;
                 break;
               case 'parameternamefield':
-                this._parameterValues[index] = value;
+                this._parameterNameValues[index] = value;
+                break;
+              case 'newvaluefield':
+                this._newValues[index] = value;
                 break;
             }
             
@@ -152,7 +156,7 @@ export class ParameterPanel {
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      this._currentValues[index] = await getParameter(url,this._managerAuth,this._parameterValues[index],this._codeCompanyValues[index],this._handlingAgentValues[index]);
+      this._currentValues[index] = await getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._handlingAgentValues[index]);
     }    
   }
 
@@ -201,7 +205,8 @@ export class ParameterPanel {
       this._fieldValues,
       this._codeCompanyValues,
       this._handlingAgentValues,
-      this._parameterValues,
+      this._parameterNameValues,
+      this._newValues,
       this._currentValues,
       this._environmentOptions
     );

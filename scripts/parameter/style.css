@@ -1,7 +1,8 @@
 @import url("../general/general.css");
 
 .parameternamefield,
-.currentvaluefield {
+.currentvaluefield,
+.newvaluefield {
   width: 15rem;
 }
 

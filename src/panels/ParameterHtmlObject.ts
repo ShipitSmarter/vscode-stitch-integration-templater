@@ -17,7 +17,8 @@ export class ParameterHtmlObject {
     private _fieldValues: string[],
     private _codeCompanyValues: string[],
     private _handlingAgentValues: string[],
-    private _parameterValues: string[],
+    private _parameterNameValues: string[],
+    private _newValues: string[],
     private _currentValues: string[],
     private _environmentOptions: string[]
   ) { }
@@ -105,24 +106,7 @@ export class ParameterHtmlObject {
         </vscode-dropdown>
         ${this._getParametersButton()}
       </section>
-      
-
-      
-
       `;
-
-    //   getParametersGrid = /*html*/ `<section class="component-example">
-    //   <vscode-text-field id="parametername" class="field" index="${parameterIndex}" ${valueString(this._fieldValues[parameterIndex])} placeholder="parameter name" size="15"></vscode-text-field>
-    // </section>
-
-    // <section class="component-example">
-    //   <vscode-text-field id="codecompany" class="field" index="${codecompanyIndex}" ${valueString(this._fieldValues[codecompanyIndex])} placeholder="CodeCompany" size="15"></vscode-text-field>
-    // </section>
-
-    // <section class="component-example">
-    //   <vscode-text-field id="handlingagent" class="field" index="${handlingagentIndex}" ${valueString(this._fieldValues[handlingagentIndex])} placeholder="handling agent" size="15"></vscode-text-field>
-    // </section>
-    // ` + getParametersGrid;
 
     return getParametersGrid;
   }
@@ -143,7 +127,7 @@ export class ParameterHtmlObject {
     let html: string = /*html*/ `
       <section class="component-example">
         <section class="floatleftnopadding">
-          <p>Parameter Value</p>
+          <p>Current Parameter Value</p>
           ${currentValues}
         </section>
 
@@ -162,27 +146,34 @@ export class ParameterHtmlObject {
     let codeCompanys: string = '';
     let handlingAgents: string = '';
     let parameterNames: string = '';
+    let newValues: string = '';
     for (let row = 0; row < nofRows; row++) {
 
-      // step name dropdown
+      // code company
       codeCompanys += /*html*/`
         <section class="component-vmargin">
         <vscode-text-field id="codecompany${row}" class="codecompanyfield" index="${row}" ${valueString(this._codeCompanyValues[row])} placeholder="CodeCompany"></vscode-text-field>
         </section>
       `;
 
-
-      // step type dropdown
+      // handling agent
       handlingAgents += /*html*/`
         <section class="component-vmargin">
           <vscode-text-field id="handlingagent${row}" class="handlingagentfield" index="${row}" ${valueString(this._handlingAgentValues[row])} placeholder="handling agent"></vscode-text-field>
         </section>
       `;
 
-      // step method dropdown
+      // parameter name
       parameterNames += /*html*/`
         <section class="component-vmargin">
-          <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterValues[row])} placeholder="parameter name"></vscode-text-field>
+          <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name"></vscode-text-field>
+        </section>
+      `;
+
+      // new parameter value
+      newValues += /*html*/`
+        <section class="component-vmargin">
+          <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" ${valueString(this._newValues[row])} placeholder="new parameter value"></vscode-text-field>
         </section>
       `;
     }
@@ -200,6 +191,10 @@ export class ParameterHtmlObject {
         <section class="floatleftnopadding">
           <p>Parameter Name</p>
           ${parameterNames}
+        </section>
+        <section class="floatleft">
+          <p>New Parameter Value</p>
+          ${newValues}
         </section>
       </section>`;
 
