@@ -15,6 +15,9 @@ export class ParameterPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
+  private _codeCompanyValues: string[] = ['','',''];
+  private _handlingAgentValues: string[] = [];
+  private _parameterValues: string[] = [];
   private _currentValues: string[] = [];
   private _managerAuth: string = '';
   private _urls: {type:string, acc:string, prod:string}[] = [];
@@ -84,7 +87,10 @@ export class ParameterPanel {
             break;
 
           case 'getparameters':
-            this._getParametersButton(extensionUri);
+            this._getParametersButton(extensionUri).then(() => {
+              // update panel
+              this._updateWebview(extensionUri);
+            });
             break;
 
           case 'showerrormessage':
@@ -104,6 +110,7 @@ export class ParameterPanel {
             // do some updating and refreshing
             switch(clas) {
               case 'dropdown':
+              case 'field':
                 this._fieldValues[index] = value;
                 switch (index) {
                   case environmentIndex:
@@ -112,13 +119,14 @@ export class ParameterPanel {
                 }
                 break;
 
-              case 'field':
-                this._fieldValues[index] = value;
-                switch (index) {
-                  case parameterIndex:
-
-                    break;
-                }
+              case 'codecompanyfield':
+                this._codeCompanyValues[index] = value;
+                break;
+              case 'handlingagentfield':
+                this._handlingAgentValues[index] = value;
+                break;
+              case 'parameternamefield':
+                this._parameterValues[index] = value;
                 break;
             }
             
@@ -130,7 +138,7 @@ export class ParameterPanel {
     );
   }
 
-  private _getParametersButton(extensionUri: vscode.Uri) {
+  private async _getParametersButton(extensionUri: vscode.Uri) {
     const urls: {type:string, acc:string, prod:string} = this._urls.filter(el => el.type === 'getparameters')[0];
     let url: string = '';
     switch (this._environment()) {
@@ -142,15 +150,10 @@ export class ParameterPanel {
         break;
     }
     
-    // set param value
-    getParameter(url,this._managerAuth,this._fieldValues[parameterIndex],this._fieldValues[codecompanyIndex],this._fieldValues[handlingagentIndex]).then( result => {
-      this._currentValues[0] = result;
-
-      // update panel
-      this._updateWebview(extensionUri);
-
-    });
-    
+    // get param values
+    for (let index = 0; index < this._codeCompanyValues.length; index++) {
+      this._currentValues[index] = await getParameter(url,this._managerAuth,this._parameterValues[index],this._codeCompanyValues[index],this._handlingAgentValues[index]);
+    }    
   }
 
   private async _getAPIDetails() {
@@ -196,6 +199,9 @@ export class ParameterPanel {
     let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
       this._fieldValues,
+      this._codeCompanyValues,
+      this._handlingAgentValues,
+      this._parameterValues,
       this._currentValues,
       this._environmentOptions
     );

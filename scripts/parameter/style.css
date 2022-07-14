@@ -1,9 +1,15 @@
 @import url("../general/general.css");
 
-.field,
+.parameternamefield,
 .currentvaluefield {
   width: 15rem;
 }
+
+.codecompanyfield,
+.handlingagentfield {
+  width: 6rem;
+}
+
 
 /* #createpostmancollection {
   width:15rem;

@@ -22,7 +22,7 @@ function main() {
   }
 
   // save input fields
-  const fields = document.querySelectorAll(".field");
+  const fields = document.querySelectorAll(".field,.codecompanyfield,.handlingagentfield,.parameternamefield");
   for (const field of fields) {
     field.addEventListener("keyup", fieldChange);
   }
