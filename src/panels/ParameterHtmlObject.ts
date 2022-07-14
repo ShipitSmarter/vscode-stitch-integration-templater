@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes} from "../utilities/functions";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -14,7 +14,9 @@ export class ParameterHtmlObject {
   // constructor
   public constructor(  
     private _uris: vscode.Uri[],
-    private _fieldValues: string[]
+    private _fieldValues: string[],
+    private _currentValues: string[],
+    private _environmentOptions: string[]
   ) { }
 
   // METHODS
@@ -59,7 +61,17 @@ export class ParameterHtmlObject {
             </section> 
           </section>
 
-          
+
+          <section class="rowsingle">
+            <section class="component-container">
+              <div class="component-sub-container">
+                <h2>Parameter values</h2>
+                ${this._parameterValues()}
+              </div>
+            </section> 
+          </section>
+
+
         </section>
 
 			</body>
@@ -80,6 +92,7 @@ export class ParameterHtmlObject {
   }
 
   private _getParametersGrid(): string {
+
     let getParametersGrid = /*html*/ `
       <section class="component-example">
         <vscode-text-field id="parametername" class="field" index="${parameterIndex}" ${valueString(this._fieldValues[parameterIndex])} placeholder="parameter name" size="15"></vscode-text-field>
@@ -96,7 +109,7 @@ export class ParameterHtmlObject {
 
       <section class="component-example">
         <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${valueString(this._fieldValues[environmentIndex])} position="below">
-            ${dropdownOptions(['ACC','PROD'])}
+            ${dropdownOptions(this._environmentOptions)}
         </vscode-dropdown>
       </section>
       
@@ -106,6 +119,22 @@ export class ParameterHtmlObject {
       `;
 
     return getParametersGrid;
+  }
+
+  private _parameterValues(): string {
+    let html: string = ``;
+
+    for (let index = 0; index < this._currentValues.length; index++) {
+      let curValue = this._currentValues[index];
+
+      html += /*html*/`
+        <section class="component-example">
+          <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${curValue}" readonly></vscode-text-field>
+        </section>
+      `;
+    }
+
+    return html;
   }
 
 }

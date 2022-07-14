@@ -1,17 +1,14 @@
 @import url("../general/general.css");
 
-#carriercode {
-  width: 5rem;
+.field,
+.currentvaluefield {
+  width: 15rem;
 }
 
-#company {
-  width: 11rem;
-}
-
-#createpostmancollection {
+/* #createpostmancollection {
   width:15rem;
   height:3rem;
-}
+} */
 
 #farright {
   margin-right: 5rem;

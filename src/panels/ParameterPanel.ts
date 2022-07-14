@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
-import { getUri } from "../utilities/functions";
+import { getUri, getWorkspaceFile, getParameter, removeQuotes } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
+import * as fs from "fs";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -14,6 +15,10 @@ export class ParameterPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
+  private _currentValues: string[] = [];
+  private _managerAuth: string = '';
+  private _urls: {type:string, acc:string, prod:string}[] = [];
+  private _environmentOptions: string[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -47,7 +52,7 @@ export class ParameterPanel {
     if (ParameterPanel.currentPanel) {
       ParameterPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("hello-world", "Hello World!", vscode.ViewColumn.One, {
+      const panel = vscode.window.createWebviewPanel("get-parameters", "Get Parameters", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
@@ -79,9 +84,8 @@ export class ParameterPanel {
             break;
 
           case 'getparameters':
-            
+            this._getParametersButton(extensionUri);
             break;
-
 
           case 'showerrormessage':
             vscode.window.showErrorMessage(text);
@@ -126,6 +130,57 @@ export class ParameterPanel {
     );
   }
 
+  private _getParametersButton(extensionUri: vscode.Uri) {
+    const urls: {type:string, acc:string, prod:string} = this._urls.filter(el => el.type === 'getparameters')[0];
+    let url: string = '';
+    switch (this._environment()) {
+      case 'ACC':
+        url = urls.acc;
+        break;
+      case 'PROD':
+        url = urls.prod;
+        break;
+    }
+    
+    // set param value
+    getParameter(url,this._managerAuth,this._fieldValues[parameterIndex],this._fieldValues[codecompanyIndex],this._fieldValues[handlingagentIndex]).then( result => {
+      this._currentValues[0] = result;
+
+      // update panel
+      this._updateWebview(extensionUri);
+
+    });
+    
+  }
+
+  private async _getAPIDetails() {
+    this._urls = [];
+
+    // get urls from each file and add to array 
+    let getParametersPath = await getWorkspaceFile('**/templater/parameters/parameter_get.json');
+    let getParameterAPIDetails = JSON.parse(fs.readFileSync(getParametersPath, 'utf8'));
+
+    this._managerAuth = getParameterAPIDetails.Headers.Authorization;
+    this._urls[0] = {type: 'getparameters', acc: getParameterAPIDetails.Parameters.Uri_ACC ?? '', prod: getParameterAPIDetails.Parameters.Uri_PROD ?? ''};
+  }
+
+  private async _getEnvironmentOptions() {
+    // get module dropdown options from txt file
+    let environmentOptionsPath = await getWorkspaceFile('**/templater/parameters/EnvironmentOptions.txt');
+    this._environmentOptions = fs.readFileSync(environmentOptionsPath, 'utf8').split("\n").map(el => el.trim());
+  }
+
+
+  private async _refresh() {
+    await this._getAPIDetails();
+    await this._getEnvironmentOptions();
+    this._fieldValues[environmentIndex] = this._environmentOptions[0];
+  }
+
+  private _environment(): string {
+    return this._fieldValues[environmentIndex];
+  }
+
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
     // define necessary extension Uris
     const toolkitUri = getUri(webview, extensionUri, ["node_modules", "@vscode", "webview-ui-toolkit", "dist", "toolkit.js"]);
@@ -133,10 +188,16 @@ export class ParameterPanel {
     const mainUri = getUri(webview, extensionUri, ["scripts", "parameter", "main.js"]);
     const styleUri = getUri(webview, extensionUri, ["scripts", "parameter", "style.css"]);
 
+    if (this._urls.length === 0) {
+      await this._refresh();
+    }
+
     // construct panel html object and retrieve html
     let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
-      this._fieldValues
+      this._fieldValues,
+      this._currentValues,
+      this._environmentOptions
     );
 
     let html =  parameterHtmlObject.getHtml();

@@ -39,7 +39,6 @@ function infoMessage(info) {
   vscodeApi.postMessage({ command: "showinformationmessage", text: info });
 }
 
-
 function saveValue(fieldId) {
   var field = document.getElementById(fieldId);
   var attr = 'index';
@@ -54,7 +53,7 @@ function refreshContent() {
 
 function getParameters() {
   // check field content
-  if (checkScenarioFields()) {
+  if (true) {
     vscodeApi.postMessage({ command: "getparameters", text: "real fast!" });
   } else {
     vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });

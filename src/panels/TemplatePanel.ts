@@ -107,7 +107,7 @@ export class NEWNAMEPanel {
             
             // do some updating and refreshing
             switch(clas) {
-              case 'dropdown':
+              case 'field':
                 this._fieldValues[index] = value;
                 switch (index) {
                   case variable0Index:
@@ -116,18 +116,17 @@ export class NEWNAMEPanel {
                   case variable1Index:
                    
                     break;
-                
+
+                  case variable2Index:
+                  
+                    break;
                 }
                 break;
-
-              case 'field':
+              case 'dropdown':
                 this._fieldValues[index] = value;
                 switch (index) {
-                  case variable2Index:
-                    
-                    break;
                   case variable3Index:
-                   
+                    
                     break;
                 
                 }
