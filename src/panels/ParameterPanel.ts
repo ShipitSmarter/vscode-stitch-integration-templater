@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getParameter, removeQuotes } from "../utilities/functions";
+import { getUri, getWorkspaceFile, getParameter, removeQuotes, toBoolean } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 
@@ -18,8 +18,10 @@ export class ParameterPanel {
   private _codeCompanyValues: string[] = ['','',''];
   private _handlingAgentValues: string[] = [];
   private _parameterNameValues: string[] = [];
+  private _previousValues: string[] = [];
   private _newValues: string[] = [];
   private _currentValues: string[] = [];
+  private _previous: boolean = false;
   private _managerAuth: string = '';
   private _urls: {type:string, acc:string, prod:string}[] = [];
   private _environmentOptions: string[] = [];
@@ -56,7 +58,7 @@ export class ParameterPanel {
     if (ParameterPanel.currentPanel) {
       ParameterPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
-      const panel = vscode.window.createWebviewPanel("get-parameters", "Get Parameters", vscode.ViewColumn.One, {
+      const panel = vscode.window.createWebviewPanel("get-parameters", "Get/Set Parameters", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
@@ -132,6 +134,9 @@ export class ParameterPanel {
               case 'newvaluefield':
                 this._newValues[index] = value;
                 break;
+              case 'previous':
+                this._previous = toBoolean(value);
+                break;
             }
             
             break;
@@ -206,8 +211,10 @@ export class ParameterPanel {
       this._codeCompanyValues,
       this._handlingAgentValues,
       this._parameterNameValues,
+      this._previousValues,
       this._newValues,
       this._currentValues,
+      this._previous,
       this._environmentOptions
     );
 

@@ -2,6 +2,7 @@
 
 .parameternamefield,
 .currentvaluefield,
+.previousvaluefield,
 .newvaluefield {
   width: 15rem;
 }

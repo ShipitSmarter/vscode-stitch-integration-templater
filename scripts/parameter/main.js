@@ -11,8 +11,8 @@ function main() {
   // document.getElementById("refresh").addEventListener("click", refreshContent);
   // document.getElementById("load").addEventListener("click",loadPmc);
 
-  // independent checkbox
-  // document.getElementById("independent").addEventListener("change", fieldChange);
+  // previous checkbox
+  document.getElementById("previous").addEventListener("change", previousChange);
 
 
   // save dropdowns
@@ -26,6 +26,9 @@ function main() {
   for (const field of fields) {
     field.addEventListener("keyup", fieldChange);
   }
+
+  // actions on panel load
+  updateHighlightSet();
 }
 
 function fieldChange(event) {
@@ -33,6 +36,45 @@ function fieldChange(event) {
 
   // save field value
   saveValue(field.id);
+}
+
+function previousChange(event) {
+  const field = event.target;
+
+  saveValue(field.id);
+
+  updateHighlightSet();
+}
+
+function updateHighlightSet() {
+  const prevs = document.querySelectorAll(".previousvaluefield");
+  const news = document.querySelectorAll(".newvaluefield");
+
+  if (document.getElementById("previous").checked) {
+    for (const prev of prevs) {
+      highlightSet(prev.id);
+    }
+    for (const neww of news) {
+      unHighlight(neww.id);
+    }
+  } else {
+    for (const neww of news) {
+      highlightSet(neww.id);
+    }
+    for (const prev of prevs) {
+      unHighlight(prev.id);
+    }
+  }
+}
+
+function highlightSet(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid cyan";
+}
+
+function unHighlight(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "none";
 }
 
 function infoMessage(info) {

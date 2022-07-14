@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString} from "../utilities/functions";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -18,8 +18,10 @@ export class ParameterHtmlObject {
     private _codeCompanyValues: string[],
     private _handlingAgentValues: string[],
     private _parameterNameValues: string[],
+    private _previousValues: string[],
     private _newValues: string[],
     private _currentValues: string[],
+    private _previous: boolean,
     private _environmentOptions: string[]
   ) { }
 
@@ -47,8 +49,8 @@ export class ParameterHtmlObject {
 
 				<div class="row11" id="main">
           <section id="farleft">
-					  <h1>Get parameters</h1> 
-            ${this._getDetailsGrid()}
+					  <h1>Get/set parameters</h1> 
+            
           </section>
           <section id="farright">
             
@@ -56,6 +58,13 @@ export class ParameterHtmlObject {
 				</div>
         
         <section class="rowflex">
+          <section class="rowsingle">
+                ${this._getDetailsGrid()}
+          </section>
+
+          <section class="component-header">
+            ${this._getParametersButton()}
+          </section>
 
           <section class="rowsingle">
             <section class="component-container">
@@ -64,7 +73,6 @@ export class ParameterHtmlObject {
                 ${this._parameterInputs()}
               </div>
             </section> 
-
           </section>
 
           <section class="rowsingle">
@@ -86,11 +94,21 @@ export class ParameterHtmlObject {
     return html;
   }
 
+  private _setParametersButton(): string {
+    let getParametersButton: string = /*html*/ `
+      <vscode-button id="setparameters" appearance="primary" >
+        Set Parameters
+        <span slot="start" class="codicon codicon-arrow-up"></span>
+      </vscode-button>
+      `;
+    return getParametersButton;
+  }
+
   private _getParametersButton(): string {
     let getParametersButton: string = /*html*/ `
       <vscode-button id="getparameters" appearance="primary" >
         Get Parameters
-        <span slot="start" class="codicon codicon-add"></span>
+        <span slot="start" class="codicon codicon-refresh"></span>
       </vscode-button>
       `;
     return getParametersButton;
@@ -100,11 +118,12 @@ export class ParameterHtmlObject {
 
     let getParametersGrid = /*html*/ `
       <section class="component-example">
-      <p>Environment</p>
+        <p>Environment</p>
         <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${valueString(this._fieldValues[environmentIndex])} position="below">
             ${dropdownOptions(this._environmentOptions)}
         </vscode-dropdown>
-        ${this._getParametersButton()}
+        <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
+        ${this._setParametersButton()}
       </section>
       `;
 
@@ -127,7 +146,7 @@ export class ParameterHtmlObject {
     let html: string = /*html*/ `
       <section class="component-example">
         <section class="floatleftnopadding">
-          <p>Current Parameter Value</p>
+          <p>Current Value</p>
           ${currentValues}
         </section>
 
@@ -146,6 +165,7 @@ export class ParameterHtmlObject {
     let codeCompanys: string = '';
     let handlingAgents: string = '';
     let parameterNames: string = '';
+    let previousValues: string = '';
     let newValues: string = '';
     for (let row = 0; row < nofRows; row++) {
 
@@ -167,6 +187,13 @@ export class ParameterHtmlObject {
       parameterNames += /*html*/`
         <section class="component-nomargin">
           <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name"></vscode-text-field>
+        </section>
+      `;
+
+      // previous parameter value
+      previousValues += /*html*/`
+        <section class="component-nomargin">
+          <vscode-text-field id="previousvalue${row}" class="previousvaluefield" index="${row}" ${valueString(this._previousValues[row])} readonly></vscode-text-field>
         </section>
       `;
 
@@ -192,8 +219,12 @@ export class ParameterHtmlObject {
           <p>Parameter Name</p>
           ${parameterNames}
         </section>
+        <section class="floatleftnopadding">
+          <p>Previous Value</p>
+          ${previousValues}
+        </section>
         <section class="floatleft">
-          <p>New Parameter Value</p>
+          <p>New Value</p>
           ${newValues}
         </section>
       </section>`;
