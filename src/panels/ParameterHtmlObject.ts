@@ -118,7 +118,7 @@ export class ParameterHtmlObject {
       let curValue = this._currentValues[index] ?? '';
 
       currentValues += /*html*/`
-        <section class="component-vmargin">
+        <section class="component-nomargin">
           <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${curValue}" readonly></vscode-text-field>
         </section>
       `;
@@ -151,28 +151,28 @@ export class ParameterHtmlObject {
 
       // code company
       codeCompanys += /*html*/`
-        <section class="component-vmargin">
+        <section class="component-nomargin">
         <vscode-text-field id="codecompany${row}" class="codecompanyfield" index="${row}" ${valueString(this._codeCompanyValues[row])} placeholder="CodeCompany"></vscode-text-field>
         </section>
       `;
 
       // handling agent
       handlingAgents += /*html*/`
-        <section class="component-vmargin">
+        <section class="component-nomargin">
           <vscode-text-field id="handlingagent${row}" class="handlingagentfield" index="${row}" ${valueString(this._handlingAgentValues[row])} placeholder="handling agent"></vscode-text-field>
         </section>
       `;
 
       // parameter name
       parameterNames += /*html*/`
-        <section class="component-vmargin">
+        <section class="component-nomargin">
           <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name"></vscode-text-field>
         </section>
       `;
 
       // new parameter value
       newValues += /*html*/`
-        <section class="component-vmargin">
+        <section class="component-nomargin">
           <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" ${valueString(this._newValues[row])} placeholder="new parameter value"></vscode-text-field>
         </section>
       `;
