@@ -4,24 +4,27 @@ import * as fs from "fs";
 import axios from 'axios';
 
 export async function getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<string> {
-    
-    const response = await axios({
-      method: "GET",
-      url: `${baseurl}/${parameterName}/${handlingAgent}`,
-      responseType: 'arraybuffer',
-      responseEncoding: "binary",
-      headers: {
-        'Accept': 'application/json',
-		'CodeCompany': codeCompany,
-		'Authorization': authorization
-      }
-    });
+    let result: string = '';
+	try {
+		const response = await axios({
+			method: "GET",
+			url: `${baseurl}/${parameterName}/${handlingAgent}`,
+			responseType: 'arraybuffer',
+			responseEncoding: "binary",
+			headers: {
+				'CodeCompany': codeCompany,
+				'Authorization': authorization
+			}
+		});
 
-    //https://stackoverflow.com/questions/42785229/axios-serving-png-image-is-giving-broken-image
-    const result = Buffer.from(response.data).toString();
+		//https://stackoverflow.com/questions/42785229/axios-serving-png-image-is-giving-broken-image
+		result = removeQuotes(Buffer.from(response.data).toString());
 
-    return removeQuotes(result);
+	} catch (err) {
+		result = err.message +'';
+	}
 
+    return result;
 };
 
 export function removeQuotes(input:string): string {
