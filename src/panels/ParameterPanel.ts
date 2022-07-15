@@ -204,7 +204,7 @@ export class ParameterPanel {
     let delim = '{delim}';
 
     // replace in-value quotes
-    let prep = input.replace('""',quote);
+    let prep = input.replace(/""/g,quote);
 
     // replace in-value delimiters (from https://stackoverflow.com/a/37675638/1716283)
     prep = (';' + prep + ';').replace(/(?<=;")[\s\S]*(?=";)/g, (m:string) => {
@@ -224,7 +224,7 @@ export class ParameterPanel {
     let quote = '{quote}';
     let delim = '{delim}';
 
-    let post = input.replace(quote,'"').replace(delim,';');
+    let post = input.replace(new RegExp(quote,'g'),'"').replace(new RegExp(delim,'g'),';');
 
     return post;
   }
