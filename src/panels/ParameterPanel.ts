@@ -10,6 +10,7 @@ const codecompanyIndex = 1;
 const handlingagentIndex = 2;
 const environmentIndex = 3;
 const filesIndex = 4;
+const noflinesIndex = 5;
 
 // type defs
 type ParameterObject = {
@@ -32,7 +33,7 @@ export class ParameterPanel {
   private readonly _panel: vscode.WebviewPanel;
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
-  private _codeCompanyValues: string[] = ['','',''];
+  private _codeCompanyValues: string[] = [''];
   private _codeCustomerValues: string[] = [];
   private _parameterNameValues: string[] = [];
   private _previousValues: string[] = [];
@@ -48,6 +49,9 @@ export class ParameterPanel {
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
     this._panel = panel;
+
+    // set initial values
+    this._fieldValues[noflinesIndex] = '1';
 
     // set content
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
@@ -139,8 +143,15 @@ export class ParameterPanel {
               case 'field':
                 this._fieldValues[index] = value;
                 switch (index) {
-                  case environmentIndex:
+                  case noflinesIndex:
+                    // crop line arrays
+                    this._codeCompanyValues = this._codeCompanyValues.slice(0, +this._fieldValues[noflinesIndex]);
+                    this._codeCustomerValues = this._codeCustomerValues.slice(0, +this._fieldValues[noflinesIndex]);
+                    this._parameterNameValues = this._parameterNameValues.slice(0, +this._fieldValues[noflinesIndex]);
+                    this._previousValues = this._previousValues.slice(0, +this._fieldValues[noflinesIndex]);
+                    this._newValues = this._newValues.slice(0, +this._fieldValues[noflinesIndex]);
 
+                    this._updateWebview(extensionUri);
                     break;
                 }
                 break;

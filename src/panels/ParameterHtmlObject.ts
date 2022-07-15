@@ -7,6 +7,7 @@ const codecompanyIndex = 1;
 const handlingagentIndex = 2;
 const environmentIndex = 3;
 const filesIndex = 4;
+const noflinesIndex = 5;
 
 export class ParameterHtmlObject {
   // PROPERTIES
@@ -122,12 +123,28 @@ export class ParameterHtmlObject {
 
     let getParametersGrid = /*html*/ `
       <section class="component-example">
-        <p>Environment</p>
-        <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${valueString(this._fieldValues[environmentIndex])} position="below">
-            ${dropdownOptions(this._environmentOptions)}
-        </vscode-dropdown>
-        <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
-        ${this._setParametersButton()}
+        <div class="floatleftnopadding">
+          Environment:
+        </div>
+        <div class="floatleft">
+          <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${valueString(this._fieldValues[environmentIndex])} position="below">
+              ${dropdownOptions(this._environmentOptions)}
+          </vscode-dropdown>
+        </div>
+        <div class="floatleftnopadding">
+          nofLines:
+        </div>
+        <div class="floatleft">
+          <vscode-dropdown id="noflines" class="dropdown" index="${noflinesIndex}" ${valueString(this._fieldValues[noflinesIndex])} position="below">
+            ${dropdownOptions(arrayFrom1(100))}
+          </vscode-dropdown>
+        </div>
+        <div class="floatleft">
+          <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
+        </div>
+        <div class="floatleft">
+          ${this._setParametersButton()}
+        </div>
       </section>
       `;
 
@@ -187,7 +204,7 @@ export class ParameterHtmlObject {
   private _getCurrentValues(): string {
     let currentValues: string = ``;
 
-    for (let index = 0; index < this._codeCompanyValues.length; index++) {
+    for (let index = 0; index < +this._fieldValues[noflinesIndex]; index++) {
       let curValue = this._currentValues[index] ?? '';
 
       currentValues += /*html*/`
@@ -217,7 +234,7 @@ export class ParameterHtmlObject {
   
 
   private _parameterInputs(): string {
-    let nofRows = this._codeCompanyValues.length;
+    let nofRows = +this._fieldValues[noflinesIndex];
     let codeCompanys: string = '';
     let codeCustomers: string = '';
     let parameterNames: string = '';
