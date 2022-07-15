@@ -27,6 +27,16 @@ export async function getParameter(baseurl:string, authorization:string, paramet
     return result;
 };
 
+export function escapeHtml(unsafe:string): string {
+	// from https://stackoverflow.com/a/6234804/1716283
+	return unsafe
+		 .replace(/&/g, "&amp;")
+		 .replace(/</g, "&lt;")
+		 .replace(/>/g, "&gt;")
+		 .replace(/"/g, "&quot;")
+		 .replace(/'/g, "&#039;");
+}
+
 export function removeQuotes(input:string): string {
 	let output = input.replace(/^["']/,'').replace(/["']$/,'');
 	return output;

@@ -3,8 +3,12 @@
 .parameternamefield,
 .currentvaluefield,
 .previousvaluefield,
-.newvaluefield {
+.newvaluefield{
   width: 15rem;
+}
+
+#files {
+  width: 30rem;
 }
 
 .codecompanyfield,

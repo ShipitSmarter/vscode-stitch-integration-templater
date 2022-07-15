@@ -9,6 +9,7 @@ const parameterIndex = 0;
 const codecompanyIndex = 1;
 const handlingagentIndex = 2;
 const environmentIndex = 3;
+const filesIndex = 4;
 
 // type defs
 type ParameterObject = {
@@ -159,6 +160,10 @@ export class ParameterPanel {
               case 'previous':
                 this._previous = toBoolean(value);
                 break;
+
+              case 'showload':
+                this._showLoad = toBoolean(value);
+                break;
             }
             
             break;
@@ -193,33 +198,35 @@ export class ParameterPanel {
     }    
   }
 
-  private _loadFile2(file:string) {
-    const fileContent = fs.readFileSync(file,{encoding: 'utf8'});
+  private _preParse(input:string):string {
+    // preparse: replace double quotes, delimiter by strings
+    let quote = '{quote}';
+    let delim = '{delim}';
 
-    const headers = ['codecompany', 'codecustomer', 'name', 'previousvalue','newvalue'];
-    // type ParameterObject = {
-    //   codecompany: string;
-    //   codecustomer: string;
-    //   name: string;
-    //   previousvalue: string;
-    //   newvalue: string;
-    // };
+    // replace in-value quotes
+    let prep = input.replace('""',quote);
 
-    var csvData:any[]=[];
+    // replace in-value delimiters (from https://stackoverflow.com/a/37675638/1716283)
+    prep = (';' + prep + ';').replace(/(?<=;")[\s\S]*(?=";)/g, (m:string) => {
+      return m.replace(/;/g, delim);
+     });
+    // remove first and last added delimiters
+    prep = prep.replace(/^;/,'').replace(/;$/,'');
 
-    var parser = csvParse.parse({delimiter: ';', columns: headers});
+    // remove remaining quotes
+    prep = prep.replace(/"/g,'');
 
+    return prep;
+  }
 
-          
-    // parse(fileContent,{ delimiter: ';', columns: headers }, (error, result: ParameterObject[]) => {
-    //   if (error) {
-    //     console.error(error);
-    //   }
-  
-    //   csvData = result;
-    // });
+  private _postParse(input:string):string {
+    // postparse: replace strings by original characters
+    let quote = '{quote}';
+    let delim = '{delim}';
 
-    // csvData = parser.write(fileContent);
+    let post = input.replace(quote,'"').replace(delim,';');
+
+    return post;
   }
 
   private _loadFile(file:string) {
@@ -240,18 +247,18 @@ export class ParameterPanel {
     // convert to object array
     //let parameterObjects: ParameterObject[] = new Array<ParameterObject>(parameterLines.length);
     for (let index=0; index < parameterLines.length; index++) {
-      // preprocess: replace double quotes, delimiter
-      let quote = '{quote}';
-      let delim = '{delim}';
-      let repLine = parameterLines[index].replace('\"',quote);
-      
-      let line: string[] = parameterLines[index].split(delimiter);
+
+      // preparse: replace in-value delimiters and quotes
+      let prep = this._preParse(parameterLines[index]);
+
+      let line: string[] = prep.split(delimiter);
+
       // fill parameters
-      this._codeCompanyValues[index] = line[0];
-      this._codeCustomerValues[index] = line[1];
-      this._parameterNameValues[index] = line[2];
-      this._previousValues[index] = line[3];
-      this._newValues[index] = line[4];
+      this._codeCompanyValues[index] = this._postParse(line[0]);
+      this._codeCustomerValues[index] = this._postParse(line[1]);
+      this._parameterNameValues[index] = this._postParse(line[2]);
+      this._previousValues[index] = this._postParse(line[3]);
+      this._newValues[index] = this._postParse(line[4]);
     }
 
   }

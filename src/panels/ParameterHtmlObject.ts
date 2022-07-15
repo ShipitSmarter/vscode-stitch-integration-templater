@@ -1,11 +1,12 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, escapeHtml} from "../utilities/functions";
 
 // fixed fields indices
 const parameterIndex = 0;
 const codecompanyIndex = 1;
 const handlingagentIndex = 2;
 const environmentIndex = 3;
+const filesIndex = 4;
 
 export class ParameterHtmlObject {
   // PROPERTIES
@@ -139,7 +140,7 @@ export class ParameterHtmlObject {
         ${dropdownOptions(this._getFileLoadOptions())}
       </vscode-dropdown>`;
 
-    let filesField: string = /*html*/ `<vscode-text-field id="files" class="files" ${hiddenString(this._showLoad)}></vscode-text-field>`;
+    let filesField: string = /*html*/ `<vscode-text-field id="files" class="field" index="${filesIndex}" ${valueString(this._fieldValues[filesIndex])} ${hiddenString(this._showLoad)}></vscode-text-field>`;
     
     let html: string = /*html*/ `
 
@@ -213,6 +214,8 @@ export class ParameterHtmlObject {
     return html;
   }
 
+  
+
   private _parameterInputs(): string {
     let nofRows = this._codeCompanyValues.length;
     let codeCompanys: string = '';
@@ -246,14 +249,14 @@ export class ParameterHtmlObject {
       // previous parameter value
       previousValues += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="previousvalue${row}" class="previousvaluefield" index="${row}" ${valueString(this._previousValues[row])} readonly></vscode-text-field>
+          <vscode-text-field id="previousvalue${row}" class="previousvaluefield" index="${row}" ${valueString(escapeHtml(this._previousValues[row]??''))} readonly></vscode-text-field>
         </section>
       `;
 
       // new parameter value
       newValues += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" ${valueString(this._newValues[row])} placeholder="new parameter value"></vscode-text-field>
+          <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" ${valueString(escapeHtml(this._newValues[row]??''))} placeholder="new parameter value"></vscode-text-field>
         </section>
       `;
     }
