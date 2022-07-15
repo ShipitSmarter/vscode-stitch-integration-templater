@@ -1,13 +1,29 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getParameter, removeQuotes, toBoolean } from "../utilities/functions";
+import { getUri, getWorkspaceFile, getParameter, removeQuotes, toBoolean, isEmpty } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
+import * as csvParse from "csv-parse";
 
 // fixed fields indices
 const parameterIndex = 0;
 const codecompanyIndex = 1;
 const handlingagentIndex = 2;
 const environmentIndex = 3;
+
+// type defs
+type ParameterObject = {
+  codecompany: string;
+  codecustomer: string;
+  name: string;
+  previousvalue: string;
+  newvalue: string;
+};
+
+type UrlObject = {
+  type:string;
+  acc:string; 
+  prod:string;
+};
 
 export class ParameterPanel {
   // PROPERTIES
@@ -16,7 +32,7 @@ export class ParameterPanel {
   private _disposables: vscode.Disposable[] = [];
   private _fieldValues: string[] = [];
   private _codeCompanyValues: string[] = ['','',''];
-  private _handlingAgentValues: string[] = [];
+  private _codeCustomerValues: string[] = [];
   private _parameterNameValues: string[] = [];
   private _previousValues: string[] = [];
   private _newValues: string[] = [];
@@ -24,8 +40,9 @@ export class ParameterPanel {
   private _previous: boolean = false;
   private _showLoad: boolean = false;
   private _managerAuth: string = '';
-  private _urls: {type:string, acc:string, prod:string}[] = [];
+  private _urls: UrlObject[] = [];
   private _environmentOptions: string[] = [];
+  // private _parameterObjects: ParameterObject[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -79,6 +96,13 @@ export class ParameterPanel {
         const text = message.text;
 
         switch (command) {
+          case 'showerrormessage':
+            vscode.window.showErrorMessage(text);
+            break;
+
+          case 'showinformationmessage':
+            vscode.window.showInformationMessage(text);
+            break;
 
           case 'refreshpanel':
             this._updateWebview(extensionUri);
@@ -97,12 +121,9 @@ export class ParameterPanel {
             });
             break;
 
-          case 'showerrormessage':
-            vscode.window.showErrorMessage(text);
-            break;
-
-          case 'showinformationmessage':
-            vscode.window.showInformationMessage(text);
+          case 'loadfile':
+            this._loadFile(text);
+            this._updateWebview(extensionUri);
             break;
 
           case "savevalue":
@@ -126,8 +147,8 @@ export class ParameterPanel {
               case 'codecompanyfield':
                 this._codeCompanyValues[index] = value;
                 break;
-              case 'handlingagentfield':
-                this._handlingAgentValues[index] = value;
+              case 'codecustomerfield':
+                this._codeCustomerValues[index] = value;
                 break;
               case 'parameternamefield':
                 this._parameterNameValues[index] = value;
@@ -148,8 +169,7 @@ export class ParameterPanel {
     );
   }
 
-  private async _getParametersButton(extensionUri: vscode.Uri) {
-    const urls: {type:string, acc:string, prod:string} = this._urls.filter(el => el.type === 'getparameters')[0];
+  private _getUrl(urls:UrlObject) : string {
     let url: string = '';
     switch (this._environment()) {
       case 'ACC':
@@ -159,11 +179,81 @@ export class ParameterPanel {
         url = urls.prod;
         break;
     }
+
+    return url;
+  }
+
+  private async _getParametersButton(extensionUri: vscode.Uri) {
+    const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
+    let url: string = this._getUrl(urls);
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      this._currentValues[index] = await getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._handlingAgentValues[index]);
+      this._currentValues[index] = await getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
     }    
+  }
+
+  private _loadFile2(file:string) {
+    const fileContent = fs.readFileSync(file,{encoding: 'utf8'});
+
+    const headers = ['codecompany', 'codecustomer', 'name', 'previousvalue','newvalue'];
+    // type ParameterObject = {
+    //   codecompany: string;
+    //   codecustomer: string;
+    //   name: string;
+    //   previousvalue: string;
+    //   newvalue: string;
+    // };
+
+    var csvData:any[]=[];
+
+    var parser = csvParse.parse({delimiter: ';', columns: headers});
+
+
+          
+    // parse(fileContent,{ delimiter: ';', columns: headers }, (error, result: ParameterObject[]) => {
+    //   if (error) {
+    //     console.error(error);
+    //   }
+  
+    //   csvData = result;
+    // });
+
+    // csvData = parser.write(fileContent);
+  }
+
+  private _loadFile(file:string) {
+
+    // load file
+    const fileContent = fs.readFileSync(file, {encoding:'utf8'});
+
+    let delimiter: string = ';';
+    let skipheader:boolean = true;
+    let parameterLines: string[] = fileContent.split('\r\n');
+
+    // remove empty lines and header line
+    parameterLines = parameterLines.filter(el => !el.startsWith(';')).filter(el => !isEmpty(el));
+    if (skipheader) {
+      parameterLines.shift();
+    }
+
+    // convert to object array
+    //let parameterObjects: ParameterObject[] = new Array<ParameterObject>(parameterLines.length);
+    for (let index=0; index < parameterLines.length; index++) {
+      // preprocess: replace double quotes, delimiter
+      let quote = '{quote}';
+      let delim = '{delim}';
+      let repLine = parameterLines[index].replace('\"',quote);
+      
+      let line: string[] = parameterLines[index].split(delimiter);
+      // fill parameters
+      this._codeCompanyValues[index] = line[0];
+      this._codeCustomerValues[index] = line[1];
+      this._parameterNameValues[index] = line[2];
+      this._previousValues[index] = line[3];
+      this._newValues[index] = line[4];
+    }
+
   }
 
   private async _getAPIDetails() {
@@ -210,7 +300,7 @@ export class ParameterPanel {
       [toolkitUri,codiconsUri,mainUri,styleUri],
       this._fieldValues,
       this._codeCompanyValues,
-      this._handlingAgentValues,
+      this._codeCustomerValues,
       this._parameterNameValues,
       this._previousValues,
       this._newValues,

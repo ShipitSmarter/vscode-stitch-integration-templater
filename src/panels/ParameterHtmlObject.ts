@@ -16,7 +16,7 @@ export class ParameterHtmlObject {
     private _uris: vscode.Uri[],
     private _fieldValues: string[],
     private _codeCompanyValues: string[],
-    private _handlingAgentValues: string[],
+    private _codeCustomerValues: string[],
     private _parameterNameValues: string[],
     private _previousValues: string[],
     private _newValues: string[],
@@ -134,6 +134,13 @@ export class ParameterHtmlObject {
   }
 
   private _getLoadItems(): string {
+    let filesDropdown: string = /*html*/ `
+      <vscode-dropdown id="files" class="files" position="below" ${hiddenString(this._showLoad)}>
+        ${dropdownOptions(this._getFileLoadOptions())}
+      </vscode-dropdown>`;
+
+    let filesField: string = /*html*/ `<vscode-text-field id="files" class="files" ${hiddenString(this._showLoad)}></vscode-text-field>`;
+    
     let html: string = /*html*/ `
 
     <section class="rowsingle">
@@ -145,9 +152,7 @@ export class ParameterHtmlObject {
 
       <section class="component-example">
         <div class="floatleft">
-          <vscode-dropdown id="files" class="files" position="below" ${hiddenString(this._showLoad)}>
-            ${dropdownOptions(this._getFileLoadOptions())}
-          </vscode-dropdown>
+          ${filesField}
         </div>
         <div class="floatleft">
           <vscode-button id="load" appearance="primary" ${hiddenString(this._showLoad)}>
@@ -211,7 +216,7 @@ export class ParameterHtmlObject {
   private _parameterInputs(): string {
     let nofRows = this._codeCompanyValues.length;
     let codeCompanys: string = '';
-    let handlingAgents: string = '';
+    let codeCustomers: string = '';
     let parameterNames: string = '';
     let previousValues: string = '';
     let newValues: string = '';
@@ -224,10 +229,10 @@ export class ParameterHtmlObject {
         </section>
       `;
 
-      // handling agent
-      handlingAgents += /*html*/`
+      // code customer
+      codeCustomers += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="handlingagent${row}" class="handlingagentfield" index="${row}" ${valueString(this._handlingAgentValues[row])} placeholder="handling agent"></vscode-text-field>
+          <vscode-text-field id="handlingagent${row}" class="codecustomerfield" index="${row}" ${valueString(this._codeCustomerValues[row])} placeholder="handling agent"></vscode-text-field>
         </section>
       `;
 
@@ -260,8 +265,8 @@ export class ParameterHtmlObject {
           ${codeCompanys}
         </section>
         <section class="floatleftnopadding">
-          <p>HandlingAgent</p>
-          ${handlingAgents}
+          <p>CodeCustomer</p>
+          ${codeCustomers}
         </section>
         <section class="floatleftnopadding">
           <p>Parameter Name</p>

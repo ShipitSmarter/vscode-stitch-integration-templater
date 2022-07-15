@@ -9,7 +9,7 @@ function main() {
   // button onclick event listeners
   document.getElementById("getparameters").addEventListener("click", getParameters);
   // document.getElementById("refresh").addEventListener("click", refreshContent);
-  // document.getElementById("load").addEventListener("click",loadPmc);
+  document.getElementById("load").addEventListener("click",loadFile);
 
   // previous checkbox
   document.getElementById("previous").addEventListener("change", previousChange);
@@ -25,7 +25,7 @@ function main() {
   }
 
   // save input fields
-  const fields = document.querySelectorAll(".field,.codecompanyfield,.handlingagentfield,.parameternamefield,.newvaluefield");
+  const fields = document.querySelectorAll(".field,.codecompanyfield,.codecustomerfield,.parameternamefield,.newvaluefield");
   for (const field of fields) {
     field.addEventListener("keyup", fieldChange);
   }
@@ -108,6 +108,11 @@ function saveValue(fieldId) {
 
 function refreshContent() {
   vscodeApi.postMessage({ command: "refreshcontent", text: "" });
+}
+
+function loadFile() {
+  var path = document.getElementById("files").value;
+  vscodeApi.postMessage({ command: "loadfile", text: path });
 }
 
 function getParameters() {

@@ -86,6 +86,7 @@
   "icon": "img/sit-logo.png",
   "dependencies": {
     "axios": "^0.26.1",
+    "csv-parse":"^5.3.0",
     "@vscode/webview-ui-toolkit": "^1.0.0",
     "@vscode/codicons": "^0.0.29",
     "vscode-uri": "^3.0.3"
