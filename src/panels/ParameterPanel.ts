@@ -145,12 +145,8 @@ export class ParameterPanel {
                 switch (index) {
                   case noflinesIndex:
                     // crop line arrays
-                    this._codeCompanyValues = this._codeCompanyValues.slice(0, +this._fieldValues[noflinesIndex]);
-                    this._codeCustomerValues = this._codeCustomerValues.slice(0, +this._fieldValues[noflinesIndex]);
-                    this._parameterNameValues = this._parameterNameValues.slice(0, +this._fieldValues[noflinesIndex]);
-                    this._previousValues = this._previousValues.slice(0, +this._fieldValues[noflinesIndex]);
-                    this._newValues = this._newValues.slice(0, +this._fieldValues[noflinesIndex]);
-
+                    this._cropLines(+this._fieldValues[noflinesIndex]);
+                    // update webview
                     this._updateWebview(extensionUri);
                     break;
                 }
@@ -209,6 +205,16 @@ export class ParameterPanel {
     }    
   }
 
+  private _cropLines(lines:number) {
+    // crop line arrays
+    this._codeCompanyValues = this._codeCompanyValues.slice(0, lines);
+    this._codeCustomerValues = this._codeCustomerValues.slice(0, lines);
+    this._parameterNameValues = this._parameterNameValues.slice(0, lines);
+    this._previousValues = this._previousValues.slice(0, lines);
+    this._newValues = this._newValues.slice(0, lines);
+    this._currentValues = this._currentValues.slice(0, lines);
+  }
+
   private _preParse(input:string):string {
     // preparse: replace double quotes, delimiter by strings
     let quote = '{quote}';
@@ -254,6 +260,10 @@ export class ParameterPanel {
     if (skipheader) {
       parameterLines.shift();
     }
+
+    // update line arrays
+    this._fieldValues[noflinesIndex] = parameterLines.length + '';
+    this._cropLines(parameterLines.length);
 
     // convert to object array
     //let parameterObjects: ParameterObject[] = new Array<ParameterObject>(parameterLines.length);
