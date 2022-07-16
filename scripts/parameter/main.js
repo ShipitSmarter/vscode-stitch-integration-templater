@@ -8,6 +8,7 @@ function main() {
 
   // button onclick event listeners
   document.getElementById("getparameters").addEventListener("click", getParameters);
+  document.getElementById("setparameters").addEventListener("click", setParameters);
   // document.getElementById("refresh").addEventListener("click", refreshContent);
   document.getElementById("load").addEventListener("click",loadFile);
 
@@ -119,6 +120,15 @@ function getParameters() {
   // check field content
   if (true) {
     vscodeApi.postMessage({ command: "getparameters", text: "real fast!" });
+  } else {
+    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+  }
+}
+
+function setParameters() {
+  // check field content
+  if (true) {
+    vscodeApi.postMessage({ command: "setparameters", text: "real fast!" });
   } else {
     vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
   }

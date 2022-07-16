@@ -1,31 +1,6 @@
 import { Uri, Webview, workspace , ExtensionContext, window, Terminal} from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-import axios from 'axios';
-
-export async function getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<string> {
-    let result: string = '';
-	try {
-		const response = await axios({
-			method: "GET",
-			url: `${baseurl}/${parameterName}/${handlingAgent}`,
-			responseType: 'arraybuffer',
-			responseEncoding: "binary",
-			headers: {
-				'CodeCompany': codeCompany,
-				'Authorization': authorization
-			}
-		});
-
-		//https://stackoverflow.com/questions/42785229/axios-serving-png-image-is-giving-broken-image
-		result = removeQuotes(Buffer.from(response.data).toString());
-
-	} catch (err) {
-		result = err.message +'';
-	}
-
-    return result;
-};
 
 export function escapeHtml(unsafe:string): string {
 	// from https://stackoverflow.com/a/6234804/1716283

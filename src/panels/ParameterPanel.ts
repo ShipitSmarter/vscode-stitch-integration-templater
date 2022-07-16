@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getParameter, removeQuotes, toBoolean, isEmpty } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
+import axios from 'axios';
 import * as csvParse from "csv-parse";
 
 // fixed fields indices
@@ -126,6 +127,13 @@ export class ParameterPanel {
             });
             break;
 
+          case 'setparameters':
+            this._setParametersButton(extensionUri).then(() => {
+              // update panel
+              this._updateWebview(extensionUri);
+            });
+            break;
+
           case 'loadfile':
             this._loadFile(text);
             this._updateWebview(extensionUri);
@@ -195,15 +203,87 @@ export class ParameterPanel {
     return url;
   }
 
+  private async _setParametersButton(extensionUri: vscode.Uri) {
+    const urls: UrlObject = this._urls.filter(el => el.type === 'setparameters')[0];
+    let url: string = this._getUrl(urls);
+    let setValues: string[] = this._previous ? this._previousValues : this._newValues;
+
+    // get param values
+    // for (let index = 0; index < this._codeCompanyValues.length; index++) {
+    //   this._currentValues[index] = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
+    // }   
+    
+    // save new value and current values to file
+
+    // set param values
+    for (let index = 0; index < this._codeCompanyValues.length; index++) {
+      await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], " ");
+    }  
+  }
+
+  private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) {
+    let result: string = '';
+    try {
+      const response = await axios({
+        method: "POST",
+        data: {
+          codeParam: parameterName,
+          paramDescription: "",
+          value: parameterValue,
+          changeReason: changeReason,
+          codeCustomer: codeCustomer
+      },
+        url: baseurl,
+        headers: {
+          'Content-Type': 'application/json',
+          'CodeCompany': codeCompany,
+          'Authorization': authorization
+        }
+      });
+
+      //https://stackoverflow.com/questions/42785229/axios-serving-png-image-is-giving-broken-image
+      result = removeQuotes(Buffer.from(response.data).toString());
+
+    } catch (err:any) {
+      result = err.message +'';
+    }
+
+    //return result;
+  };
+
   private async _getParametersButton(extensionUri: vscode.Uri) {
     const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
     let url: string = this._getUrl(urls);
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      this._currentValues[index] = await getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
+      this._currentValues[index] = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
     }    
   }
+
+  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<string> {
+    let result: string = '';
+    try {
+      const response = await axios({
+        method: "GET",
+        url: `${baseurl}/${parameterName}/${handlingAgent}`,
+        responseType: 'arraybuffer',
+        responseEncoding: "binary",
+        headers: {
+          'CodeCompany': codeCompany,
+          'Authorization': authorization
+        }
+      });
+
+      //https://stackoverflow.com/questions/42785229/axios-serving-png-image-is-giving-broken-image
+      result = removeQuotes(Buffer.from(response.data).toString());
+
+    } catch (err:any) {
+      result = err.message +'';
+    }
+
+    return result;
+  };
 
   private _cropLines(lines:number) {
     // crop line arrays
@@ -287,12 +367,18 @@ export class ParameterPanel {
   private async _getAPIDetails() {
     this._urls = [];
 
-    // get urls from each file and add to array 
+    // get urls: getparameters
     let getParametersPath = await getWorkspaceFile('**/templater/parameters/parameter_get.json');
     let getParameterAPIDetails = JSON.parse(fs.readFileSync(getParametersPath, 'utf8'));
 
     this._managerAuth = getParameterAPIDetails.Headers.Authorization;
     this._urls[0] = {type: 'getparameters', acc: getParameterAPIDetails.Parameters.Uri_ACC ?? '', prod: getParameterAPIDetails.Parameters.Uri_PROD ?? ''};
+
+    // get urls: setparameters
+    let setParametersPath = await getWorkspaceFile('**/templater/parameters/parameter_set.json');
+    let setParameterAPIDetails = JSON.parse(fs.readFileSync(setParametersPath, 'utf8'));
+
+    this._urls[1] = {type: 'setparameters', acc: setParameterAPIDetails.Parameters.Uri_ACC ?? '', prod: setParameterAPIDetails.Parameters.Uri_PROD ?? ''};
   }
 
   private async _getEnvironmentOptions() {
