@@ -43,6 +43,7 @@ export class ParameterPanel {
   private _previous: boolean = false;
   private _showLoad: boolean = false;
   private _managerAuth: string = '';
+  private _delimiter: string = ';';
   private _urls: UrlObject[] = [];
   private _environmentOptions: string[] = [];
   // private _parameterObjects: ParameterObject[] = [];
@@ -304,7 +305,7 @@ export class ParameterPanel {
     let prep = input.replace(/""/g,quote);
 
     // replace in-value delimiters (from https://stackoverflow.com/a/37675638/1716283)
-    prep = (';' + prep + ';').replace(/(?<=;")[\s\S]*(?=";)/g, (m:string) => {
+    prep = (this._delimiter + prep + this._delimiter).replace(/(?<=;")[\s\S]*(?=";)/g, (m:string) => {
       return m.replace(/;/g, delim);
      });
     // remove first and last added delimiters
@@ -321,7 +322,7 @@ export class ParameterPanel {
     let quote = '{quote}';
     let delim = '{delim}';
 
-    let post = input.replace(new RegExp(quote,'g'),'"').replace(new RegExp(delim,'g'),';');
+    let post = input.replace(new RegExp(quote,'g'),'"').replace(new RegExp(delim,'g'),this._delimiter);
 
     return post;
   }
@@ -331,12 +332,11 @@ export class ParameterPanel {
     // load file
     const fileContent = fs.readFileSync(file, {encoding:'utf8'});
 
-    let delimiter: string = ';';
     let skipheader:boolean = true;
     let parameterLines: string[] = fileContent.split('\r\n');
 
     // remove empty lines and header line
-    parameterLines = parameterLines.filter(el => !el.startsWith(';')).filter(el => !isEmpty(el));
+    parameterLines = parameterLines.filter(el => !el.startsWith(this._delimiter)).filter(el => !isEmpty(el));
     if (skipheader) {
       parameterLines.shift();
     }
@@ -352,7 +352,7 @@ export class ParameterPanel {
       // preparse: replace in-value delimiters and quotes
       let prep = this._preParse(parameterLines[index]);
 
-      let line: string[] = prep.split(delimiter);
+      let line: string[] = prep.split(this._delimiter);
 
       // fill parameters
       this._codeCompanyValues[index] = this._postParse(line[0]);
