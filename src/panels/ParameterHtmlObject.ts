@@ -8,6 +8,7 @@ const handlingagentIndex = 2;
 const environmentIndex = 3;
 const filesIndex = 4;
 const noflinesIndex = 5;
+const saveIndex = 6;
 
 export class ParameterHtmlObject {
   // PROPERTIES
@@ -144,6 +145,15 @@ export class ParameterHtmlObject {
         </div>
         <div class="floatleft">
           ${this._setParametersButton()}
+        </div>
+      </section>
+
+      <section class="component-example">
+        <div class="floatleftnopadding">
+          Save file to folder:
+        </div>
+        <div class="floatleft">
+        <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
         </div>
       </section>
       `;

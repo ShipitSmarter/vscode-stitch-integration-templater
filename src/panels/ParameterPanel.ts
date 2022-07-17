@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -12,6 +12,7 @@ const handlingagentIndex = 2;
 const environmentIndex = 3;
 const filesIndex = 4;
 const noflinesIndex = 5;
+const saveIndex = 6;
 
 // type defs
 type ParameterObject = {
@@ -122,7 +123,7 @@ export class ParameterPanel {
             break;
 
           case 'getparameters':
-            this._getParametersButton(extensionUri).then(() => {
+            this._getCurrentValues().then(() => {
               // update panel
               this._updateWebview(extensionUri);
             });
@@ -158,6 +159,11 @@ export class ParameterPanel {
                     // update webview
                     this._updateWebview(extensionUri);
                     break;
+                  case filesIndex:
+                    if (this._getPath()) {
+                      this._updateWebview(extensionUri);
+                    }
+                    break;
                 }
                 break;
 
@@ -190,6 +196,17 @@ export class ParameterPanel {
     );
   }
 
+  private _getPath(): boolean {
+    let updatePath:boolean = false;
+    if (fs.existsSync(this._fieldValues[filesIndex])) {
+      let path: string = parentPath(cleanPath(this._fieldValues[filesIndex]));
+      this._fieldValues[saveIndex] = path;
+      updatePath = true;
+    }
+
+    return updatePath;
+  }
+
   private _getUrl(urls:UrlObject) : string {
     let url: string = '';
     switch (this._environment()) {
@@ -207,14 +224,11 @@ export class ParameterPanel {
   private async _setParametersButton(extensionUri: vscode.Uri) {
     const urls: UrlObject = this._urls.filter(el => el.type === 'setparameters')[0];
     let url: string = this._getUrl(urls);
-    let setValues: string[] = this._previous ? this._previousValues : this._newValues;
-
-    // get param values
-    // for (let index = 0; index < this._codeCompanyValues.length; index++) {
-    //   this._currentValues[index] = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
-    // }   
+    let setValues: string[] = this._previous ? this._previousValues : this._newValues; 
     
-    // save new value and current values to file
+    // save new and current values to file
+    let fileName:string = this._codeCompanyValues[0]+'_'+(new Date()).toISOString().substring(0,19).replace(/[\-T:]/g,'') + '.csv';
+    await this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
 
     // set param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
@@ -252,7 +266,7 @@ export class ParameterPanel {
     //return result;
   };
 
-  private async _getParametersButton(extensionUri: vscode.Uri) {
+  private async _getCurrentValues() {
     const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
     let url: string = this._getUrl(urls);
     
@@ -327,10 +341,10 @@ export class ParameterPanel {
     return post;
   }
 
-  private _loadFile(file:string) {
+  private _loadFile(filePath:string) {
 
     // load file
-    const fileContent = fs.readFileSync(file, {encoding:'utf8'});
+    const fileContent = fs.readFileSync(filePath, {encoding:'utf8'});
 
     let skipheader:boolean = true;
     let parameterLines: string[] = fileContent.split('\r\n');
@@ -361,7 +375,33 @@ export class ParameterPanel {
       this._previousValues[index] = this._postParse(line[3]);
       this._newValues[index] = this._postParse(line[4]);
     }
+  }
 
+  private async _writeFile(filePath:string) {
+    // retrieve current values
+    await this._getCurrentValues();
+
+    // check which will be the next values
+    let nextValues: string[] = this._previous ? this._previousValues : this._newValues;
+    
+    // construct file content
+    let fileContent: string = 'CodeCompany;CodeCustomer;Name;PreviousValue;NewValue\r\n';
+    for (let index=0; index < this._codeCompanyValues.length; index++) {
+      // construct line
+      fileContent +=  this._codeCompanyValues[index] + this._delimiter
+                    + this._codeCustomerValues[index] + this._delimiter
+                    + this._parameterNameValues[index] + this._delimiter
+                    + this._currentValues[index] + this._delimiter
+                    + nextValues[index];
+
+      // add newline
+      if (index !== this._codeCompanyValues.length -1) {
+        fileContent += '\r\n';
+      }
+    }
+
+    // write to file
+    fs.writeFileSync(filePath,fileContent);
   }
 
   private async _getAPIDetails() {
