@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -407,24 +407,26 @@ export class ParameterPanel {
   private async _getAPIDetails() {
     this._urls = [];
 
-    // get urls: getparameters
-    let getParametersPath = await getWorkspaceFile('**/templater/parameters/parameter_get.json');
-    let getParameterAPIDetails = JSON.parse(fs.readFileSync(getParametersPath, 'utf8'));
+    // get stuff
+    let fileContent = await getFileContentFromGlob('**/templater/parameters/stuff.json');
+    let stuffDetails = JSON.parse(fileContent);
+    this._managerAuth = stuffDetails.Stuff;
 
-    this._managerAuth = getParameterAPIDetails.Headers.Authorization;
-    this._urls[0] = {type: 'getparameters', acc: getParameterAPIDetails.Parameters.Uri_ACC ?? '', prod: getParameterAPIDetails.Parameters.Uri_PROD ?? ''};
+    // retrieve urls
+    this._urls[0] = await this._getUrlObject('**/templater/parameters/parameter_get.json','getparameters');
+    this._urls[1] = await this._getUrlObject('**/templater/parameters/parameter_set.json','setparameters');
+  }
 
-    // get urls: setparameters
-    let setParametersPath = await getWorkspaceFile('**/templater/parameters/parameter_set.json');
-    let setParameterAPIDetails = JSON.parse(fs.readFileSync(setParametersPath, 'utf8'));
-
-    this._urls[1] = {type: 'setparameters', acc: setParameterAPIDetails.Parameters.Uri_ACC ?? '', prod: setParameterAPIDetails.Parameters.Uri_PROD ?? ''};
+  private async _getUrlObject(glob:string, type:string) : Promise<UrlObject> {
+    let fileContent:string = await getFileContentFromGlob(glob);
+    let details = JSON.parse(fileContent);
+    return {type: type, acc: details.Parameters.Uri_ACC ?? '', prod: details.Parameters.Uri_PROD ?? ''};
   }
 
   private async _getEnvironmentOptions() {
     // get module dropdown options from txt file
-    let environmentOptionsPath = await getWorkspaceFile('**/templater/parameters/EnvironmentOptions.txt');
-    this._environmentOptions = fs.readFileSync(environmentOptionsPath, 'utf8').split("\n").map(el => el.trim());
+    let fileContent: string = await getFileContentFromGlob('**/templater/parameters/EnvironmentOptions.txt');
+    this._environmentOptions = fileContent.split("\n").map(el => el.trim());
   }
 
 

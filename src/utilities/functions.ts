@@ -364,3 +364,8 @@ export function readonlyString(ifTrue: boolean) : string {
 export function valueString(string: string): string {
     return !isEmpty(string) ? `value="${string}"` : '' ;
 }
+
+export async function getFileContentFromGlob(glob:string) : Promise<string> {
+	let path = await getWorkspaceFile(glob);
+	return fs.readFileSync(path, 'utf8');
+}
