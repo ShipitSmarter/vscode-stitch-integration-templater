@@ -10,6 +10,13 @@ const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
 
+// type defs
+type ResponseObject = {
+  status:number;
+  value:string;
+  message:string;
+};
+
 export class ParameterHtmlObject {
   // PROPERTIES
   public static currentHtmlObject: ParameterHtmlObject | undefined;
@@ -24,9 +31,9 @@ export class ParameterHtmlObject {
     private _previousValues: string[],
     private _newValues: string[],
     private _changeReasonValues: string[],
-    private _setResponseValues: string[],
+    private _setResponseValues: ResponseObject[],
     private _currentValues: string[],
-    private _getResponseValues: string[],
+    private _getResponseValues: ResponseObject[],
     private _previous: boolean,
     private _showLoad: boolean,
     private _environmentOptions: string[]
@@ -68,7 +75,7 @@ export class ParameterHtmlObject {
         
         <section class="rowflex">
           <section class="rowsingle">
-                ${this._getDetailsGrid()}
+               ${this._getDetailsGrid()}
           </section>
 
           <section class="component-header">
@@ -214,6 +221,20 @@ export class ParameterHtmlObject {
     return ['file1.csv','file2.csv','file3.csv'];
   }
 
+  private _getBackgroundColor(input:string) : string {
+    // if input is 'OK': green
+    // else if input is '': ''
+    // else: red
+    return input === 'OK' ? 'background-color:darkgreen' : (isEmpty(input) ? '' : 'background-color:maroon');
+  }
+
+  private _getOptionText(status:number, message:string) : string {
+    // if message 'OK' : 'OK'
+    // else if status 0: ''
+    // else : '[status] : [message]'
+    return message === 'OK' ? message : ( status === 0 ? '' : (status.toString() + ' : ' + message));
+  }
+
   private _getCurrentValues(): string {
     let currentValues: string = ``;
     let getResponseValues: string = '';
@@ -228,12 +249,18 @@ export class ParameterHtmlObject {
       `;
 
       // set response
-      const okEmoji: string = '&#9989;';
-      const badEmoji: string = '&#10060;';
-      let emoji:string = this._getResponseValues[index] === 'OK' ? okEmoji : (isEmpty(this._getResponseValues[index]) ? '-' : badEmoji);
+      // const okEmoji: string = '&#9989;';
+      // const badEmoji: string = '&#10060;';
+      // let emoji:string = this._getResponseValues[index] === 'OK' ? okEmoji : (isEmpty(this._getResponseValues[index]) ? '-' : badEmoji);
+      
+      let backgroundColor:string =  this._getBackgroundColor(this._getResponseValues[index]?.message ?? '');
+      let optionText = this._getOptionText(this._getResponseValues[index]?.status ?? 0, this._getResponseValues[index]?.message ?? '');
+      
       getResponseValues += /*html*/`
-        <section class="component-response-minvmargin">
-          <div id="getresponse${index}" class="getresponsefield" index="${index}" title="${this._getResponseValues[index]??''}">${emoji}</div>
+        <section class="component-option-fixed">
+          <div id="getresponse${index}" class="getresponsefield" index="${index}">
+            <vscode-option style="${backgroundColor}">${optionText}</vscode-option>
+          </div>
         </section>
       `;
     }
@@ -245,7 +272,7 @@ export class ParameterHtmlObject {
           ${currentValues}
         </section>
 
-        <section class="floatleftnopadding">
+        <section class="floatleft">
           <p>Get Response</p>
           ${getResponseValues}
         </section>
@@ -310,13 +337,17 @@ export class ParameterHtmlObject {
       `;
 
       // set response
-      const okEmoji: string = '&#9989;';
-      const badEmoji: string = '&#10060;';
+      // const okEmoji: string = '&#9989;';
+      // const badEmoji: string = '&#10060;';
       // this._setResponseValues[row] = '401';
-      let emoji:string = this._setResponseValues[row] === 'OK' ? okEmoji : (isEmpty(this._setResponseValues[row]) ? '-' : badEmoji);
+      // let emoji:string = this._setResponseValues[row] === 'OK' ? okEmoji : (isEmpty(this._setResponseValues[row]) ? '-' : badEmoji);
+      let backgroundColor:string =  this._getBackgroundColor(this._setResponseValues[row]?.message ?? '');
+      let optionText = this._getOptionText(this._setResponseValues[row]?.status ?? 0, this._setResponseValues[row]?.value ?? '');
       setResponseValues += /*html*/`
-        <section class="component-response-minvmargin">
-          <div id="setresponse${row}" class="setresponsefield" index="${row}" title="${this._setResponseValues[row]??''}">${emoji}</div>
+        <section class="component-option-fixed">
+          <div id="setresponse${row}" class="setresponsefield" index="${row}">
+            <vscode-option style="${backgroundColor}" title="${this._setResponseValues[row]?.message ?? ''}">${optionText}</vscode-option>
+          </div>
         </section>
       `;
 

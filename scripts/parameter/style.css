@@ -18,16 +18,9 @@
   width: 6rem;
 }
 
-.setresponsefield,
-.getresponsefield {
+.setresponsefield {
   font-size: large;
 }
-
-
-/* #createpostmancollection {
-  width:15rem;
-  height:3rem;
-} */
 
 #farright {
   margin-right: 5rem;

@@ -29,7 +29,7 @@ type UrlObject = {
   prod:string;
 };
 
-type GetParameterResponseObject = {
+type ResponseObject = {
   status:number;
   value:string;
   message:string;
@@ -46,10 +46,10 @@ export class ParameterPanel {
   private _parameterNameValues: string[] = [];
   private _previousValues: string[] = [];
   private _newValues: string[] = [];
-  private _setResponseValues: string[] = [];
+  private _setResponseValues: ResponseObject[] = [];
   private _changeReasonValues: string[] = [];
   private _currentValues: string[] = [];
-  private _getResponseValues: string[] = [];
+  private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
   private _showLoad: boolean = false;
   private _managerAuth: string = '';
@@ -248,8 +248,8 @@ export class ParameterPanel {
     }  
   }
 
-  private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) : Promise<string> {
-    let result: string = '';
+  private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) : Promise<ResponseObject> {
+    let result: ResponseObject;
     try {
       const response = await axios({
         method: "POST",
@@ -267,11 +267,27 @@ export class ParameterPanel {
           'Authorization': authorization
         }
       });
-
-      result = response.statusText;
+      result = {
+        status: response.status,
+        value: response.statusText,
+        message: response.statusText
+      };
 
     } catch (err:any) {
-      result = err.response.statusText + ' : ' + (err.response.data.errors[0].message ?? '');
+      let message: string;
+      if (err.response.data.hasOwnProperty('errors')) {
+        message = err.response.data?.errors[0]?.message;
+      } else if (err.response.data.hasOwnProperty('Message')) {
+        message = err.response.data.Message;
+      } else {
+        message = '';
+      }
+
+      result = {
+        status: err.response.status,
+        value: err.response.statusText,
+        message: err.response.statusText + ' : ' + message
+      };
     }
 
     return result;
@@ -283,14 +299,14 @@ export class ParameterPanel {
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      let response: GetParameterResponseObject = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
+      let response: ResponseObject = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
       this._currentValues[index] = response.value;
-      this._getResponseValues[index] = response.message === 'OK' ? response.message : (response.status.toString() + ' : ' + response.message);
+      this._getResponseValues[index] = response;
     }    
   }
 
-  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<GetParameterResponseObject> {
-    let result: GetParameterResponseObject;
+  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<ResponseObject> {
+    let result: ResponseObject;
     try {
       const response = await axios({
         method: "GET",
@@ -309,7 +325,7 @@ export class ParameterPanel {
         status: response.status,
         value: value,
         message: response.statusText
-      }
+      };
 
     } catch (err:any) {
       result = {

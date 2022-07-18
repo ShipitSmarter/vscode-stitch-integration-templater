@@ -39,6 +39,14 @@
   margin-bottom: 0.755rem;
 }
 
+.component-option-fixed {
+  display:block;
+  width: 100%;
+  margin-top: 0.9rem;
+  height: 1.37rem;
+  /* margin-bottom: 0.9rem; */
+}
+
 .component-nomargin {
   width: 100%;
 }
