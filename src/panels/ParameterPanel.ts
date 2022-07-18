@@ -139,10 +139,17 @@ export class ParameterPanel {
             break;
 
           case 'setparameters':
-            this._setParametersButton(extensionUri).then(() => {
-              // update panel
-              this._updateWebview(extensionUri);
-            });
+            if (!fs.existsSync(this._fieldValues[saveIndex])) {
+              vscode.window.showErrorMessage('Save folder is not an existing directory');
+            } else {
+              this._setParametersButton(extensionUri).then(() => {
+                // confirm
+                vscode.window.showInformationMessage('Parameters set');
+                // update panel
+                this._updateWebview(extensionUri);
+              });
+            }
+            
             break;
 
           case 'loadfile':
