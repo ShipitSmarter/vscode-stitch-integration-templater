@@ -13,10 +13,10 @@ function main() {
   document.getElementById("load").addEventListener("click",loadFile);
 
   // previous checkbox
-  document.getElementById("previous").addEventListener("change", previousChange);
+  document.getElementById("previous").addEventListener("change", fieldChange);
 
   // load file checkbox
-  document.getElementById("showload").addEventListener("change", showLoadChange);
+  document.getElementById("showload").addEventListener("change", fieldChange);
 
 
   // save dropdowns
@@ -32,44 +32,47 @@ function main() {
   }
 
   // update hover-overs on load
-  const allFields = document.querySelectorAll(".field,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield");
+  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield");
   for (const field of allFields) {
     field.title = field.value;
   }
 
   // actions on panel load
   updateHighlightSet();
+  // on panel creation: update field outlines and tooltips
+  checkFields();
 }
 
 function fieldChange(event) {
   const field = event.target;
+  let className = field.classList[0];
+  var fieldType = (className === 'field') ? field.id : className;
 
   // save field value
   saveValue(field.id);
 
   // update hover-over on change
   field.title = field.value;
-}
 
-function previousChange(event) {
-  const field = event.target;
+  // update field outline and tooltip
+  if (['save','codecompanyfield','codecustomerfield','parameternamefield','changereasonfield'].includes(fieldType)){
+    updateFieldOutlineAndTooltip(field.id);
+  }
 
-  saveValue(field.id);
-
-  updateHighlightSet();
-}
-
-function showLoadChange(event) {
-  const field = event.target;
-
-  saveValue(field.id);
-
-  if (field.checked) {
-    document.getElementById("files").hidden = false;
-    document.getElementById("load").hidden = false;
-  } else {
-    document.getElementById("files").hidden = true;
-    document.getElementById("load").hidden = true;
+  // additional actions
+  switch (fieldType) {
+    case 'previous':
+      updateHighlightSet();
+      break;
+    case 'showload':
+      if (field.checked) {
+        document.getElementById("files").hidden = false;
+        document.getElementById("load").hidden = false;
+      } else {
+        document.getElementById("files").hidden = true;
+        document.getElementById("load").hidden = true;
+      }
+      break;
   }
 }
 
@@ -125,9 +128,95 @@ function loadFile() {
   vscodeApi.postMessage({ command: "loadfile", text: path });
 }
 
+function updateFieldOutlineAndTooltip(fieldId) {
+  let isCorrect = false;
+  let field = document.getElementById(fieldId);
+  let className = field.classList[0];
+  var fieldType = (className === 'field') ? field.id : className;
+
+  // check any non-scenario input field
+  let check = '';
+  if (['save','codecompanyfield','codecustomerfield','changereasonfield','parameternamefield'].includes(fieldType) && isEmpty(field.value)) {
+    check = 'empty';
+  } else {
+    switch(fieldType) {
+      case 'codecompanyfield': 
+      case 'codecustomerfield': 
+        check = field.value.match(/[^0-9]/);
+        break;
+      case 'parameternamefield': 
+        check = field.value.match(/[^A-Z0-9_-]/);
+        break;
+    }
+  }
+
+  // update and return output
+  if (check === 'empty') {
+    updateEmpty(field.id);
+  }else if (check !== '' && check !== null) {
+    updateWrong(field.id, getContentHint(fieldType));
+  } else {
+    updateRight(field.id);
+    isCorrect= true;
+  }
+  
+  return isCorrect;
+}
+
+function getContentHint(fieldType) {
+  let hint = '';
+  switch(fieldType) {
+    case 'codecompanyfield': 
+    case 'codecustomerfield': 
+      hint ='only numbers (0-9)';
+      break;
+    case 'parameternamefield': 
+      hint = 'A-Z, 0-9, _-';
+      break;
+  }
+
+  return hint;
+}
+
+function checkFields() {
+  // check if any incorrect field contents and update fields outlining and tooltip in the process
+  var check = true;
+  const fields = document.querySelectorAll("#save,.codecompanyfield,.codecustomerfield,.parameternamefield,.changereasonfield");
+  for (const field of fields) {
+    check = updateFieldOutlineAndTooltip(field.id) ? check : false;
+  }
+
+  return check;
+}
+
+function updateWrong(fieldId,title="Wrong") {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid red";
+  field.title = title;
+}
+
+function updateEmpty(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px solid coral";
+  field.title = 'Field is mandatory';
+}
+
+export function updateRight(fieldId) {
+    let field = document.getElementById(fieldId);
+    field.style.outline = "none";
+
+    let className = field.classList[0];
+    var fieldType = (className === 'field') ? field.id : className;
+    if (['save','parameternamefield','changereasonfield'].includes(fieldType)) {
+      field.title = field.value;
+    } else {
+      field.title = '';
+    }
+}
+
 function getParameters() {
   // check field content
-  if (true) {
+  if (checkFields()) {
     vscodeApi.postMessage({ command: "getparameters", text: "real fast!" });
   } else {
     vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
@@ -136,7 +225,7 @@ function getParameters() {
 
 function setParameters() {
   // check field content
-  if (true) {
+  if (checkFields()) {
     vscodeApi.postMessage({ command: "setparameters", text: "real fast!" });
   } else {
     vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
