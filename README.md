@@ -28,6 +28,12 @@ Contributes the following commands, which are available from the *Command Palett
 
     ![Modular tiles](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/scenariotiles-use-gif.gif)
 
+### `Stitch: Get/Set parameters`
+- Dashboard for mass check and update of SiS parameters, either by uploading a CSV, or by manual input.
+
+    ![Get Set Parameters](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/get_set_parameters_use.png)
+
+
 ## Dependencies
 This dashboard is a graphical frontend for the ShipitSmarter integration automation PowerShell script, and does not function independently without it.
 
