@@ -413,6 +413,7 @@ export class ParameterPanel {
       this._parameterNameValues[index] = this._postParse(line[2]);
       this._previousValues[index] = this._postParse(line[3]);
       this._newValues[index] = this._postParse(line[4]);
+      this._changeReasonValues[index] = this._postParse(line[5]);
     }
   }
 
@@ -424,7 +425,7 @@ export class ParameterPanel {
     let nextValues: string[] = this._previous ? this._previousValues : this._newValues;
     
     // construct file content
-    let fileContent: string = 'CodeCompany;CodeCustomer;Name;PreviousValue;NewValue\r\n';
+    let fileContent: string = 'CodeCompany;CodeCustomer;Name;PreviousValue;NewValue;ChangeReason\r\n';
     for (let index=0; index < this._codeCompanyValues.length; index++) {
       // construct line
       fileContent +=  this._codeCompanyValues[index] + this._delimiter
@@ -432,6 +433,7 @@ export class ParameterPanel {
                     + this._parameterNameValues[index] + this._delimiter
                     + this._currentValues[index] + this._delimiter
                     + nextValues[index];
+                    + this._changeReasonValues[index];
 
       // add newline
       if (index !== this._codeCompanyValues.length -1) {
