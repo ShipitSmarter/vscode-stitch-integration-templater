@@ -199,6 +199,7 @@ export class CreateIntegrationPanel {
                 this._nofPackages[index] = value;
                 break;
             }
+            break;
         }
       },
       undefined,

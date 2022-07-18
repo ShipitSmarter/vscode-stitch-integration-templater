@@ -1,0 +1,27 @@
+@import url("../general/general.css");
+
+.parameternamefield,
+.currentvaluefield,
+.previousvaluefield,
+.newvaluefield,
+.changereasonfield {
+  width: 15rem;
+}
+
+#files,
+#save {
+  width: 30rem;
+}
+
+.codecompanyfield,
+.codecustomerfield {
+  width: 6rem;
+}
+
+.setresponsefield {
+  font-size: large;
+}
+
+#farright {
+  margin-right: 5rem;
+}

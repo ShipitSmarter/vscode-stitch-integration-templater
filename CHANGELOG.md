@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.0
+- Get/set Parameters
+  - Added new Get/set Parameters panel, allowing mass check and change of SiS parameters, by either uploading a CSV file, or manual input.
+
 ## 1.5.4
 - Carrier integration
   - 'Check' button click now does a full refresh

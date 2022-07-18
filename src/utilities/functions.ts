@@ -2,6 +2,21 @@ import { Uri, Webview, workspace , ExtensionContext, window, Terminal} from "vsc
 import * as path from "path";
 import * as fs from "fs";
 
+export function escapeHtml(unsafe:string): string {
+	// from https://stackoverflow.com/a/6234804/1716283
+	return unsafe
+		 .replace(/&/g, "&amp;")
+		 .replace(/</g, "&lt;")
+		 .replace(/>/g, "&gt;")
+		 .replace(/"/g, "&quot;")
+		 .replace(/'/g, "&#039;");
+}
+
+export function removeQuotes(input:string): string {
+	let output = input.replace(/^["']/,'').replace(/["']$/,'');
+	return output;
+}
+
 export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) {
   return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList));
 }
@@ -348,4 +363,9 @@ export function readonlyString(ifTrue: boolean) : string {
   
 export function valueString(string: string): string {
     return !isEmpty(string) ? `value="${string}"` : '' ;
+}
+
+export async function getFileContentFromGlob(glob:string) : Promise<string> {
+	let path = await getWorkspaceFile(glob);
+	return fs.readFileSync(path, 'utf8');
 }
