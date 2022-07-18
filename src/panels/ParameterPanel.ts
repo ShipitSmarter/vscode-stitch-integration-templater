@@ -29,6 +29,12 @@ type UrlObject = {
   prod:string;
 };
 
+type GetParameterResponseObject = {
+  status:number;
+  value:string;
+  message:string;
+};
+
 export class ParameterPanel {
   // PROPERTIES
   public static currentPanel: ParameterPanel | undefined;
@@ -43,6 +49,7 @@ export class ParameterPanel {
   private _setResponseValues: string[] = [];
   private _changeReasonValues: string[] = [];
   private _currentValues: string[] = [];
+  private _getResponseValues: string[] = [];
   private _previous: boolean = false;
   private _showLoad: boolean = false;
   private _managerAuth: string = '';
@@ -276,12 +283,14 @@ export class ParameterPanel {
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      this._currentValues[index] = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
+      let response: GetParameterResponseObject = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
+      this._currentValues[index] = response.value;
+      this._getResponseValues[index] = response.message === 'OK' ? response.message : (response.status.toString() + ' : ' + response.message);
     }    
   }
 
-  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<string> {
-    let result: string = '';
+  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<GetParameterResponseObject> {
+    let result: GetParameterResponseObject;
     try {
       const response = await axios({
         method: "GET",
@@ -294,10 +303,20 @@ export class ParameterPanel {
         }
       });
 
-      result = removeQuotes(Buffer.from(response.data).toString());
+      let value: string = removeQuotes(Buffer.from(response.data).toString());
+
+      result = {
+        status: response.status,
+        value: value,
+        message: response.statusText
+      }
 
     } catch (err:any) {
-      result = err.message +'';
+      result = {
+        status: err.response.status,
+        value: '',
+        message: err.response.statusText
+      };
     }
 
     return result;
@@ -467,6 +486,7 @@ export class ParameterPanel {
       this._changeReasonValues,
       this._setResponseValues,
       this._currentValues,
+      this._getResponseValues,
       this._previous,
       this._showLoad,
       this._environmentOptions

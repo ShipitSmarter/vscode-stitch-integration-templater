@@ -26,6 +26,7 @@ export class ParameterHtmlObject {
     private _changeReasonValues: string[],
     private _setResponseValues: string[],
     private _currentValues: string[],
+    private _getResponseValues: string[],
     private _previous: boolean,
     private _showLoad: boolean,
     private _environmentOptions: string[]
@@ -215,6 +216,7 @@ export class ParameterHtmlObject {
 
   private _getCurrentValues(): string {
     let currentValues: string = ``;
+    let getResponseValues: string = '';
 
     for (let index = 0; index < +this._fieldValues[noflinesIndex]; index++) {
       let curValue = this._currentValues[index] ?? '';
@@ -222,6 +224,16 @@ export class ParameterHtmlObject {
       currentValues += /*html*/`
         <section class="component-minvmargin">
           <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${curValue}" readonly></vscode-text-field>
+        </section>
+      `;
+
+      // set response
+      const okEmoji: string = '&#9989;';
+      const badEmoji: string = '&#10060;';
+      let emoji:string = this._getResponseValues[index] === 'OK' ? okEmoji : (isEmpty(this._getResponseValues[index]) ? '-' : badEmoji);
+      getResponseValues += /*html*/`
+        <section class="component-response-minvmargin">
+          <div id="getresponse${index}" class="getresponsefield" index="${index}" title="${this._getResponseValues[index]??''}">${emoji}</div>
         </section>
       `;
     }
@@ -234,7 +246,8 @@ export class ParameterHtmlObject {
         </section>
 
         <section class="floatleftnopadding">
-          
+          <p>Get Response</p>
+          ${getResponseValues}
         </section>
       </section>`;
 

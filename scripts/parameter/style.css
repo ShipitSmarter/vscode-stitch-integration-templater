@@ -18,7 +18,8 @@
   width: 6rem;
 }
 
-.setresponsefield {
+.setresponsefield,
+.getresponsefield {
   font-size: large;
 }
 
