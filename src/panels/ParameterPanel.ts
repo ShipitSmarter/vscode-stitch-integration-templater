@@ -237,11 +237,11 @@ export class ParameterPanel {
 
     // set param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
+      this._setResponseValues[index] = await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
     }  
   }
 
-  private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) {
+  private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) : Promise<string> {
     let result: string = '';
     try {
       const response = await axios({
@@ -250,7 +250,7 @@ export class ParameterPanel {
           codeParam: parameterName,
           paramDescription: "",
           value: parameterValue,
-          changeReason: changeReason,
+          changeReason: (isEmpty(changeReason) ? "" : changeReason),
           codeCustomer: codeCustomer
       },
         url: baseurl,
@@ -261,13 +261,13 @@ export class ParameterPanel {
         }
       });
 
-      result = removeQuotes(Buffer.from(response.data).toString());
+      result = response.statusText;
 
     } catch (err:any) {
-      result = err.message +'';
+      result = err.response.statusText + ' : ' + (err.response.data.errors[0].message ?? '');
     }
 
-    //return result;
+    return result;
   };
 
   private async _getCurrentValues() {

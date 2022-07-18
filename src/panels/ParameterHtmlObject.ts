@@ -299,11 +299,11 @@ export class ParameterHtmlObject {
       // set response
       const okEmoji: string = '&#9989;';
       const badEmoji: string = '&#10060;';
-      this._setResponseValues[row] = '401';
+      // this._setResponseValues[row] = '401';
       let emoji:string = this._setResponseValues[row] === 'OK' ? okEmoji : (isEmpty(this._setResponseValues[row]) ? '-' : badEmoji);
       setResponseValues += /*html*/`
         <section class="component-response-minvmargin">
-          <div id="setresponse${row}" class="setresponsefield" index="${row}" title="${this._setResponseValues[row]}">${emoji}</div>
+          <div id="setresponse${row}" class="setresponsefield" index="${row}" title="${this._setResponseValues[row]??''}">${emoji}</div>
         </section>
       `;
 
