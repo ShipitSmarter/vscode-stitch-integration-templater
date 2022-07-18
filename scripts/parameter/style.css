@@ -3,7 +3,8 @@
 .parameternamefield,
 .currentvaluefield,
 .previousvaluefield,
-.newvaluefield{
+.newvaluefield,
+.changereasonfield {
   width: 15rem;
 }
 
@@ -13,7 +14,7 @@
 }
 
 .codecompanyfield,
-.handlingagentfield {
+.codecustomerfield {
   width: 6rem;
 }
 

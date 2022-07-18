@@ -40,6 +40,7 @@ export class ParameterPanel {
   private _parameterNameValues: string[] = [];
   private _previousValues: string[] = [];
   private _newValues: string[] = [];
+  private _changeReasonValues: string[] = [];
   private _currentValues: string[] = [];
   private _previous: boolean = false;
   private _showLoad: boolean = false;
@@ -179,6 +180,9 @@ export class ParameterPanel {
               case 'newvaluefield':
                 this._newValues[index] = value;
                 break;
+              case 'changereasonfield':
+                this._changeReasonValues[index] = value;
+                break;
               case 'previous':
                 this._previous = toBoolean(value);
                 break;
@@ -232,7 +236,7 @@ export class ParameterPanel {
 
     // set param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], " ");
+      await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
     }  
   }
 
@@ -256,7 +260,6 @@ export class ParameterPanel {
         }
       });
 
-      //https://stackoverflow.com/questions/42785229/axios-serving-png-image-is-giving-broken-image
       result = removeQuotes(Buffer.from(response.data).toString());
 
     } catch (err:any) {
@@ -290,7 +293,6 @@ export class ParameterPanel {
         }
       });
 
-      //https://stackoverflow.com/questions/42785229/axios-serving-png-image-is-giving-broken-image
       result = removeQuotes(Buffer.from(response.data).toString());
 
     } catch (err:any) {
@@ -307,6 +309,7 @@ export class ParameterPanel {
     this._parameterNameValues = this._parameterNameValues.slice(0, lines);
     this._previousValues = this._previousValues.slice(0, lines);
     this._newValues = this._newValues.slice(0, lines);
+    this._changeReasonValues = this._changeReasonValues.slice(0, lines);
     this._currentValues = this._currentValues.slice(0, lines);
   }
 
@@ -460,6 +463,7 @@ export class ParameterPanel {
       this._parameterNameValues,
       this._previousValues,
       this._newValues,
+      this._changeReasonValues,
       this._currentValues,
       this._previous,
       this._showLoad,

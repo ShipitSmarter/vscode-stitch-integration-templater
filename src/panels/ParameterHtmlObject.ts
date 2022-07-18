@@ -23,6 +23,7 @@ export class ParameterHtmlObject {
     private _parameterNameValues: string[],
     private _previousValues: string[],
     private _newValues: string[],
+    private _changeReasonValues: string[],
     private _currentValues: string[],
     private _previous: boolean,
     private _showLoad: boolean,
@@ -241,8 +242,6 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  
-
   private _parameterInputs(): string {
     let nofRows = +this._fieldValues[noflinesIndex];
     let codeCompanys: string = '';
@@ -250,6 +249,7 @@ export class ParameterHtmlObject {
     let parameterNames: string = '';
     let previousValues: string = '';
     let newValues: string = '';
+    let changeReasonValues: string = '';
     for (let row = 0; row < nofRows; row++) {
 
       // code company
@@ -262,7 +262,7 @@ export class ParameterHtmlObject {
       // code customer
       codeCustomers += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="handlingagent${row}" class="codecustomerfield" index="${row}" ${valueString(this._codeCustomerValues[row])} placeholder="handling agent"></vscode-text-field>
+          <vscode-text-field id="codecustomer${row}" class="codecustomerfield" index="${row}" ${valueString(this._codeCustomerValues[row])} placeholder="CodeCustomer"></vscode-text-field>
         </section>
       `;
 
@@ -286,6 +286,13 @@ export class ParameterHtmlObject {
           <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" ${valueString(escapeHtml(this._newValues[row]??''))} placeholder="new parameter value"></vscode-text-field>
         </section>
       `;
+
+      // change reason
+      changeReasonValues += /*html*/`
+        <section class="component-minvmargin">
+          <vscode-text-field id="changereason${row}" class="changereasonfield" index="${row}" ${valueString(escapeHtml(this._changeReasonValues[row]??''))} placeholder="change reason"></vscode-text-field>
+        </section>
+      `;
     }
 
     let html: string = /*html*/ `
@@ -306,9 +313,13 @@ export class ParameterHtmlObject {
           <p>Previous Value</p>
           ${previousValues}
         </section>
-        <section class="floatleft">
+        <section class="floatleftnopadding">
           <p>New Value</p>
           ${newValues}
+        </section>
+        <section class="floatleft">
+          <p>Change Reason</p>
+          ${changeReasonValues}
         </section>
       </section>`;
 
