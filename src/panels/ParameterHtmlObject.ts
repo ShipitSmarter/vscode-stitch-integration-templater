@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, escapeHtml} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, escapeHtml, isEmpty} from "../utilities/functions";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -24,6 +24,7 @@ export class ParameterHtmlObject {
     private _previousValues: string[],
     private _newValues: string[],
     private _changeReasonValues: string[],
+    private _setResponseValues: string[],
     private _currentValues: string[],
     private _previous: boolean,
     private _showLoad: boolean,
@@ -250,6 +251,7 @@ export class ParameterHtmlObject {
     let previousValues: string = '';
     let newValues: string = '';
     let changeReasonValues: string = '';
+    let setResponseValues: string = '';
     for (let row = 0; row < nofRows; row++) {
 
       // code company
@@ -293,6 +295,18 @@ export class ParameterHtmlObject {
           <vscode-text-field id="changereason${row}" class="changereasonfield" index="${row}" ${valueString(escapeHtml(this._changeReasonValues[row]??''))} placeholder="change reason"></vscode-text-field>
         </section>
       `;
+
+      // set response
+      const okEmoji: string = '&#9989;';
+      const badEmoji: string = '&#10060;';
+      this._setResponseValues[row] = '401';
+      let emoji:string = this._setResponseValues[row] === 'OK' ? okEmoji : (isEmpty(this._setResponseValues[row]) ? '-' : badEmoji);
+      setResponseValues += /*html*/`
+        <section class="component-response-minvmargin">
+          <div id="setresponse${row}" class="setresponsefield" index="${row}" title="${this._setResponseValues[row]}">${emoji}</div>
+        </section>
+      `;
+
     }
 
     let html: string = /*html*/ `
@@ -317,9 +331,13 @@ export class ParameterHtmlObject {
           <p>New Value</p>
           ${newValues}
         </section>
-        <section class="floatleft">
+        <section class="floatleftnopadding">
           <p>Change Reason</p>
           ${changeReasonValues}
+        </section>
+        <section class="floatleft">
+          <p>Set Response</p>
+          ${setResponseValues}
         </section>
       </section>`;
 

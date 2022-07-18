@@ -40,6 +40,7 @@ export class ParameterPanel {
   private _parameterNameValues: string[] = [];
   private _previousValues: string[] = [];
   private _newValues: string[] = [];
+  private _setResponseValues: string[] = [];
   private _changeReasonValues: string[] = [];
   private _currentValues: string[] = [];
   private _previous: boolean = false;
@@ -464,6 +465,7 @@ export class ParameterPanel {
       this._previousValues,
       this._newValues,
       this._changeReasonValues,
+      this._setResponseValues,
       this._currentValues,
       this._previous,
       this._showLoad,

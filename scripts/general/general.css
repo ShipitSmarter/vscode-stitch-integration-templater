@@ -33,6 +33,12 @@
   /* margin-bottom: 1.5rem; */
 }
 
+.component-response-minvmargin {
+  width: 100%;
+  margin-top: 0.755rem;
+  margin-bottom: 0.755rem;
+}
+
 .component-nomargin {
   width: 100%;
 }
