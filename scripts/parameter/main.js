@@ -31,6 +31,12 @@ function main() {
     field.addEventListener("keyup", fieldChange);
   }
 
+  // update hover-overs on load
+  const allFields = document.querySelectorAll(".field,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield");
+  for (const field of allFields) {
+    field.title = field.value;
+  }
+
   // actions on panel load
   updateHighlightSet();
 }
@@ -40,6 +46,9 @@ function fieldChange(event) {
 
   // save field value
   saveValue(field.id);
+
+  // update hover-over on change
+  field.title = field.value;
 }
 
 function previousChange(event) {

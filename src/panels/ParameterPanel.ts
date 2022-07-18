@@ -432,7 +432,7 @@ export class ParameterPanel {
                     + this._codeCustomerValues[index] + this._delimiter
                     + this._parameterNameValues[index] + this._delimiter
                     + this._currentValues[index] + this._delimiter
-                    + nextValues[index];
+                    + nextValues[index] + this._delimiter
                     + this._changeReasonValues[index];
 
       // add newline
