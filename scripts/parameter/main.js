@@ -41,11 +41,13 @@ function main() {
   // actions on panel load
   updateHighlightSet();
   updateCurrentValuesHighlight();
+  showProd();
   // on panel creation: update field outlines and tooltips
   checkFields();
   // disable certain fields when processing requests
   processingSet();
   processingGet();
+
 }
 
 function fieldChange(event) {
@@ -80,8 +82,7 @@ function fieldChange(event) {
       }
       break;
     case 'environment':
-      document.body.style.backgroundColor = field.value === 'PROD' ? '#350000' : '';
-      field.style.backgroundColor = field.value === 'PROD' ? '#800000' : '';
+      showProd();
       break;
 
     case 'allchangereasons':
@@ -94,6 +95,13 @@ function fieldChange(event) {
   }
 }
 
+function showProd() {
+  const field = document.getElementById("environment");
+
+  document.body.style.backgroundColor = field.value === 'PROD' ? '#350000' : '';
+  field.style.backgroundColor = field.value === 'PROD' ? '#800000' : '';
+}
+
 function processingGet(push = false) {
   if (push) {
     document.getElementById("processingget").hidden = false;
@@ -101,7 +109,7 @@ function processingGet(push = false) {
   const isProcessing = !document.getElementById("processingget").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
@@ -115,7 +123,7 @@ function processingSet(push = false) {
   const isProcessing = !document.getElementById("processingset").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
