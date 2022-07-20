@@ -46,7 +46,7 @@ function main() {
 function fieldChange(event) {
   const field = event.target;
   let className = field.classList[0];
-  var fieldType = (className === 'field') ? field.id : className;
+  var fieldType = (['field','dropdown'].includes(className)) ? field.id : className;
 
   // save field value
   saveValue(field.id);
@@ -72,6 +72,10 @@ function fieldChange(event) {
         document.getElementById("files").hidden = true;
         document.getElementById("load").hidden = true;
       }
+      break;
+    case 'environment':
+      document.body.style.backgroundColor = field.value === 'PROD' ? '#350000' : '';
+      field.style.backgroundColor = field.value === 'PROD' ? '#800000' : '';
       break;
   }
 }
