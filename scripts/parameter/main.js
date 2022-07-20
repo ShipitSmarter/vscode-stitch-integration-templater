@@ -9,6 +9,7 @@ function main() {
   // button onclick event listeners
   document.getElementById("getparameters").addEventListener("click", getParameters);
   document.getElementById("setparameters").addEventListener("click", setParameters);
+  document.getElementById("savetofile").addEventListener("click", saveToFile);
   // document.getElementById("refresh").addEventListener("click", refreshContent);
   document.getElementById("load").addEventListener("click",loadFile);
 
@@ -243,12 +244,16 @@ export function updateRight(fieldId) {
     }
 }
 
+function invalidForm() {
+  vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+}
+
 function getParameters() {
   // check field content
   if (checkFields()) {
     vscodeApi.postMessage({ command: "getparameters", text: "real fast!" });
   } else {
-    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+    invalidForm();
   }
 }
 
@@ -257,6 +262,15 @@ function setParameters() {
   if (checkFields()) {
     vscodeApi.postMessage({ command: "setparameters", text: "real fast!" });
   } else {
-    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+    invalidForm();
+  }
+}
+
+function saveToFile() {
+  // check field content
+  if (checkFields()) {
+    vscodeApi.postMessage({ command: "savetofile", text: "real fast!" });
+  } else {
+    invalidForm();
   }
 }

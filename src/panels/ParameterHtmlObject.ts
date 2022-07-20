@@ -79,7 +79,7 @@ export class ParameterHtmlObject {
           </section>
 
           <section class="component-header">
-            ${this._getParametersButton()}
+            ${this._getButton('getparameters','Get Parameters','codicon-refresh')}
           </section>
 
           <section class="rowsingle">
@@ -110,24 +110,15 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  private _setParametersButton(): string {
-    let getParametersButton: string = /*html*/ `
-      <vscode-button id="setparameters" appearance="primary" >
-        Set Parameters
-        <span slot="start" class="codicon codicon-arrow-right"></span>
+  private _getButton(id:string, title:string, codicon:string): string {
+    let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
+    let button: string = /*html*/ `
+      <vscode-button id="${id}" appearance="primary" >
+        ${title}
+        ${codiconString}
       </vscode-button>
       `;
-    return getParametersButton;
-  }
-
-  private _getParametersButton(): string {
-    let getParametersButton: string = /*html*/ `
-      <vscode-button id="getparameters" appearance="primary" >
-        Get Parameters
-        <span slot="start" class="codicon codicon-refresh"></span>
-      </vscode-button>
-      `;
-    return getParametersButton;
+    return button;
   }
 
   private _getDetailsGrid(): string {
@@ -154,7 +145,7 @@ export class ParameterHtmlObject {
           <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
         </div>
         <div class="floatleft">
-          ${this._setParametersButton()}
+          ${this._getButton('setparameters','Set Parameters','codicon-arrow-right')}
         </div>
       </section>
 
@@ -163,7 +154,10 @@ export class ParameterHtmlObject {
           Save file to folder:
         </div>
         <div class="floatleft">
-        <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
+          <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
+        </div>
+        <div class="floatleft">
+          ${this._getButton('savetofile','Save current input to file','codicon-arrow-right')}
         </div>
       </section>
       `;
@@ -240,19 +234,14 @@ export class ParameterHtmlObject {
     let getResponseValues: string = '';
 
     for (let index = 0; index < +this._fieldValues[noflinesIndex]; index++) {
-      let curValue = this._currentValues[index] ?? '';
 
       currentValues += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${curValue}" readonly></vscode-text-field>
+          <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${this._currentValues[index] ?? ''}" readonly></vscode-text-field>
         </section>
       `;
 
-      // set response
-      // const okEmoji: string = '&#9989;';
-      // const badEmoji: string = '&#10060;';
-      // let emoji:string = this._getResponseValues[index] === 'OK' ? okEmoji : (isEmpty(this._getResponseValues[index]) ? '-' : badEmoji);
-      
+      // api response    
       let bColorString:string =  this._getBackgroundColorString(this._getResponseValues[index]?.message ?? '');
       let optionText = this._getOptionText(this._getResponseValues[index]?.status ?? 0, this._getResponseValues[index]?.message ?? '');
       
@@ -297,7 +286,7 @@ export class ParameterHtmlObject {
       // code company
       codeCompanys += /*html*/`
         <section class="component-minvmargin">
-        <vscode-text-field id="codecompany${row}" class="codecompanyfield" index="${row}" ${valueString(this._codeCompanyValues[row])} placeholder="CodeCompany"></vscode-text-field>
+          <vscode-text-field id="codecompany${row}" class="codecompanyfield" index="${row}" ${valueString(this._codeCompanyValues[row])} placeholder="CodeCompany"></vscode-text-field>
         </section>
       `;
 
@@ -336,11 +325,7 @@ export class ParameterHtmlObject {
         </section>
       `;
 
-      // set response
-      // const okEmoji: string = '&#9989;';
-      // const badEmoji: string = '&#10060;';
-      // this._setResponseValues[row] = '401';
-      // let emoji:string = this._setResponseValues[row] === 'OK' ? okEmoji : (isEmpty(this._setResponseValues[row]) ? '-' : badEmoji);
+      // api response
       let bColorString:string =  this._getBackgroundColorString(this._setResponseValues[row]?.message ?? '');
       let optionText = this._getOptionText(this._setResponseValues[row]?.status ?? 0, this._setResponseValues[row]?.value ?? '');
       setResponseValues += /*html*/`

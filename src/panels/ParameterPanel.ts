@@ -139,15 +139,22 @@ export class ParameterPanel {
             break;
 
           case 'setparameters':
-            if (!fs.existsSync(this._fieldValues[saveIndex])) {
-              vscode.window.showErrorMessage('Save folder is not an existing directory');
-            } else {
+            if (this._checkSaveFolder())  {
               this._setParametersButton(extensionUri).then(() => {
                 // confirm
                 vscode.window.showInformationMessage('Parameters set');
                 // update panel
                 this._updateWebview(extensionUri);
               });
+            }
+
+          case 'savetofile':
+            if (this._checkSaveFolder())  {
+              // save to file
+              let fileName:string = 'Saved_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
+              this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+              // confirm
+              vscode.window.showInformationMessage('Input saved to ' + fileName);
             }
             
             break;
@@ -213,6 +220,15 @@ export class ParameterPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private _checkSaveFolder(): boolean {
+    let isValid: boolean = fs.existsSync(this._fieldValues[saveIndex]);
+    if (!isValid) {
+      vscode.window.showErrorMessage('Save folder is not an existing directory');
+    }
+
+    return isValid;
   }
 
   private _getPath(): boolean {

@@ -3,14 +3,21 @@
 .parameternamefield,
 .currentvaluefield,
 .previousvaluefield,
-.newvaluefield,
-.changereasonfield {
+.newvaluefield {
   width: 15rem;
 }
 
-#files,
-#save {
+.changereasonfield {
+  width: 10rem;
+}
+
+
+#files {
   width: 30rem;
+}
+
+#save {
+  width: 20rem;
 }
 
 .codecompanyfield,
