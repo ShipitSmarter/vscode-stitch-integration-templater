@@ -13,6 +13,7 @@ const environmentIndex = 3;
 const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
+const allChangeReasonsIndex = 7;
 
 // type defs
 type ParameterObject = {
@@ -52,6 +53,8 @@ export class ParameterPanel {
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
   private _showLoad: boolean = false;
+  private _processingSet: boolean = false;
+  private _processingGet: boolean = false;
   private _managerAuth: string = '';
   private _delimiter: string = ';';
   private _urls: UrlObject[] = [];
@@ -139,15 +142,25 @@ export class ParameterPanel {
             break;
 
           case 'setparameters':
-            if (!fs.existsSync(this._fieldValues[saveIndex])) {
-              vscode.window.showErrorMessage('Save folder is not an existing directory');
-            } else {
+            if (this._checkSaveFolder())  {
               this._setParametersButton(extensionUri).then(() => {
                 // confirm
                 vscode.window.showInformationMessage('Parameters set');
                 // update panel
                 this._updateWebview(extensionUri);
               });
+            } else {
+              this._updateWebview(extensionUri);
+            }
+            break;
+
+          case 'savetofile':
+            if (this._checkSaveFolder())  {
+              // save to file
+              let fileName:string = 'Saved_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
+              this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+              // confirm
+              vscode.window.showInformationMessage('Input saved to ' + fileName);
             }
             
             break;
@@ -215,6 +228,15 @@ export class ParameterPanel {
     );
   }
 
+  private _checkSaveFolder(): boolean {
+    let isValid: boolean = fs.existsSync(this._fieldValues[saveIndex]);
+    if (!isValid) {
+      vscode.window.showErrorMessage('Save folder is not an existing directory');
+    }
+
+    return isValid;
+  }
+
   private _getPath(): boolean {
     let updatePath:boolean = false;
     if (fs.existsSync(this._fieldValues[filesIndex])) {
@@ -256,19 +278,27 @@ export class ParameterPanel {
     this._previous = false;
 
     // save values to file
-    let fileName:string = this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
+    let fileName:string = 'Set_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
     this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
 
     // clear previous responses and update webview
     this._currentValues= [];
     this._setResponseValues = [];
     this._getResponseValues = [];
-    await this._updateWebview(extensionUri);
+    this._processingSet = true;
+    this._updateWebview(extensionUri);
 
     // set param values
+    // const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
       this._setResponseValues[index] = await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
+
+      // if ((index % updatePer) === 0 || index === (this._codeCompanyValues.length -1)) {
+      //   this._updateWebview(extensionUri);
+      // }
     }  
+
+    this._processingSet = false;
 
   }
 
@@ -525,6 +555,8 @@ export class ParameterPanel {
       this._getResponseValues,
       this._previous,
       this._showLoad,
+      this._processingSet,
+      this._processingGet,
       this._environmentOptions
     );
 

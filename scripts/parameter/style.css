@@ -3,14 +3,22 @@
 .parameternamefield,
 .currentvaluefield,
 .previousvaluefield,
-.newvaluefield,
-.changereasonfield {
+.newvaluefield {
   width: 15rem;
 }
 
-#files,
-#save {
+.changereasonfield,
+#allchangereasons {
+  width: 10rem;
+}
+
+
+#files {
   width: 30rem;
+}
+
+#save {
+  width: 20rem;
 }
 
 .codecompanyfield,
@@ -24,4 +32,9 @@
 
 #farright {
   margin-right: 5rem;
+}
+
+.floatleftmuchpadding {
+  float: left;
+  padding-left: 9rem;
 }

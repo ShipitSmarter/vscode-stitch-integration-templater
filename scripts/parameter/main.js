@@ -9,6 +9,7 @@ function main() {
   // button onclick event listeners
   document.getElementById("getparameters").addEventListener("click", getParameters);
   document.getElementById("setparameters").addEventListener("click", setParameters);
+  document.getElementById("savetofile").addEventListener("click", saveToFile);
   // document.getElementById("refresh").addEventListener("click", refreshContent);
   document.getElementById("load").addEventListener("click",loadFile);
 
@@ -40,8 +41,13 @@ function main() {
   // actions on panel load
   updateHighlightSet();
   updateCurrentValuesHighlight();
+  showProd();
   // on panel creation: update field outlines and tooltips
   checkFields();
+  // disable certain fields when processing requests
+  processingSet();
+  processingGet();
+
 }
 
 function fieldChange(event) {
@@ -76,9 +82,51 @@ function fieldChange(event) {
       }
       break;
     case 'environment':
-      document.body.style.backgroundColor = field.value === 'PROD' ? '#350000' : '';
-      field.style.backgroundColor = field.value === 'PROD' ? '#800000' : '';
+      showProd();
       break;
+
+    case 'allchangereasons':
+      const changeReasons = document.querySelectorAll(".changereasonfield");
+      for (const cr of changeReasons) {
+        cr.value = field.value;
+        saveValue(cr.id);
+      }
+      break;
+  }
+}
+
+function showProd() {
+  const field = document.getElementById("environment");
+
+  document.body.style.backgroundColor = field.value === 'PROD' ? '#350000' : '';
+  field.style.backgroundColor = field.value === 'PROD' ? '#800000' : '';
+}
+
+function processingGet(push = false) {
+  if (push) {
+    document.getElementById("processingget").hidden = false;
+  }
+  const isProcessing = !document.getElementById("processingget").hidden;
+
+  if (isProcessing) {
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield");
+    for (const dField of disableFields) {
+      dField.disabled = true;
+    }
+  }
+}
+
+function processingSet(push = false) {
+  if (push) {
+    document.getElementById("processingset").hidden = false;
+  }
+  const isProcessing = !document.getElementById("processingset").hidden;
+
+  if (isProcessing) {
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield");
+    for (const dField of disableFields) {
+      dField.disabled = true;
+    }
   }
 }
 
@@ -243,20 +291,35 @@ export function updateRight(fieldId) {
     }
 }
 
+function invalidForm() {
+  vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+}
+
 function getParameters() {
   // check field content
   if (checkFields()) {
+    processingGet(true);
     vscodeApi.postMessage({ command: "getparameters", text: "real fast!" });
   } else {
-    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+    invalidForm();
   }
 }
 
 function setParameters() {
   // check field content
   if (checkFields()) {
+    processingSet(true);
     vscodeApi.postMessage({ command: "setparameters", text: "real fast!" });
   } else {
-    vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+    invalidForm();
+  }
+}
+
+function saveToFile() {
+  // check field content
+  if (checkFields()) {
+    vscodeApi.postMessage({ command: "savetofile", text: "real fast!" });
+  } else {
+    invalidForm();
   }
 }
