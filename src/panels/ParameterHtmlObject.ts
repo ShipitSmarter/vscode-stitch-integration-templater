@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, escapeHtml, isEmpty} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, backgroundColorString, escapeHtml, isEmpty} from "../utilities/functions";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -138,7 +138,7 @@ export class ParameterHtmlObject {
           Environment:
         </div>
         <div class="floatleft">
-          <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${valueString(this._fieldValues[environmentIndex])} position="below">
+          <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${backgroundColorString(this._fieldValues[environmentIndex] === 'PROD' ? 'red' : '')} ${valueString(this._fieldValues[environmentIndex])} position="below">
               ${dropdownOptions(this._environmentOptions)}
           </vscode-dropdown>
         </div>
@@ -221,11 +221,11 @@ export class ParameterHtmlObject {
     return ['file1.csv','file2.csv','file3.csv'];
   }
 
-  private _getBackgroundColor(input:string) : string {
+  private _getBackgroundColorString(input:string) : string {
     // if input is 'OK': green
     // else if input is '': ''
     // else: red
-    return input === 'OK' ? 'background-color:darkgreen' : (isEmpty(input) ? '' : 'background-color:maroon');
+    return input === 'OK' ? backgroundColorString('darkgreen') : (isEmpty(input) ? '' : backgroundColorString('maroon'));
   }
 
   private _getOptionText(status:number, message:string) : string {
@@ -253,13 +253,13 @@ export class ParameterHtmlObject {
       // const badEmoji: string = '&#10060;';
       // let emoji:string = this._getResponseValues[index] === 'OK' ? okEmoji : (isEmpty(this._getResponseValues[index]) ? '-' : badEmoji);
       
-      let backgroundColor:string =  this._getBackgroundColor(this._getResponseValues[index]?.message ?? '');
+      let bColorString:string =  this._getBackgroundColorString(this._getResponseValues[index]?.message ?? '');
       let optionText = this._getOptionText(this._getResponseValues[index]?.status ?? 0, this._getResponseValues[index]?.message ?? '');
       
       getResponseValues += /*html*/`
         <section class="component-option-fixed">
           <div id="getresponse${index}" class="getresponsefield" index="${index}">
-            <vscode-option style="${backgroundColor}">${optionText}</vscode-option>
+            <vscode-option ${bColorString}>${optionText}</vscode-option>
           </div>
         </section>
       `;
@@ -341,12 +341,12 @@ export class ParameterHtmlObject {
       // const badEmoji: string = '&#10060;';
       // this._setResponseValues[row] = '401';
       // let emoji:string = this._setResponseValues[row] === 'OK' ? okEmoji : (isEmpty(this._setResponseValues[row]) ? '-' : badEmoji);
-      let backgroundColor:string =  this._getBackgroundColor(this._setResponseValues[row]?.message ?? '');
+      let bColorString:string =  this._getBackgroundColorString(this._setResponseValues[row]?.message ?? '');
       let optionText = this._getOptionText(this._setResponseValues[row]?.status ?? 0, this._setResponseValues[row]?.value ?? '');
       setResponseValues += /*html*/`
         <section class="component-option-fixed">
           <div id="setresponse${row}" class="setresponsefield" index="${row}">
-            <vscode-option style="${backgroundColor}" title="${this._setResponseValues[row]?.message ?? ''}">${optionText}</vscode-option>
+            <vscode-option ${bColorString} title="${this._setResponseValues[row]?.message ?? ''}">${optionText}</vscode-option>
           </div>
         </section>
       `;

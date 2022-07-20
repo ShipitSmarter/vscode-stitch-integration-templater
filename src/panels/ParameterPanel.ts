@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -241,18 +241,35 @@ export class ParameterPanel {
   }
 
   private async _setParametersButton(extensionUri: vscode.Uri) {
+
+    // get url
     const urls: UrlObject = this._urls.filter(el => el.type === 'setparameters')[0];
     let url: string = this._getUrl(urls);
+
+    // refresh current values
+    await this._getCurrentValues();
+
+    // update input values
     let setValues: string[] = this._previous ? this._previousValues : this._newValues; 
-    
-    // save new and current values to file
-    let fileName:string = this._codeCompanyValues[0]+'_'+(new Date()).toISOString().substring(0,19).replace(/[\-T:]/g,'') + '.csv';
-    await this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+    this._previousValues = this._currentValues;
+    this._newValues = setValues;
+    this._previous = false;
+
+    // save values to file
+    let fileName:string = this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
+    this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+
+    // clear previous responses and update webview
+    this._currentValues= [];
+    this._setResponseValues = [];
+    this._getResponseValues = [];
+    await this._updateWebview(extensionUri);
 
     // set param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
       this._setResponseValues[index] = await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
     }  
+
   }
 
   private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) : Promise<ResponseObject> {
@@ -424,13 +441,7 @@ export class ParameterPanel {
     }
   }
 
-  private async _writeFile(filePath:string) {
-    // retrieve current values
-    await this._getCurrentValues();
-
-    // check which will be the next values
-    let nextValues: string[] = this._previous ? this._previousValues : this._newValues;
-    
+  private _writeFile(filePath:string) {
     // construct file content
     let fileContent: string = 'CodeCompany;CodeCustomer;Name;PreviousValue;NewValue;ChangeReason\r\n';
     for (let index=0; index < this._codeCompanyValues.length; index++) {
@@ -438,8 +449,8 @@ export class ParameterPanel {
       fileContent +=  this._codeCompanyValues[index] + this._delimiter
                     + this._codeCustomerValues[index] + this._delimiter
                     + this._parameterNameValues[index] + this._delimiter
-                    + this._currentValues[index] + this._delimiter
-                    + nextValues[index] + this._delimiter
+                    + this._previousValues[index] + this._delimiter
+                    + this._newValues[index] + this._delimiter
                     + this._changeReasonValues[index];
 
       // add newline

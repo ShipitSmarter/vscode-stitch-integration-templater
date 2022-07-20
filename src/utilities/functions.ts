@@ -365,7 +365,20 @@ export function valueString(string: string): string {
     return !isEmpty(string) ? `value="${string}"` : '' ;
 }
 
+export function backgroundColorString(color:string): string {
+	let bColorString:string = '';
+	if (!isEmpty(color)) {
+		bColorString = `style="background-color:${color}"`;
+	}
+	return bColorString;
+}
+
 export async function getFileContentFromGlob(glob:string) : Promise<string> {
 	let path = await getWorkspaceFile(glob);
 	return fs.readFileSync(path, 'utf8');
 }
+
+export function getDateTimeStamp() : string {
+	return (new Date()).toISOString().substring(0,19).replace(/[\-T:]/g,'');
+}
+
