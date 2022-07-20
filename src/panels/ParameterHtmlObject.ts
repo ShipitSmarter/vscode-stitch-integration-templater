@@ -9,6 +9,7 @@ const environmentIndex = 3;
 const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
+const allChangeReasonsIndex = 7;
 
 // type defs
 type ResponseObject = {
@@ -158,6 +159,13 @@ export class ParameterHtmlObject {
         </div>
         <div class="floatleft">
           ${this._getButton('savetofile','Save current input to file','codicon-arrow-right')}
+        </div>
+
+        <div class="floatleftmuchpadding">
+          Set all change reasons:
+        </div>
+        <div class="floatleftnopadding">
+          <vscode-text-field id="allchangereasons" class="field" index="${allChangeReasonsIndex}" ${valueString(this._fieldValues[allChangeReasonsIndex])}></vscode-text-field>
         </div>
       </section>
       `;

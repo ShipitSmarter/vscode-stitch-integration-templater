@@ -80,6 +80,14 @@ function fieldChange(event) {
       document.body.style.backgroundColor = field.value === 'PROD' ? '#350000' : '';
       field.style.backgroundColor = field.value === 'PROD' ? '#800000' : '';
       break;
+
+    case 'allchangereasons':
+      const changeReasons = document.querySelectorAll(".changereasonfield");
+      for (const cr of changeReasons) {
+        cr.value = field.value;
+        saveValue(cr.id);
+      }
+      break;
   }
 }
 

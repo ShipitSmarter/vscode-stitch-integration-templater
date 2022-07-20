@@ -13,6 +13,7 @@ const environmentIndex = 3;
 const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
+const allChangeReasonsIndex = 7;
 
 // type defs
 type ParameterObject = {
@@ -272,7 +273,7 @@ export class ParameterPanel {
     this._previous = false;
 
     // save values to file
-    let fileName:string = this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
+    let fileName:string = 'Set_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
     this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
 
     // clear previous responses and update webview
