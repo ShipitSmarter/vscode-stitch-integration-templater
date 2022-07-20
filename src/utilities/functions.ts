@@ -378,3 +378,7 @@ export async function getFileContentFromGlob(glob:string) : Promise<string> {
 	return fs.readFileSync(path, 'utf8');
 }
 
+export function getDateTimeStamp() : string {
+	return (new Date()).toISOString().substring(0,19).replace(/[\-T:]/g,'');
+}
+
