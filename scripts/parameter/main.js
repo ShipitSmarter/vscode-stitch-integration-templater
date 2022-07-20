@@ -39,6 +39,7 @@ function main() {
 
   // actions on panel load
   updateHighlightSet();
+  updateCurrentValuesHighlight();
   // on panel creation: update field outlines and tooltips
   checkFields();
 }
@@ -63,6 +64,7 @@ function fieldChange(event) {
   switch (fieldType) {
     case 'previous':
       updateHighlightSet();
+      updateCurrentValuesHighlight();
       break;
     case 'showload':
       if (field.checked) {
@@ -101,6 +103,24 @@ function updateHighlightSet() {
   }
 }
 
+function updateCurrentValuesHighlight() {
+  const prevs = document.querySelectorAll(".previousvaluefield");
+  const news = document.querySelectorAll(".newvaluefield");
+  const curs = document.querySelectorAll(".currentvaluefield");
+  const isPrevious = document.getElementById("previous").checked;
+
+  const compares = isPrevious ? prevs : news;
+
+  for (let index=0; index<curs.length; index++) {
+    if (curs[index].value === compares[index].value){
+      unHighlight(curs[index].id);
+    } else {
+      unequalHighlight(curs[index].id);
+    }
+  }
+
+}
+
 function highlightSet(fieldId) {
   let field = document.getElementById(fieldId);
   field.style.outline = "1px solid cyan";
@@ -109,6 +129,11 @@ function highlightSet(fieldId) {
 function unHighlight(fieldId) {
   let field = document.getElementById(fieldId);
   field.style.outline = "none";
+}
+
+function unequalHighlight(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px dashed orange";
 }
 
 function infoMessage(info) {

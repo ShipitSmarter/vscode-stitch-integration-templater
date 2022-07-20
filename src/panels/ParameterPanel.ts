@@ -257,7 +257,7 @@ export class ParameterPanel {
 
     // save values to file
     let fileName:string = this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
-    await this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+    this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
 
     // clear previous responses and update webview
     this._currentValues= [];
