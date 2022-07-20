@@ -263,11 +263,16 @@ export class ParameterPanel {
     this._currentValues= [];
     this._setResponseValues = [];
     this._getResponseValues = [];
-    await this._updateWebview(extensionUri);
+    this._updateWebview(extensionUri);
 
     // set param values
+    const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
       this._setResponseValues[index] = await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
+
+      if ((index % updatePer) === 0 || index === (this._codeCompanyValues.length -1)) {
+        this._updateWebview(extensionUri);
+      }
     }  
 
   }
