@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.6.2
+- Get/set Parameters
+  - Added 'save current input' button
+  - Added field for updating all change reason fields at once
+  - Now disables fields and buttons and shows waiting icon when processing 'get' or 'set' request
+  - Fix: when environment is 'PROD' and updating panel by clicking other buttons, environment dropdown and panel background stay red
+
 ## 1.6.1
 - Get/set Parameters
   - When Environment dropdown set to 'PROD', color dropdown bright red and panel background dark red
