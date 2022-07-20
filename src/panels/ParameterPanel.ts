@@ -54,6 +54,7 @@ export class ParameterPanel {
   private _previous: boolean = false;
   private _showLoad: boolean = false;
   private _processingSet: boolean = false;
+  private _processingGet: boolean = false;
   private _managerAuth: string = '';
   private _delimiter: string = ';';
   private _urls: UrlObject[] = [];
@@ -151,6 +152,7 @@ export class ParameterPanel {
             } else {
               this._updateWebview(extensionUri);
             }
+            break;
 
           case 'savetofile':
             if (this._checkSaveFolder())  {
@@ -554,6 +556,7 @@ export class ParameterPanel {
       this._previous,
       this._showLoad,
       this._processingSet,
+      this._processingGet,
       this._environmentOptions
     );
 

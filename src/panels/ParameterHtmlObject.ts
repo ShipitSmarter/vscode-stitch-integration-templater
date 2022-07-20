@@ -38,6 +38,7 @@ export class ParameterHtmlObject {
     private _previous: boolean,
     private _showLoad: boolean,
     private _processingSet: boolean,
+    private _processingGet: boolean,
     private _environmentOptions: string[]
   ) { }
 
@@ -81,7 +82,12 @@ export class ParameterHtmlObject {
           </section>
 
           <section class="component-header">
-            ${this._getButton('getparameters','Get Parameters','codicon-refresh')}
+            <div class="floatleftlesspadding">
+              ${this._getButton('getparameters','Get Parameters','codicon-refresh')}
+            </div>
+            <div class="floatleftnopadding">
+              <vscode-progress-ring id="processingget" ${hiddenString(this._processingGet)}></vscode-progress-ring>
+            </div>
           </section>
 
           <section class="rowsingle">

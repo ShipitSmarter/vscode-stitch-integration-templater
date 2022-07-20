@@ -45,6 +45,7 @@ function main() {
   checkFields();
   // disable certain fields when processing requests
   processingSet();
+  processingGet();
 }
 
 function fieldChange(event) {
@@ -93,6 +94,20 @@ function fieldChange(event) {
   }
 }
 
+function processingGet(push = false) {
+  if (push) {
+    document.getElementById("processingget").hidden = false;
+  }
+  const isProcessing = !document.getElementById("processingget").hidden;
+
+  if (isProcessing) {
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield");
+    for (const dField of disableFields) {
+      dField.disabled = true;
+    }
+  }
+}
+
 function processingSet(push = false) {
   if (push) {
     document.getElementById("processingset").hidden = false;
@@ -100,7 +115,7 @@ function processingSet(push = false) {
   const isProcessing = !document.getElementById("processingset").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
@@ -275,6 +290,7 @@ function invalidForm() {
 function getParameters() {
   // check field content
   if (checkFields()) {
+    processingGet(true);
     vscodeApi.postMessage({ command: "getparameters", text: "real fast!" });
   } else {
     invalidForm();
