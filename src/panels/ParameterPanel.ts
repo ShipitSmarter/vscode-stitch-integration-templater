@@ -53,6 +53,7 @@ export class ParameterPanel {
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
   private _showLoad: boolean = false;
+  private _processingSet: boolean = false;
   private _managerAuth: string = '';
   private _delimiter: string = ';';
   private _urls: UrlObject[] = [];
@@ -147,6 +148,8 @@ export class ParameterPanel {
                 // update panel
                 this._updateWebview(extensionUri);
               });
+            } else {
+              this._updateWebview(extensionUri);
             }
 
           case 'savetofile':
@@ -280,17 +283,20 @@ export class ParameterPanel {
     this._currentValues= [];
     this._setResponseValues = [];
     this._getResponseValues = [];
+    this._processingSet = true;
     this._updateWebview(extensionUri);
 
     // set param values
-    const updatePer: number = 3;
+    // const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
       this._setResponseValues[index] = await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
 
-      if ((index % updatePer) === 0 || index === (this._codeCompanyValues.length -1)) {
-        this._updateWebview(extensionUri);
-      }
+      // if ((index % updatePer) === 0 || index === (this._codeCompanyValues.length -1)) {
+      //   this._updateWebview(extensionUri);
+      // }
     }  
+
+    this._processingSet = false;
 
   }
 
@@ -547,6 +553,7 @@ export class ParameterPanel {
       this._getResponseValues,
       this._previous,
       this._showLoad,
+      this._processingSet,
       this._environmentOptions
     );
 

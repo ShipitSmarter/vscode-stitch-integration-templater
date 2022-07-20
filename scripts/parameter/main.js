@@ -43,6 +43,8 @@ function main() {
   updateCurrentValuesHighlight();
   // on panel creation: update field outlines and tooltips
   checkFields();
+  // disable certain fields when processing requests
+  processingSet();
 }
 
 function fieldChange(event) {
@@ -88,6 +90,20 @@ function fieldChange(event) {
         saveValue(cr.id);
       }
       break;
+  }
+}
+
+function processingSet(push = false) {
+  if (push) {
+    document.getElementById("processingset").hidden = false;
+  }
+  const isProcessing = !document.getElementById("processingset").hidden;
+
+  if (isProcessing) {
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield");
+    for (const dField of disableFields) {
+      dField.disabled = true;
+    }
   }
 }
 
@@ -268,6 +284,7 @@ function getParameters() {
 function setParameters() {
   // check field content
   if (checkFields()) {
+    processingSet(true);
     vscodeApi.postMessage({ command: "setparameters", text: "real fast!" });
   } else {
     invalidForm();

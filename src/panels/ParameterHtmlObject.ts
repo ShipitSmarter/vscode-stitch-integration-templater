@@ -37,6 +37,7 @@ export class ParameterHtmlObject {
     private _getResponseValues: ResponseObject[],
     private _previous: boolean,
     private _showLoad: boolean,
+    private _processingSet: boolean,
     private _environmentOptions: string[]
   ) { }
 
@@ -145,9 +146,13 @@ export class ParameterHtmlObject {
         <div class="floatleft">
           <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
         </div>
-        <div class="floatleft">
+        <div class="floatleftlesspadding">
           ${this._getButton('setparameters','Set Parameters','codicon-arrow-right')}
         </div>
+        <div class="floatleftnopadding">
+          <vscode-progress-ring id="processingset" ${hiddenString(this._processingSet)}></vscode-progress-ring>
+        </div>
+        
       </section>
 
       <section class="component-example">
