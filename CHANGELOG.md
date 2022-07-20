@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.6.1
+- Get/set Parameters
+  - When Environment dropdown set to 'PROD', color dropdown bright red and panel background dark red
+  - On pressing 'Set Parameter' button
+    - Add environment name to saved file
+    - Update input layout and highlight, uncheck 'previous' checkbox, clear previous Get/Set responses and current values
+- Add highlight to current value fields which are unequal to new values (or previous values, if 'previous' checkbox is set)
+
 ## 1.6.0
 - Get/set Parameters
   - Added new Get/set Parameters panel, allowing mass check and change of SiS parameters, by either uploading a CSV file, or manual input.
