@@ -62,7 +62,20 @@ function fieldChange(event) {
   field.title = field.value;
 
   // update field outline and tooltip
-  if (['save','codecompanyfield','codecustomerfield','parameternamefield','changereasonfield'].includes(fieldType)){
+  if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType)) {
+    // codecompany, codecustomeror parametername: check all three in all rows
+    const rowFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield");
+    for (const rowField of rowFields) {
+      updateFieldOutlineAndTooltip(rowField.id);
+    }
+   
+    if (checkIfDuplicate(+row)) {
+      checkFields();
+    } else {
+      updateFieldOutlineAndTooltip(field.id);
+    }
+
+  } else  if (['save','changereasonfield'].includes(fieldType)) {
     updateFieldOutlineAndTooltip(field.id);
   }
 
@@ -95,6 +108,27 @@ function fieldChange(event) {
 
       break;
   }
+}
+
+function checkIfDuplicate(row) {
+  let isDuplicate = false;
+
+  let nofLines = +document.getElementById('noflines').value;
+  let cocos = document.querySelectorAll(".codecompanyfield");
+  let cocus = document.querySelectorAll(".codecustomerfield");
+  let pnames = document.querySelectorAll(".parameternamefield");
+
+  for (let index = 0; index < nofLines; index++) {
+    if ((index !== row) && (!isEmpty(cocos[index].value)) && (!isEmpty(cocus[index].value)) && (!isEmpty(pnames[index].value))) {
+
+      if ((cocos[index].value === cocos[row].value) && (cocus[index].value === cocus[row].value) && (pnames[index].value === pnames[row].value)) {
+        isDuplicate = true;
+        break;
+      }
+    }
+  }
+
+  return isDuplicate;
 }
 
 function getCompanyName(codeCompany) {
@@ -226,7 +260,7 @@ function updateFieldOutlineAndTooltip(fieldId) {
   let className = field.classList[0];
   var fieldType = (className === 'field') ? field.id : className;
 
-  // check any non-scenario input field
+  // check input field
   let check = '';
   if (['save','codecompanyfield','codecustomerfield','changereasonfield','parameternamefield'].includes(fieldType) && isEmpty(field.value)) {
     check = 'empty';
@@ -245,8 +279,10 @@ function updateFieldOutlineAndTooltip(fieldId) {
   // update and return output
   if (check === 'empty') {
     updateEmpty(field.id);
-  }else if (check !== '' && check !== null) {
+  } else if (check !== '' && check !== null) {
     updateWrong(field.id, getContentHint(fieldType));
+  } else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
+    updateWrong(field.id, 'Company/customer/parameter combination is duplicate');
   } else {
     updateRight(field.id);
     isCorrect= true;
