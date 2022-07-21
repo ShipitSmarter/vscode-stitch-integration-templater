@@ -93,7 +93,7 @@ export class ParameterHtmlObject {
 
           <section class="component-header">
             <div class="floatleftlesspadding">
-              ${this._getButton('getparameters','Get Parameters','codicon-refresh')}
+              ${this._getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
             </div>
             <div class="floatleftnopadding">
               <vscode-progress-ring id="processingget" ${hiddenString(this._processingGet)}></vscode-progress-ring>
@@ -128,10 +128,10 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  private _getButton(id:string, title:string, codicon:string): string {
+  private _getButton(id:string, title:string, codicon:string,appearance:string = 'primary',hidden:string = ''): string {
     let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
     let button: string = /*html*/ `
-      <vscode-button id="${id}" appearance="primary" >
+      <vscode-button id="${id}" appearance="${appearance}" ${hidden}>
         ${title}
         ${codiconString}
       </vscode-button>
@@ -192,7 +192,7 @@ export class ParameterHtmlObject {
           <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
         </div>
         <div class="floatleft">
-          ${this._getButton('savetofile','Save current input to file','codicon-arrow-right')}
+          ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary')}
         </div>
 
         <div class="floatleftmuchpadding">
@@ -229,10 +229,7 @@ export class ParameterHtmlObject {
           ${filesField}
         </div>
         <div class="floatleft">
-          <vscode-button id="load" appearance="primary" ${hiddenString(this._showLoad)}>
-            Load
-            <span slot="start" class="codicon codicon-arrow-up"></span>
-          </vscode-button>
+          ${this._getButton('load','Load','codicon-arrow-up','primary',hiddenString(this._showLoad))}
         </div>
       </section>
 
