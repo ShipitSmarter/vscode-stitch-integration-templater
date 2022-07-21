@@ -366,27 +366,28 @@ export class ParameterPanel {
   };
 
   private async _getCurrentValues() {
+    // get base url
     // const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
-    // let url: string = this._getUrl(urls);
-
     const urls: UrlObject = this._urls.filter(el => el.type === 'getparameterhistory')[0];
-    let url: string = this._getUrl(urls);
+    let baseurl: string = this._getUrl(urls);
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      let response: ResponseObject = await this._getParameterHistory(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
+      // let url: string = `${baseurl}/${this._parameterNameValues[index]}/${this._codeCustomerValues[index]}`;
+      let url: string = `${baseurl}/${this._codeCustomerValues[index]}/${this._parameterNameValues[index]}/1`;
+      let response: ResponseObject = await this._getApiCall(url,this._managerAuth,this._codeCompanyValues[index]);
       let responseJson = JSON.parse(response.value);      
       this._currentValues[index] = responseJson[0].paramValue;
       this._getResponseValues[index] = response;
     }    
   }
 
-  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string): Promise<ResponseObject> {
+  private async _getApiCall(url:string, authorization:string, codeCompany:string): Promise<ResponseObject> {
     let result: ResponseObject;
     try {
       const response = await axios({
         method: "GET",
-        url: `${baseurl}/${parameterName}/${codeCustomer}`,
+        url: url,
         responseType: 'arraybuffer',
         responseEncoding: "binary",
         headers: {
@@ -432,39 +433,6 @@ export class ParameterPanel {
     this._codeCompanies = this._codeCompanies.sort((a, b) => (a.company > b.company) ? 1 : -1);
 
   }
-
-  private async _getParameterHistory(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string): Promise<ResponseObject> {
-    let result: ResponseObject;
-    try {
-      const response = await axios({
-        method: "GET",
-        url: `${baseurl}/${codeCustomer}/${parameterName}/1`,
-        responseType: 'arraybuffer',
-        responseEncoding: "binary",
-        headers: {
-          'CodeCompany': codeCompany,
-          'Authorization': authorization
-        }
-      });
-
-      let value: string = removeQuotes(Buffer.from(response.data).toString());
-
-      result = {
-        status: response.status,
-        value: value,
-        message: response.statusText
-      };
-
-    } catch (err:any) {
-      result = {
-        status: err.response.status,
-        value: '',
-        message: err.response.statusText
-      };
-    }
-
-    return result;
-  };
 
   private _cropLines(lines:number) {
     // crop line arrays
