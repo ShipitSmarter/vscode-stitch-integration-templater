@@ -36,6 +36,11 @@ type ResponseObject = {
   message:string;
 };
 
+type CodeCompanyObject = {
+  company: string;
+  codecompany: string;
+};
+
 export class ParameterPanel {
   // PROPERTIES
   public static currentPanel: ParameterPanel | undefined;
@@ -59,7 +64,7 @@ export class ParameterPanel {
   private _delimiter: string = ';';
   private _urls: UrlObject[] = [];
   private _environmentOptions: string[] = [];
-  // private _parameterObjects: ParameterObject[] = [];
+  private _codeCompanies: CodeCompanyObject[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -392,6 +397,58 @@ export class ParameterPanel {
     return result;
   };
 
+  private async _getCompanies() {
+    // get companies and codecompanies from translation file
+    let translationPath = await getWorkspaceFile('**/templater/parameters/CompanyToCodeCompany.csv');
+    let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
+
+    this._codeCompanies = new Array<CodeCompanyObject>(translations.length);
+
+    for (let index = 0; index < translations.length; index++) {
+      this._codeCompanies[index] = {
+        company: translations[index].split(',')[0],
+        codecompany: translations[index].split(',')[1]
+      };
+    }
+
+    // sort
+    this._codeCompanies = this._codeCompanies.sort((a, b) => (a.company > b.company) ? 1 : -1);
+
+  }
+
+  private async _getParameterHistory(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<ResponseObject> {
+    let result: ResponseObject;
+    try {
+      const response = await axios({
+        method: "GET",
+        url: `${baseurl}/${parameterName}/${handlingAgent}`,
+        responseType: 'arraybuffer',
+        responseEncoding: "binary",
+        headers: {
+          'CodeCompany': codeCompany,
+          'Authorization': authorization
+        }
+      });
+
+      let value: string = removeQuotes(Buffer.from(response.data).toString());
+
+      result = {
+        status: response.status,
+        value: value,
+        message: response.statusText
+      };
+
+    } catch (err:any) {
+      result = {
+        status: err.response.status,
+        value: '',
+        message: err.response.statusText
+      };
+    }
+
+    return result;
+  };
+
   private _cropLines(lines:number) {
     // crop line arrays
     this._codeCompanyValues = this._codeCompanyValues.slice(0, lines);
@@ -523,6 +580,7 @@ export class ParameterPanel {
     await this._getAPIDetails();
     await this._getEnvironmentOptions();
     this._fieldValues[environmentIndex] = this._environmentOptions[0];
+    await this._getCompanies();
   }
 
   private _environment(): string {
@@ -557,7 +615,8 @@ export class ParameterPanel {
       this._showLoad,
       this._processingSet,
       this._processingGet,
-      this._environmentOptions
+      this._environmentOptions,
+      this._codeCompanies
     );
 
     let html =  parameterHtmlObject.getHtml();

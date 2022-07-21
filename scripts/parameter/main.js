@@ -95,6 +95,19 @@ function fieldChange(event) {
   }
 }
 
+function getCompanyName(codeCompany) {
+  let companyName = '';
+  if (!isEmpty(codeCompany)) {
+    try {
+      companyName = document.getElementById(codeCompany).value;
+    } catch (err) {
+      companyName = '';
+    }
+  }
+
+  return companyName;
+}
+
 function showProd() {
   const field = document.getElementById("environment");
 
@@ -278,7 +291,7 @@ function updateEmpty(fieldId) {
   field.title = 'Field is mandatory';
 }
 
-export function updateRight(fieldId) {
+function updateRight(fieldId) {
     let field = document.getElementById(fieldId);
     field.style.outline = "none";
 
@@ -286,6 +299,8 @@ export function updateRight(fieldId) {
     var fieldType = (className === 'field') ? field.id : className;
     if (['save','parameternamefield','changereasonfield'].includes(fieldType)) {
       field.title = field.value;
+    } else if (fieldType === 'codecompanyfield') {
+      field.title = getCompanyName(field.value);
     } else {
       field.title = '';
     }

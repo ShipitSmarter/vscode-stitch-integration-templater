@@ -18,6 +18,11 @@ type ResponseObject = {
   message:string;
 };
 
+type CodeCompanyObject = {
+  company: string;
+  codecompany: string;
+};
+
 export class ParameterHtmlObject {
   // PROPERTIES
   public static currentHtmlObject: ParameterHtmlObject | undefined;
@@ -39,7 +44,8 @@ export class ParameterHtmlObject {
     private _showLoad: boolean,
     private _processingSet: boolean,
     private _processingGet: boolean,
-    private _environmentOptions: string[]
+    private _environmentOptions: string[],
+    private _codeCompanies: CodeCompanyObject[]
   ) { }
 
   // METHODS
@@ -70,9 +76,13 @@ export class ParameterHtmlObject {
             
           </section>
           <section id="farright">
-            
+
           </section>
 				</div>
+
+        <section id="hidden">
+            ${this._codeCompanyFields()}
+        </section>
 
         ${this._getLoadItems()}
         
@@ -127,6 +137,19 @@ export class ParameterHtmlObject {
       </vscode-button>
       `;
     return button;
+  }
+
+  private _codeCompanyFields(): string {
+    let html: string = '';
+
+    for (let index = 0; index < this._codeCompanies.length; index++) {
+      let cc: CodeCompanyObject = this._codeCompanies[index];
+      html += /*html*/ `
+        <vscode-text-field id="${cc.codecompany}" class="codecompanylookupfield" value="${cc.company}" hidden></vscode-text-field>
+      `;
+    }
+
+    return html;
   }
 
   private _getDetailsGrid(): string {
