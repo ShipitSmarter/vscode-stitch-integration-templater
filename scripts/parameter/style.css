@@ -1,7 +1,6 @@
 @import url("../general/general.css");
 
 .parameternamefield,
-.currentvaluefield,
 .previousvaluefield,
 .newvaluefield {
   width: 15rem;
@@ -9,9 +8,20 @@
 
 .changereasonfield,
 #allchangereasons {
+  width: 8rem;
+}
+
+.currentvaluefield {
   width: 10rem;
 }
 
+.currentchangereasonfield {
+  width: 8rem;
+}
+
+.currenttimestampfield {
+  width: 9rem;
+}
 
 #files {
   width: 30rem;

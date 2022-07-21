@@ -55,6 +55,8 @@ export class ParameterPanel {
   private _setResponseValues: ResponseObject[] = [];
   private _changeReasonValues: string[] = [];
   private _currentValues: string[] = [];
+  private _currentChangeReasonValues: string[] = [];
+  private _currentTimestampValues: string[] = [];
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
   private _showLoad: boolean = false;
@@ -142,6 +144,8 @@ export class ParameterPanel {
           case 'getparameters':
             // clear previous responses and update webview
             this._currentValues= [];
+            this._currentChangeReasonValues = [];
+            this._currentTimestampValues = [];
             this._getResponseValues = [];
             this._processingGet = true;
             this._updateWebview(extensionUri);
@@ -183,6 +187,8 @@ export class ParameterPanel {
 
             // clear previous responses and update webview
             this._currentValues= [];
+            this._currentChangeReasonValues = [];
+            this._currentTimestampValues = [];
             this._setResponseValues = [];
             this._getResponseValues = [];
             this._updateWebview(extensionUri);
@@ -301,6 +307,8 @@ export class ParameterPanel {
 
     // clear previous responses and update webview
     this._currentValues= [];
+    this._currentChangeReasonValues = [];
+    this._currentTimestampValues = [];
     this._setResponseValues = [];
     this._getResponseValues = [];
     this._processingSet = true;
@@ -378,6 +386,8 @@ export class ParameterPanel {
       let response: ResponseObject = await this._getApiCall(url,this._managerAuth,this._codeCompanyValues[index]);
       let responseJson = JSON.parse(response.value);      
       this._currentValues[index] = responseJson[0].paramValue;
+      this._currentChangeReasonValues[index] = responseJson[0].changeReason;
+      this._currentTimestampValues[index] = responseJson[0].dateTimeAction.substring(0,19);
       this._getResponseValues[index] = response;
     }    
   }
@@ -443,6 +453,8 @@ export class ParameterPanel {
     this._newValues = this._newValues.slice(0, lines);
     this._changeReasonValues = this._changeReasonValues.slice(0, lines);
     this._currentValues = this._currentValues.slice(0, lines);
+    this._currentChangeReasonValues = this._currentChangeReasonValues.slice(0,lines);
+    this._currentTimestampValues = this._currentTimestampValues.slice(0,lines);
   }
 
   private _preParse(input:string):string {
@@ -605,6 +617,8 @@ export class ParameterPanel {
       this._changeReasonValues,
       this._setResponseValues,
       this._currentValues,
+      this._currentChangeReasonValues,
+      this._currentTimestampValues,
       this._getResponseValues,
       this._previous,
       this._showLoad,

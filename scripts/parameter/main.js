@@ -33,7 +33,7 @@ function main() {
   }
 
   // update hover-overs on load
-  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield");
+  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield,.currentchangereasonfield");
   for (const field of allFields) {
     field.title = field.value;
   }

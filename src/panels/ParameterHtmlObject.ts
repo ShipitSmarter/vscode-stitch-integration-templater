@@ -39,6 +39,8 @@ export class ParameterHtmlObject {
     private _changeReasonValues: string[],
     private _setResponseValues: ResponseObject[],
     private _currentValues: string[],
+    private _currentChangeReasonValues: string[],
+    private _currentTimestampValues: string[],
     private _getResponseValues: ResponseObject[],
     private _previous: boolean,
     private _showLoad: boolean,
@@ -270,6 +272,8 @@ export class ParameterHtmlObject {
 
   private _getCurrentValues(): string {
     let currentValues: string = ``;
+    let currentChangeReasons: string = '';
+    let currentTimestamps: string = '';
     let getResponseValues: string = '';
 
     for (let index = 0; index < +this._fieldValues[noflinesIndex]; index++) {
@@ -277,6 +281,18 @@ export class ParameterHtmlObject {
       currentValues += /*html*/`
         <section class="component-minvmargin">
           <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${this._currentValues[index] ?? ''}" readonly></vscode-text-field>
+        </section>
+      `;
+
+      currentChangeReasons += /*html*/`
+        <section class="component-minvmargin">
+          <vscode-text-field id="currentchangereason${index}" class="currentchangereasonfield" value="${this._currentChangeReasonValues[index] ?? ''}" readonly></vscode-text-field>
+        </section>
+      `;
+
+      currentTimestamps += /*html*/`
+        <section class="component-minvmargin">
+          <vscode-text-field id="currenttimestamp${index}" class="currenttimestampfield" value="${this._currentTimestampValues[index] ?? ''}" readonly></vscode-text-field>
         </section>
       `;
 
@@ -296,8 +312,18 @@ export class ParameterHtmlObject {
     let html: string = /*html*/ `
       <section class="component-example">
         <section class="floatleftnopadding">
-          <p>Current Value</p>
+          <p>Current value</p>
           ${currentValues}
+        </section>
+
+        <section class="floatleftnopadding">
+          <p>Change reason</p>
+          ${currentChangeReasons}
+        </section>
+
+        <section class="floatleftnopadding">
+          <p>Timestamp</p>
+          ${currentTimestamps}
         </section>
 
         <section class="floatleft">
