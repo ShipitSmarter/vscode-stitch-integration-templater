@@ -57,6 +57,7 @@ export class ParameterPanel {
   private _currentValues: string[] = [];
   private _currentChangeReasonValues: string[] = [];
   private _currentTimestampValues: string[] = [];
+  private _extendedHistoryValues: string[] = [];
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
   private _showLoad: boolean = false;
@@ -146,6 +147,7 @@ export class ParameterPanel {
             this._currentValues= [];
             this._currentChangeReasonValues = [];
             this._currentTimestampValues = [];
+            this._extendedHistoryValues = [];
             this._getResponseValues = [];
             this._processingGet = true;
             this._updateWebview(extensionUri);
@@ -189,6 +191,7 @@ export class ParameterPanel {
             this._currentValues= [];
             this._currentChangeReasonValues = [];
             this._currentTimestampValues = [];
+            this._extendedHistoryValues = [];
             this._setResponseValues = [];
             this._getResponseValues = [];
             this._updateWebview(extensionUri);
@@ -309,6 +312,7 @@ export class ParameterPanel {
     this._currentValues= [];
     this._currentChangeReasonValues = [];
     this._currentTimestampValues = [];
+    this._extendedHistoryValues = [];
     this._setResponseValues = [];
     this._getResponseValues = [];
     this._processingSet = true;
@@ -389,6 +393,12 @@ export class ParameterPanel {
       this._currentChangeReasonValues[index] = responseJson[0].changeReason;
       this._currentTimestampValues[index] = responseJson[0].dateTimeAction.substring(0,19);
       this._getResponseValues[index] = response;
+
+      // fill extended history
+      this._extendedHistoryValues[index] = '';
+      for (let row=0; row < (Math.min(5,responseJson.length)); row++) {
+        this._extendedHistoryValues[index] += `${row} | ${responseJson[row].dateTimeAction.substring(0,19)} | ${responseJson[row].changeReason} | ${responseJson[row].paramValue}\r\n`;
+      }
     }    
   }
 
@@ -455,6 +465,7 @@ export class ParameterPanel {
     this._currentValues = this._currentValues.slice(0, lines);
     this._currentChangeReasonValues = this._currentChangeReasonValues.slice(0,lines);
     this._currentTimestampValues = this._currentTimestampValues.slice(0,lines);
+    this._extendedHistoryValues = this._extendedHistoryValues.slice(0,lines);
   }
 
   private _preParse(input:string):string {
@@ -619,6 +630,7 @@ export class ParameterPanel {
       this._currentValues,
       this._currentChangeReasonValues,
       this._currentTimestampValues,
+      this._extendedHistoryValues,
       this._getResponseValues,
       this._previous,
       this._showLoad,

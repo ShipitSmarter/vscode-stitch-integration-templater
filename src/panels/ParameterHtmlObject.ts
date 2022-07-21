@@ -41,6 +41,7 @@ export class ParameterHtmlObject {
     private _currentValues: string[],
     private _currentChangeReasonValues: string[],
     private _currentTimestampValues: string[],
+    private _extendedHistoryValues: string[],
     private _getResponseValues: ResponseObject[],
     private _previous: boolean,
     private _showLoad: boolean,
@@ -292,7 +293,7 @@ export class ParameterHtmlObject {
 
       currentTimestamps += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="currenttimestamp${index}" class="currenttimestampfield" value="${this._currentTimestampValues[index] ?? ''}" readonly></vscode-text-field>
+          <vscode-text-field id="currenttimestamp${index}" class="currenttimestampfield" value="${this._currentTimestampValues[index] ?? ''}" title="${this._extendedHistoryValues[index] ?? ''}" readonly></vscode-text-field>
         </section>
       `;
 
