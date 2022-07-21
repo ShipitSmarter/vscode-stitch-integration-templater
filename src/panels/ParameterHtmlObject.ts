@@ -91,7 +91,7 @@ export class ParameterHtmlObject {
                ${this._getDetailsGrid()}
           </section>
 
-          <section class="component-header">
+          <section class="component-example">
             <div class="floatleftlesspadding">
               ${this._getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
             </div>

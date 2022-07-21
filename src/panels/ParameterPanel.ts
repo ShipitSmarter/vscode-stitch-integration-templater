@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -538,6 +538,15 @@ export class ParameterPanel {
       this._previousValues[index] = this._postParse(line[3]);
       this._newValues[index] = this._postParse(line[4]);
       this._changeReasonValues[index] = this._postParse(line[5]);
+    }
+
+    // set environment if present in file name
+    const fileName:string = nameFromPath(filePath);
+    for (const env of this._environmentOptions) {
+      if (fileName.includes(env)) {
+        this._fieldValues[environmentIndex] = env;
+        break;
+      }
     }
   }
 

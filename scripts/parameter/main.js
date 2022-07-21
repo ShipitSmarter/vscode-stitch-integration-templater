@@ -90,7 +90,9 @@ function fieldChange(event) {
       for (const cr of changeReasons) {
         cr.value = field.value;
         saveValue(cr.id);
+        updateFieldOutlineAndTooltip(cr.id);
       }
+
       break;
   }
 }
