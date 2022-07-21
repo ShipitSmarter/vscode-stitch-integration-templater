@@ -140,7 +140,15 @@ export class ParameterPanel {
             break;
 
           case 'getparameters':
+            // clear previous responses and update webview
+            this._currentValues= [];
+            this._getResponseValues = [];
+            this._processingGet = true;
+            this._updateWebview(extensionUri);
+
+            // retrieve 
             this._getCurrentValues().then(() => {
+              this._processingGet = false;
               // update panel
               this._updateWebview(extensionUri);
             });
@@ -172,6 +180,11 @@ export class ParameterPanel {
 
           case 'loadfile':
             this._loadFile(text);
+
+            // clear previous responses and update webview
+            this._currentValues= [];
+            this._setResponseValues = [];
+            this._getResponseValues = [];
             this._updateWebview(extensionUri);
             break;
 
