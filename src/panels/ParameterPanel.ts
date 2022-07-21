@@ -366,23 +366,27 @@ export class ParameterPanel {
   };
 
   private async _getCurrentValues() {
-    const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
+    // const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
+    // let url: string = this._getUrl(urls);
+
+    const urls: UrlObject = this._urls.filter(el => el.type === 'getparameterhistory')[0];
     let url: string = this._getUrl(urls);
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      let response: ResponseObject = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
-      this._currentValues[index] = response.value;
+      let response: ResponseObject = await this._getParameterHistory(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
+      let responseJson = JSON.parse(response.value);      
+      this._currentValues[index] = responseJson[0].paramValue;
       this._getResponseValues[index] = response;
     }    
   }
 
-  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<ResponseObject> {
+  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string): Promise<ResponseObject> {
     let result: ResponseObject;
     try {
       const response = await axios({
         method: "GET",
-        url: `${baseurl}/${parameterName}/${handlingAgent}`,
+        url: `${baseurl}/${parameterName}/${codeCustomer}`,
         responseType: 'arraybuffer',
         responseEncoding: "binary",
         headers: {
@@ -429,12 +433,12 @@ export class ParameterPanel {
 
   }
 
-  private async _getParameterHistory(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<ResponseObject> {
+  private async _getParameterHistory(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string): Promise<ResponseObject> {
     let result: ResponseObject;
     try {
       const response = await axios({
         method: "GET",
-        url: `${baseurl}/${parameterName}/${handlingAgent}`,
+        url: `${baseurl}/${codeCustomer}/${parameterName}/1`,
         responseType: 'arraybuffer',
         responseEncoding: "binary",
         headers: {
@@ -583,6 +587,7 @@ export class ParameterPanel {
     // retrieve urls
     this._urls[0] = await this._getUrlObject('**/templater/parameters/parameter_get.json','getparameters');
     this._urls[1] = await this._getUrlObject('**/templater/parameters/parameter_set.json','setparameters');
+    this._urls[2] = await this._getUrlObject('**/templater/parameters/parameter_get_history.json','getparameterhistory');
   }
 
   private async _getUrlObject(glob:string, type:string) : Promise<UrlObject> {
