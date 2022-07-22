@@ -1,6 +1,33 @@
 import * as vscode from "vscode";
 import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, readonlyString, hiddenString} from "./functions";
 
+// type definitions
+type ScenarioObject = {
+    name: string,
+    structure: string
+};
+  
+type IntegrationObject = {
+    path:string, carrier:string, 
+    api:string, module:string, 
+    carriercode:string,
+     modular: boolean, 
+     scenarios:string[], 
+     validscenarios: ScenarioObject[]
+};
+  
+type ModularElementObject = {
+    parent:string, 
+    element:string, 
+    multi:boolean
+};
+  
+type FileObject = {
+    parent: string,
+    file: string,
+    path: string
+};
+  
 
 export class ScenarioGridObject {
     // PROPERTIES
@@ -9,7 +36,7 @@ export class ScenarioGridObject {
     // constructor
     public constructor (
         private _availableScenarios: string[],
-        private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
+        private _modularElementsWithParents: ModularElementObject[],
         private _scenarioFieldValues: string[],
         private _nofScenarios: number,
         private _nofScenariosIndex: number,

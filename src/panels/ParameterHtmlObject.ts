@@ -75,8 +75,7 @@ export class ParameterHtmlObject {
 
 				<div class="row11" id="main">
           <section id="farleft">
-					  <h1>Get/set parameters</h1> 
-            
+					  <h1>Get/set parameters</h1>       
           </section>
           <section id="farright">
 
