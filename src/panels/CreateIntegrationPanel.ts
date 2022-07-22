@@ -11,6 +11,33 @@ const carrierCodeIndex = 3;
 const nofStepsIndex = 5;
 const nofScenariosIndex = 6;
 
+// type definitions
+type ScenarioObject = {
+  name: string,
+  structure: string
+};
+
+type IntegrationObject = {
+  path:string, carrier:string, 
+  api:string, module:string, 
+  carriercode:string,
+   modular: boolean, 
+   scenarios:string[], 
+   validscenarios: ScenarioObject[]
+};
+
+type ModularElementObject = {
+  parent:string, 
+  element:string, 
+  multi:boolean
+};
+
+type FileObject = {
+  parent: string,
+  file: string,
+  path: string
+};
+
 export class CreateIntegrationPanel {
   // PROPERTIES
   public static currentPanel: CreateIntegrationPanel | undefined;
@@ -22,11 +49,11 @@ export class CreateIntegrationPanel {
   private _existingScenarioFieldValues: string[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: string = 'create';      // pre-allocate with 'create'
-  private _integrationObjects:      {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[] = [];
-  private _emptyIntegrationObject : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]} = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios: [{name:'', structure:''}]};
-  private _currentIntegration :     {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]} = this._emptyIntegrationObject;
+  private _integrationObjects:     IntegrationObject[] = [];
+  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios: [{name:'', structure:''}]};
+  private _currentIntegration : IntegrationObject = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
-  private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
+  private _modularElementsWithParents: ModularElementObject[] = [];
   private _functionsPath: string = '';
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
@@ -207,7 +234,7 @@ export class CreateIntegrationPanel {
     );
   }
 
-  private _getIntegrationObject() : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]} {
+  private _getIntegrationObject() : IntegrationObject {
     return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0] ?? this._emptyIntegrationObject;
   }
 
@@ -276,7 +303,7 @@ export class CreateIntegrationPanel {
       let scenarios : string[] = this._getNewScenarios();
       let scenarioNames:string[] =  this._scenarioCustomFields.filter(el => !isEmpty(el));
 
-      let scenarioObjects :  {name:string, structure:string}[] = new Array< {name:string, structure:string}>(scenarios.length);
+      let scenarioObjects :  ScenarioObject[] = new Array< ScenarioObject>(scenarios.length);
       for (let index=0; index < scenarios.length; index++) {
         scenarioObjects[index] = {
           name: scenarioNames[index],
@@ -350,7 +377,7 @@ export class CreateIntegrationPanel {
       let newScenarios : string[] = this._getNewScenarios();
       let newScenarioNames : string[] =  this._scenarioCustomFields.filter(el => !isEmpty(el));
 
-      let scenarioObjects :  {name:string, structure:string}[] = new Array< {name:string, structure:string}>(newScenarios.length);
+      let scenarioObjects :  ScenarioObject[] = new Array<ScenarioObject>(newScenarios.length);
       for (let index=0; index < newScenarios.length; index++) {
         scenarioObjects[index] = {
           name: newScenarioNames[index],

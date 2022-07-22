@@ -16,6 +16,34 @@ const nofScenariosIndex = 7;
 const carrierCodeIndex = 8;
 const pmcIndex = 9;
 
+// type definitions
+type ScenarioObject = {
+  name: string,
+  structure: string
+};
+
+type IntegrationObject = {
+  path:string, carrier:string, 
+  api:string, module:string, 
+  carriercode:string,
+   modular: boolean, 
+   scenarios:string[], 
+   validscenarios: ScenarioObject[]
+};
+
+type ModularElementObject = {
+  parent:string, 
+  element:string, 
+  multi:boolean
+};
+
+type FileObject = {
+  parent: string,
+  file: string,
+  path: string
+};
+
+
 export class CreatePostmanCollectionPanel {
   // PROPERTIES
   public static currentPanel: CreatePostmanCollectionPanel | undefined;
@@ -29,13 +57,13 @@ export class CreatePostmanCollectionPanel {
   private _modules: string[] = [];
   private _scenarioFieldValues: string[] = [];
   private _availableScenarios: string[] = [];
-  private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[] = [];
+  private _modularElementsWithParents: ModularElementObject[] = [];
   private _independent: boolean = false;
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
-  private _integrationObjects:      {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[] = [];
+  private _integrationObjects: IntegrationObject[] = [];
 
-  private _pmcObjects : {parent:string, file:string, path:string}[] = [];
+  private _pmcObjects : FileObject[] = [];
 
   private _showLoad : boolean = false;
   private _scenarioCustomFields: string[] = [];
@@ -280,7 +308,7 @@ export class CreatePostmanCollectionPanel {
     );
   }
 
-  private _getIntegrationObject() : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios:{name:string, structure:string}[]} {
+  private _getIntegrationObject() : IntegrationObject {
     return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0];
   }
 

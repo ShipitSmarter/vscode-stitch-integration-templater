@@ -2,6 +2,33 @@ import { Uri, Webview, workspace , ExtensionContext, window, Terminal} from "vsc
 import * as path from "path";
 import * as fs from "fs";
 
+// type definitions
+type ScenarioObject = {
+	name: string,
+	structure: string
+};
+  
+type IntegrationObject = {
+	path:string, carrier:string, 
+	api:string, module:string, 
+	carriercode:string,
+	modular: boolean, 
+	scenarios:string[], 
+	validscenarios: ScenarioObject[]
+};
+  
+type ModularElementObject = {
+	parent:string, 
+	element:string, 
+	multi:boolean
+};
+
+type FileObject = {
+	parent: string,
+	file: string,
+	path: string
+};
+
 export function escapeHtml(unsafe:string): string {
 	// from https://stackoverflow.com/a/6234804/1716283
 	return unsafe
@@ -72,9 +99,9 @@ export async function getModularElements(module:string): Promise<string[]> {
     return (await getModularElementsWithParents(module)).map(el => el.element).sort();
 }
 
-export async function getModularElementsWithParents(module:string): Promise<{parent:string, element:string, multi:boolean}[]> {
+export async function getModularElementsWithParents(module:string): Promise<ModularElementObject[]> {
     let elementXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*.xml');
-    let parentsElementsMulti: {parent:string, element:string, multi:boolean}[] = new Array<{parent:string, element:string, multi:boolean}>(elementXmls.length);
+    let parentsElementsMulti: ModularElementObject[] = new Array<ModularElementObject>(elementXmls.length);
 
     for (let index = 0; index < elementXmls.length; index++) {
 	  // element, parent
@@ -101,11 +128,11 @@ export async function getModularElementsWithParents(module:string): Promise<{par
     return parentsElementsMulti.sort();
 }
 
-export async function getPostmanCollectionFiles(): Promise<{parent:string, file:string, path:string}[]> {
+export async function getPostmanCollectionFiles(): Promise<FileObject[]> {
 	let pmcPaths: string[] = (await getWorkspaceFiles('**/postman/**/*.json')).map(el => cleanPath(el));
 
 	// pre-allocate output
-	let pmcObjects : {parent:string, file:string, path:string}[] = new Array<{parent:string, file:string, path:string}>(pmcPaths.length);
+	let pmcObjects : FileObject[] = new Array<FileObject>(pmcPaths.length);
 
 	// build pmcObjects array
 	for (let index = 0; index < pmcPaths.length; index++) {
@@ -120,7 +147,7 @@ export async function getPostmanCollectionFiles(): Promise<{parent:string, file:
 	return pmcObjects;
 }
 
-export function getScenarioAndStructure(path:string) : {name:string, structure:string} {
+export function getScenarioAndStructure(path:string) : ScenarioObject {
 	// name
 	let name = nameFromPath(path);
 
@@ -136,14 +163,14 @@ export function getScenarioAndStructure(path:string) : {name:string, structure:s
 	};
 }
 
-export async function getAvailableIntegrations(panel:string) : Promise<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios:string[], validscenarios: {name:string, structure:string}[]}[]> {
+export async function getAvailableIntegrations(panel:string) : Promise<IntegrationObject[]> {
 	// panel input: 'integration' or 'postman'
 
 	// integration script path array
 	let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
 
 	// pre-allocate output
-	let integrationObjects : {path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios: string[], validscenarios: {name:string, structure:string}[]}[] = new Array<{path:string, carrier:string, api:string, module:string, carriercode:string, modular: boolean, scenarios: string[], validscenarios: {name:string, structure:string}[]}>(integrationScripts.length);
+	let integrationObjects : IntegrationObject[] = new Array<IntegrationObject>(integrationScripts.length);
 
 	// build integration array
 	let newIndex: number = 0;
@@ -179,7 +206,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 		let scenarioDir = fs.readdirSync(scenariosDir);
 		let integrationScenarios = scenarioDir.filter(el => !el.includes('.')).sort();
 
-		let scenarioNameStructures: {name:string, structure:string}[] = new Array<{name:string, structure:string}>(integrationScenarios.length);
+		let scenarioNameStructures: ScenarioObject[] = new Array<ScenarioObject>(integrationScenarios.length);
 		for (let index = 0; index < scenarioNameStructures.length; index++) {
 			scenarioNameStructures[index] = getScenarioAndStructure(scenariosDir + '/' + integrationScenarios[index]);
 		}
@@ -189,7 +216,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<{path:str
 		// filter on valid scenarios
 		let availableScenarios = await getAvailableScenarios(module, false);
 		let modularElements = (await getModularElementsWithParents(module)).map(el => (isEmpty(el.parent) ? '' : (el.parent.replace(/[^_]*_/g,'') + ':')) + el.element);
-		let validScenarios : {name:string, structure:string}[] = scenarioNameStructures.filter(el => isScenarioValid(el.structure, availableScenarios, modularElements));
+		let validScenarios : ScenarioObject[] = scenarioNameStructures.filter(el => isScenarioValid(el.structure, availableScenarios, modularElements));
 
 		// add array element
 		integrationObjects[newIndex] = {
