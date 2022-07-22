@@ -44,7 +44,6 @@ export class ParameterHtmlObject {
     private _extendedHistoryValues: string[],
     private _getResponseValues: ResponseObject[],
     private _previous: boolean,
-    private _showLoad: boolean,
     private _processingSet: boolean,
     private _processingGet: boolean,
     private _environmentOptions: string[],
@@ -211,11 +210,11 @@ export class ParameterHtmlObject {
 
   private _getLoadItems(): string {
     let filesDropdown: string = /*html*/ `
-      <vscode-dropdown id="files" class="files" position="below" ${hiddenString(this._showLoad)}>
+      <vscode-dropdown id="files" class="files" position="below">
         ${dropdownOptions(this._getFileLoadOptions())}
       </vscode-dropdown>`;
 
-    let filesField: string = /*html*/ `<vscode-text-field id="files" class="field" index="${filesIndex}" ${valueString(this._fieldValues[filesIndex])} ${hiddenString(this._showLoad)}></vscode-text-field>`;
+    let filesField: string = /*html*/ `<vscode-text-field id="files" class="field" index="${filesIndex}" ${valueString(this._fieldValues[filesIndex])}></vscode-text-field>`;
     
     let html: string = /*html*/ `
 
@@ -223,7 +222,7 @@ export class ParameterHtmlObject {
       <vscode-divider role="separator"></vscode-divider>
 
       <section class="component-example">
-        <vscode-checkbox id="showload" class="showload" ${checkedString(this._showLoad)}>Load from file</vscode-checkbox>
+        <p>Load from file<p>
       </section>
 
       <section class="component-example">
@@ -231,7 +230,7 @@ export class ParameterHtmlObject {
           ${filesField}
         </div>
         <div class="floatleft">
-          ${this._getButton('load','Load','codicon-arrow-up','primary',hiddenString(this._showLoad))}
+          ${this._getButton('load','Load','codicon-arrow-up')}
         </div>
       </section>
 

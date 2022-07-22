@@ -16,10 +16,6 @@ function main() {
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
 
-  // load file checkbox
-  document.getElementById("showload").addEventListener("change", fieldChange);
-
-
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown");
   for (const field of dropdowns) {
@@ -84,15 +80,6 @@ function fieldChange(event) {
     case 'previous':
       updateHighlightSet();
       updateCurrentValuesHighlight();
-      break;
-    case 'showload':
-      if (field.checked) {
-        document.getElementById("files").hidden = false;
-        document.getElementById("load").hidden = false;
-      } else {
-        document.getElementById("files").hidden = true;
-        document.getElementById("load").hidden = true;
-      }
       break;
     case 'environment':
       showProd();
