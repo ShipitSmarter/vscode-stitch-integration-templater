@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.6.3
+- Get/set Parameters
+  - Show company name on hover-over
+  - Clears previous get/set responses on load, set actions
+  - Updates environment if present in loaded CSV file name
+  - Checks and shows if company/customer/parameter combination is duplicate
+  - Shows change reason and timestamp in get response
+  - Shows last 5 changes on timestamp hover-over
+
 ## 1.6.2
 - Get/set Parameters
   - Added 'save current input' button

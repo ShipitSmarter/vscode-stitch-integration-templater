@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -36,6 +36,11 @@ type ResponseObject = {
   message:string;
 };
 
+type CodeCompanyObject = {
+  company: string;
+  codecompany: string;
+};
+
 export class ParameterPanel {
   // PROPERTIES
   public static currentPanel: ParameterPanel | undefined;
@@ -50,6 +55,9 @@ export class ParameterPanel {
   private _setResponseValues: ResponseObject[] = [];
   private _changeReasonValues: string[] = [];
   private _currentValues: string[] = [];
+  private _currentChangeReasonValues: string[] = [];
+  private _currentTimestampValues: string[] = [];
+  private _extendedHistoryValues: string[] = [];
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
   private _showLoad: boolean = false;
@@ -59,7 +67,7 @@ export class ParameterPanel {
   private _delimiter: string = ';';
   private _urls: UrlObject[] = [];
   private _environmentOptions: string[] = [];
-  // private _parameterObjects: ParameterObject[] = [];
+  private _codeCompanies: CodeCompanyObject[] = [];
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -135,7 +143,18 @@ export class ParameterPanel {
             break;
 
           case 'getparameters':
+            // clear previous responses and update webview
+            this._currentValues= [];
+            this._currentChangeReasonValues = [];
+            this._currentTimestampValues = [];
+            this._extendedHistoryValues = [];
+            this._getResponseValues = [];
+            this._processingGet = true;
+            this._updateWebview(extensionUri);
+
+            // retrieve 
             this._getCurrentValues().then(() => {
+              this._processingGet = false;
               // update panel
               this._updateWebview(extensionUri);
             });
@@ -167,6 +186,14 @@ export class ParameterPanel {
 
           case 'loadfile':
             this._loadFile(text);
+
+            // clear previous responses and update webview
+            this._currentValues= [];
+            this._currentChangeReasonValues = [];
+            this._currentTimestampValues = [];
+            this._extendedHistoryValues = [];
+            this._setResponseValues = [];
+            this._getResponseValues = [];
             this._updateWebview(extensionUri);
             break;
 
@@ -283,6 +310,9 @@ export class ParameterPanel {
 
     // clear previous responses and update webview
     this._currentValues= [];
+    this._currentChangeReasonValues = [];
+    this._currentTimestampValues = [];
+    this._extendedHistoryValues = [];
     this._setResponseValues = [];
     this._getResponseValues = [];
     this._processingSet = true;
@@ -348,23 +378,36 @@ export class ParameterPanel {
   };
 
   private async _getCurrentValues() {
-    const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
-    let url: string = this._getUrl(urls);
+    // get base url
+    // const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
+    const urls: UrlObject = this._urls.filter(el => el.type === 'getparameterhistory')[0];
+    let baseurl: string = this._getUrl(urls);
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      let response: ResponseObject = await this._getParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index]);
-      this._currentValues[index] = response.value;
+      // let url: string = `${baseurl}/${this._parameterNameValues[index]}/${this._codeCustomerValues[index]}`;
+      let url: string = `${baseurl}/${this._codeCustomerValues[index]}/${this._parameterNameValues[index]}/1`;
+      let response: ResponseObject = await this._getApiCall(url,this._managerAuth,this._codeCompanyValues[index]);
+      let responseJson = JSON.parse(response.value);      
+      this._currentValues[index] = responseJson[0].paramValue;
+      this._currentChangeReasonValues[index] = responseJson[0].changeReason;
+      this._currentTimestampValues[index] = responseJson[0].dateTimeAction.substring(0,19);
       this._getResponseValues[index] = response;
+
+      // fill extended history
+      this._extendedHistoryValues[index] = '';
+      for (let row=0; row < (Math.min(5,responseJson.length)); row++) {
+        this._extendedHistoryValues[index] += `${row} | ${responseJson[row].dateTimeAction.substring(0,19)} | ${responseJson[row].changeReason} | ${responseJson[row].paramValue}\r\n`;
+      }
     }    
   }
 
-  private async _getParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, handlingAgent:string): Promise<ResponseObject> {
+  private async _getApiCall(url:string, authorization:string, codeCompany:string): Promise<ResponseObject> {
     let result: ResponseObject;
     try {
       const response = await axios({
         method: "GET",
-        url: `${baseurl}/${parameterName}/${handlingAgent}`,
+        url: url,
         responseType: 'arraybuffer',
         responseEncoding: "binary",
         headers: {
@@ -392,6 +435,25 @@ export class ParameterPanel {
     return result;
   };
 
+  private async _getCompanies() {
+    // get companies and codecompanies from translation file
+    let translationPath = await getWorkspaceFile('**/templater/parameters/CompanyToCodeCompany.csv');
+    let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
+
+    this._codeCompanies = new Array<CodeCompanyObject>(translations.length);
+
+    for (let index = 0; index < translations.length; index++) {
+      this._codeCompanies[index] = {
+        company: translations[index].split(',')[0],
+        codecompany: translations[index].split(',')[1]
+      };
+    }
+
+    // sort
+    this._codeCompanies = this._codeCompanies.sort((a, b) => (a.company > b.company) ? 1 : -1);
+
+  }
+
   private _cropLines(lines:number) {
     // crop line arrays
     this._codeCompanyValues = this._codeCompanyValues.slice(0, lines);
@@ -401,6 +463,9 @@ export class ParameterPanel {
     this._newValues = this._newValues.slice(0, lines);
     this._changeReasonValues = this._changeReasonValues.slice(0, lines);
     this._currentValues = this._currentValues.slice(0, lines);
+    this._currentChangeReasonValues = this._currentChangeReasonValues.slice(0,lines);
+    this._currentTimestampValues = this._currentTimestampValues.slice(0,lines);
+    this._extendedHistoryValues = this._extendedHistoryValues.slice(0,lines);
   }
 
   private _preParse(input:string):string {
@@ -469,6 +534,15 @@ export class ParameterPanel {
       this._newValues[index] = this._postParse(line[4]);
       this._changeReasonValues[index] = this._postParse(line[5]);
     }
+
+    // set environment if present in file name
+    const fileName:string = nameFromPath(filePath);
+    for (const env of this._environmentOptions) {
+      if (fileName.includes(env)) {
+        this._fieldValues[environmentIndex] = env;
+        break;
+      }
+    }
   }
 
   private _writeFile(filePath:string) {
@@ -504,6 +578,7 @@ export class ParameterPanel {
     // retrieve urls
     this._urls[0] = await this._getUrlObject('**/templater/parameters/parameter_get.json','getparameters');
     this._urls[1] = await this._getUrlObject('**/templater/parameters/parameter_set.json','setparameters');
+    this._urls[2] = await this._getUrlObject('**/templater/parameters/parameter_get_history.json','getparameterhistory');
   }
 
   private async _getUrlObject(glob:string, type:string) : Promise<UrlObject> {
@@ -523,6 +598,7 @@ export class ParameterPanel {
     await this._getAPIDetails();
     await this._getEnvironmentOptions();
     this._fieldValues[environmentIndex] = this._environmentOptions[0];
+    await this._getCompanies();
   }
 
   private _environment(): string {
@@ -552,12 +628,16 @@ export class ParameterPanel {
       this._changeReasonValues,
       this._setResponseValues,
       this._currentValues,
+      this._currentChangeReasonValues,
+      this._currentTimestampValues,
+      this._extendedHistoryValues,
       this._getResponseValues,
       this._previous,
       this._showLoad,
       this._processingSet,
       this._processingGet,
-      this._environmentOptions
+      this._environmentOptions,
+      this._codeCompanies
     );
 
     let html =  parameterHtmlObject.getHtml();

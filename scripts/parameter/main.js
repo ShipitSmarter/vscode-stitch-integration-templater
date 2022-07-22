@@ -33,7 +33,7 @@ function main() {
   }
 
   // update hover-overs on load
-  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield");
+  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield,.currentchangereasonfield");
   for (const field of allFields) {
     field.title = field.value;
   }
@@ -62,7 +62,20 @@ function fieldChange(event) {
   field.title = field.value;
 
   // update field outline and tooltip
-  if (['save','codecompanyfield','codecustomerfield','parameternamefield','changereasonfield'].includes(fieldType)){
+  if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType)) {
+    // codecompany, codecustomeror parametername: check all three in all rows
+    const rowFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield");
+    for (const rowField of rowFields) {
+      updateFieldOutlineAndTooltip(rowField.id);
+    }
+   
+    if (checkIfDuplicate(+row)) {
+      checkFields();
+    } else {
+      updateFieldOutlineAndTooltip(field.id);
+    }
+
+  } else  if (['save','changereasonfield'].includes(fieldType)) {
     updateFieldOutlineAndTooltip(field.id);
   }
 
@@ -90,9 +103,45 @@ function fieldChange(event) {
       for (const cr of changeReasons) {
         cr.value = field.value;
         saveValue(cr.id);
+        updateFieldOutlineAndTooltip(cr.id);
       }
+
       break;
   }
+}
+
+function checkIfDuplicate(row) {
+  let isDuplicate = false;
+
+  let nofLines = +document.getElementById('noflines').value;
+  let cocos = document.querySelectorAll(".codecompanyfield");
+  let cocus = document.querySelectorAll(".codecustomerfield");
+  let pnames = document.querySelectorAll(".parameternamefield");
+
+  for (let index = 0; index < nofLines; index++) {
+    if ((index !== row) && (!isEmpty(cocos[index].value)) && (!isEmpty(cocus[index].value)) && (!isEmpty(pnames[index].value))) {
+
+      if ((cocos[index].value === cocos[row].value) && (cocus[index].value === cocus[row].value) && (pnames[index].value === pnames[row].value)) {
+        isDuplicate = true;
+        break;
+      }
+    }
+  }
+
+  return isDuplicate;
+}
+
+function getCompanyName(codeCompany) {
+  let companyName = '';
+  if (!isEmpty(codeCompany)) {
+    try {
+      companyName = document.getElementById(codeCompany).value;
+    } catch (err) {
+      companyName = '';
+    }
+  }
+
+  return companyName;
 }
 
 function showProd() {
@@ -211,7 +260,7 @@ function updateFieldOutlineAndTooltip(fieldId) {
   let className = field.classList[0];
   var fieldType = (className === 'field') ? field.id : className;
 
-  // check any non-scenario input field
+  // check input field
   let check = '';
   if (['save','codecompanyfield','codecustomerfield','changereasonfield','parameternamefield'].includes(fieldType) && isEmpty(field.value)) {
     check = 'empty';
@@ -230,8 +279,10 @@ function updateFieldOutlineAndTooltip(fieldId) {
   // update and return output
   if (check === 'empty') {
     updateEmpty(field.id);
-  }else if (check !== '' && check !== null) {
+  } else if (check !== '' && check !== null) {
     updateWrong(field.id, getContentHint(fieldType));
+  } else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
+    updateWrong(field.id, 'Company/customer/parameter combination is duplicate');
   } else {
     updateRight(field.id);
     isCorrect= true;
@@ -278,7 +329,7 @@ function updateEmpty(fieldId) {
   field.title = 'Field is mandatory';
 }
 
-export function updateRight(fieldId) {
+function updateRight(fieldId) {
     let field = document.getElementById(fieldId);
     field.style.outline = "none";
 
@@ -286,6 +337,8 @@ export function updateRight(fieldId) {
     var fieldType = (className === 'field') ? field.id : className;
     if (['save','parameternamefield','changereasonfield'].includes(fieldType)) {
       field.title = field.value;
+    } else if (fieldType === 'codecompanyfield') {
+      field.title = getCompanyName(field.value);
     } else {
       field.title = '';
     }

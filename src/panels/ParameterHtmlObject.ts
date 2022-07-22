@@ -18,6 +18,11 @@ type ResponseObject = {
   message:string;
 };
 
+type CodeCompanyObject = {
+  company: string;
+  codecompany: string;
+};
+
 export class ParameterHtmlObject {
   // PROPERTIES
   public static currentHtmlObject: ParameterHtmlObject | undefined;
@@ -34,12 +39,16 @@ export class ParameterHtmlObject {
     private _changeReasonValues: string[],
     private _setResponseValues: ResponseObject[],
     private _currentValues: string[],
+    private _currentChangeReasonValues: string[],
+    private _currentTimestampValues: string[],
+    private _extendedHistoryValues: string[],
     private _getResponseValues: ResponseObject[],
     private _previous: boolean,
     private _showLoad: boolean,
     private _processingSet: boolean,
     private _processingGet: boolean,
-    private _environmentOptions: string[]
+    private _environmentOptions: string[],
+    private _codeCompanies: CodeCompanyObject[]
   ) { }
 
   // METHODS
@@ -70,9 +79,13 @@ export class ParameterHtmlObject {
             
           </section>
           <section id="farright">
-            
+
           </section>
 				</div>
+
+        <section id="hidden">
+            ${this._codeCompanyFields()}
+        </section>
 
         ${this._getLoadItems()}
         
@@ -81,9 +94,9 @@ export class ParameterHtmlObject {
                ${this._getDetailsGrid()}
           </section>
 
-          <section class="component-header">
+          <section class="component-example">
             <div class="floatleftlesspadding">
-              ${this._getButton('getparameters','Get Parameters','codicon-refresh')}
+              ${this._getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
             </div>
             <div class="floatleftnopadding">
               <vscode-progress-ring id="processingget" ${hiddenString(this._processingGet)}></vscode-progress-ring>
@@ -118,15 +131,28 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  private _getButton(id:string, title:string, codicon:string): string {
+  private _getButton(id:string, title:string, codicon:string,appearance:string = 'primary',hidden:string = ''): string {
     let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
     let button: string = /*html*/ `
-      <vscode-button id="${id}" appearance="primary" >
+      <vscode-button id="${id}" appearance="${appearance}" ${hidden}>
         ${title}
         ${codiconString}
       </vscode-button>
       `;
     return button;
+  }
+
+  private _codeCompanyFields(): string {
+    let html: string = '';
+
+    for (let index = 0; index < this._codeCompanies.length; index++) {
+      let cc: CodeCompanyObject = this._codeCompanies[index];
+      html += /*html*/ `
+        <vscode-text-field id="${cc.codecompany}" class="codecompanylookupfield" value="${cc.company}" hidden></vscode-text-field>
+      `;
+    }
+
+    return html;
   }
 
   private _getDetailsGrid(): string {
@@ -169,7 +195,7 @@ export class ParameterHtmlObject {
           <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
         </div>
         <div class="floatleft">
-          ${this._getButton('savetofile','Save current input to file','codicon-arrow-right')}
+          ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary')}
         </div>
 
         <div class="floatleftmuchpadding">
@@ -206,10 +232,7 @@ export class ParameterHtmlObject {
           ${filesField}
         </div>
         <div class="floatleft">
-          <vscode-button id="load" appearance="primary" ${hiddenString(this._showLoad)}>
-            Load
-            <span slot="start" class="codicon codicon-arrow-up"></span>
-          </vscode-button>
+          ${this._getButton('load','Load','codicon-arrow-up','primary',hiddenString(this._showLoad))}
         </div>
       </section>
 
@@ -250,6 +273,8 @@ export class ParameterHtmlObject {
 
   private _getCurrentValues(): string {
     let currentValues: string = ``;
+    let currentChangeReasons: string = '';
+    let currentTimestamps: string = '';
     let getResponseValues: string = '';
 
     for (let index = 0; index < +this._fieldValues[noflinesIndex]; index++) {
@@ -257,6 +282,18 @@ export class ParameterHtmlObject {
       currentValues += /*html*/`
         <section class="component-minvmargin">
           <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${this._currentValues[index] ?? ''}" readonly></vscode-text-field>
+        </section>
+      `;
+
+      currentChangeReasons += /*html*/`
+        <section class="component-minvmargin">
+          <vscode-text-field id="currentchangereason${index}" class="currentchangereasonfield" value="${this._currentChangeReasonValues[index] ?? ''}" readonly></vscode-text-field>
+        </section>
+      `;
+
+      currentTimestamps += /*html*/`
+        <section class="component-minvmargin">
+          <vscode-text-field id="currenttimestamp${index}" class="currenttimestampfield" value="${this._currentTimestampValues[index] ?? ''}" title="${this._extendedHistoryValues[index] ?? ''}" readonly></vscode-text-field>
         </section>
       `;
 
@@ -276,8 +313,18 @@ export class ParameterHtmlObject {
     let html: string = /*html*/ `
       <section class="component-example">
         <section class="floatleftnopadding">
-          <p>Current Value</p>
+          <p>Current value</p>
           ${currentValues}
+        </section>
+
+        <section class="floatleftnopadding">
+          <p>Change reason</p>
+          ${currentChangeReasons}
+        </section>
+
+        <section class="floatleftnopadding">
+          <p>Timestamp</p>
+          ${currentTimestamps}
         </section>
 
         <section class="floatleft">
