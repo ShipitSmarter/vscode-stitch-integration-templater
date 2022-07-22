@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.6.4
+- Get/set Parameters
+  - Fix: Unable to get/set parameters if not set for given company/customer combination
+    - 'Get' now first calls parameter service; if exists, retrieves history
+  - Always show file load field and button
+
+
 ## 1.6.3
 - Get/set Parameters
   - Show company name on hover-over
