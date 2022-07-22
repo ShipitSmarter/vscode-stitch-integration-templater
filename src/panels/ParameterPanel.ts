@@ -275,7 +275,9 @@ export class ParameterPanel {
     return updatePath;
   }
 
-  private _getUrl(urls:UrlObject) : string {
+  private _getUrl(type:string) : string {
+    const urls: UrlObject = this._urls.filter(el => el.type === type)[0];
+
     let url: string = '';
     switch (this._environment()) {
       case 'ACC':
@@ -292,8 +294,7 @@ export class ParameterPanel {
   private async _setParametersButton(extensionUri: vscode.Uri) {
 
     // get url
-    const urls: UrlObject = this._urls.filter(el => el.type === 'setparameters')[0];
-    let url: string = this._getUrl(urls);
+    let url: string = this._getUrl('setparameters');
 
     // refresh current values
     await this._getCurrentValues();
@@ -378,27 +379,40 @@ export class ParameterPanel {
   };
 
   private async _getCurrentValues() {
-    // get base url
-    // const urls: UrlObject = this._urls.filter(el => el.type === 'getparameters')[0];
-    const urls: UrlObject = this._urls.filter(el => el.type === 'getparameterhistory')[0];
-    let baseurl: string = this._getUrl(urls);
+    // get base urls
+    let baseUrlGetParameter: string = this._getUrl('getparameters');
+    let baseUrlGetHistory: string = this._getUrl('getparameterhistory');
     
     // get param values
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      // let url: string = `${baseurl}/${this._parameterNameValues[index]}/${this._codeCustomerValues[index]}`;
-      let url: string = `${baseurl}/${this._codeCustomerValues[index]}/${this._parameterNameValues[index]}/1`;
-      let response: ResponseObject = await this._getApiCall(url,this._managerAuth,this._codeCompanyValues[index]);
-      let responseJson = JSON.parse(response.value);      
-      this._currentValues[index] = responseJson[0].paramValue;
-      this._currentChangeReasonValues[index] = responseJson[0].changeReason;
-      this._currentTimestampValues[index] = responseJson[0].dateTimeAction.substring(0,19);
-      this._getResponseValues[index] = response;
+      // construct urls
+      let urlGetParameter: string = `${baseUrlGetParameter}/${this._parameterNameValues[index]}/${this._codeCustomerValues[index]}`;
+      let urlGetHistory: string = `${baseUrlGetHistory}/${this._codeCustomerValues[index]}/${this._parameterNameValues[index]}/1`;
 
-      // fill extended history
-      this._extendedHistoryValues[index] = '';
-      for (let row=0; row < (Math.min(5,responseJson.length)); row++) {
-        this._extendedHistoryValues[index] += `${row} | ${responseJson[row].dateTimeAction.substring(0,19)} | ${responseJson[row].changeReason} | ${responseJson[row].paramValue}\r\n`;
+      // step 1: parameter service call
+      let parameterResponse: ResponseObject = await this._getApiCall(urlGetParameter,this._managerAuth,this._codeCompanyValues[index]);
+
+      // step 2: if not exists: '', else execute history call
+      if (parameterResponse.status === 404) {
+        this._currentValues[index] = parameterResponse.value;
+        this._getResponseValues[index] = parameterResponse;
+      } else {
+        let historyResponse: ResponseObject = await this._getApiCall(urlGetHistory,this._managerAuth,this._codeCompanyValues[index]);
+        let responseJson = JSON.parse(historyResponse.value);      
+        this._currentValues[index] = responseJson[0].paramValue;
+        this._currentChangeReasonValues[index] = responseJson[0].changeReason;
+        this._currentTimestampValues[index] = responseJson[0].dateTimeAction.substring(0,19);
+        this._getResponseValues[index] = historyResponse;
+
+        // fill extended history
+        this._extendedHistoryValues[index] = '';
+        for (let row=0; row < (Math.min(5,responseJson.length)); row++) {
+          this._extendedHistoryValues[index] += `${row} | ${responseJson[row].dateTimeAction.substring(0,19)} | ${responseJson[row].changeReason} | ${responseJson[row].paramValue}\r\n`;
+        }
       }
+      
+
+      
     }    
   }
 
