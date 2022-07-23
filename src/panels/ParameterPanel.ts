@@ -67,6 +67,7 @@ export class ParameterPanel {
   private _urls: UrlObject[] = [];
   private _environmentOptions: string[] = [];
   private _codeCompanies: CodeCompanyObject[] = [];
+  private _settingsGlob: string = "**/templater/parameters/";
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -446,7 +447,7 @@ export class ParameterPanel {
 
   private async _getCompanies() {
     // get companies and codecompanies from translation file
-    let translationPath = await getWorkspaceFile('**/templater/parameters/CompanyToCodeCompany.csv');
+    let translationPath = await getWorkspaceFile(this._settingsGlob + 'CompanyToCodeCompany.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
     this._codeCompanies = new Array<CodeCompanyObject>(translations.length);
@@ -580,14 +581,15 @@ export class ParameterPanel {
     this._urls = [];
 
     // get stuff
-    let fileContent = await getFileContentFromGlob('**/templater/parameters/stuff.json');
+    let fileContent = await getFileContentFromGlob(this._settingsGlob + 'stuff.json');
     let stuffDetails = JSON.parse(fileContent);
     this._managerAuth = stuffDetails.Stuff;
 
     // retrieve urls
-    this._urls[0] = await this._getUrlObject('**/templater/parameters/parameter_get.json','getparameters');
-    this._urls[1] = await this._getUrlObject('**/templater/parameters/parameter_set.json','setparameters');
-    this._urls[2] = await this._getUrlObject('**/templater/parameters/parameter_get_history.json','getparameterhistory');
+    this._urls[0] = await this._getUrlObject(this._settingsGlob + 'parameter_get.json','getparameters');
+    this._urls[1] = await this._getUrlObject(this._settingsGlob + 'parameter_set.json','setparameters');
+    this._urls[2] = await this._getUrlObject(this._settingsGlob + 'parameter_get_history.json','getparameterhistory');
+    this._urls[3] = await this._getUrlObject(this._settingsGlob + 'parameter_get_parameter_codes.json','getparametercodes');
   }
 
   private async _getUrlObject(glob:string, type:string) : Promise<UrlObject> {
@@ -598,7 +600,7 @@ export class ParameterPanel {
 
   private async _getEnvironmentOptions() {
     // get module dropdown options from txt file
-    let fileContent: string = await getFileContentFromGlob('**/templater/parameters/EnvironmentOptions.txt');
+    let fileContent: string = await getFileContentFromGlob(this._settingsGlob + 'EnvironmentOptions.txt');
     this._environmentOptions = fileContent.split("\n").map(el => el.trim());
   }
 
