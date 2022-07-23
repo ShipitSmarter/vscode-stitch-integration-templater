@@ -34,6 +34,14 @@ function main() {
     field.title = field.value;
   }
 
+  // on parameternamefield focus: show search button
+  const pnamefields = document.querySelectorAll(".parameternamefield");
+  for (const field of pnamefields) {
+    field.addEventListener('focus',parameterNameFocus);
+    field.addEventListener('focusout',parameterNameFocusOut);
+  }
+
+
   // actions on panel load
   updateHighlightSet();
   updateCurrentValuesHighlight();
@@ -95,6 +103,26 @@ function fieldChange(event) {
 
       break;
   }
+}
+
+function parameterNameFocus(event) {
+  const field = event.target;
+  const index = field.getAttribute("index");
+  const searchButton = document.getElementById("parametersearch" + index);
+
+  // show search button and adjust field width
+  searchButton.hidden = false;
+  field.style.width = "11rem";
+}
+
+function parameterNameFocusOut(event) {
+  const field = event.target;
+  const index = field.getAttribute("index");
+  const searchButton = document.getElementById("parametersearch" + index);
+
+  // hide search button and reset field width
+  searchButton.hidden = true;
+  field.style.width = "15rem";
 }
 
 function checkIfDuplicate(row) {

@@ -129,7 +129,7 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  private _getButton(id:string, title:string, codicon:string,appearance:string = 'primary',hidden:string = ''): string {
+  private _getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = ''): string {
     let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
     let button: string = /*html*/ `
       <vscode-button id="${id}" appearance="${appearance}" ${hidden}>
@@ -364,7 +364,12 @@ export class ParameterHtmlObject {
       // parameter name
       parameterNames += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name"></vscode-text-field>
+          <div class="floatpname">
+            <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name"></vscode-text-field>
+          </div>
+          <div class="floatpsearch">
+            ${this._getButton('parametersearch' + row,'Search','','secondary','hidden')}
+          </div>
         </section>
       `;
 

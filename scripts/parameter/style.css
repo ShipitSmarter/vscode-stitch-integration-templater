@@ -1,5 +1,13 @@
 @import url("../general/general.css");
 
+.component-pname {
+  /* display:block; */
+  /* white-space: nowrap; */
+  /* width: 17rem; */
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
 .parameternamefield,
 .previousvaluefield,
 .newvaluefield {
@@ -48,3 +56,14 @@
   float: left;
   padding-left: 14rem;
 }
+
+.floatpsearch {
+  float: left;
+  padding-left: 0.5rem;
+}
+
+.floatpname {
+  float: left;
+  margin-bottom: 0.5rem;
+}
+
