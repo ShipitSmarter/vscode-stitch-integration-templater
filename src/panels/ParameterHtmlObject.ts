@@ -85,7 +85,7 @@ export class ParameterHtmlObject {
 
         <section id="hidden">
             ${this._codeCompanyFields()}
-            <vscode-text-field id="focusline" value="${this._focusLine > 0 ? this._focusLine+'' : ''}"></vscode-text-field>
+            <vscode-text-field id="focusline" value="${this._focusLine > 0 ? this._focusLine+'' : ''}" hidden></vscode-text-field>
         </section>
 
         ${this._getLoadItems()}
@@ -97,7 +97,7 @@ export class ParameterHtmlObject {
 
           <section class="component-example">
             <div class="floatleftlesspadding">
-              ${this._getButton('getparameters','Get Parameters','codicon-refresh','secondary','',9)}
+              ${this._getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
             </div>
             <div class="floatleftnopadding">
               <vscode-progress-ring id="processingget" ${hiddenString(this._processingGet)}></vscode-progress-ring>
@@ -130,11 +130,10 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  private _getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = '',tabindex:number=-2): string {
+  private _getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = ''): string {
     let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
-    let tabindexString:string = tabindex < -1 ? '' : `tabindex="${tabindex.toString()}"` ;
     let button: string = /*html*/ `
-      <vscode-button id="${id}" appearance="${appearance}" ${tabindexString} ${hidden}>
+      <vscode-button id="${id}" appearance="${appearance}" ${hidden}>
         ${title}
         ${codiconString}
       </vscode-button>
@@ -163,7 +162,7 @@ export class ParameterHtmlObject {
           Environment:
         </div>
         <div class="floatleft">
-          <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" tabindex="2" ${backgroundColorString(this._fieldValues[environmentIndex] === 'PROD' ? 'red' : '')} ${valueString(this._fieldValues[environmentIndex])} position="below">
+          <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${backgroundColorString(this._fieldValues[environmentIndex] === 'PROD' ? 'red' : '')} ${valueString(this._fieldValues[environmentIndex])} position="below">
               ${dropdownOptions(this._environmentOptions)}
           </vscode-dropdown>
         </div>
@@ -171,15 +170,15 @@ export class ParameterHtmlObject {
           nofLines:
         </div>
         <div class="floatleft">
-          <vscode-dropdown id="noflines" class="dropdown" index="${noflinesIndex}" tabindex="3" ${valueString(this._fieldValues[noflinesIndex])} position="below">
+          <vscode-dropdown id="noflines" class="dropdown" index="${noflinesIndex}" ${valueString(this._fieldValues[noflinesIndex])} position="below">
             ${dropdownOptions(arrayFrom1(100))}
           </vscode-dropdown>
         </div>
         <div class="floatleft">
-          <vscode-checkbox id="previous" class="previous"tabindex="4"  ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
+          <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
         </div>
         <div class="floatleftlesspadding">
-          ${this._getButton('setparameters','Set Parameters','codicon-arrow-right','primary','',5)}
+          ${this._getButton('setparameters','Set Parameters','codicon-arrow-right')}
         </div>
         <div class="floatleftnopadding">
           <vscode-progress-ring id="processingset" ${hiddenString(this._processingSet)}></vscode-progress-ring>
@@ -192,17 +191,17 @@ export class ParameterHtmlObject {
           Save file to folder:
         </div>
         <div class="floatleft">
-          <vscode-text-field id="save" class="field" index="${saveIndex}" tabindex="6" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
+          <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
         </div>
         <div class="floatleft">
-          ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary','',7)}
+          ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary')}
         </div>
 
         <div class="floatleftmuchpadding">
           Set all change reasons:
         </div>
         <div class="floatleftnopadding">
-          <vscode-text-field id="allchangereasons" class="field" index="${allChangeReasonsIndex}" tabindex="8" ${valueString(this._fieldValues[allChangeReasonsIndex])}></vscode-text-field>
+          <vscode-text-field id="allchangereasons" class="field" index="${allChangeReasonsIndex}" ${valueString(this._fieldValues[allChangeReasonsIndex])}></vscode-text-field>
         </div>
       </section>
       `;
@@ -216,7 +215,7 @@ export class ParameterHtmlObject {
         ${dropdownOptions(this._getFileLoadOptions())}
       </vscode-dropdown>`;
 
-    let filesField: string = /*html*/ `<vscode-text-field id="files" class="field" index="${filesIndex}" tabindex="0" ${valueString(this._fieldValues[filesIndex])}></vscode-text-field>`;
+    let filesField: string = /*html*/ `<vscode-text-field id="files" class="field" index="${filesIndex}" ${valueString(this._fieldValues[filesIndex])}></vscode-text-field>`;
     
     let html: string = /*html*/ `
 
@@ -232,7 +231,7 @@ export class ParameterHtmlObject {
           ${filesField}
         </div>
         <div class="floatleft">
-          ${this._getButton('load','Load','codicon-arrow-up',"primary",'',1)}
+          ${this._getButton('load','Load','codicon-arrow-up')}
         </div>
       </section>
 
