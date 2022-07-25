@@ -126,11 +126,6 @@ function parameterOptionsStyleAndFocus(fieldId) {
   const field = document.getElementById(fieldId);
 
   // update field style
-  field.style.height = "1.6rem";
-  field.style.lineHeight = "1.6rem";
-  field.style.fontSize = "0.8rem";
-  field.style.fontWeight = "normal";
-  field.style.borderWidth = "0px";
   field.style.fontFamily = document.body.style.fontFamily;
 
   // update text and background color based on theme
