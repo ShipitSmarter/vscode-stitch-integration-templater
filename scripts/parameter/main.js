@@ -34,14 +34,42 @@ function main() {
     field.title = field.value;
   }
 
+  // show parameter search options
+  const paramFields = document.querySelectorAll(".parameternamefield");
+  for (const field of paramFields) {
+    field.addEventListener("keydown",parameterOptionsShow);
+  }
+
   // parameter search options select
   const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
   for (const field of parameterOptionsFields) {
     field.addEventListener("keydown", parameterOptionsSelect);
 
-      // focus on parameter search if unhidden
+      // if parameter search visible: focus and show options
       if (field.hidden === false) {
         field.focus();
+
+        // from https://stackoverflow.com/a/18937620/1716283
+        // const ke = new KeyboardEvent('keydown', {
+        //     bubbles: true, cancelable: true, keyCode: 13
+        // });
+        // field.dispatchEvent(ke);
+
+        field.style.height = "1.6rem";
+        field.style.lineHeight = "1.6rem";
+        field.style.fontSize = "0.75rem";
+        field.style.fontWeight = "normal";
+
+        // update text and background color based on theme
+        if (document.body.classList.contains('vscode-dark')) {
+          field.style.background = '#454545';
+          field.style.color = '#CCCCCC';
+        } else if (document.body.classList.contains('vscode-high-contrast')) {
+          field.style.background = '#000000';
+          field.style.color = '#FFFFFF';
+        }
+
+        field.dispatchEvent(new Event('click'));
       }
   }
 
@@ -68,12 +96,8 @@ function fieldChange(event) {
   // update hover-over on change
   field.title = field.value;
 
-  // parameter search on enter
-  if (fieldType === 'parameternamefield' && event.key === 'Enter') {
-    parameterSearch(field.id);
-  }
   // update field outline and tooltip
-  else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType)) {
+  if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType)) {
     // codecompany, codecustomeror parametername: check all three in all rows
     const rowFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield");
     for (const rowField of rowFields) {
@@ -112,6 +136,14 @@ function fieldChange(event) {
   }
 }
 
+function parameterOptionsShow(event) {
+  const field = event.target;
+  // parameter search on enter
+  if (event.key === 'Enter') {
+    parameterSearch(field.id);
+  }
+}
+
 function parameterOptionsSelect(event) {
   if (event.key === 'Enter' && event.ctrlKey) {
     const field = event.target;
@@ -126,6 +158,12 @@ function parameterOptionsSelect(event) {
     // hide/unhide
     parameterField.hidden = false;
     field.hidden = true;
+
+    // focus and add cursor
+    const eol = parameterField.value.length;
+    parameterField.focus();
+    parameterField.setSelectionRange(eol, eol);
+    
   }
 }
 
