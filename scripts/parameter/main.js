@@ -91,6 +91,8 @@ function main() {
   processingSet();
   processingGet();
 
+  // set focus if line number present
+  focusNewLine();
 }
 
 function fieldChange(event) {
@@ -162,6 +164,25 @@ function parameterOptionsShow(event) {
   }
 }
 
+function focusNewLine() {
+  let focusLine = document.getElementById("focusline").value;
+
+  if(focusLine.length > 0){
+    const focusCompany = document.getElementById("codecompany"+focusLine);
+    const focusCustomer = document.getElementById("codecustomer" + focusLine);
+    const focusParameter = document.getElementById("parametername"+focusLine);
+    focusParameter.focus();
+
+    if (isEmpty(focusCompany.value)) {
+      focusCompany.focus();
+    } else if (isEmpty(focusCustomer.value)) {
+      focusCustomer.focus();
+    } else {
+      focusParameter.focus();
+    }
+  }
+}
+
 function addNewLine(event) {
   const field = event.target;
   if (event.key === 'Enter' && event.ctrlKey) {
@@ -200,9 +221,9 @@ function focusAndCursor(fieldId) {
   const field = document.getElementById(fieldId);
 
   // focus and place cursor at end of content
-  const eol = field.value.length;
+  const eol = field.value.length ?? 0;
   field.focus();
-  field.setSelectionRange(eol, eol);
+  // field.setSelectionRange(eol, eol);
 }
 
 function checkIfDuplicate(row) {

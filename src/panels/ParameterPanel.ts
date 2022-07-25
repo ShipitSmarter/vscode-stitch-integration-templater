@@ -69,6 +69,7 @@ export class ParameterPanel {
   private _environmentOptions: string[] = [];
   private _codeCompanies: CodeCompanyObject[] = [];
   private _settingsGlob: string = "**/templater/parameters/";
+  private _focusLine: number = -1;
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -213,11 +214,23 @@ export class ParameterPanel {
             switch(clas) {
               case 'dropdown':
               case 'field':
+                let oldLines:number = +this._fieldValues[noflinesIndex];
                 this._fieldValues[index] = value;
                 switch (index) {
                   case noflinesIndex:
+                    let nofLines:number = +this._fieldValues[noflinesIndex];
+                    if (nofLines > oldLines) {
+                      this._focusLine = oldLines;
+                    }
+
                     // crop line arrays
-                    this._cropLines(+this._fieldValues[noflinesIndex]);
+                    this._cropLines(nofLines);
+
+                    // update company, customer, change reason fields
+                    this._codeCompanyValues = this._fillWithLastUnempty(this._codeCompanyValues,nofLines);
+                    this._codeCustomerValues = this._fillWithLastUnempty(this._codeCustomerValues,nofLines);
+                    this._changeReasonValues = this._fillWithLastUnempty(this._changeReasonValues,nofLines,this._fieldValues[allChangeReasonsIndex]);
+
                     // update webview
                     this._updateWebview(extensionUri);
                     break;
@@ -275,6 +288,30 @@ export class ParameterPanel {
     }
 
     return updatePath;
+  }
+
+  private _fillWithLastUnempty(array:string[],maxIndex:number, value:string='') : string[] {
+    let newArray: string[] = array;
+    let startIndex:number = 0;
+    for (let index=maxIndex; index>=0; index--) {
+      if (!isEmpty(array[index]) || index === 0) {
+        startIndex = index + 1;
+
+        if (isEmpty(value)) {
+          value = array[index];
+        }
+        
+        break;
+      }
+    }
+
+    if (!isEmpty(value)) {
+      for (let index=startIndex; index<=maxIndex; index++) {
+        newArray[index] = value;
+      }
+    }
+
+    return newArray;
   }
 
   private _getUrl(type:string) : string {
@@ -659,6 +696,10 @@ export class ParameterPanel {
     let psearchValues: string[][] = this._parameterSearchValues;
     this._parameterSearchValues = [];
 
+    // reset updatelines flag
+    let focusLine:number = this._focusLine;
+    this._focusLine = -1;
+
     // construct panel html object and retrieve html
     let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
@@ -680,7 +721,8 @@ export class ParameterPanel {
       this._processingSet,
       this._processingGet,
       this._environmentOptions,
-      this._codeCompanies
+      this._codeCompanies,
+      focusLine
     );
 
     let html =  parameterHtmlObject.getHtml();
