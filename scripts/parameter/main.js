@@ -53,31 +53,7 @@ function main() {
 
       // if parameter search visible: focus and show options
       if (field.hidden === false) {
-
-        // update field style
-        field.style.height = "1.6rem";
-        field.style.lineHeight = "1.6rem";
-        field.style.fontSize = "0.75rem";
-        field.style.fontWeight = "normal";
-
-        // update text and background color based on theme
-        if (document.body.classList.contains('vscode-dark')) {
-          field.style.background = '#454545';
-          field.style.color = '#CCCCCC';
-        } else if (document.body.classList.contains('vscode-high-contrast')) {
-          field.style.background = '#000000';
-          field.style.color = '#FFFFFF';
-        }
-
-        // focus and show items
-        field.focus();
-        //field.dispatchEvent(new Event('click'));
-
-        // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
-        // const ke = new KeyboardEvent('keydown', {
-        //     bubbles: true, cancelable: true, keyCode: 13
-        // });
-        // field.dispatchEvent(ke);
+        parameterOptionsStyleAndFocus(field.id);        
       }
   }
 
@@ -144,6 +120,37 @@ function fieldChange(event) {
 
       break;
   }
+}
+
+function parameterOptionsStyleAndFocus(fieldId) {
+  const field = document.getElementById(fieldId);
+
+  // update field style
+  field.style.height = "1.6rem";
+  field.style.lineHeight = "1.6rem";
+  field.style.fontSize = "0.8rem";
+  field.style.fontWeight = "normal";
+  field.style.borderWidth = "0px";
+  field.style.fontFamily = document.body.style.fontFamily;
+
+  // update text and background color based on theme
+  if (document.body.classList.contains('vscode-dark')) {
+    field.style.background = '#353535';
+    field.style.color = '#CCCCCC';
+  } else if (document.body.classList.contains('vscode-high-contrast')) {
+    field.style.background = '#000000';
+    field.style.color = '#FFFFFF';
+  }
+
+  // focus and show items
+  field.focus();
+  field.dispatchEvent(new Event('click'));
+
+  // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
+  // const ke = new KeyboardEvent('keydown', {
+  //     bubbles: true, cancelable: true, keyCode: 13
+  // });
+  // field.dispatchEvent(ke);
 }
 
 function parameterOptionsShow(event) {
@@ -398,6 +405,8 @@ function updateFieldOutlineAndTooltip(fieldId) {
   // update and return output
   if (check === 'empty') {
     updateEmpty(field.id);
+  } else if (fieldType === 'parameteroptionsfield' && field.hidden === false) {
+    updateWrong(field.id,'Select parameter and press Ctrl + Enter');
   } else if (check !== '' && check !== null) {
     updateWrong(field.id, getContentHint(fieldType));
   } else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
@@ -428,7 +437,7 @@ function getContentHint(fieldType) {
 function checkFields() {
   // check if any incorrect field contents and update fields outlining and tooltip in the process
   var check = true;
-  const fields = document.querySelectorAll("#save,.codecompanyfield,.codecustomerfield,.parameternamefield,.changereasonfield");
+  const fields = document.querySelectorAll("#save,.codecompanyfield,.codecustomerfield,.parameternamefield,.changereasonfield,.parameteroptionsfield");
   for (const field of fields) {
     check = updateFieldOutlineAndTooltip(field.id) ? check : false;
   }
