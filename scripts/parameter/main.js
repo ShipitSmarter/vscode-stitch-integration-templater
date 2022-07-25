@@ -13,14 +13,6 @@ function main() {
   // document.getElementById("refresh").addEventListener("click", refreshContent);
   document.getElementById("load").addEventListener("click",loadFile);
 
-  // parameter code search
-  // let nofLines = document.getElementById("noflines").value;
-  // for (let index=0; index < +nofLines; index++ ) {
-  //   let searchButton = document.getElementById("parametersearch" + index);
-  //   searchButton.addEventListener("click",parameterSearch);
-  // }
-  // document.getElementById("parametersearch0").addEventListener("click",parameterSearch);
-
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
 
@@ -45,15 +37,13 @@ function main() {
   // parameter search options select
   const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
   for (const field of parameterOptionsFields) {
-    field.addEventListener("change", parameterOptionsSelect);
-  }
+    field.addEventListener("keydown", parameterOptionsSelect);
 
-  // on parameternamefield focus: show search button
-  // const pnamefields = document.querySelectorAll(".parameternamefield");
-  // for (const field of pnamefields) {
-    // field.addEventListener('focus',parameterNameFocus);
-    // field.addEventListener('focusout',parameterNameFocusOut);
-  // }
+      // focus on parameter search if unhidden
+      if (field.hidden === false) {
+        field.focus();
+      }
+  }
 
   // actions on panel load
   updateHighlightSet();
@@ -123,39 +113,20 @@ function fieldChange(event) {
 }
 
 function parameterOptionsSelect(event) {
-  const field = event.target;
-  const value = field.value.replace(/\s\([\s\S]*/g,'');
-  const index = field.getAttribute('index');
-  const parameterField = document.getElementById('parametername' + index);
-  
-  // update parameter value
-  parameterField.value = value;
-  parameterField.dispatchEvent(new Event('keyup'));
-  
-  // hide/unhide
-  parameterField.hidden = false;
-  field.hidden = true;
-
-}
-
-function parameterNameFocus(event) {
-  const field = event.target;
-  const index = field.getAttribute("index");
-  const searchButton = document.getElementById("parametersearch" + index);
-
-  // show search button and adjust field width
-  searchButton.hidden = false;
-  field.style.width = "11rem";
-}
-
-function parameterNameFocusOut(event) {
-  const field = event.target;
-  const index = field.getAttribute("index");
-  const searchButton = document.getElementById("parametersearch" + index);
-
-  // hide search button and reset field width
-  searchButton.hidden = true;
-  field.style.width = "15rem";
+  if (event.key === 'Enter' && event.ctrlKey) {
+    const field = event.target;
+    const value = field.value.replace(/\s\([\s\S]*/g,'');
+    const index = field.getAttribute('index');
+    const parameterField = document.getElementById('parametername' + index);
+    
+    // update parameter value
+    parameterField.value = value;
+    parameterField.dispatchEvent(new Event('keyup'));
+    
+    // hide/unhide
+    parameterField.hidden = false;
+    field.hidden = true;
+  }
 }
 
 function checkIfDuplicate(row) {
