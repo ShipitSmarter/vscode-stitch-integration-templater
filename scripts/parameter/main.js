@@ -40,6 +40,12 @@ function main() {
     field.addEventListener("keydown",parameterOptionsShow);
   }
 
+  // new line on ctrl+enter in new value or change reason fields
+  const newLineFields = document.querySelectorAll(".newvaluefield,.changereasonfield");
+  for (const field of newLineFields) {
+    field.addEventListener("keydown",addNewLine);
+  }
+
   // parameter search options select
   const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
   for (const field of parameterOptionsFields) {
@@ -153,6 +159,20 @@ function parameterOptionsShow(event) {
       errorMessage("Company, customer and parameter name values may not be empty");
     }
     
+  }
+}
+
+function addNewLine(event) {
+  const field = event.target;
+  if (event.key === 'Enter' && event.ctrlKey) {
+    let nofLinesField = document.getElementById("noflines");
+    let nofLines = +nofLinesField.value;
+    let index = field.getAttribute("index");
+
+    if (+index === (nofLines-1)) {
+      nofLinesField.value = (nofLines + 1).toString();
+      nofLinesField.dispatchEvent(new Event('change'));
+    }
   }
 }
 
