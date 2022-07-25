@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.6.6
+- Get/set parameters
+  - Horizontal tabbing through input fields
+  - auto-fill company, customer and change reason fields when adding new lines
+  - Add new line on `Ctrl` + `Enter` in last-line new parameter value or change reason fields
+  - On adding new line(s), auto-place cursor and focus to appropriate field in next line
+  - On 'get' and 'set', check on remaining parameter name option dropdowns which have not been selected with `Ctrl` + `Enter` yet
+
 ## 1.6.5
 - Get/set parameters
   - Allow searching for existing parameters by pressing `Enter` on parameter name field, and confirming choice from dropdown by pressing `Ctrl` + `Enter`
