@@ -324,6 +324,15 @@ export function dropdownOptions(options:(string|number)[]) : string {
 	return optionsString;
 }
 
+export function selectOptions(options: (string|number)[]) : string {
+	let optionsString : string = '';
+	for (const option of options) {
+		optionsString += '\n    <option>' + option + '</option>';
+	}
+
+	return optionsString;
+}
+
 export function arrayFrom0(max:number) : number[] {
 	// from https://stackoverflow.com/a/33352604/1716283
 	return [...Array(max).keys()];

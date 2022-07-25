@@ -34,6 +34,47 @@ function main() {
     field.title = field.value;
   }
 
+  // show parameter search options
+  const paramFields = document.querySelectorAll(".parameternamefield");
+  for (const field of paramFields) {
+    field.addEventListener("keydown",parameterOptionsShow);
+  }
+
+  // parameter search options select
+  const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
+  for (const field of parameterOptionsFields) {
+    field.addEventListener("keydown", parameterOptionsSelect);
+
+      // if parameter search visible: focus and show options
+      if (field.hidden === false) {
+
+        // update field style
+        field.style.height = "1.6rem";
+        field.style.lineHeight = "1.6rem";
+        field.style.fontSize = "0.75rem";
+        field.style.fontWeight = "normal";
+
+        // update text and background color based on theme
+        if (document.body.classList.contains('vscode-dark')) {
+          field.style.background = '#454545';
+          field.style.color = '#CCCCCC';
+        } else if (document.body.classList.contains('vscode-high-contrast')) {
+          field.style.background = '#000000';
+          field.style.color = '#FFFFFF';
+        }
+
+        // focus and show items
+        field.focus();
+        //field.dispatchEvent(new Event('click'));
+
+        // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
+        // const ke = new KeyboardEvent('keydown', {
+        //     bubbles: true, cancelable: true, keyCode: 13
+        // });
+        // field.dispatchEvent(ke);
+      }
+  }
+
   // actions on panel load
   updateHighlightSet();
   updateCurrentValuesHighlight();
@@ -94,6 +135,47 @@ function fieldChange(event) {
       }
 
       break;
+  }
+}
+
+function parameterOptionsShow(event) {
+  const field = event.target;
+
+  // parameter search on enter
+  if (event.key === 'Enter') {
+    const index = field.id.replace('parametername','');
+    const codeCompany = document.getElementById("codecompany" + index).value;
+    const codeCustomer = document.getElementById("codecustomer" + index).value;
+
+    if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
+      parameterSearch(field.id);
+    } else {
+      errorMessage("Company, customer and parameter name values may not be empty");
+    }
+    
+  }
+}
+
+function parameterOptionsSelect(event) {
+  if (event.key === 'Enter' && event.ctrlKey) {
+    const field = event.target;
+    const value = field.value.replace(/\s\([\s\S]*/g,'');
+    const index = field.getAttribute('index');
+    const parameterField = document.getElementById('parametername' + index);
+    
+    // update parameter value
+    parameterField.value = value;
+    parameterField.dispatchEvent(new Event('keyup'));
+    
+    // hide/unhide
+    parameterField.hidden = false;
+    field.hidden = true;
+
+    // focus and add cursor
+    const eol = parameterField.value.length;
+    parameterField.focus();
+    parameterField.setSelectionRange(eol, eol);
+    
   }
 }
 
@@ -202,7 +284,6 @@ function updateCurrentValuesHighlight() {
       unequalHighlight(curs[index].id);
     }
   }
-
 }
 
 function highlightSet(fieldId) {
@@ -222,6 +303,10 @@ function unequalHighlight(fieldId) {
 
 function infoMessage(info) {
   vscodeApi.postMessage({ command: "showinformationmessage", text: info });
+}
+
+function errorMessage(info) {
+  vscodeApi.postMessage({ command: "showerrormessage", text: info });
 }
 
 function saveValue(fieldId) {
@@ -333,6 +418,14 @@ function updateRight(fieldId) {
 
 function invalidForm() {
   vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+}
+
+function parameterSearch(fieldId) {
+  // const button = event.target;
+  // const index = +button.id.replace('parametersearch','');
+  const index = document.getElementById(fieldId).getAttribute('index');
+
+  vscodeApi.postMessage({ command: "parametersearch", text: index });
 }
 
 function getParameters() {

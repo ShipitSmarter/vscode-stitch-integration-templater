@@ -50,6 +50,7 @@ export class ParameterPanel {
   private _codeCompanyValues: string[] = [''];
   private _codeCustomerValues: string[] = [];
   private _parameterNameValues: string[] = [];
+  private _parameterSearchValues: string[][] = [];
   private _previousValues: string[] = [];
   private _newValues: string[] = [];
   private _setResponseValues: ResponseObject[] = [];
@@ -67,6 +68,7 @@ export class ParameterPanel {
   private _urls: UrlObject[] = [];
   private _environmentOptions: string[] = [];
   private _codeCompanies: CodeCompanyObject[] = [];
+  private _settingsGlob: string = "**/templater/parameters/";
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
@@ -141,6 +143,11 @@ export class ParameterPanel {
             // });
             break;
 
+          case 'parametersearch':
+            this._parameterSearchButton(+text).then( () => {
+              this._updateWebview(extensionUri);
+            });
+            break;
           case 'getparameters':
             // clear previous responses and update webview
             this._currentValues= [];
@@ -284,6 +291,27 @@ export class ParameterPanel {
     }
 
     return url;
+  }
+
+  private async _parameterSearchButton(index:number) {
+    if (!isEmpty(this._parameterNameValues[index]) && !isEmpty(this._codeCompanyValues[index]) && !isEmpty(this._codeCustomerValues[index])) {
+      let urlGetParameterCodes: string = `${this._getUrl('getparametercodes')}?filter=${this._parameterNameValues[index] ?? ''}`;
+      let parameterCodesResponse: ResponseObject = await this._getApiCall(urlGetParameterCodes,this._managerAuth,this._codeCompanyValues[index]);
+  
+      if (parameterCodesResponse.status === 200) {
+        let responseJson = JSON.parse(parameterCodesResponse.value);
+  
+        let dropdownOptions: string[] = [];
+        dropdownOptions[0] = this._parameterNameValues[index];
+        for (let row = 0; row < Math.min(15,responseJson.length ?? 15); row++) {
+          dropdownOptions[row+1] = responseJson[row].key + ' (' + responseJson[row].value + ')';
+        }
+  
+        this._parameterSearchValues[index] = dropdownOptions;
+  
+        let piet = 'bla';
+      }
+    }
   }
 
   private async _setParametersButton(extensionUri: vscode.Uri) {
@@ -446,7 +474,7 @@ export class ParameterPanel {
 
   private async _getCompanies() {
     // get companies and codecompanies from translation file
-    let translationPath = await getWorkspaceFile('**/templater/parameters/CompanyToCodeCompany.csv');
+    let translationPath = await getWorkspaceFile(this._settingsGlob + 'CompanyToCodeCompany.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
     this._codeCompanies = new Array<CodeCompanyObject>(translations.length);
@@ -580,14 +608,16 @@ export class ParameterPanel {
     this._urls = [];
 
     // get stuff
-    let fileContent = await getFileContentFromGlob('**/templater/parameters/stuff.json');
+    let fileContent = await getFileContentFromGlob(this._settingsGlob + 'stuff.json');
     let stuffDetails = JSON.parse(fileContent);
     this._managerAuth = stuffDetails.Stuff;
 
     // retrieve urls
-    this._urls[0] = await this._getUrlObject('**/templater/parameters/parameter_get.json','getparameters');
-    this._urls[1] = await this._getUrlObject('**/templater/parameters/parameter_set.json','setparameters');
-    this._urls[2] = await this._getUrlObject('**/templater/parameters/parameter_get_history.json','getparameterhistory');
+    this._urls[0] = await this._getUrlObject(this._settingsGlob + 'parameter_get.json','getparameters');
+    this._urls[1] = await this._getUrlObject(this._settingsGlob + 'parameter_set.json','setparameters');
+    this._urls[2] = await this._getUrlObject(this._settingsGlob + 'parameter_get_history.json','getparameterhistory');
+    this._urls[3] = await this._getUrlObject(this._settingsGlob + 'parameter_get_parameter_codes.json','getparametercodes');
+
   }
 
   private async _getUrlObject(glob:string, type:string) : Promise<UrlObject> {
@@ -598,7 +628,7 @@ export class ParameterPanel {
 
   private async _getEnvironmentOptions() {
     // get module dropdown options from txt file
-    let fileContent: string = await getFileContentFromGlob('**/templater/parameters/EnvironmentOptions.txt');
+    let fileContent: string = await getFileContentFromGlob(this._settingsGlob + 'EnvironmentOptions.txt');
     this._environmentOptions = fileContent.split("\n").map(el => el.trim());
   }
 
@@ -625,6 +655,10 @@ export class ParameterPanel {
       await this._refresh();
     }
 
+    // clear parameter search values before rendering
+    let psearchValues: string[][] = this._parameterSearchValues;
+    this._parameterSearchValues = [];
+
     // construct panel html object and retrieve html
     let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
@@ -632,6 +666,7 @@ export class ParameterPanel {
       this._codeCompanyValues,
       this._codeCustomerValues,
       this._parameterNameValues,
+      psearchValues,
       this._previousValues,
       this._newValues,
       this._changeReasonValues,

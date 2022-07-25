@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, backgroundColorString, escapeHtml, isEmpty} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, backgroundColorString, escapeHtml, isEmpty, selectOptions} from "../utilities/functions";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -34,6 +34,7 @@ export class ParameterHtmlObject {
     private _codeCompanyValues: string[],
     private _codeCustomerValues: string[],
     private _parameterNameValues: string[],
+    private _parameterSearchValues: string[][],
     private _previousValues: string[],
     private _newValues: string[],
     private _changeReasonValues: string[],
@@ -129,7 +130,7 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  private _getButton(id:string, title:string, codicon:string,appearance:string = 'primary',hidden:string = ''): string {
+  private _getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = ''): string {
     let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
     let button: string = /*html*/ `
       <vscode-button id="${id}" appearance="${appearance}" ${hidden}>
@@ -361,10 +362,20 @@ export class ParameterHtmlObject {
         </section>
       `;
 
-      // parameter name
+      var showSearch: boolean = this._parameterSearchValues[row] !== undefined;
+
+      var select: string = /*html*/ `
+        <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" position="below" ${hiddenString(showSearch)}>
+          ${selectOptions(this._parameterSearchValues[row] ?? [''])}
+        </select>`;
+
       parameterNames += /*html*/`
-        <section class="component-minvmargin">
-          <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name"></vscode-text-field>
+        <section class="component-pname">
+          <div class="floatpname">
+            <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
+            ${select}
+          </div>
+          
         </section>
       `;
 
@@ -413,7 +424,7 @@ export class ParameterHtmlObject {
           ${codeCustomers}
         </section>
         <section class="floatleftnopadding">
-          <p>Parameter Name</p>
+          <p title="Enter to search, Ctrl + Enter to confirm">Parameter Name</p>
           ${parameterNames}
         </section>
         <section class="floatleftnopadding">
