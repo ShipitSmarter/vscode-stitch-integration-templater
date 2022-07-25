@@ -9,6 +9,7 @@
 }
 
 .parameternamefield,
+.parameteroptionsfield,
 .previousvaluefield,
 .newvaluefield {
   width: 15rem;

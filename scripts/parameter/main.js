@@ -13,6 +13,14 @@ function main() {
   // document.getElementById("refresh").addEventListener("click", refreshContent);
   document.getElementById("load").addEventListener("click",loadFile);
 
+  // parameter code search
+  // let nofLines = document.getElementById("noflines").value;
+  // for (let index=0; index < +nofLines; index++ ) {
+  //   let searchButton = document.getElementById("parametersearch" + index);
+  //   searchButton.addEventListener("click",parameterSearch);
+  // }
+  // document.getElementById("parametersearch0").addEventListener("click",parameterSearch);
+
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
 
@@ -34,13 +42,18 @@ function main() {
     field.title = field.value;
   }
 
-  // on parameternamefield focus: show search button
-  const pnamefields = document.querySelectorAll(".parameternamefield");
-  for (const field of pnamefields) {
-    field.addEventListener('focus',parameterNameFocus);
-    field.addEventListener('focusout',parameterNameFocusOut);
+  // parameter search options select
+  const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
+  for (const field of parameterOptionsFields) {
+    field.addEventListener("change", parameterOptionsSelect);
   }
 
+  // on parameternamefield focus: show search button
+  // const pnamefields = document.querySelectorAll(".parameternamefield");
+  // for (const field of pnamefields) {
+    // field.addEventListener('focus',parameterNameFocus);
+    // field.addEventListener('focusout',parameterNameFocusOut);
+  // }
 
   // actions on panel load
   updateHighlightSet();
@@ -65,8 +78,12 @@ function fieldChange(event) {
   // update hover-over on change
   field.title = field.value;
 
+  // parameter search on enter
+  if (fieldType === 'parameternamefield' && event.key === 'Enter') {
+    parameterSearch(field.id);
+  }
   // update field outline and tooltip
-  if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType)) {
+  else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType)) {
     // codecompany, codecustomeror parametername: check all three in all rows
     const rowFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield");
     for (const rowField of rowFields) {
@@ -103,6 +120,22 @@ function fieldChange(event) {
 
       break;
   }
+}
+
+function parameterOptionsSelect(event) {
+  const field = event.target;
+  const value = field.value.replace(/\s\([\s\S]*/g,'');
+  const index = field.getAttribute('index');
+  const parameterField = document.getElementById('parametername' + index);
+  
+  // update parameter value
+  parameterField.value = value;
+  parameterField.dispatchEvent(new Event('keyup'));
+  
+  // hide/unhide
+  parameterField.hidden = false;
+  field.hidden = true;
+
 }
 
 function parameterNameFocus(event) {
@@ -230,7 +263,6 @@ function updateCurrentValuesHighlight() {
       unequalHighlight(curs[index].id);
     }
   }
-
 }
 
 function highlightSet(fieldId) {
@@ -361,6 +393,14 @@ function updateRight(fieldId) {
 
 function invalidForm() {
   vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
+}
+
+function parameterSearch(fieldId) {
+  // const button = event.target;
+  // const index = +button.id.replace('parametersearch','');
+  const index = document.getElementById(fieldId).getAttribute('index');
+
+  vscodeApi.postMessage({ command: "parametersearch", text: index });
 }
 
 function getParameters() {

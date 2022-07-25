@@ -50,6 +50,7 @@ export class ParameterPanel {
   private _codeCompanyValues: string[] = [''];
   private _codeCustomerValues: string[] = [];
   private _parameterNameValues: string[] = [];
+  private _parameterSearchValues: string[][] = [];
   private _previousValues: string[] = [];
   private _newValues: string[] = [];
   private _setResponseValues: ResponseObject[] = [];
@@ -142,6 +143,11 @@ export class ParameterPanel {
             // });
             break;
 
+          case 'parametersearch':
+            this._parameterSearchButton(+text).then( () => {
+              this._updateWebview(extensionUri);
+            });
+            break;
           case 'getparameters':
             // clear previous responses and update webview
             this._currentValues= [];
@@ -285,6 +291,27 @@ export class ParameterPanel {
     }
 
     return url;
+  }
+
+  private async _parameterSearchButton(index:number) {
+    if (!isEmpty(this._parameterNameValues[index]) && !isEmpty(this._codeCompanyValues[index]) && !isEmpty(this._codeCustomerValues[index])) {
+      let urlGetParameterCodes: string = `${this._getUrl('getparametercodes')}?filter=${this._parameterNameValues[index] ?? ''}`;
+      let parameterCodesResponse: ResponseObject = await this._getApiCall(urlGetParameterCodes,this._managerAuth,this._codeCompanyValues[index]);
+  
+      if (parameterCodesResponse.status === 200) {
+        let responseJson = JSON.parse(parameterCodesResponse.value);
+  
+        let dropdownOptions: string[] = [];
+        dropdownOptions[0] = this._parameterNameValues[index];
+        for (let row = 0; row < Math.min(15,responseJson.length ?? 15); row++) {
+          dropdownOptions[row+1] = responseJson[row].key + ' (' + responseJson[row].value + ')';
+        }
+  
+        this._parameterSearchValues[index] = dropdownOptions;
+  
+        let piet = 'bla';
+      }
+    }
   }
 
   private async _setParametersButton(extensionUri: vscode.Uri) {
@@ -590,6 +617,7 @@ export class ParameterPanel {
     this._urls[1] = await this._getUrlObject(this._settingsGlob + 'parameter_set.json','setparameters');
     this._urls[2] = await this._getUrlObject(this._settingsGlob + 'parameter_get_history.json','getparameterhistory');
     this._urls[3] = await this._getUrlObject(this._settingsGlob + 'parameter_get_parameter_codes.json','getparametercodes');
+
   }
 
   private async _getUrlObject(glob:string, type:string) : Promise<UrlObject> {
@@ -627,6 +655,10 @@ export class ParameterPanel {
       await this._refresh();
     }
 
+    // clear parameter search values before rendering
+    let psearchValues: string[][] = this._parameterSearchValues;
+    this._parameterSearchValues = [];
+
     // construct panel html object and retrieve html
     let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
@@ -634,6 +666,7 @@ export class ParameterPanel {
       this._codeCompanyValues,
       this._codeCustomerValues,
       this._parameterNameValues,
+      psearchValues,
       this._previousValues,
       this._newValues,
       this._changeReasonValues,

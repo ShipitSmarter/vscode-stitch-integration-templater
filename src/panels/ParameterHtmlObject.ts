@@ -34,6 +34,7 @@ export class ParameterHtmlObject {
     private _codeCompanyValues: string[],
     private _codeCustomerValues: string[],
     private _parameterNameValues: string[],
+    private _parameterSearchValues: string[][],
     private _previousValues: string[],
     private _newValues: string[],
     private _changeReasonValues: string[],
@@ -362,14 +363,25 @@ export class ParameterHtmlObject {
       `;
 
       // parameter name
+      // var searchButton: string = /*html*/ `
+      //   <div class="floatpsearch">
+      //     ${this._getButton('parametersearch' + row,'Search','','secondary','hidden')}
+      //   </div>`;
+
+      var searchButton: string = '';
+
+      var showSearch: boolean = this._parameterSearchValues[row] !== undefined;
+
       parameterNames += /*html*/`
-        <section class="component-minvmargin">
+        <section class="component-pname">
           <div class="floatpname">
-            <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name"></vscode-text-field>
+            <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
+            <vscode-dropdown id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" position="below" ${hiddenString(showSearch)}>
+              ${dropdownOptions(this._parameterSearchValues[row] ?? [''])}
+            </vscode-dropdown>
+            ${searchButton}
           </div>
-          <div class="floatpsearch">
-            ${this._getButton('parametersearch' + row,'Search','','secondary','hidden')}
-          </div>
+          
         </section>
       `;
 
