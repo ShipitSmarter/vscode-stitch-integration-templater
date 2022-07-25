@@ -364,10 +364,6 @@ export class ParameterHtmlObject {
 
       var showSearch: boolean = this._parameterSearchValues[row] !== undefined;
 
-      var dropdown: string = /*html*/ `
-        <vscode-dropdown id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" position="below" ${hiddenString(showSearch)}>
-          ${dropdownOptions(this._parameterSearchValues[row] ?? [''])}
-        </vscode-dropdown>`;
       var select: string = /*html*/ `
         <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" position="below" ${hiddenString(showSearch)}>
           ${selectOptions(this._parameterSearchValues[row] ?? [''])}
@@ -428,7 +424,7 @@ export class ParameterHtmlObject {
           ${codeCustomers}
         </section>
         <section class="floatleftnopadding">
-          <p>Parameter Name</p>
+          <p title="Enter to search, Ctrl + Enter to confirm">Parameter Name</p>
           ${parameterNames}
         </section>
         <section class="floatleftnopadding">
