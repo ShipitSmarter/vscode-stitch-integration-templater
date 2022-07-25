@@ -47,14 +47,8 @@ function main() {
 
       // if parameter search visible: focus and show options
       if (field.hidden === false) {
-        field.focus();
 
-        // from https://stackoverflow.com/a/18937620/1716283
-        // const ke = new KeyboardEvent('keydown', {
-        //     bubbles: true, cancelable: true, keyCode: 13
-        // });
-        // field.dispatchEvent(ke);
-
+        // update field style
         field.style.height = "1.6rem";
         field.style.lineHeight = "1.6rem";
         field.style.fontSize = "0.75rem";
@@ -69,7 +63,15 @@ function main() {
           field.style.color = '#FFFFFF';
         }
 
-        field.dispatchEvent(new Event('click'));
+        // focus and show items
+        field.focus();
+        //field.dispatchEvent(new Event('click'));
+
+        // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
+        // const ke = new KeyboardEvent('keydown', {
+        //     bubbles: true, cancelable: true, keyCode: 13
+        // });
+        // field.dispatchEvent(ke);
       }
   }
 
@@ -138,9 +140,19 @@ function fieldChange(event) {
 
 function parameterOptionsShow(event) {
   const field = event.target;
+
   // parameter search on enter
   if (event.key === 'Enter') {
-    parameterSearch(field.id);
+    const index = field.id.replace('parametername','');
+    const codeCompany = document.getElementById("codecompany" + index).value;
+    const codeCustomer = document.getElementById("codecustomer" + index).value;
+
+    if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
+      parameterSearch(field.id);
+    } else {
+      errorMessage("Company, customer and parameter name values may not be empty");
+    }
+    
   }
 }
 
@@ -291,6 +303,10 @@ function unequalHighlight(fieldId) {
 
 function infoMessage(info) {
   vscodeApi.postMessage({ command: "showinformationmessage", text: info });
+}
+
+function errorMessage(info) {
+  vscodeApi.postMessage({ command: "showerrormessage", text: info });
 }
 
 function saveValue(fieldId) {
