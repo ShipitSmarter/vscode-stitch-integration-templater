@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.5
+- Get/set parameters
+  - Allow searching for existing parameters by pressing `Enter` on parameter name field, and confirming choice from dropdown by pressing `Ctrl` + `Enter`
+
 ## 1.6.4
 - Get/set Parameters
   - Fix: Unable to get/set parameters if not set for given company/customer combination
