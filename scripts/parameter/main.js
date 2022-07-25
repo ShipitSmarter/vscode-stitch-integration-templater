@@ -171,12 +171,18 @@ function parameterOptionsSelect(event) {
     parameterField.hidden = false;
     field.hidden = true;
 
-    // focus and add cursor
-    const eol = parameterField.value.length;
-    parameterField.focus();
-    parameterField.setSelectionRange(eol, eol);
-    
+    // set focus and place cursor
+    focusAndCursor(parameterField.id);    
   }
+}
+
+function focusAndCursor(fieldId) {
+  const field = document.getElementById(fieldId);
+
+  // focus and place cursor at end of content
+  const eol = field.value.length;
+  field.focus();
+  field.setSelectionRange(eol, eol);
 }
 
 function checkIfDuplicate(row) {
