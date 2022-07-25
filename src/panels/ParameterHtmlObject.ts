@@ -48,7 +48,8 @@ export class ParameterHtmlObject {
     private _processingSet: boolean,
     private _processingGet: boolean,
     private _environmentOptions: string[],
-    private _codeCompanies: CodeCompanyObject[]
+    private _codeCompanies: CodeCompanyObject[],
+    private _focusLine: number
   ) { }
 
   // METHODS
@@ -84,6 +85,7 @@ export class ParameterHtmlObject {
 
         <section id="hidden">
             ${this._codeCompanyFields()}
+            <vscode-text-field id="focusline" value="${this._focusLine > 0 ? this._focusLine+'' : ''}" hidden></vscode-text-field>
         </section>
 
         ${this._getLoadItems()}
@@ -120,9 +122,7 @@ export class ParameterHtmlObject {
             </section> 
           </section>
 
-
         </section>
-
 			</body>
 		</html>
 	  `;
@@ -351,28 +351,28 @@ export class ParameterHtmlObject {
       // code company
       codeCompanys += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="codecompany${row}" class="codecompanyfield" index="${row}" ${valueString(this._codeCompanyValues[row])} placeholder="CodeCompany"></vscode-text-field>
+          <vscode-text-field id="codecompany${row}" class="codecompanyfield" index="${row}" tabindex="${row +1}0" ${valueString(this._codeCompanyValues[row])} placeholder="CodeCompany"></vscode-text-field>
         </section>
       `;
 
       // code customer
       codeCustomers += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="codecustomer${row}" class="codecustomerfield" index="${row}" ${valueString(this._codeCustomerValues[row])} placeholder="CodeCustomer"></vscode-text-field>
+          <vscode-text-field id="codecustomer${row}" class="codecustomerfield" index="${row}" tabindex="${row +1}1" ${valueString(this._codeCustomerValues[row])} placeholder="CodeCustomer"></vscode-text-field>
         </section>
       `;
 
       var showSearch: boolean = this._parameterSearchValues[row] !== undefined;
 
       var select: string = /*html*/ `
-        <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" position="below" ${hiddenString(showSearch)}>
+        <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}2" position="below" ${hiddenString(showSearch)}>
           ${selectOptions(this._parameterSearchValues[row] ?? [''])}
         </select>`;
 
       parameterNames += /*html*/`
         <section class="component-pname">
           <div class="floatpname">
-            <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
+            <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" tabindex="${row +1}3" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
             ${select}
           </div>
           
@@ -382,21 +382,21 @@ export class ParameterHtmlObject {
       // previous parameter value
       previousValues += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="previousvalue${row}" class="previousvaluefield" index="${row}" ${valueString(escapeHtml(this._previousValues[row]??''))} readonly></vscode-text-field>
+          <vscode-text-field id="previousvalue${row}" class="previousvaluefield" index="${row}" tabindex="-1" ${valueString(escapeHtml(this._previousValues[row]??''))} readonly></vscode-text-field>
         </section>
       `;
 
       // new parameter value
       newValues += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" ${valueString(escapeHtml(this._newValues[row]??''))} placeholder="new parameter value"></vscode-text-field>
+          <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" tabindex="${row +1}5" ${valueString(escapeHtml(this._newValues[row]??''))} placeholder="new parameter value"></vscode-text-field>
         </section>
       `;
 
       // change reason
       changeReasonValues += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="changereason${row}" class="changereasonfield" index="${row}" ${valueString(escapeHtml(this._changeReasonValues[row]??''))} placeholder="change reason"></vscode-text-field>
+          <vscode-text-field id="changereason${row}" class="changereasonfield" index="${row}" tabindex="${row +1}6" ${valueString(escapeHtml(this._changeReasonValues[row]??''))} placeholder="change reason"></vscode-text-field>
         </section>
       `;
 
