@@ -579,7 +579,7 @@ export class ParameterPanel {
     const fileContent = fs.readFileSync(filePath, {encoding:'utf8'});
 
     let skipheader:boolean = true;
-    let parameterLines: string[] = fileContent.split('\r\n');
+    let parameterLines: string[] = fileContent.replace(/\r/g,'').split('\n');
 
     // remove empty lines and header line
     parameterLines = parameterLines.filter(el => !el.startsWith(this._delimiter)).filter(el => !isEmpty(el));
