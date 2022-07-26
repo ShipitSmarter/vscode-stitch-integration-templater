@@ -21,6 +21,9 @@
   font-size: 0.8rem;
   font-weight: normal;
   border-width: 0px;
+  font-family: inherit;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
 }
 
 .changereasonfield,

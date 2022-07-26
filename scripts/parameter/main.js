@@ -53,7 +53,15 @@ function main() {
 
       // if parameter search visible: focus and show options
       if (field.hidden === false) {
-        parameterOptionsStyleAndFocus(field.id);        
+        // focus and show items
+        field.focus();
+        field.dispatchEvent(new Event('click'));    
+        
+        // // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
+        // const ke = new KeyboardEvent('keydown', {
+        //     bubbles: true, cancelable: true, keyCode: 13
+        // });
+        // field.dispatchEvent(ke);
       }
   }
 
@@ -90,7 +98,8 @@ function fieldChange(event) {
       updateFieldOutlineAndTooltip(rowField.id);
     }
    
-    if (checkIfDuplicate(+row)) {
+    const row = field.getAttribute('index');
+    if (checkIfDuplicate(parseInt(row))) {
       checkFields();
     } else {
       updateFieldOutlineAndTooltip(field.id);
@@ -120,32 +129,6 @@ function fieldChange(event) {
 
       break;
   }
-}
-
-function parameterOptionsStyleAndFocus(fieldId) {
-  const field = document.getElementById(fieldId);
-
-  // update field style
-  field.style.fontFamily = document.body.style.fontFamily;
-
-  // update text and background color based on theme
-  if (document.body.classList.contains('vscode-dark')) {
-    field.style.background = '#353535';
-    field.style.color = '#CCCCCC';
-  } else if (document.body.classList.contains('vscode-high-contrast')) {
-    field.style.background = '#000000';
-    field.style.color = '#FFFFFF';
-  }
-
-  // focus and show items
-  field.focus();
-  field.dispatchEvent(new Event('click'));
-
-  // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
-  // const ke = new KeyboardEvent('keydown', {
-  //     bubbles: true, cancelable: true, keyCode: 13
-  // });
-  // field.dispatchEvent(ke);
 }
 
 function parameterOptionsShow(event) {
@@ -231,7 +214,7 @@ function focusAndCursor(fieldId) {
 function checkIfDuplicate(row) {
   let isDuplicate = false;
 
-  let nofLines = +document.getElementById('noflines').value;
+  let nofLines = parseInt(document.getElementById('noflines').value);
   let cocos = document.querySelectorAll(".codecompanyfield");
   let cocus = document.querySelectorAll(".codecustomerfield");
   let pnames = document.querySelectorAll(".parameternamefield");
