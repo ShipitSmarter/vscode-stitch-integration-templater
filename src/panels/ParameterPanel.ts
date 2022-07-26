@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -183,10 +183,12 @@ export class ParameterPanel {
           case 'savetofile':
             if (this._checkSaveFolder())  {
               // save to file
-              let fileName:string = 'Saved_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
-              this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+              let fileNameProposed:string = 'Saved_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
+              let isDir:boolean = isDirectory(this._fieldValues[saveIndex]);
+              let filePath: string = this._fieldValues[saveIndex] + (isDir ? ('/' + fileNameProposed) : '');
+              this._writeFile(filePath);
               // confirm
-              vscode.window.showInformationMessage('Input saved to ' + fileName);
+              vscode.window.showInformationMessage('Input saved to ' + nameFromPath(filePath));
             }
             
             break;
@@ -271,7 +273,7 @@ export class ParameterPanel {
   }
 
   private _checkSaveFolder(): boolean {
-    let isValid: boolean = fs.existsSync(this._fieldValues[saveIndex]);
+    let isValid: boolean = (fs.existsSync(this._fieldValues[saveIndex]) || fs.existsSync(parentPath(cleanPath(this._fieldValues[saveIndex]))));
     if (!isValid) {
       vscode.window.showErrorMessage('Save folder is not an existing directory');
     }
@@ -367,7 +369,8 @@ export class ParameterPanel {
 
     // save values to file
     let fileName:string = 'Set_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
-    this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+    let fileDir: string = isDirectory(this._fieldValues[saveIndex]) ? this._fieldValues[saveIndex] : parentPath(cleanPath(this._fieldValues[saveIndex]));
+    this._writeFile(fileDir + '/'+ fileName);
 
     // clear previous responses and update webview
     this._currentValues= [];
@@ -638,7 +641,7 @@ export class ParameterPanel {
     }
 
     // write to file
-    fs.writeFileSync(filePath,fileContent);
+    fs.writeFileSync(filePath,fileContent,{encoding:'utf8',flag:'w'});
   }
 
   private async _getAPIDetails() {

@@ -187,8 +187,8 @@ export class ParameterHtmlObject {
       </section>
 
       <section class="component-example">
-        <div class="floatleftnopadding">
-          Save file to folder:
+        <div class="floatleftnopadding" title="Must contain a valid directory or file path">
+          Save file to:
         </div>
         <div class="floatleft">
           <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>

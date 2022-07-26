@@ -418,3 +418,25 @@ export function getDateTimeStamp() : string {
 	return (new Date()).toISOString().substring(0,19).replace(/[\-T:]/g,'');
 }
 
+export function isFile(path:string) : boolean {
+	let isF:boolean = true;
+	try {
+		fs.lstatSync(path).isFile();
+	} catch (err) {
+		isF = false;
+	}
+
+	return isF;
+}
+
+export function isDirectory(path:string) : boolean {
+	let isDir:boolean = true;
+	try {
+		let check:boolean = fs.lstatSync(path).isDirectory();
+		isDir = check;
+	} catch (err) {
+		isDir = false;
+	}
+
+	return isDir;
+}
