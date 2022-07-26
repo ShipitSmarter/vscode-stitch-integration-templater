@@ -52,7 +52,7 @@
       },
       {
         "command": "stitch.parameters-loadcsv",
-        "title": "Stitch: Load file in parameters tool"
+        "title": "Stitch: load file in parameters tool"
       }
     ],
     "menus": {
