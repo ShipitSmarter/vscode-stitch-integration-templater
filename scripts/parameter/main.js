@@ -65,6 +65,9 @@ function main() {
       }
   }
 
+  // global keyboard shortcuts
+  document.addEventListener("keydown",globalKeys);
+
   // actions on panel load
   updateHighlightSet();
   updateCurrentValuesHighlight();
@@ -131,21 +134,10 @@ function fieldChange(event) {
   }
 }
 
-function parameterOptionsShow(event) {
-  const field = event.target;
-
-  // parameter search on enter
-  if (event.key === 'Enter') {
-    const index = field.id.replace('parametername','');
-    const codeCompany = document.getElementById("codecompany" + index).value;
-    const codeCustomer = document.getElementById("codecustomer" + index).value;
-
-    if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
-      parameterSearch(field.id);
-    } else {
-      errorMessage("Company, customer and parameter name values may not be empty");
-    }
-    
+function globalKeys(event) {
+  if (event.key === 's' && event.ctrlKey) {
+    // Ctrl + S: save input to file
+    saveToFile();
   }
 }
 
@@ -179,6 +171,24 @@ function addNewLine(event) {
       nofLinesField.value = (nofLines + 1).toString();
       nofLinesField.dispatchEvent(new Event('change'));
     }
+  }
+}
+
+function parameterOptionsShow(event) {
+  const field = event.target;
+
+  // parameter search on enter
+  if (event.key === 'Enter') {
+    const index = field.id.replace('parametername','');
+    const codeCompany = document.getElementById("codecompany" + index).value;
+    const codeCustomer = document.getElementById("codecustomer" + index).value;
+
+    if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
+      parameterSearch(field.id);
+    } else {
+      errorMessage("Company, customer and parameter name values may not be empty");
+    }
+    
   }
 }
 
