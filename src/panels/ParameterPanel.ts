@@ -227,9 +227,9 @@ export class ParameterPanel {
                     this._cropLines(nofLines);
 
                     // update company, customer, change reason fields
-                    this._codeCompanyValues = this._fillWithLastUnempty(this._codeCompanyValues,nofLines);
-                    this._codeCustomerValues = this._fillWithLastUnempty(this._codeCustomerValues,nofLines);
-                    this._changeReasonValues = this._fillWithLastUnempty(this._changeReasonValues,nofLines,this._fieldValues[allChangeReasonsIndex]);
+                    this._codeCompanyValues = this._fillWithLastUnempty(this._codeCompanyValues,nofLines-1);
+                    this._codeCustomerValues = this._fillWithLastUnempty(this._codeCustomerValues,nofLines-1);
+                    this._changeReasonValues = this._fillWithLastUnempty(this._changeReasonValues,nofLines-1,this._fieldValues[allChangeReasonsIndex]);
 
                     // update webview
                     this._updateWebview(extensionUri);
