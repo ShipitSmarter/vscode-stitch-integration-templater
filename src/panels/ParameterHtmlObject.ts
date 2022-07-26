@@ -280,7 +280,7 @@ export class ParameterHtmlObject {
 
       currentValues += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${this._currentValues[index] ?? ''}" readonly></vscode-text-field>
+          <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${escapeHtml(this._currentValues[index] ?? '')}" readonly></vscode-text-field>
         </section>
       `;
 
