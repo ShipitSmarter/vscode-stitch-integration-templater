@@ -72,7 +72,7 @@ export class ParameterPanel {
   private _focusLine: number = -1;
 
   // constructor
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
     this._panel = panel;
 
     // set initial values
@@ -99,10 +99,18 @@ export class ParameterPanel {
 
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
+
+    // if load file: load file
+    if (!isEmpty(loadFile)) {
+      this._fieldValues[filesIndex] = loadFile;
+      this._getPath();
+      this._loadFile(loadFile);
+      this._updateWebview(extensionUri);
+    }
   }
 
   // METHODS
-  public static render(extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
+  public static render(extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
     if (ParameterPanel.currentPanel) {
       ParameterPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
     } else {
@@ -110,7 +118,8 @@ export class ParameterPanel {
         enableScripts: true
       });
 
-      ParameterPanel.currentPanel = new ParameterPanel(panel, extensionUri, context);
+      ParameterPanel.currentPanel = new ParameterPanel(panel, extensionUri, context, loadFile);
+
     }
   }
 

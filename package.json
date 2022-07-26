@@ -49,8 +49,21 @@
       {
         "command": "stitch.parameters",
         "title": "Stitch: Get/Set parameters"
+      },
+      {
+        "command": "stitch.parameters-loadcsv",
+        "title": "Stitch: Load file in parameters tool"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "stitch.parameters-loadcsv",
+          "when": "resourceExtname == .csv",
+          "group": "stitch"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
