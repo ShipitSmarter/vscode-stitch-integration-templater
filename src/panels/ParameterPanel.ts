@@ -627,12 +627,12 @@ export class ParameterPanel {
     let fileContent: string = 'CodeCompany;CodeCustomer;Name;PreviousValue;NewValue;ChangeReason\r\n';
     for (let index=0; index < this._codeCompanyValues.length; index++) {
       // construct line
-      fileContent +=  this._codeCompanyValues[index] + this._delimiter
-                    + this._codeCustomerValues[index] + this._delimiter
-                    + this._parameterNameValues[index] + this._delimiter
-                    + this._previousValues[index] + this._delimiter
-                    + this._newValues[index] + this._delimiter
-                    + this._changeReasonValues[index];
+      fileContent +=  (this._codeCompanyValues[index] ?? '') + this._delimiter
+                    + (this._codeCustomerValues[index] ?? '') + this._delimiter
+                    + (this._parameterNameValues[index] ?? '') + this._delimiter
+                    + (this._previousValues[index] ?? '') + this._delimiter
+                    + (this._newValues[index] ?? '') + this._delimiter
+                    + (this._changeReasonValues[index]?? '');
 
       // add newline
       if (index !== this._codeCompanyValues.length -1) {
