@@ -100,26 +100,24 @@ export class ParameterPanel {
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
 
-    // if load file: load file
-    if (!isEmpty(loadFile)) {
-      this._fieldValues[filesIndex] = loadFile;
-      this._getPath();
-      this._loadFile(loadFile);
-      this._updateWebview(extensionUri);
-    }
+    // if loadFile: load file
+    this._loadFileIfPresent(extensionUri,loadFile);
   }
 
   // METHODS
   public static render(extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
     if (ParameterPanel.currentPanel) {
       ParameterPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
+
+      // if loadFile: load file
+      ParameterPanel.currentPanel._loadFileIfPresent(extensionUri,loadFile);
+
     } else {
       const panel = vscode.window.createWebviewPanel("get-parameters", "Get/Set Parameters", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
       ParameterPanel.currentPanel = new ParameterPanel(panel, extensionUri, context, loadFile);
-
     }
   }
 
@@ -279,6 +277,15 @@ export class ParameterPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
+    if (!isEmpty(loadFile)) {
+      this._fieldValues[filesIndex] = loadFile;
+      this._getPath();
+      this._loadFile(loadFile);
+      this._updateWebview(extensionUri);
+    }
   }
 
   private _checkSaveFolder(): boolean {

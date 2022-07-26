@@ -55,13 +55,13 @@ function main() {
       if (field.hidden === false) {
         // focus and show items
         field.focus();
-        field.dispatchEvent(new Event('click'));    
+        // field.dispatchEvent(new Event('click'));
+        // field.dispatchEvent(new Event('mousedown')); 
         
-        // // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
-        // const ke = new KeyboardEvent('keydown', {
+        // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
+        // field.dispatchEvent(new Event('keydown', {
         //     bubbles: true, cancelable: true, keyCode: 13
-        // });
-        // field.dispatchEvent(ke);
+        // }));
       }
   }
 
