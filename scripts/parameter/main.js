@@ -10,9 +10,13 @@ function main() {
   document.getElementById("getparameters").addEventListener("click", getParameters);
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
+  document.getElementById("saveauth").addEventListener("click", saveAuth);
 
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
+
+  // show auth checkbox
+  document.getElementById("showauth").addEventListener("change", fieldChange);
 
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown");
@@ -119,6 +123,14 @@ function fieldChange(event) {
     case 'previous':
       updateHighlightSet();
       updateCurrentValuesHighlight();
+      break;
+
+    case 'showauth':
+      if (field.checked) {
+        document.getElementById("authsection").hidden = false;
+      } else {
+        document.getElementById("authsection").hidden = true;
+      }
       break;
     case 'environment':
       showProd();
@@ -469,6 +481,10 @@ function parameterSearch(fieldId) {
   const index = document.getElementById(fieldId).getAttribute('index');
 
   vscodeApi.postMessage({ command: "parametersearch", text: index });
+}
+
+function saveAuth() {
+  vscodeApi.postMessage({ command: "saveauth", text: "" });
 }
 
 function getParameters() {

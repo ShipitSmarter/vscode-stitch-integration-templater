@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory, getWorkspaceFiles } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -14,6 +14,8 @@ const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
+const userIndex = 8;
+const pwIndex = 9;
 
 // type defs
 type ParameterObject = {
@@ -61,14 +63,15 @@ export class ParameterPanel {
   private _extendedHistoryValues: string[] = [];
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
+  private _showAuth: boolean = false;
   private _processingSet: boolean = false;
   private _processingGet: boolean = false;
-  private _managerAuth: string = '';
   private _delimiter: string = ';';
   private _urls: UrlObject[] = [];
   private _environmentOptions: string[] = [];
   private _codeCompanies: CodeCompanyObject[] = [];
   private _settingsGlob: string = "**/templater/parameters/";
+  private _authLocation: string = 'parameters_auth/auth.json';
   private _focusLine: number = -1;
 
   // constructor
@@ -187,6 +190,10 @@ export class ParameterPanel {
             }
             break;
 
+          case 'saveauth':
+            this._saveAuth();
+            break;
+
           case 'savetofile':
             if (this._checkSaveFolder())  {
               // save to file
@@ -235,6 +242,7 @@ export class ParameterPanel {
                       this._updateWebview(extensionUri);
                     }
                     break;
+
                 }
                 break;
 
@@ -256,6 +264,9 @@ export class ParameterPanel {
               case 'previous':
                 this._previous = toBoolean(value);
                 break;
+              case 'showauth':
+                this._showAuth = toBoolean(value);
+                break;
             }
             
             break;
@@ -264,6 +275,34 @@ export class ParameterPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private _getAuth() : string {
+    let authString:string = Buffer.from(this._fieldValues[userIndex] + ':' + this._fieldValues[pwIndex]).toString('base64');
+    return 'Basic ' + authString;
+  }
+
+  private async _saveAuth() {
+    // get file path
+    let randomSettingFilePath = await getWorkspaceFile(this._settingsGlob + '*.json');
+    let settingsDir = parentPath(cleanPath(randomSettingFilePath));
+    let rootDir = parentPath(parentPath(parentPath(settingsDir)));
+    let filePath = rootDir + '/' + this._authLocation;
+
+    // get file content
+    let fileContent:string = `{
+      "user": "${this._fieldValues[userIndex]}",
+      "pw": "${this._fieldValues[pwIndex]}"\r\n}`;
+
+    // make dir if not exists
+    let fileDir = parentPath(filePath);
+    fs.mkdirSync(fileDir,{ recursive: true });
+
+    // write to file
+    fs.writeFileSync(filePath,fileContent,{encoding:'utf8',flag:'w'});
+
+    // tell the world
+    vscode.window.showInformationMessage(`Saved auth to ${nameFromPath(filePath)}`);
   }
 
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
@@ -346,7 +385,7 @@ export class ParameterPanel {
   private async _parameterSearchButton(index:number) {
     if (!isEmpty(this._parameterNameValues[index]) && !isEmpty(this._codeCompanyValues[index]) && !isEmpty(this._codeCustomerValues[index])) {
       let urlGetParameterCodes: string = `${this._getUrl('getparametercodes')}?filter=${this._parameterNameValues[index] ?? ''}`;
-      let parameterCodesResponse: ResponseObject = await this._getApiCall(urlGetParameterCodes,this._managerAuth,this._codeCompanyValues[index]);
+      let parameterCodesResponse: ResponseObject = await this._getApiCall(urlGetParameterCodes,this._getAuth(),this._codeCompanyValues[index]);
   
       if (parameterCodesResponse.status === 200) {
         let responseJson = JSON.parse(parameterCodesResponse.value);
@@ -396,15 +435,14 @@ export class ParameterPanel {
     // set param values
     // const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      this._setResponseValues[index] = await this._setParameter(url,this._managerAuth,this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
+      this._setResponseValues[index] = await this._setParameter(url,this._getAuth(),this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
 
       // if ((index % updatePer) === 0 || index === (this._codeCompanyValues.length -1)) {
       //   this._updateWebview(extensionUri);
       // }
-    }  
+    }
 
     this._processingSet = false;
-
   }
 
   private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) : Promise<ResponseObject> {
@@ -464,14 +502,11 @@ export class ParameterPanel {
       let urlGetHistory: string = `${baseUrlGetHistory}/${this._codeCustomerValues[index]}/${this._parameterNameValues[index]}/1`;
 
       // step 1: parameter service call
-      let parameterResponse: ResponseObject = await this._getApiCall(urlGetParameter,this._managerAuth,this._codeCompanyValues[index]);
+      let parameterResponse: ResponseObject = await this._getApiCall(urlGetParameter,this._getAuth(),this._codeCompanyValues[index]);
 
       // step 2: if not exists: '', else execute history call
-      if (parameterResponse.status === 404) {
-        this._currentValues[index] = parameterResponse.value;
-        this._getResponseValues[index] = parameterResponse;
-      } else {
-        let historyResponse: ResponseObject = await this._getApiCall(urlGetHistory,this._managerAuth,this._codeCompanyValues[index]);
+      if (parameterResponse.status >= 200 && parameterResponse.status <= 299 ) {
+        let historyResponse: ResponseObject = await this._getApiCall(urlGetHistory,this._getAuth(),this._codeCompanyValues[index]);
         let responseJson = JSON.parse(historyResponse.value);      
         this._currentValues[index] = responseJson[0].paramValue;
         this._currentChangeReasonValues[index] = responseJson[0].changeReason;
@@ -483,10 +518,11 @@ export class ParameterPanel {
         for (let row=0; row < (Math.min(5,responseJson.length)); row++) {
           this._extendedHistoryValues[index] += `${row} | ${responseJson[row].dateTimeAction.substring(0,19)} | ${responseJson[row].changeReason} | ${responseJson[row].paramValue}\r\n`;
         }
+      } else {
+        this._currentValues[index] = parameterResponse.value;
+        this._getResponseValues[index] = parameterResponse;
       }
-      
 
-      
     }    
   }
 
@@ -658,10 +694,14 @@ export class ParameterPanel {
   private async _getAPIDetails() {
     this._urls = [];
 
-    // get stuff
-    let fileContent = await getFileContentFromGlob(this._settingsGlob + 'stuff.json');
-    let stuffDetails = JSON.parse(fileContent);
-    this._managerAuth = stuffDetails.Stuff;
+    // get stuff if file exists
+    let files = await getWorkspaceFiles('**/' + this._authLocation);
+    if (files.length > 0) {
+      let fileContent = await getFileContentFromGlob('**/' + this._authLocation);
+      let stuffDetails = JSON.parse(fileContent);
+      this._fieldValues[userIndex] = stuffDetails.user;
+      this._fieldValues[pwIndex] = stuffDetails.pw;
+    }
 
     // retrieve urls
     this._urls[0] = await this._getUrlObject(this._settingsGlob + 'parameter_get.json','getparameters');
@@ -732,6 +772,7 @@ export class ParameterPanel {
       this._extendedHistoryValues,
       this._getResponseValues,
       this._previous,
+      this._showAuth,
       this._processingSet,
       this._processingGet,
       this._environmentOptions,

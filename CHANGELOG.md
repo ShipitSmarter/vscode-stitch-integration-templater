@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.9
+- Get/set parameters
+  - Update authentication
+    - credentials taken from user input or file, allows saving by user
+    - File location is separate from other settings, so can be gitignored
+
 ## 1.6.8
 - Get/set parameters
   - Removed explicit load options. From now on, load from right-mouse-click in explorer menu.
