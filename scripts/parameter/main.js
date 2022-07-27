@@ -10,8 +10,6 @@ function main() {
   document.getElementById("getparameters").addEventListener("click", getParameters);
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
-  // document.getElementById("refresh").addEventListener("click", refreshContent);
-  // document.getElementById("load").addEventListener("click",loadFile);
 
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
@@ -50,6 +48,7 @@ function main() {
   const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
   for (const field of parameterOptionsFields) {
     field.addEventListener("keydown", parameterOptionsSelect);
+    field.addEventListener("change",updateParameterFromOptions);
 
     // if parameter search visible: focus and show options
     if (field.hidden === false) {
@@ -196,16 +195,7 @@ function parameterOptionsShow(event) {
 }
 
 function parameterOptionsSelect(event) {
-  if (event.key === 'Enter' && event.ctrlKey) {
-    const field = event.target;
-    const value = field.value.replace(/\s\([\s\S]*/g,'');
-    const index = field.getAttribute('index');
-    const parameterField = document.getElementById('parametername' + index);
-    
-    // update parameter value
-    parameterField.value = value;
-    parameterField.dispatchEvent(new Event('keyup'));
-    
+  if (event.key === 'Enter' && event.ctrlKey) {   
     // hide/unhide
     parameterField.hidden = false;
     field.hidden = true;
@@ -213,6 +203,17 @@ function parameterOptionsSelect(event) {
     // set focus and place cursor
     focusAndCursor(parameterField.id);    
   }
+}
+
+function updateParameterFromOptions(event) {
+  const field = event.target;
+  const value = field.value.replace(/\s\([\s\S]*/g,'');
+  const index = field.getAttribute('index');
+  const parameterField = document.getElementById('parametername' + index);
+
+  // update parameter value
+  parameterField.value = value;
+  parameterField.dispatchEvent(new Event('keyup'));
 }
 
 function focusAndCursor(fieldId) {
@@ -391,8 +392,8 @@ function updateFieldOutlineAndTooltip(fieldId) {
   // update and return output
   if (check === 'empty') {
     updateEmpty(field.id);
-  } else if (fieldType === 'parameteroptionsfield' && field.hidden === false) {
-    updateWrong(field.id,'Select parameter and press Ctrl + Enter');
+  // } else if (fieldType === 'parameteroptionsfield' && field.hidden === false) {
+  //   updateWrong(field.id,'Select parameter and press Ctrl + Enter');
   } else if (check !== '' && check !== null) {
     updateWrong(field.id, getContentHint(fieldType));
   } else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
