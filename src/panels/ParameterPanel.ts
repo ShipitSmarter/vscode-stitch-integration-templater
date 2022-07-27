@@ -189,6 +189,12 @@ export class ParameterPanel {
               this._updateWebview(extensionUri);
             }
             break;
+          case 'checkauth':
+
+            break;
+          case 'saveauth':
+            this._saveAuth();
+            break;
 
           case 'savetofile':
             if (this._checkSaveFolder())  {
@@ -276,6 +282,29 @@ export class ParameterPanel {
   private _getAuth() : string {
     let authString:string = Buffer.from(this._fieldValues[userIndex] + ':' + this._fieldValues[pwIndex]).toString('base64');
     return 'Basic ' + authString;
+  }
+
+  private async _saveAuth() {
+    // get file path
+    let randomSettingFilePath = await getWorkspaceFile(this._settingsGlob + '*.json');
+    let settingsDir = parentPath(cleanPath(randomSettingFilePath));
+    let rootDir = parentPath(parentPath(parentPath(settingsDir)));
+    let filePath = rootDir + '/' + this._stuffLocation;
+
+    // get file content
+    let fileContent:string = `{
+      "user": "${this._fieldValues[userIndex]}",
+      "pw": "${this._fieldValues[pwIndex]}"\r\n}`;
+
+    // make dir if not exists
+    let fileDir = parentPath(filePath);
+    fs.mkdirSync(fileDir,{ recursive: true });
+
+    // write to file
+    fs.writeFileSync(filePath,fileContent,{encoding:'utf8',flag:'w'});
+
+    // tell the world
+    vscode.window.showInformationMessage(`Saved auth to ${nameFromPath(filePath)}`);
   }
 
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
@@ -495,9 +524,7 @@ export class ParameterPanel {
         this._currentValues[index] = parameterResponse.value;
         this._getResponseValues[index] = parameterResponse;
       }
-      
 
-      
     }    
   }
 

@@ -10,6 +10,8 @@ function main() {
   document.getElementById("getparameters").addEventListener("click", getParameters);
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
+  document.getElementById("checkauth").addEventListener("click", checkAuth);
+  document.getElementById("saveauth").addEventListener("click", saveAuth);
 
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
@@ -480,6 +482,14 @@ function parameterSearch(fieldId) {
   const index = document.getElementById(fieldId).getAttribute('index');
 
   vscodeApi.postMessage({ command: "parametersearch", text: index });
+}
+
+function checkAuth() {
+  vscodeApi.postMessage({ command: "checkauth", text: "" });
+}
+
+function saveAuth() {
+  vscodeApi.postMessage({ command: "saveauth", text: "" });
 }
 
 function getParameters() {

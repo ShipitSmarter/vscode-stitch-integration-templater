@@ -8,9 +8,12 @@
   margin-top: 0.5rem;
 }
 
-#user,
+#user{
+  width: 13rem;
+}
+
 #pw {
-  width: 15rem;
+  width: 10rem;
 }
 
 .parameternamefield,
