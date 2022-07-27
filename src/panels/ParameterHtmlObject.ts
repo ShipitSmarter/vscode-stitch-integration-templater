@@ -87,8 +87,6 @@ export class ParameterHtmlObject {
             ${this._codeCompanyFields()}
             <vscode-text-field id="focusline" value="${this._focusLine > 0 ? this._focusLine+'' : ''}" hidden></vscode-text-field>
         </section>
-
-        ${this._getLoadItems()}
         
         <section class="rowflex">
           <section class="rowsingle">
@@ -207,40 +205,6 @@ export class ParameterHtmlObject {
       `;
 
     return getParametersGrid;
-  }
-
-  private _getLoadItems(): string {
-    let filesDropdown: string = /*html*/ `
-      <vscode-dropdown id="files" class="files" position="below">
-        ${dropdownOptions(this._getFileLoadOptions())}
-      </vscode-dropdown>`;
-
-    let filesField: string = /*html*/ `<vscode-text-field id="files" class="field" index="${filesIndex}" ${valueString(this._fieldValues[filesIndex])}></vscode-text-field>`;
-    
-    let html: string = /*html*/ `
-
-    <section class="rowsingle">
-      <vscode-divider role="separator"></vscode-divider>
-
-      <section class="component-example">
-        <p>Load from file<p>
-      </section>
-
-      <section class="component-example">
-        <div class="floatleft">
-          ${filesField}
-        </div>
-        <div class="floatleft">
-          ${this._getButton('load','Load','codicon-arrow-up')}
-        </div>
-      </section>
-
-      <vscode-divider role="separator"></vscode-divider>
-    </section>
-    
-    `;
-
-    return html;
   }
 
   private _getFileLoadOptions() : string[] {
