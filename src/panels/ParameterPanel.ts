@@ -153,9 +153,11 @@ export class ParameterPanel {
             break;
 
           case 'parametersearch':
-            this._parameterSearchButton(+text).then( () => {
-              this._updateWebview(extensionUri);
-            });
+            if (this._checkAuthentication()){
+              this._parameterSearchButton(+text).then( () => {
+                this._updateWebview(extensionUri);
+              });
+            }
             break;
           case 'getparameters':
             if (this._checkAuthentication()){
@@ -318,7 +320,7 @@ export class ParameterPanel {
   private _checkAuthentication() : boolean {
     let isValid: boolean = this._getAuth().length > 10;
     if (!isValid) {
-      vscode.window.showErrorMessage('Setting "Stitch: Basic Authentication String" has not been set.');
+      vscode.window.showErrorMessage("Setting 'Stitch: Basic Authentication String' has not been set.");
     }
 
     return isValid;
