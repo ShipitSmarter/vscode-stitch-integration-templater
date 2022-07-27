@@ -11,7 +11,7 @@ function main() {
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
   // document.getElementById("refresh").addEventListener("click", refreshContent);
-  document.getElementById("load").addEventListener("click",loadFile);
+  // document.getElementById("load").addEventListener("click",loadFile);
 
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
@@ -51,18 +51,21 @@ function main() {
   for (const field of parameterOptionsFields) {
     field.addEventListener("keydown", parameterOptionsSelect);
 
-      // if parameter search visible: focus and show options
-      if (field.hidden === false) {
-        // focus and show items
-        field.focus();
-        // field.dispatchEvent(new Event('click'));
-        // field.dispatchEvent(new Event('mousedown')); 
-        
-        // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
-        // field.dispatchEvent(new Event('keydown', {
-        //     bubbles: true, cancelable: true, keyCode: 13
-        // }));
-      }
+    // if parameter search visible: focus and show options
+    if (field.hidden === false) {
+      // focus and show items
+      field.focus();
+
+      // setTimeout(() => {field.click();}, 100);
+      // field.click();
+      // field.dispatchEvent(new Event('click'));
+      // field.dispatchEvent(new Event('mousedown')); 
+      
+      // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
+      // field.dispatchEvent(new Event('keydown', {
+      //     bubbles: true, cancelable: true, keyCode: 13
+      // }));
+    }
   }
 
   // global keyboard shortcuts
@@ -361,11 +364,6 @@ function saveValue(fieldId) {
 
 function refreshContent() {
   vscodeApi.postMessage({ command: "refreshcontent", text: "" });
-}
-
-function loadFile() {
-  var path = document.getElementById("files").value;
-  vscodeApi.postMessage({ command: "loadfile", text: path });
 }
 
 function updateFieldOutlineAndTooltip(fieldId) {

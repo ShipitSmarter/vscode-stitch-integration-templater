@@ -200,19 +200,6 @@ export class ParameterPanel {
             
             break;
 
-          case 'loadfile':
-            this._loadFile(text);
-
-            // clear previous responses and update webview
-            this._currentValues= [];
-            this._currentChangeReasonValues = [];
-            this._currentTimestampValues = [];
-            this._extendedHistoryValues = [];
-            this._setResponseValues = [];
-            this._getResponseValues = [];
-            this._updateWebview(extensionUri);
-            break;
-
           case "savevalue":
             var classIndexValue = text.split('|');
             var clas = classIndexValue[0];
@@ -284,6 +271,14 @@ export class ParameterPanel {
       this._fieldValues[filesIndex] = loadFile;
       this._getPath();
       this._loadFile(loadFile);
+
+      // clear previous responses and update webview
+      this._currentValues= [];
+      this._currentChangeReasonValues = [];
+      this._currentTimestampValues = [];
+      this._extendedHistoryValues = [];
+      this._setResponseValues = [];
+      this._getResponseValues = [];
       this._updateWebview(extensionUri);
     }
   }
