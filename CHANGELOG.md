@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.10
+- Get/set parameters
+  - Authentication is now through setting 'Stitch: Basic Authentication String'. Removed auth input fields and file creation logic.
+
 ## 1.6.9
 - Get/set parameters
   - Update authentication
