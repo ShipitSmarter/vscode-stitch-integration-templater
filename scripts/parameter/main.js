@@ -14,6 +14,9 @@ function main() {
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
 
+  // show auth checkbox
+  document.getElementById("showauth").addEventListener("change", fieldChange);
+
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown");
   for (const field of dropdowns) {
@@ -119,6 +122,14 @@ function fieldChange(event) {
     case 'previous':
       updateHighlightSet();
       updateCurrentValuesHighlight();
+      break;
+
+    case 'showauth':
+      if (field.checked) {
+        document.getElementById("authsection").hidden = false;
+      } else {
+        document.getElementById("authsection").hidden = true;
+      }
       break;
     case 'environment':
       showProd();

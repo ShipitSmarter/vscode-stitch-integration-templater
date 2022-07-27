@@ -14,6 +14,8 @@ const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
+const userIndex = 8;
+const pwIndex = 9;
 
 // type defs
 type ParameterObject = {
@@ -61,6 +63,7 @@ export class ParameterPanel {
   private _extendedHistoryValues: string[] = [];
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
+  private _showAuth: boolean = false;
   private _processingSet: boolean = false;
   private _processingGet: boolean = false;
   private _managerAuth: string = '';
@@ -255,6 +258,9 @@ export class ParameterPanel {
                 break;
               case 'previous':
                 this._previous = toBoolean(value);
+                break;
+              case 'showauth':
+                this._showAuth = toBoolean(value);
                 break;
             }
             
@@ -732,6 +738,7 @@ export class ParameterPanel {
       this._extendedHistoryValues,
       this._getResponseValues,
       this._previous,
+      this._showAuth,
       this._processingSet,
       this._processingGet,
       this._environmentOptions,

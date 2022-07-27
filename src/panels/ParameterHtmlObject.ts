@@ -10,6 +10,8 @@ const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
+const userIndex = 8;
+const pwIndex = 9;
 
 // type defs
 type ResponseObject = {
@@ -45,6 +47,7 @@ export class ParameterHtmlObject {
     private _extendedHistoryValues: string[],
     private _getResponseValues: ResponseObject[],
     private _previous: boolean,
+    private _showAuth: boolean,
     private _processingSet: boolean,
     private _processingGet: boolean,
     private _environmentOptions: string[],
@@ -87,6 +90,8 @@ export class ParameterHtmlObject {
             ${this._codeCompanyFields()}
             <vscode-text-field id="focusline" value="${this._focusLine > 0 ? this._focusLine+'' : ''}" hidden></vscode-text-field>
         </section>
+
+        ${this._getAuthenticationItems()}
         
         <section class="rowflex">
           <section class="rowsingle">
@@ -148,6 +153,43 @@ export class ParameterHtmlObject {
         <vscode-text-field id="${cc.codecompany}" class="codecompanylookupfield" value="${cc.company}" hidden></vscode-text-field>
       `;
     }
+
+    return html;
+  }
+
+  private _getAuthenticationItems(): string {
+
+    let userField: string = /*html*/ `<vscode-text-field id="user" class="field" index="${userIndex}" ${valueString(this._fieldValues[userIndex])}></vscode-text-field>`;
+    let pwField: string = /*html*/ `<vscode-text-field id="pw" class="field" index="${pwIndex}" ${valueString(this._fieldValues[pwIndex])}></vscode-text-field>`;
+
+    let html: string = /*html*/ `
+
+    <section class="rowsingle">
+      <vscode-divider role="separator"></vscode-divider>
+
+      <section class="component-example">
+        <vscode-checkbox id="showauth" class="showauth" ${checkedString(this._showAuth)}>Authentication</vscode-checkbox>
+      </section>
+
+      <section id="authsection" class="component-example" ${hiddenString(this._showAuth)}>
+        <div class="floatleftnopadding">
+          User:
+        </div>
+        <div class="floatleft">
+          ${userField}
+        </div>
+        <div class="floatleftnopadding">
+          Password:
+        </div>
+        <div class="floatleft">
+          ${pwField}
+        </div>
+      </section>
+
+      <vscode-divider role="separator"></vscode-divider>
+    </section>
+    
+    `;
 
     return html;
   }
