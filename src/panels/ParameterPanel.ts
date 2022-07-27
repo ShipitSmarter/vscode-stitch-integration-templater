@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -72,7 +72,7 @@ export class ParameterPanel {
   private _focusLine: number = -1;
 
   // constructor
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
     this._panel = panel;
 
     // set initial values
@@ -99,18 +99,25 @@ export class ParameterPanel {
 
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
+
+    // if loadFile: load file
+    this._loadFileIfPresent(extensionUri,loadFile);
   }
 
   // METHODS
-  public static render(extensionUri: vscode.Uri, context: vscode.ExtensionContext) {
+  public static render(extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
     if (ParameterPanel.currentPanel) {
       ParameterPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
+
+      // if loadFile: load file
+      ParameterPanel.currentPanel._loadFileIfPresent(extensionUri,loadFile);
+
     } else {
       const panel = vscode.window.createWebviewPanel("get-parameters", "Get/Set Parameters", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
-      ParameterPanel.currentPanel = new ParameterPanel(panel, extensionUri, context);
+      ParameterPanel.currentPanel = new ParameterPanel(panel, extensionUri, context, loadFile);
     }
   }
 
@@ -183,10 +190,12 @@ export class ParameterPanel {
           case 'savetofile':
             if (this._checkSaveFolder())  {
               // save to file
-              let fileName:string = 'Saved_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
-              this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+              let fileNameProposed:string = 'Saved_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
+              let isDir:boolean = isDirectory(this._fieldValues[saveIndex]);
+              let filePath: string = this._fieldValues[saveIndex] + (isDir ? ('/' + fileNameProposed) : '');
+              this._writeFile(filePath);
               // confirm
-              vscode.window.showInformationMessage('Input saved to ' + fileName);
+              vscode.window.showInformationMessage('Input saved to ' + nameFromPath(filePath));
             }
             
             break;
@@ -227,9 +236,9 @@ export class ParameterPanel {
                     this._cropLines(nofLines);
 
                     // update company, customer, change reason fields
-                    this._codeCompanyValues = this._fillWithLastUnempty(this._codeCompanyValues,nofLines);
-                    this._codeCustomerValues = this._fillWithLastUnempty(this._codeCustomerValues,nofLines);
-                    this._changeReasonValues = this._fillWithLastUnempty(this._changeReasonValues,nofLines,this._fieldValues[allChangeReasonsIndex]);
+                    this._codeCompanyValues = this._fillWithLastUnempty(this._codeCompanyValues,nofLines-1);
+                    this._codeCustomerValues = this._fillWithLastUnempty(this._codeCustomerValues,nofLines-1);
+                    this._changeReasonValues = this._fillWithLastUnempty(this._changeReasonValues,nofLines-1,this._fieldValues[allChangeReasonsIndex]);
 
                     // update webview
                     this._updateWebview(extensionUri);
@@ -270,8 +279,17 @@ export class ParameterPanel {
     );
   }
 
+  private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
+    if (!isEmpty(loadFile)) {
+      this._fieldValues[filesIndex] = loadFile;
+      this._getPath();
+      this._loadFile(loadFile);
+      this._updateWebview(extensionUri);
+    }
+  }
+
   private _checkSaveFolder(): boolean {
-    let isValid: boolean = fs.existsSync(this._fieldValues[saveIndex]);
+    let isValid: boolean = (fs.existsSync(this._fieldValues[saveIndex]) || fs.existsSync(parentPath(cleanPath(this._fieldValues[saveIndex]))));
     if (!isValid) {
       vscode.window.showErrorMessage('Save folder is not an existing directory');
     }
@@ -367,7 +385,8 @@ export class ParameterPanel {
 
     // save values to file
     let fileName:string = 'Set_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
-    this._writeFile(this._fieldValues[saveIndex]+ '/'+ fileName);
+    let fileDir: string = isDirectory(this._fieldValues[saveIndex]) ? this._fieldValues[saveIndex] : parentPath(cleanPath(this._fieldValues[saveIndex]));
+    this._writeFile(fileDir + '/'+ fileName);
 
     // clear previous responses and update webview
     this._currentValues= [];
@@ -579,7 +598,7 @@ export class ParameterPanel {
     const fileContent = fs.readFileSync(filePath, {encoding:'utf8'});
 
     let skipheader:boolean = true;
-    let parameterLines: string[] = fileContent.split('\r\n');
+    let parameterLines: string[] = fileContent.replace(/\r/g,'').split('\n');
 
     // remove empty lines and header line
     parameterLines = parameterLines.filter(el => !el.startsWith(this._delimiter)).filter(el => !isEmpty(el));
@@ -624,12 +643,12 @@ export class ParameterPanel {
     let fileContent: string = 'CodeCompany;CodeCustomer;Name;PreviousValue;NewValue;ChangeReason\r\n';
     for (let index=0; index < this._codeCompanyValues.length; index++) {
       // construct line
-      fileContent +=  this._codeCompanyValues[index] + this._delimiter
-                    + this._codeCustomerValues[index] + this._delimiter
-                    + this._parameterNameValues[index] + this._delimiter
-                    + this._previousValues[index] + this._delimiter
-                    + this._newValues[index] + this._delimiter
-                    + this._changeReasonValues[index];
+      fileContent +=  (this._codeCompanyValues[index] ?? '') + this._delimiter
+                    + (this._codeCustomerValues[index] ?? '') + this._delimiter
+                    + (this._parameterNameValues[index] ?? '') + this._delimiter
+                    + (this._previousValues[index] ?? '') + this._delimiter
+                    + (this._newValues[index] ?? '') + this._delimiter
+                    + (this._changeReasonValues[index]?? '');
 
       // add newline
       if (index !== this._codeCompanyValues.length -1) {
@@ -638,7 +657,7 @@ export class ParameterPanel {
     }
 
     // write to file
-    fs.writeFileSync(filePath,fileContent);
+    fs.writeFileSync(filePath,fileContent,{encoding:'utf8',flag:'w'});
   }
 
   private async _getAPIDetails() {

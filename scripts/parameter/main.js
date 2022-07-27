@@ -53,9 +53,20 @@ function main() {
 
       // if parameter search visible: focus and show options
       if (field.hidden === false) {
-        parameterOptionsStyleAndFocus(field.id);        
+        // focus and show items
+        field.focus();
+        // field.dispatchEvent(new Event('click'));
+        // field.dispatchEvent(new Event('mousedown')); 
+        
+        // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
+        // field.dispatchEvent(new Event('keydown', {
+        //     bubbles: true, cancelable: true, keyCode: 13
+        // }));
       }
   }
+
+  // global keyboard shortcuts
+  document.addEventListener("keydown",globalKeys);
 
   // actions on panel load
   updateHighlightSet();
@@ -90,7 +101,8 @@ function fieldChange(event) {
       updateFieldOutlineAndTooltip(rowField.id);
     }
    
-    if (checkIfDuplicate(+row)) {
+    const row = field.getAttribute('index');
+    if (checkIfDuplicate(parseInt(row))) {
       checkFields();
     } else {
       updateFieldOutlineAndTooltip(field.id);
@@ -122,52 +134,10 @@ function fieldChange(event) {
   }
 }
 
-function parameterOptionsStyleAndFocus(fieldId) {
-  const field = document.getElementById(fieldId);
-
-  // update field style
-  field.style.height = "1.6rem";
-  field.style.lineHeight = "1.6rem";
-  field.style.fontSize = "0.8rem";
-  field.style.fontWeight = "normal";
-  field.style.borderWidth = "0px";
-  field.style.fontFamily = document.body.style.fontFamily;
-
-  // update text and background color based on theme
-  if (document.body.classList.contains('vscode-dark')) {
-    field.style.background = '#353535';
-    field.style.color = '#CCCCCC';
-  } else if (document.body.classList.contains('vscode-high-contrast')) {
-    field.style.background = '#000000';
-    field.style.color = '#FFFFFF';
-  }
-
-  // focus and show items
-  field.focus();
-  field.dispatchEvent(new Event('click'));
-
-  // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
-  // const ke = new KeyboardEvent('keydown', {
-  //     bubbles: true, cancelable: true, keyCode: 13
-  // });
-  // field.dispatchEvent(ke);
-}
-
-function parameterOptionsShow(event) {
-  const field = event.target;
-
-  // parameter search on enter
-  if (event.key === 'Enter') {
-    const index = field.id.replace('parametername','');
-    const codeCompany = document.getElementById("codecompany" + index).value;
-    const codeCustomer = document.getElementById("codecustomer" + index).value;
-
-    if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
-      parameterSearch(field.id);
-    } else {
-      errorMessage("Company, customer and parameter name values may not be empty");
-    }
-    
+function globalKeys(event) {
+  if (event.key === 's' && event.ctrlKey) {
+    // Ctrl + S: save input to file
+    saveToFile();
   }
 }
 
@@ -204,6 +174,24 @@ function addNewLine(event) {
   }
 }
 
+function parameterOptionsShow(event) {
+  const field = event.target;
+
+  // parameter search on enter
+  if (event.key === 'Enter') {
+    const index = field.id.replace('parametername','');
+    const codeCompany = document.getElementById("codecompany" + index).value;
+    const codeCustomer = document.getElementById("codecustomer" + index).value;
+
+    if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
+      parameterSearch(field.id);
+    } else {
+      errorMessage("Company, customer and parameter name values may not be empty");
+    }
+    
+  }
+}
+
 function parameterOptionsSelect(event) {
   if (event.key === 'Enter' && event.ctrlKey) {
     const field = event.target;
@@ -236,7 +224,7 @@ function focusAndCursor(fieldId) {
 function checkIfDuplicate(row) {
   let isDuplicate = false;
 
-  let nofLines = +document.getElementById('noflines').value;
+  let nofLines = parseInt(document.getElementById('noflines').value);
   let cocos = document.querySelectorAll(".codecompanyfield");
   let cocus = document.querySelectorAll(".codecustomerfield");
   let pnames = document.querySelectorAll(".parameternamefield");

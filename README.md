@@ -34,6 +34,13 @@ Contributes the following commands, which are available from the *Command Palett
     ![Get Set Parameters](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/get_set_parameters_use.png)
 
 
+    It is also possible to right-click on a CSV file and select `Load file to 'get/set parameters'` to load it directly to a new or existing instance of the panel:
+    
+    ![Load CSV file to get/set parameters](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/load_file_to_get_set_parameters.png)
+
+
+    Note: to enable this, .vscode/settings.json must have setting `stich.parameters.enabled` = `true`.
+
 ## Dependencies
 This dashboard is a graphical frontend for the ShipitSmarter integration automation PowerShell script, and does not function independently without it.
 

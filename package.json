@@ -2,7 +2,7 @@
   "name": "stitch-integration-templater",
   "displayName": "Stitch integration templater",
   "description": "Provides dashboard for creating and updating Stitch carrier integrations",
-  "version": "1.6.6",
+  "version": "1.6.7",
   "publisher": "ShipitSmarter",
 	"author": {
 		"name": "ShipitSmarter",
@@ -33,7 +33,8 @@
   "activationEvents": [
     "onCommand:stitch.integration-templater",
     "onCommand:stitch.postman-collection",
-    "onCommand:stitch.parameters"
+    "onCommand:stitch.parameters",
+    "onCommand:stitch.parameters-loadcsv"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -49,8 +50,21 @@
       {
         "command": "stitch.parameters",
         "title": "Stitch: Get/Set parameters"
+      },
+      {
+        "command": "stitch.parameters-loadcsv",
+        "title": "Load file to 'get/set parameters'"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "stitch.parameters-loadcsv",
+          "when": "resourceExtname == .csv && config.stitch.parameters.enabled",
+          "group": "stitch"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

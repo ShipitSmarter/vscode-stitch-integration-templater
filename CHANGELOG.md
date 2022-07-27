@@ -1,5 +1,22 @@
 # Change Log
 
+## 1.6.7
+- Get/set parameters
+  - Save input
+    - If `Save folder` field contains a file location, hitting `Save input` now saves to file (instead of creating a new file every time)
+    - Saving input can now be triggered by hitting `Ctrl` + `S`
+  - Load file
+    - A CSV file can now be loaded by right-clicking on it in the explorer menu and selecting `Load to 'get/set parameters'`
+      - Can also be used if no `get/set parameters` panel has been opened yet. If the panel is already present, file will load to that one.
+      - Note: only works if .vscode/settings.json has setting `stitch.parameters.enabled` = `true`
+  
+  - Fix:
+    - Empty values are now saved as empty string instead of 'undefined'
+    - On adding one or multiple lines, last unempty company/customer/change reason values are now correctly copied to all empty fields following
+    - Current values are now correctly shown if they contain html sensitive characters
+    - CSV file load splits file lines on `\n` instead of `\r\n`
+    - parameter options dropdown now correctly matches theme colors
+
 ## 1.6.6
 - Get/set parameters
   - Horizontal tabbing through input fields

@@ -187,8 +187,8 @@ export class ParameterHtmlObject {
       </section>
 
       <section class="component-example">
-        <div class="floatleftnopadding">
-          Save file to folder:
+        <div class="floatleftnopadding" title="Must contain a valid directory or file path">
+          Save file to:
         </div>
         <div class="floatleft">
           <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
@@ -280,7 +280,7 @@ export class ParameterHtmlObject {
 
       currentValues += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${this._currentValues[index] ?? ''}" readonly></vscode-text-field>
+          <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${escapeHtml(this._currentValues[index] ?? '')}" readonly></vscode-text-field>
         </section>
       `;
 
