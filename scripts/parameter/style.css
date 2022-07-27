@@ -8,6 +8,11 @@
   margin-top: 0.5rem;
 }
 
+#user,
+#pw {
+  width: 15rem;
+}
+
 .parameternamefield,
 .parameteroptionsfield,
 .previousvaluefield,
