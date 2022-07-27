@@ -33,7 +33,8 @@
   "activationEvents": [
     "onCommand:stitch.integration-templater",
     "onCommand:stitch.postman-collection",
-    "onCommand:stitch.parameters"
+    "onCommand:stitch.parameters",
+    "onCommand:stitch.parameters-loadcsv"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -52,7 +53,7 @@
       },
       {
         "command": "stitch.parameters-loadcsv",
-        "title": "Stitch: load file in parameters tool"
+        "title": "Load file to 'get/set parameters'"
       }
     ],
     "menus": {
