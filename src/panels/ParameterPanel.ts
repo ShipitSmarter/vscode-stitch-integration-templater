@@ -14,8 +14,6 @@ const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
-const userIndex = 8;
-const pwIndex = 9;
 
 // type defs
 type ParameterObject = {
@@ -160,25 +158,30 @@ export class ParameterPanel {
             });
             break;
           case 'getparameters':
-            // clear previous responses and update webview
-            this._currentValues= [];
-            this._currentChangeReasonValues = [];
-            this._currentTimestampValues = [];
-            this._extendedHistoryValues = [];
-            this._getResponseValues = [];
-            this._processingGet = true;
-            this._updateWebview(extensionUri);
-
-            // retrieve 
-            this._getCurrentValues().then(() => {
-              this._processingGet = false;
-              // update panel
+            if (this._checkAuthentication()){
+              // clear previous responses and update webview
+              this._currentValues= [];
+              this._currentChangeReasonValues = [];
+              this._currentTimestampValues = [];
+              this._extendedHistoryValues = [];
+              this._getResponseValues = [];
+              this._processingGet = true;
               this._updateWebview(extensionUri);
-            });
+
+              // retrieve 
+              this._getCurrentValues().then(() => {
+                this._processingGet = false;
+                // update panel
+                this._updateWebview(extensionUri);
+              });
+            } else {
+              this._updateWebview(extensionUri);
+            }
+            
             break;
 
           case 'setparameters':
-            if (this._checkSaveFolder())  {
+            if (this._checkSaveFolder() && this._checkAuthentication())  {
               this._setParametersButton(extensionUri).then(() => {
                 // confirm
                 vscode.window.showInformationMessage('Parameters set');
@@ -188,10 +191,6 @@ export class ParameterPanel {
             } else {
               this._updateWebview(extensionUri);
             }
-            break;
-
-          case 'saveauth':
-            this._saveAuth();
             break;
 
           case 'savetofile':
@@ -278,31 +277,16 @@ export class ParameterPanel {
   }
 
   private _getAuth() : string {
-    let authString:string = Buffer.from(this._fieldValues[userIndex] + ':' + this._fieldValues[pwIndex]).toString('base64');
-    return 'Basic ' + authString;
-  }
+    // get user/pw from input/file
+    // let user: string = this._fieldValues[userIndex];
+    // let pw: string = this._fieldValues[pwIndex];
+    // let authString:string = Buffer.from(user + ':' + pw).toString('base64');
+    // return 'Basic ' + authString;
 
-  private async _saveAuth() {
-    // get file path
-    let randomSettingFilePath = await getWorkspaceFile(this._settingsGlob + '*.json');
-    let settingsDir = parentPath(cleanPath(randomSettingFilePath));
-    let rootDir = parentPath(parentPath(parentPath(settingsDir)));
-    let filePath = rootDir + '/' + this._authLocation;
+    // get string from settings
+    let authString: string = vscode.workspace.getConfiguration().get<string>('stitch.basicAuthenticationString') ?? '';
 
-    // get file content
-    let fileContent:string = `{
-      "user": "${this._fieldValues[userIndex]}",
-      "pw": "${this._fieldValues[pwIndex]}"\r\n}`;
-
-    // make dir if not exists
-    let fileDir = parentPath(filePath);
-    fs.mkdirSync(fileDir,{ recursive: true });
-
-    // write to file
-    fs.writeFileSync(filePath,fileContent,{encoding:'utf8',flag:'w'});
-
-    // tell the world
-    vscode.window.showInformationMessage(`Saved auth to ${nameFromPath(filePath)}`);
+    return authString;
   }
 
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
@@ -326,6 +310,15 @@ export class ParameterPanel {
     let isValid: boolean = (fs.existsSync(this._fieldValues[saveIndex]) || fs.existsSync(parentPath(cleanPath(this._fieldValues[saveIndex]))));
     if (!isValid) {
       vscode.window.showErrorMessage('Save folder is not an existing directory');
+    }
+
+    return isValid;
+  }
+
+  private _checkAuthentication() : boolean {
+    let isValid: boolean = this._getAuth().length > 10;
+    if (!isValid) {
+      vscode.window.showErrorMessage('Setting "Stitch: Basic Authentication String" has not been set.');
     }
 
     return isValid;
@@ -693,15 +686,6 @@ export class ParameterPanel {
 
   private async _getAPIDetails() {
     this._urls = [];
-
-    // get stuff if file exists
-    let files = await getWorkspaceFiles('**/' + this._authLocation);
-    if (files.length > 0) {
-      let fileContent = await getFileContentFromGlob('**/' + this._authLocation);
-      let stuffDetails = JSON.parse(fileContent);
-      this._fieldValues[userIndex] = stuffDetails.user;
-      this._fieldValues[pwIndex] = stuffDetails.pw;
-    }
 
     // retrieve urls
     this._urls[0] = await this._getUrlObject(this._settingsGlob + 'parameter_get.json','getparameters');

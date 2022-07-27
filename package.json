@@ -64,6 +64,16 @@
           "group": "stitch"
         }
       ]
+    },
+    "configuration": {
+      "title": "Stitch: API Authentication",
+      "properties": {
+        "stitch.basicAuthenticationString": {
+          "type": "string",
+          "default": "Basic ...",
+          "description": ""
+        }
+      }
     }
   },
   "scripts": {
