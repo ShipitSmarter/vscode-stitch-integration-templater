@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.6.8
+- Get/set parameters
+  - Removed explicit load options. From now on, load from right-mouse-click in explorer menu.
+  - When parameter option is selected, no longer necessary to switch back to field using `Ctrl` + `Enter`. Get/Set will work right away. To continue search, one still can press `Ctrl` + `Enter` and update the parameter manually.
+
 ## 1.6.7
 - Get/set parameters
   - Save input
