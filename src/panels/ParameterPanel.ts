@@ -71,7 +71,7 @@ export class ParameterPanel {
   private _environmentOptions: string[] = [];
   private _codeCompanies: CodeCompanyObject[] = [];
   private _settingsGlob: string = "**/templater/parameters/";
-  private _stuffLocation: string = 'stuff/stuff.json';
+  private _authLocation: string = 'parameters_auth/auth.json';
   private _focusLine: number = -1;
 
   // constructor
@@ -189,9 +189,7 @@ export class ParameterPanel {
               this._updateWebview(extensionUri);
             }
             break;
-          case 'checkauth':
 
-            break;
           case 'saveauth':
             this._saveAuth();
             break;
@@ -289,7 +287,7 @@ export class ParameterPanel {
     let randomSettingFilePath = await getWorkspaceFile(this._settingsGlob + '*.json');
     let settingsDir = parentPath(cleanPath(randomSettingFilePath));
     let rootDir = parentPath(parentPath(parentPath(settingsDir)));
-    let filePath = rootDir + '/' + this._stuffLocation;
+    let filePath = rootDir + '/' + this._authLocation;
 
     // get file content
     let fileContent:string = `{
@@ -697,9 +695,9 @@ export class ParameterPanel {
     this._urls = [];
 
     // get stuff if file exists
-    let files = await getWorkspaceFiles('**/' + this._stuffLocation);
+    let files = await getWorkspaceFiles('**/' + this._authLocation);
     if (files.length > 0) {
-      let fileContent = await getFileContentFromGlob('**/' + this._stuffLocation);
+      let fileContent = await getFileContentFromGlob('**/' + this._authLocation);
       let stuffDetails = JSON.parse(fileContent);
       this._fieldValues[userIndex] = stuffDetails.user;
       this._fieldValues[pwIndex] = stuffDetails.pw;

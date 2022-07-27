@@ -185,9 +185,6 @@ export class ParameterHtmlObject {
           ${pwField}
         </div>
         <div class="floatleft">
-          ${this._getButton('checkauth','Check','','secondary')}
-        </div>
-        <div class="floatleft">
           ${this._getButton('saveauth','Save','codicon-arrow-right','secondary')}
         </div>
       </section>
