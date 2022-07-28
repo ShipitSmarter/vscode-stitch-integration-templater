@@ -329,8 +329,10 @@ export class ParameterPanel {
   private _getPath(): boolean {
     let updatePath:boolean = false;
     if (fs.existsSync(this._fieldValues[filesIndex])) {
-      let path: string = parentPath(cleanPath(this._fieldValues[filesIndex]));
-      this._fieldValues[saveIndex] = path;
+      // let path: string = parentPath(cleanPath(this._fieldValues[filesIndex]));
+      // this._fieldValues[saveIndex] = path;
+      this._fieldValues[saveIndex] = this._fieldValues[filesIndex];
+
       updatePath = true;
     }
 

@@ -8,14 +8,6 @@
   margin-top: 0.5rem;
 }
 
-#user{
-  width: 13rem;
-}
-
-#pw {
-  width: 10rem;
-}
-
 .parameternamefield,
 .parameteroptionsfield,
 .previousvaluefield,
@@ -98,6 +90,10 @@
   margin-bottom: 0.5rem;
   display:block;
   white-space: nowrap;
-  width: 10rem;
+  width: 15rem;
+}
+
+#savename {
+  font-size: 0.8rem;
 }
 
