@@ -735,8 +735,8 @@ export class ParameterPanel {
     }
 
     // clear parameter search values before rendering
-    let psearchValues: string[][] = this._parameterSearchValues;
-    this._parameterSearchValues = [];
+    // let psearchValues: string[][] = this._parameterSearchValues;
+    // this._parameterSearchValues = [];
 
     // reset updatelines flag
     let focusLine:number = this._focusLine;
@@ -749,7 +749,7 @@ export class ParameterPanel {
       this._codeCompanyValues,
       this._codeCustomerValues,
       this._parameterNameValues,
-      psearchValues,
+      this._parameterSearchValues,
       this._previousValues,
       this._newValues,
       this._changeReasonValues,

@@ -331,17 +331,15 @@ export class ParameterHtmlObject {
       `;
 
       var showSearch: boolean = this._parameterSearchValues[row] !== undefined;
-
-      var select: string = /*html*/ `
-        <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}2" position="below" ${hiddenString(showSearch)}>
-          ${selectOptions(this._parameterSearchValues[row] ?? [''])}
-        </select>`;
+      let selectedOption = showSearch ? this._parameterSearchValues[row].filter(el => el.startsWith(this._parameterNameValues[row] + ' '))[0] : '';
 
       parameterNames += /*html*/`
         <section class="component-pname">
           <div class="floatpname">
             <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" tabindex="${row +1}3" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
-            ${select}
+            <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}2" position="below" title="${selectedOption}" ${hiddenString(showSearch)}>
+              ${selectOptions(this._parameterSearchValues[row] ?? [''],selectedOption)}
+            </select>
           </div>
         </section>
       `;

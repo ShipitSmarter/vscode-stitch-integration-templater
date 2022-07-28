@@ -324,10 +324,11 @@ export function dropdownOptions(options:(string|number)[]) : string {
 	return optionsString;
 }
 
-export function selectOptions(options: (string|number)[]) : string {
+export function selectOptions(options: (string|number)[], selected: (string|number) = '') : string {
 	let optionsString : string = '';
 	for (const option of options) {
-		optionsString += '\n    <option>' + option + '</option>';
+		let selectedString = option === selected ? 'selected' : '';
+		optionsString += `\n    <option value="${option}" ${selectedString}>${option}</option>`;
 	}
 
 	return optionsString;

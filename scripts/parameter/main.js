@@ -52,6 +52,7 @@ function main() {
   for (const field of parameterOptionsFields) {
     field.addEventListener("keydown", parameterOptionsSelect);
     field.addEventListener("change",updateParameterFromOptions);
+    //field.title = field.value;
 
     // if parameter search visible: focus and show options
     if (field.hidden === false) {
@@ -224,6 +225,11 @@ function parameterOptionsSelect(event) {
 
 function updateParameterFromOptions(event) {
   const field = event.target;
+
+  // update options hover-over
+  field.title = field.value;
+
+  // find parameter name field
   const value = field.value.replace(/\s\([\s\S]*/g,'');
   const index = field.getAttribute('index');
   const parameterField = document.getElementById('parametername' + index);
@@ -441,7 +447,7 @@ function getContentHint(fieldType) {
 function checkFields() {
   // check if any incorrect field contents and update fields outlining and tooltip in the process
   var check = true;
-  const fields = document.querySelectorAll("#save,.codecompanyfield,.codecustomerfield,.parameternamefield,.changereasonfield,.parameteroptionsfield");
+  const fields = document.querySelectorAll("#save,.codecompanyfield,.codecustomerfield,.parameternamefield,.changereasonfield");
   for (const field of fields) {
     check = updateFieldOutlineAndTooltip(field.id) ? check : false;
   }

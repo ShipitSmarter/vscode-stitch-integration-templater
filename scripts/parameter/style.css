@@ -16,14 +16,20 @@
 }
 
 .parameteroptionsfield {
-  height: 1.6rem;
-  line-height: 1.6rem;
+  height: 1.65rem;
+  line-height: 1.65rem;
   font-size: 0.8rem;
   font-weight: normal;
-  border-width: 0px;
+  /* border-width: 0px; */
   font-family: inherit;
   color: var(--vscode-input-foreground);
   background: var(--vscode-input-background);
+  margin-bottom: 0.1rem;
+}
+
+.parameteroptionsfield:focus {
+  border-color: var(--vscode-focusBorder);
+  outline: none;
 }
 
 .changereasonfield,
