@@ -44,31 +44,11 @@ function main() {
     field.addEventListener("keydown",addNewLine);
   }
 
-  // on save input focus: place cursor at end of content
-  //document.getElementById("savetofile").addEventListener("click",saveToFileFocus);
-
   // parameter search options select
   const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
   for (const field of parameterOptionsFields) {
     field.addEventListener("keydown", parameterOptionsSelect);
     field.addEventListener("change",updateParameterFromOptions);
-    //field.title = field.value;
-
-    // if parameter search visible: focus and show options
-    if (field.hidden === false) {
-      // focus and show items
-      field.focus();
-
-      // setTimeout(() => {field.click();}, 100);
-      // field.click();
-      // field.dispatchEvent(new Event('click'));
-      // field.dispatchEvent(new Event('mousedown')); 
-      
-      // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
-      // field.dispatchEvent(new Event('keydown', {
-      //     bubbles: true, cancelable: true, keyCode: 13
-      // }));
-    }
   }
 
   // global keyboard shortcuts
@@ -86,6 +66,12 @@ function main() {
 
   // set focus if line number present
   focusNewLine();
+
+  // set focus if parameter name index present
+  var pIndex = document.getElementById("focuspoptions").value;
+  if (!isEmpty(pIndex)) {
+    document.getElementById("parameteroptions" + pIndex).focus();
+  }
 }
 
 function fieldChange(event) {
@@ -171,15 +157,6 @@ function focusNewLine() {
   }
 }
 
-function saveToFileFocus(event) {
-  const field = event.target;
-  //field.scrollLeft = field.scrollWidth;
-  // var tempValue = field.value;
-  // field.value = '';
-  // field.value = tempValue;
-  // field.selectionStart = field.selectionEnd = field.value.length
-}
-
 function addNewLine(event) {
   const field = event.target;
   if (event.key === 'Enter' && event.ctrlKey) {
@@ -213,13 +190,23 @@ function parameterOptionsShow(event) {
 }
 
 function parameterOptionsSelect(event) {
-  if (event.key === 'Enter' && event.ctrlKey) {   
-    // hide/unhide
-    parameterField.hidden = false;
+  const field = event.target;
+
+  if (event.key === 'Enter' && event.ctrlKey) {
+    // delete search options
+    vscodeApi.postMessage({ command: "deloptions", text: event.target.getAttribute("index") });
+
+    // hide search options
     field.hidden = true;
 
-    // set focus and place cursor
-    focusAndCursor(parameterField.id);    
+    // find parameter name field
+    const value = field.value.replace(/\s\([\s\S]*/g,'');
+    const index = field.getAttribute('index');
+    const parameterField = document.getElementById('parametername' + index);
+
+    // unhide parameter field and focus
+    parameterField.hidden = false;
+    parameterField.focus();
   }
 }
 
@@ -237,15 +224,6 @@ function updateParameterFromOptions(event) {
   // update parameter value
   parameterField.value = value;
   parameterField.dispatchEvent(new Event('keyup'));
-}
-
-function focusAndCursor(fieldId) {
-  const field = document.getElementById(fieldId);
-
-  // focus and place cursor at end of content
-  const eol = field.value.length ?? 0;
-  field.focus();
-  // field.setSelectionRange(eol, eol);
 }
 
 function checkIfDuplicate(row) {
@@ -415,8 +393,6 @@ function updateFieldOutlineAndTooltip(fieldId) {
   // update and return output
   if (check === 'empty') {
     updateEmpty(field.id);
-  // } else if (fieldType === 'parameteroptionsfield' && field.hidden === false) {
-  //   updateWrong(field.id,'Select parameter and press Ctrl + Enter');
   } else if (check !== '' && check !== null) {
     updateWrong(field.id, getContentHint(fieldType));
   } else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
@@ -487,10 +463,7 @@ function invalidForm() {
 }
 
 function parameterSearch(fieldId) {
-  // const button = event.target;
-  // const index = +button.id.replace('parametersearch','');
   const index = document.getElementById(fieldId).getAttribute('index');
-
   vscodeApi.postMessage({ command: "parametersearch", text: index });
 }
 

@@ -71,6 +71,7 @@ export class ParameterPanel {
   private _settingsGlob: string = "**/templater/parameters/";
   private _authLocation: string = 'parameters_auth/auth.json';
   private _focusLine: number = -1;
+  private _focusParameterOptions: string = '';
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
@@ -154,6 +155,7 @@ export class ParameterPanel {
 
           case 'parametersearch':
             if (this._checkAuthentication()){
+              this._focusParameterOptions = text;
               this._parameterSearchButton(+text).then( () => {
                 this._updateWebview(extensionUri);
               });
@@ -162,11 +164,7 @@ export class ParameterPanel {
           case 'getparameters':
             if (this._checkAuthentication()){
               // clear previous responses and update webview
-              this._currentValues= [];
-              this._currentChangeReasonValues = [];
-              this._currentTimestampValues = [];
-              this._extendedHistoryValues = [];
-              this._getResponseValues = [];
+              this._clearResponses(true);
               this._processingGet = true;
               this._updateWebview(extensionUri);
 
@@ -206,6 +204,11 @@ export class ParameterPanel {
               vscode.window.showInformationMessage('Input saved to ' + nameFromPath(filePath));
             }
             
+            break;
+
+          case 'deloptions':
+            let row:number = +text;
+            this._parameterSearchValues[row] = [];
             break;
 
           case "savevalue":
@@ -298,13 +301,20 @@ export class ParameterPanel {
       this._loadFile(loadFile);
 
       // clear previous responses and update webview
-      this._currentValues= [];
-      this._currentChangeReasonValues = [];
-      this._currentTimestampValues = [];
-      this._extendedHistoryValues = [];
-      this._setResponseValues = [];
-      this._getResponseValues = [];
+      this._clearResponses();
       this._updateWebview(extensionUri);
+    }
+  }
+
+  private _clearResponses(excludeSetResponses:boolean = false) {
+    this._currentValues= [];
+    this._currentChangeReasonValues = [];
+    this._currentTimestampValues = [];
+    this._extendedHistoryValues = [];
+    this._getResponseValues = [];
+
+    if (!excludeSetResponses) {
+      this._setResponseValues = [];
     }
   }
 
@@ -420,12 +430,7 @@ export class ParameterPanel {
     this._writeFile(fileDir + '/'+ fileName);
 
     // clear previous responses and update webview
-    this._currentValues= [];
-    this._currentChangeReasonValues = [];
-    this._currentTimestampValues = [];
-    this._extendedHistoryValues = [];
-    this._setResponseValues = [];
-    this._getResponseValues = [];
+    this._clearResponses();
     this._processingSet = true;
     this._updateWebview(extensionUri);
 
@@ -656,6 +661,10 @@ export class ParameterPanel {
       this._changeReasonValues[index] = this._postParse(line[5]);
     }
 
+    // clear responses, parameter options
+    this._clearResponses();
+    this._parameterSearchValues = [];
+
     // set environment if present in file name
     const fileName:string = nameFromPath(filePath);
     for (const env of this._environmentOptions) {
@@ -734,13 +743,13 @@ export class ParameterPanel {
       await this._refresh();
     }
 
-    // clear parameter search values before rendering
-    // let psearchValues: string[][] = this._parameterSearchValues;
-    // this._parameterSearchValues = [];
-
     // reset updatelines flag
     let focusLine:number = this._focusLine;
     this._focusLine = -1;
+
+    // reset focus parameter name flag
+    let focusParameterOptions: string = this._focusParameterOptions;
+    this._focusParameterOptions = '';
 
     // construct panel html object and retrieve html
     let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
@@ -765,7 +774,8 @@ export class ParameterPanel {
       this._processingGet,
       this._environmentOptions,
       this._codeCompanies,
-      focusLine
+      focusLine,
+      focusParameterOptions
     );
 
     let html =  parameterHtmlObject.getHtml();
