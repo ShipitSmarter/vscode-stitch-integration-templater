@@ -1,4 +1,4 @@
-import { isEmpty } from "../general/general.js";
+import { isEmpty, nameFromPath } from "../general/general.js";
 
 const vscodeApi = acquireVsCodeApi();
 
@@ -43,6 +43,9 @@ function main() {
   for (const field of newLineFields) {
     field.addEventListener("keydown",addNewLine);
   }
+
+  // on save input focus: place cursor at end of content
+  //document.getElementById("savetofile").addEventListener("click",saveToFileFocus);
 
   // parameter search options select
   const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
@@ -132,7 +135,11 @@ function fieldChange(event) {
         saveValue(cr.id);
         updateFieldOutlineAndTooltip(cr.id);
       }
+      break;
 
+    case 'save':
+      // update name value
+      document.getElementById("savename").innerHTML = nameFromPath(field.value);
       break;
   }
 }
@@ -161,6 +168,15 @@ function focusNewLine() {
       focusParameter.focus();
     }
   }
+}
+
+function saveToFileFocus(event) {
+  const field = event.target;
+  //field.scrollLeft = field.scrollWidth;
+  // var tempValue = field.value;
+  // field.value = '';
+  // field.value = tempValue;
+  // field.selectionStart = field.selectionEnd = field.value.length
 }
 
 function addNewLine(event) {

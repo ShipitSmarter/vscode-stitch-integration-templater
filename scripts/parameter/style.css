@@ -72,9 +72,15 @@
   margin-right: 5rem;
 }
 
-.floatleftmuchpadding {
+.floatleftgetparameters {
   float: left;
-  padding-left: 16.5rem;
+  padding-left: 0.5rem;
+  padding-right: 1rem;
+}
+
+.floatleftchangereason {
+  float: left;
+  padding-left: 4.5rem;
 }
 
 .floatpsearch {
@@ -85,5 +91,13 @@
 .floatpname {
   float: left;
   margin-bottom: 0.5rem;
+}
+
+.floatsavename {
+  float: left;
+  margin-bottom: 0.5rem;
+  display:block;
+  white-space: nowrap;
+  width: 10rem;
 }
 

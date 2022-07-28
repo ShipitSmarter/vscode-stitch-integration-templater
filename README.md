@@ -41,7 +41,7 @@ Contributes the following commands, which are available from the *Command Palett
 
     Note: to enable this, .vscode/settings.json must have setting `stich.parameters.enabled` = `true`.
 
-## Setting: `Stitch: Basic Authentication String`
+### Setting: `Stitch: Basic Authentication String`
 - In order for API calls to SiS APIs from the extension to work, one must update the setting through `Ctrl` + `,` -> `Stitch: Basic Authentication String`: 
 
     ![Stitch Basic Authentication String](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/stitch_basic_auth_string_setting.png)
