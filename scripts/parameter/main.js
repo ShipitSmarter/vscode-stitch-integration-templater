@@ -1,4 +1,4 @@
-import { isEmpty } from "../general/general.js";
+import { isEmpty, nameFromPath } from "../general/general.js";
 
 const vscodeApi = acquireVsCodeApi();
 
@@ -10,6 +10,9 @@ function main() {
   document.getElementById("getparameters").addEventListener("click", getParameters);
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
+
+  // info onclick
+  document.getElementById("info").addEventListener("click",infoClick);
 
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
@@ -33,38 +36,22 @@ function main() {
   }
 
   // show parameter search options
-  const paramFields = document.querySelectorAll(".parameternamefield");
-  for (const field of paramFields) {
-    field.addEventListener("keydown",parameterOptionsShow);
-  }
+  // const paramFields = document.querySelectorAll(".parameternamefield");
+  // for (const field of paramFields) {
+  //   field.addEventListener("keydown",parameterOptionsShow);
+  // }
 
-  // new line on ctrl+enter in new value or change reason fields
-  const newLineFields = document.querySelectorAll(".newvaluefield,.changereasonfield");
-  for (const field of newLineFields) {
-    field.addEventListener("keydown",addNewLine);
+  // keydown actions inside grid
+  const lineFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
+  for (const field of lineFields) {
+    field.addEventListener("keydown",gridKeydown);
   }
 
   // parameter search options select
   const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
   for (const field of parameterOptionsFields) {
-    field.addEventListener("keydown", parameterOptionsSelect);
+    // field.addEventListener("keydown", parameterOptionsSelect);
     field.addEventListener("change",updateParameterFromOptions);
-
-    // if parameter search visible: focus and show options
-    if (field.hidden === false) {
-      // focus and show items
-      field.focus();
-
-      // setTimeout(() => {field.click();}, 100);
-      // field.click();
-      // field.dispatchEvent(new Event('click'));
-      // field.dispatchEvent(new Event('mousedown')); 
-      
-      // press 'Enter'; from https://stackoverflow.com/a/18937620/1716283
-      // field.dispatchEvent(new Event('keydown', {
-      //     bubbles: true, cancelable: true, keyCode: 13
-      // }));
-    }
   }
 
   // global keyboard shortcuts
@@ -80,14 +67,23 @@ function main() {
   processingSet();
   processingGet();
 
-  // set focus if line number present
-  focusNewLine();
+
+  // set focus on field if not empty
+  var focusId = document.getElementById("focusfield").value;
+  if (!isEmpty(focusId)) {
+    document.getElementById(focusId).focus();
+  }
 }
 
 function fieldChange(event) {
   const field = event.target;
   let className = field.classList[0];
   var fieldType = (['field','dropdown'].includes(className)) ? field.id : className;
+
+  // if the keydown is 'ctrl' or 'enter' or 'delete': skip
+  if (!['dropdown','parameteroptionsfield'].includes(className) && ['Enter','Control','Delete'].includes(event.key)) {
+    return;
+  }
 
   // save field value
   saveValue(field.id);
@@ -132,9 +128,46 @@ function fieldChange(event) {
         saveValue(cr.id);
         updateFieldOutlineAndTooltip(cr.id);
       }
+      break;
 
+    case 'save':
+      // update name value
+      document.getElementById("savename").innerHTML = nameFromPath(field.value);
       break;
   }
+}
+
+function gridKeydown(event) {
+  const field = event.target;
+  const fclass = field.classList[0];
+
+  if (event.key === 'Enter' && event.ctrlKey) {
+    // on ctrl + enter
+
+    if (['newvaluefield','changereasonfield'].includes(fclass)) {
+      // in newvalue, changereason: add new line
+      addLine(event);
+    } else if(fclass === 'parameteroptionsfield') {
+      // in parameteroptions: select
+      parameterOptionsSelect(event);
+    }
+  } else if (event.key === 'Delete' && event.ctrlKey) {
+    // on ctrl + delete: any grid field
+
+    deleteLine(event);
+
+  } else if (event.key === 'Enter') {
+    // on just enter
+
+    if (fclass === 'parameternamefield') {
+      // pname: search
+      parameterOptionsShow(event);
+    }
+  }
+}
+
+function infoClick(event) {
+  vscodeApi.postMessage({ command: "infoclick", text: "parameters" });
 }
 
 function globalKeys(event) {
@@ -144,70 +177,72 @@ function globalKeys(event) {
   }
 }
 
-function focusNewLine() {
-  let focusLine = document.getElementById("focusline").value;
+function addLine(event) {
+  const field = event.target;
 
-  if(focusLine.length > 0){
-    const focusCompany = document.getElementById("codecompany"+focusLine);
-    const focusCustomer = document.getElementById("codecustomer" + focusLine);
-    const focusParameter = document.getElementById("parametername"+focusLine);
-    focusParameter.focus();
+  let nofLinesField = document.getElementById("noflines");
+  let nofLines = parseInt(nofLinesField.value);
+  let index = parseInt(field.getAttribute("index"));
 
-    if (isEmpty(focusCompany.value)) {
-      focusCompany.focus();
-    } else if (isEmpty(focusCustomer.value)) {
-      focusCustomer.focus();
-    } else {
-      focusParameter.focus();
-    }
+  if (index === (nofLines-1)) {
+    nofLinesField.value = (nofLines + 1).toString();
+    nofLinesField.dispatchEvent(new Event('change'));
   }
 }
 
-function addNewLine(event) {
+function deleteLine(event) {
   const field = event.target;
-  if (event.key === 'Enter' && event.ctrlKey) {
-    let nofLinesField = document.getElementById("noflines");
-    let nofLines = +nofLinesField.value;
-    let index = field.getAttribute("index");
 
-    if (+index === (nofLines-1)) {
-      nofLinesField.value = (nofLines + 1).toString();
-      nofLinesField.dispatchEvent(new Event('change'));
-    }
-  }
+  let nofLinesField = document.getElementById("noflines");
+  let nofLines = parseInt(nofLinesField.value);
+  let index = field.getAttribute("index");
+
+  if (parseInt(nofLines) > 1) {
+    vscodeApi.postMessage({ command: "deleteline", text: index });
+  } 
 }
 
 function parameterOptionsShow(event) {
   const field = event.target;
 
   // parameter search on enter
-  if (event.key === 'Enter') {
-    const index = field.id.replace('parametername','');
-    const codeCompany = document.getElementById("codecompany" + index).value;
-    const codeCustomer = document.getElementById("codecustomer" + index).value;
+  const index = field.id.replace('parametername','');
+  const codeCompany = document.getElementById("codecompany" + index).value;
+  const codeCustomer = document.getElementById("codecustomer" + index).value;
 
-    if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
-      parameterSearch(field.id);
-    } else {
-      errorMessage("Company, customer and parameter name values may not be empty");
-    }
-    
+  if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
+    parameterSearch(field.id);
+  } else {
+    errorMessage("Company, customer and parameter name values may not be empty");
   }
 }
 
 function parameterOptionsSelect(event) {
-  if (event.key === 'Enter' && event.ctrlKey) {   
-    // hide/unhide
-    parameterField.hidden = false;
-    field.hidden = true;
+  const field = event.target;
 
-    // set focus and place cursor
-    focusAndCursor(parameterField.id);    
-  }
+  // delete search options
+  vscodeApi.postMessage({ command: "deloptions", text: event.target.getAttribute("index") });
+
+  // hide search options
+  field.hidden = true;
+
+  // find parameter name field
+  const value = field.value.replace(/\s\([\s\S]*/g,'');
+  const index = field.getAttribute('index');
+  const parameterField = document.getElementById('parametername' + index);
+
+  // unhide parameter field and focus
+  parameterField.hidden = false;
+  parameterField.focus();
 }
 
 function updateParameterFromOptions(event) {
   const field = event.target;
+
+  // update options hover-over
+  field.title = field.value;
+
+  // find parameter name field
   const value = field.value.replace(/\s\([\s\S]*/g,'');
   const index = field.getAttribute('index');
   const parameterField = document.getElementById('parametername' + index);
@@ -215,15 +250,6 @@ function updateParameterFromOptions(event) {
   // update parameter value
   parameterField.value = value;
   parameterField.dispatchEvent(new Event('keyup'));
-}
-
-function focusAndCursor(fieldId) {
-  const field = document.getElementById(fieldId);
-
-  // focus and place cursor at end of content
-  const eol = field.value.length ?? 0;
-  field.focus();
-  // field.setSelectionRange(eol, eol);
 }
 
 function checkIfDuplicate(row) {
@@ -393,8 +419,6 @@ function updateFieldOutlineAndTooltip(fieldId) {
   // update and return output
   if (check === 'empty') {
     updateEmpty(field.id);
-  // } else if (fieldType === 'parameteroptionsfield' && field.hidden === false) {
-  //   updateWrong(field.id,'Select parameter and press Ctrl + Enter');
   } else if (check !== '' && check !== null) {
     updateWrong(field.id, getContentHint(fieldType));
   } else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
@@ -425,7 +449,7 @@ function getContentHint(fieldType) {
 function checkFields() {
   // check if any incorrect field contents and update fields outlining and tooltip in the process
   var check = true;
-  const fields = document.querySelectorAll("#save,.codecompanyfield,.codecustomerfield,.parameternamefield,.changereasonfield,.parameteroptionsfield");
+  const fields = document.querySelectorAll("#save,.codecompanyfield,.codecustomerfield,.parameternamefield,.changereasonfield");
   for (const field of fields) {
     check = updateFieldOutlineAndTooltip(field.id) ? check : false;
   }
@@ -465,10 +489,7 @@ function invalidForm() {
 }
 
 function parameterSearch(fieldId) {
-  // const button = event.target;
-  // const index = +button.id.replace('parametersearch','');
   const index = document.getElementById(fieldId).getAttribute('index');
-
   vscodeApi.postMessage({ command: "parametersearch", text: index });
 }
 

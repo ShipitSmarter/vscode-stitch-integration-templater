@@ -51,7 +51,11 @@ export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) 
 export async function getWorkspaceFile(matchString: string): Promise<string> {
 	// get path to file in workspace
 	let functionsFiles = await workspace.findFiles(matchString);
-	return cleanPath(functionsFiles[0].fsPath);
+	let outPath = '';
+	if (functionsFiles.length > 0) {
+		outPath = cleanPath(functionsFiles[0].fsPath);
+	}
+	return outPath;
 }
 
 export async function getWorkspaceFiles(matchString: string): Promise<string[]> {
@@ -324,10 +328,11 @@ export function dropdownOptions(options:(string|number)[]) : string {
 	return optionsString;
 }
 
-export function selectOptions(options: (string|number)[]) : string {
+export function selectOptions(options: (string|number)[], selected: (string|number) = '') : string {
 	let optionsString : string = '';
 	for (const option of options) {
-		optionsString += '\n    <option>' + option + '</option>';
+		let selectedString = option === selected ? 'selected' : '';
+		optionsString += `\n    <option value="${option}" ${selectedString}>${option}</option>`;
 	}
 
 	return optionsString;
@@ -415,7 +420,8 @@ export async function getFileContentFromGlob(glob:string) : Promise<string> {
 }
 
 export function getDateTimeStamp() : string {
-	return (new Date()).toISOString().substring(0,19).replace(/[\-T:]/g,'');
+	// create datetimestamp in format YYYYMMDD_hhmmss
+	return (new Date()).toISOString().substring(0,19).replace(/[\-:]/g,'').replace(/T/g,'_');
 }
 
 export function isFile(path:string) : boolean {

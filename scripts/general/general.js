@@ -6,3 +6,7 @@ export function isEmpty(string) {
   
     return empty;
 }
+
+export function nameFromPath (path) {
+	return path.replace(/^[\s\S]*[\/\\]/g,'');
+}

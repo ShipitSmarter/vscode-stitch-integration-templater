@@ -69,8 +69,9 @@ export class ParameterPanel {
   private _environmentOptions: string[] = [];
   private _codeCompanies: CodeCompanyObject[] = [];
   private _settingsGlob: string = "**/templater/parameters/";
+  private _infoGlob: string = "**/docs/intro_get_set_parameters.md";
   private _authLocation: string = 'parameters_auth/auth.json';
-  private _focusLine: number = -1;
+  private _focusField: string = '';
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
@@ -154,6 +155,7 @@ export class ParameterPanel {
 
           case 'parametersearch':
             if (this._checkAuthentication()){
+              this._focusField = 'parameteroptions' + text;
               this._parameterSearchButton(+text).then( () => {
                 this._updateWebview(extensionUri);
               });
@@ -162,11 +164,7 @@ export class ParameterPanel {
           case 'getparameters':
             if (this._checkAuthentication()){
               // clear previous responses and update webview
-              this._currentValues= [];
-              this._currentChangeReasonValues = [];
-              this._currentTimestampValues = [];
-              this._extendedHistoryValues = [];
-              this._getResponseValues = [];
+              this._clearResponses(true);
               this._processingGet = true;
               this._updateWebview(extensionUri);
 
@@ -208,6 +206,20 @@ export class ParameterPanel {
             
             break;
 
+          case 'infoclick':
+            this._openInfoFile();
+            break;
+
+          case 'deloptions':
+            let row:number = +text;
+            this._parameterSearchValues[row] = [];
+            break;
+
+          case 'deleteline':
+            this._deleteLine(+text);
+            this._updateWebview(extensionUri);
+            break;
+
           case "savevalue":
             var classIndexValue = text.split('|');
             var clas = classIndexValue[0];
@@ -223,9 +235,6 @@ export class ParameterPanel {
                 switch (index) {
                   case noflinesIndex:
                     let nofLines:number = +this._fieldValues[noflinesIndex];
-                    if (nofLines > oldLines) {
-                      this._focusLine = oldLines;
-                    }
 
                     // crop line arrays
                     this._cropLines(nofLines);
@@ -234,6 +243,11 @@ export class ParameterPanel {
                     this._codeCompanyValues = this._fillWithLastUnempty(this._codeCompanyValues,nofLines-1);
                     this._codeCustomerValues = this._fillWithLastUnempty(this._codeCustomerValues,nofLines-1);
                     this._changeReasonValues = this._fillWithLastUnempty(this._changeReasonValues,nofLines-1,this._fieldValues[allChangeReasonsIndex]);
+
+                    // apply focus
+                    if (nofLines > oldLines) {
+                      this._focusLineField(oldLines);
+                    }
 
                     // update webview
                     this._updateWebview(extensionUri);
@@ -278,6 +292,28 @@ export class ParameterPanel {
     );
   }
 
+  private _focusLineField(index:number) {
+    if (isEmpty(this._codeCompanyValues[index])) {
+      this._focusField = 'codecompany' + index;
+    } else if (isEmpty(this._codeCustomerValues[index])) {
+      this._focusField = 'codecustomer' + index;
+    } else {
+      this._focusField = 'parametername' + index;
+    }
+  }
+
+  private async _openInfoFile() {
+    const filePath:string = await getWorkspaceFile(this._infoGlob);
+    if (!isEmpty(filePath)) {
+      const openPath = vscode.Uri.file(filePath);
+      // const doc = await vscode.workspace.openTextDocument(openPath);
+      // vscode.window.showTextDocument(doc, vscode.ViewColumn.Two);
+      await vscode.commands.executeCommand("markdown.showPreview", openPath);
+    } else {
+      vscode.window.showErrorMessage(`Missing info file '${this._infoGlob}'`);
+    }
+  }
+
   private _getAuth() : string {
     // get user/pw from input/file
     // let user: string = this._fieldValues[userIndex];
@@ -291,6 +327,25 @@ export class ParameterPanel {
     return authString;
   }
 
+  private _deleteLine(index:number) {
+    this._codeCompanyValues.splice(index,1);
+    this._codeCustomerValues.splice(index,1);
+    this._parameterNameValues.splice(index,1);
+    this._parameterSearchValues.splice(index,1);
+    this._previousValues.splice(index,1);
+    this._newValues.splice(index,1);
+    this._changeReasonValues.splice(index,1);
+    this._setResponseValues.splice(index,1);
+    this._currentValues.splice(index,1);
+    this._currentChangeReasonValues.splice(index,1);
+    this._currentTimestampValues.splice(index,1);
+    this._getResponseValues.splice(index,1);
+
+    this._fieldValues[noflinesIndex] = (parseInt(this._fieldValues[noflinesIndex]) -1).toString();
+
+    this._focusLineField(Math.min(index, this._codeCompanyValues.length -1));
+  }
+
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
     if (!isEmpty(loadFile)) {
       this._fieldValues[filesIndex] = loadFile;
@@ -298,13 +353,20 @@ export class ParameterPanel {
       this._loadFile(loadFile);
 
       // clear previous responses and update webview
-      this._currentValues= [];
-      this._currentChangeReasonValues = [];
-      this._currentTimestampValues = [];
-      this._extendedHistoryValues = [];
-      this._setResponseValues = [];
-      this._getResponseValues = [];
+      this._clearResponses();
       this._updateWebview(extensionUri);
+    }
+  }
+
+  private _clearResponses(excludeSetResponses:boolean = false) {
+    this._currentValues= [];
+    this._currentChangeReasonValues = [];
+    this._currentTimestampValues = [];
+    this._extendedHistoryValues = [];
+    this._getResponseValues = [];
+
+    if (!excludeSetResponses) {
+      this._setResponseValues = [];
     }
   }
 
@@ -329,8 +391,10 @@ export class ParameterPanel {
   private _getPath(): boolean {
     let updatePath:boolean = false;
     if (fs.existsSync(this._fieldValues[filesIndex])) {
-      let path: string = parentPath(cleanPath(this._fieldValues[filesIndex]));
-      this._fieldValues[saveIndex] = path;
+      // let path: string = parentPath(cleanPath(this._fieldValues[filesIndex]));
+      // this._fieldValues[saveIndex] = path;
+      this._fieldValues[saveIndex] = this._fieldValues[filesIndex];
+
       updatePath = true;
     }
 
@@ -418,12 +482,7 @@ export class ParameterPanel {
     this._writeFile(fileDir + '/'+ fileName);
 
     // clear previous responses and update webview
-    this._currentValues= [];
-    this._currentChangeReasonValues = [];
-    this._currentTimestampValues = [];
-    this._extendedHistoryValues = [];
-    this._setResponseValues = [];
-    this._getResponseValues = [];
+    this._clearResponses();
     this._processingSet = true;
     this._updateWebview(extensionUri);
 
@@ -654,6 +713,10 @@ export class ParameterPanel {
       this._changeReasonValues[index] = this._postParse(line[5]);
     }
 
+    // clear responses, parameter options
+    this._clearResponses();
+    this._parameterSearchValues = [];
+
     // set environment if present in file name
     const fileName:string = nameFromPath(filePath);
     for (const env of this._environmentOptions) {
@@ -732,13 +795,10 @@ export class ParameterPanel {
       await this._refresh();
     }
 
-    // clear parameter search values before rendering
-    let psearchValues: string[][] = this._parameterSearchValues;
-    this._parameterSearchValues = [];
 
-    // reset updatelines flag
-    let focusLine:number = this._focusLine;
-    this._focusLine = -1;
+    // reset focus field flag
+    let focusField: string = this._focusField;
+    this._focusField = '';
 
     // construct panel html object and retrieve html
     let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
@@ -747,7 +807,7 @@ export class ParameterPanel {
       this._codeCompanyValues,
       this._codeCustomerValues,
       this._parameterNameValues,
-      psearchValues,
+      this._parameterSearchValues,
       this._previousValues,
       this._newValues,
       this._changeReasonValues,
@@ -763,7 +823,7 @@ export class ParameterPanel {
       this._processingGet,
       this._environmentOptions,
       this._codeCompanies,
-      focusLine
+      focusField
     );
 
     let html =  parameterHtmlObject.getHtml();

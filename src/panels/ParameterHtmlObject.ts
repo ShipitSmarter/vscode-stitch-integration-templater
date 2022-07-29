@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, backgroundColorString, escapeHtml, isEmpty, selectOptions} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, backgroundColorString, escapeHtml, isEmpty, selectOptions, nameFromPath} from "../utilities/functions";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -50,7 +50,7 @@ export class ParameterHtmlObject {
     private _processingGet: boolean,
     private _environmentOptions: string[],
     private _codeCompanies: CodeCompanyObject[],
-    private _focusLine: number
+    private _focusField: string
   ) { }
 
   // METHODS
@@ -77,7 +77,8 @@ export class ParameterHtmlObject {
 
 				<div class="row11" id="main">
           <section id="farleft">
-					  <h1>Get/set parameters</h1>       
+					  <h1>Get/set parameters</h1>   
+            <vscode-badge id="info" class="floatleft">i</vscode-badge>    
           </section>
           <section id="farright">
 
@@ -86,8 +87,10 @@ export class ParameterHtmlObject {
 
         <section id="hidden">
             ${this._codeCompanyFields()}
-            <vscode-text-field id="focusline" value="${this._focusLine > 0 ? this._focusLine+'' : ''}" hidden></vscode-text-field>
+            <vscode-text-field id="focusfield" ${valueString(this._focusField)} hidden></vscode-text-field>
         </section>
+
+        ${this._getSaveItems()}
         
         <section class="rowflex">
           <section class="rowsingle">
@@ -95,7 +98,7 @@ export class ParameterHtmlObject {
           </section>
 
           <section class="component-example">
-            <div class="floatleftlesspadding">
+            <div class="floatleftgetparameters">
               ${this._getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
             </div>
             <div class="floatleftnopadding">
@@ -153,6 +156,34 @@ export class ParameterHtmlObject {
     return html;
   }
 
+  private _getSaveItems(): string {
+    let html: string = /*html*/ `
+      <section class="rowsingle">
+        <vscode-divider role="separator"></vscode-divider>
+
+        <section class="component-example">
+          <div class="floatleftnopadding" title="Must contain a valid directory or file path">
+            Save file to:
+          </div>
+          <div class="floatleftlesspadding">
+            <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
+          </div>
+
+          <div class="floatsavename">
+            <vscode-tag id="savename">${nameFromPath(this._fieldValues[saveIndex] ?? '')}</vscode-tag>
+          </div>
+
+          <div class="floatleft">
+            ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary')}
+          </div>
+        </section>
+
+        <vscode-divider role="separator"></vscode-divider>
+      <section class="rowsingle">`;
+
+      return html;
+  }
+
   private _getDetailsGrid(): string {
 
     let getParametersGrid = /*html*/ `
@@ -182,43 +213,18 @@ export class ParameterHtmlObject {
         <div class="floatleftnopadding">
           <vscode-progress-ring id="processingset" ${hiddenString(this._processingSet)}></vscode-progress-ring>
         </div>
-        
-      </section>
 
-      <section class="component-example">
-        <div class="floatleftnopadding" title="Must contain a valid directory or file path">
-          Save file to:
-        </div>
-        <div class="floatleft">
-          <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
-        </div>
-        <div class="floatleft">
-          ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary')}
-        </div>
-
-        <div class="floatleftmuchpadding">
+        <div class="floatleftchangereason">
           Set all change reasons:
         </div>
         <div class="floatleftnopadding">
           <vscode-text-field id="allchangereasons" class="field" index="${allChangeReasonsIndex}" ${valueString(this._fieldValues[allChangeReasonsIndex])}></vscode-text-field>
         </div>
+        
       </section>
       `;
 
     return getParametersGrid;
-  }
-
-  private _getFileLoadOptions() : string[] {
-    //this._pmcObjects.map(el => el.path);
-    var options: string[] = [];
-
-    // for (let index = 0; index < this._pmcObjects.length; index++) {
-    //   let pmc = this._pmcObjects[index];
-    //   options[index] = pmc.parent + ' > ' + pmc.file;
-    // }
-
-    // return options.sort();
-    return ['file1.csv','file2.csv','file3.csv'];
   }
 
   private _getBackgroundColorString(input:string) : string {
@@ -298,8 +304,6 @@ export class ParameterHtmlObject {
       </section>`;
 
     return html;
-
-    return html;
   }
 
   private _parameterInputs(): string {
@@ -327,20 +331,17 @@ export class ParameterHtmlObject {
         </section>
       `;
 
-      var showSearch: boolean = this._parameterSearchValues[row] !== undefined;
-
-      var select: string = /*html*/ `
-        <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}2" position="below" ${hiddenString(showSearch)}>
-          ${selectOptions(this._parameterSearchValues[row] ?? [''])}
-        </select>`;
+      var showSearch: boolean = (this._parameterSearchValues[row] !== undefined) && (this._parameterSearchValues[row].length > 0);
+      let selectedOption = showSearch ? this._parameterSearchValues[row].filter(el => el.startsWith(this._parameterNameValues[row] + ' '))[0] ?? this._parameterNameValues[row] ?? '' : '';
 
       parameterNames += /*html*/`
         <section class="component-pname">
           <div class="floatpname">
             <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" tabindex="${row +1}3" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
-            ${select}
+            <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}2" position="below" title="${selectedOption}" ${hiddenString(showSearch)}>
+              ${selectOptions(this._parameterSearchValues[row] ?? [''],selectedOption)}
+            </select>
           </div>
-          
         </section>
       `;
 
@@ -389,7 +390,7 @@ export class ParameterHtmlObject {
           ${codeCustomers}
         </section>
         <section class="floatleftnopadding">
-          <p title="Enter to search, Ctrl + Enter to confirm">Parameter Name</p>
+          <p title="Enter to search, Ctrl + Enter to type">Parameter Name</p>
           ${parameterNames}
         </section>
         <section class="floatleftnopadding">

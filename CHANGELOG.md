@@ -1,5 +1,19 @@
 # Change Log
 
+## 1.6.11
+- Get/set parameters
+  - Save file
+    - Show save folder/file name next to input field
+  - Load file
+    - On file load, set same file as save location
+    - Fix: on file load, clear get/set responses, parameter code dropdowns
+  - parameter code dropdown
+    - Fix: don't close dropdown when refreshing window or opening another dropdown
+    - Show dropdown value on hover-over
+  - Allow deletion of specific line on `Ctrl` + `Delete` anywhere in the line
+  - Show (`i`) information badge next to panel title and link to local introduction documentation in repo
+
+
 ## 1.6.10
 - Get/set parameters
   - Authentication is now through setting 'Stitch: Basic Authentication String'. Removed auth input fields and file creation logic.
