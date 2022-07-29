@@ -64,13 +64,11 @@ function main() {
   processingSet();
   processingGet();
 
-  // set focus if line number present
-  focusNewLine();
 
-  // set focus if parameter name index present
-  var pIndex = document.getElementById("focuspoptions").value;
-  if (!isEmpty(pIndex)) {
-    document.getElementById("parameteroptions" + pIndex).focus();
+  // set focus on field if not empty
+  var focusId = document.getElementById("focusfield").value;
+  if (!isEmpty(focusId)) {
+    document.getElementById(focusId).focus();
   }
 }
 
@@ -190,7 +188,7 @@ function addLine(event) {
   const field = event.target;
 
   let nofLinesField = document.getElementById("noflines");
-  let nofLines = pasreInt(nofLinesField.value);
+  let nofLines = parseInt(nofLinesField.value);
   let index = parseInt(field.getAttribute("index"));
 
   if (index === (nofLines-1)) {

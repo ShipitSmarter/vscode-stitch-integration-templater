@@ -70,8 +70,7 @@ export class ParameterPanel {
   private _codeCompanies: CodeCompanyObject[] = [];
   private _settingsGlob: string = "**/templater/parameters/";
   private _authLocation: string = 'parameters_auth/auth.json';
-  private _focusLine: number = -1;
-  private _focusParameterOptions: string = '';
+  private _focusField: string = '';
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
@@ -155,7 +154,7 @@ export class ParameterPanel {
 
           case 'parametersearch':
             if (this._checkAuthentication()){
-              this._focusParameterOptions = text;
+              this._focusField = 'parameteroptions' + text;
               this._parameterSearchButton(+text).then( () => {
                 this._updateWebview(extensionUri);
               });
@@ -231,9 +230,6 @@ export class ParameterPanel {
                 switch (index) {
                   case noflinesIndex:
                     let nofLines:number = +this._fieldValues[noflinesIndex];
-                    if (nofLines > oldLines) {
-                      this._focusLine = oldLines;
-                    }
 
                     // crop line arrays
                     this._cropLines(nofLines);
@@ -243,6 +239,11 @@ export class ParameterPanel {
                     this._codeCustomerValues = this._fillWithLastUnempty(this._codeCustomerValues,nofLines-1);
                     this._changeReasonValues = this._fillWithLastUnempty(this._changeReasonValues,nofLines-1,this._fieldValues[allChangeReasonsIndex]);
 
+                    // apply focus
+                    if (nofLines > oldLines) {
+                      this._focusLineField(oldLines);
+                    }
+                    
                     // update webview
                     this._updateWebview(extensionUri);
                     break;
@@ -286,6 +287,16 @@ export class ParameterPanel {
     );
   }
 
+  private _focusLineField(index:number) {
+    if (isEmpty(this._codeCompanyValues[index])) {
+      this._focusField = 'codecompany' + index;
+    } else if (isEmpty(this._codeCustomerValues[index])) {
+      this._focusField = 'codecustomer' + index;
+    } else {
+      this._focusField = 'parametername' + index;
+    }
+  }
+
   private _getAuth() : string {
     // get user/pw from input/file
     // let user: string = this._fieldValues[userIndex];
@@ -315,7 +326,7 @@ export class ParameterPanel {
 
     this._fieldValues[noflinesIndex] = (parseInt(this._fieldValues[noflinesIndex]) -1).toString();
 
-    this._focusLine = Math.min(index, this._codeCompanyValues.length -1);
+    this._focusLineField(Math.min(index, this._codeCompanyValues.length -1));
   }
 
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
@@ -767,13 +778,10 @@ export class ParameterPanel {
       await this._refresh();
     }
 
-    // reset updatelines flag
-    let focusLine:number = this._focusLine;
-    this._focusLine = -1;
 
-    // reset focus parameter name flag
-    let focusParameterOptions: string = this._focusParameterOptions;
-    this._focusParameterOptions = '';
+    // reset focus field flag
+    let focusField: string = this._focusField;
+    this._focusField = '';
 
     // construct panel html object and retrieve html
     let parameterHtmlObject: ParameterHtmlObject = new ParameterHtmlObject(
@@ -798,8 +806,7 @@ export class ParameterPanel {
       this._processingGet,
       this._environmentOptions,
       this._codeCompanies,
-      focusLine,
-      focusParameterOptions
+      focusField
     );
 
     let html =  parameterHtmlObject.getHtml();

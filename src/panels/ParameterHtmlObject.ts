@@ -50,8 +50,7 @@ export class ParameterHtmlObject {
     private _processingGet: boolean,
     private _environmentOptions: string[],
     private _codeCompanies: CodeCompanyObject[],
-    private _focusLine: number,
-    private _focusParameterOptions: string
+    private _focusField: string
   ) { }
 
   // METHODS
@@ -87,8 +86,7 @@ export class ParameterHtmlObject {
 
         <section id="hidden">
             ${this._codeCompanyFields()}
-            <vscode-text-field id="focusline" value="${this._focusLine > 0 ? this._focusLine+'' : ''}" hidden></vscode-text-field>
-            <vscode-text-field id="focuspoptions" ${valueString(this._focusParameterOptions)} hidden></vscode-text-field>
+            <vscode-text-field id="focusfield" ${valueString(this._focusField)} hidden></vscode-text-field>
         </section>
 
         ${this._getSaveItems()}
