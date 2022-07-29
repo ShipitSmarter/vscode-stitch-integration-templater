@@ -77,6 +77,11 @@ function fieldChange(event) {
   let className = field.classList[0];
   var fieldType = (['field','dropdown'].includes(className)) ? field.id : className;
 
+  // if the keydown is 'ctrl' or 'enter' or 'delete': skip
+  if (className !== 'dropdown' && ['Enter','Control','Delete'].includes(event.key)) {
+    return;
+  }
+
   // save field value
   saveValue(field.id);
 
@@ -162,25 +167,6 @@ function globalKeys(event) {
   if (event.key === 's' && event.ctrlKey) {
     // Ctrl + S: save input to file
     saveToFile();
-  }
-}
-
-function focusNewLine() {
-  let focusLine = document.getElementById("focusline").value;
-
-  if(focusLine.length > 0){
-    const focusCompany = document.getElementById("codecompany"+focusLine);
-    const focusCustomer = document.getElementById("codecustomer" + focusLine);
-    const focusParameter = document.getElementById("parametername"+focusLine);
-    focusParameter.focus();
-
-    if (isEmpty(focusCompany.value)) {
-      focusCompany.focus();
-    } else if (isEmpty(focusCustomer.value)) {
-      focusCustomer.focus();
-    } else {
-      focusParameter.focus();
-    }
   }
 }
 

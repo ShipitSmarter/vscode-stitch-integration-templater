@@ -243,7 +243,7 @@ export class ParameterPanel {
                     if (nofLines > oldLines) {
                       this._focusLineField(oldLines);
                     }
-                    
+
                     // update webview
                     this._updateWebview(extensionUri);
                     break;
