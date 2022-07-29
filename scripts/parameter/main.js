@@ -11,6 +11,9 @@ function main() {
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
 
+  // info onclick
+  document.getElementById("info").addEventListener("click",infoClick);
+
   // previous checkbox
   document.getElementById("previous").addEventListener("change", fieldChange);
 
@@ -78,7 +81,7 @@ function fieldChange(event) {
   var fieldType = (['field','dropdown'].includes(className)) ? field.id : className;
 
   // if the keydown is 'ctrl' or 'enter' or 'delete': skip
-  if (className !== 'dropdown' && ['Enter','Control','Delete'].includes(event.key)) {
+  if (!['dropdown','parameteroptionsfield'].includes(className) && ['Enter','Control','Delete'].includes(event.key)) {
     return;
   }
 
@@ -161,6 +164,10 @@ function gridKeydown(event) {
       parameterOptionsShow(event);
     }
   }
+}
+
+function infoClick(event) {
+  vscodeApi.postMessage({ command: "infoclick", text: "parameters" });
 }
 
 function globalKeys(event) {

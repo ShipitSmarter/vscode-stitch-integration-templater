@@ -69,6 +69,7 @@ export class ParameterPanel {
   private _environmentOptions: string[] = [];
   private _codeCompanies: CodeCompanyObject[] = [];
   private _settingsGlob: string = "**/templater/parameters/";
+  private _infoGlob: string = "**/docs/intro_get_set_parameters.md";
   private _authLocation: string = 'parameters_auth/auth.json';
   private _focusField: string = '';
 
@@ -205,6 +206,10 @@ export class ParameterPanel {
             
             break;
 
+          case 'infoclick':
+            this._openInfoFile();
+            break;
+
           case 'deloptions':
             let row:number = +text;
             this._parameterSearchValues[row] = [];
@@ -294,6 +299,18 @@ export class ParameterPanel {
       this._focusField = 'codecustomer' + index;
     } else {
       this._focusField = 'parametername' + index;
+    }
+  }
+
+  private async _openInfoFile() {
+    const filePath:string = await getWorkspaceFile(this._infoGlob);
+    if (!isEmpty(filePath)) {
+      const openPath = vscode.Uri.file(filePath);
+      // const doc = await vscode.workspace.openTextDocument(openPath);
+      // vscode.window.showTextDocument(doc, vscode.ViewColumn.Two);
+      await vscode.commands.executeCommand("markdown.showPreview", openPath);
+    } else {
+      vscode.window.showErrorMessage(`Missing info file '${this._infoGlob}'`);
     }
   }
 

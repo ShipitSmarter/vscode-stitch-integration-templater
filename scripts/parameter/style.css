@@ -1,5 +1,13 @@
 @import url("../general/general.css");
 
+h1 {
+  float:left;
+}
+
+#info {
+  color: #9999FF;
+}
+
 .component-pname {
   /* display:block; */
   /* white-space: nowrap; */

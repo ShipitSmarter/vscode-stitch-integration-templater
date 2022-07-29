@@ -51,7 +51,11 @@ export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) 
 export async function getWorkspaceFile(matchString: string): Promise<string> {
 	// get path to file in workspace
 	let functionsFiles = await workspace.findFiles(matchString);
-	return cleanPath(functionsFiles[0].fsPath);
+	let outPath = '';
+	if (functionsFiles.length > 0) {
+		outPath = cleanPath(functionsFiles[0].fsPath);
+	}
+	return outPath;
 }
 
 export async function getWorkspaceFiles(matchString: string): Promise<string[]> {
