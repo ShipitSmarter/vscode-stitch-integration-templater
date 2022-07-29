@@ -391,7 +391,7 @@ export class ParameterHtmlObject {
           ${codeCustomers}
         </section>
         <section class="floatleftnopadding">
-          <p title="Enter to search, Ctrl + Enter to confirm">Parameter Name</p>
+          <p title="Enter to search, Ctrl + Enter to type">Parameter Name</p>
           ${parameterNames}
         </section>
         <section class="floatleftnopadding">

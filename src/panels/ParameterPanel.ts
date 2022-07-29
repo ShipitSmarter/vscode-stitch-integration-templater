@@ -211,6 +211,11 @@ export class ParameterPanel {
             this._parameterSearchValues[row] = [];
             break;
 
+          case 'deleteline':
+            this._deleteLine(+text);
+            this._updateWebview(extensionUri);
+            break;
+
           case "savevalue":
             var classIndexValue = text.split('|');
             var clas = classIndexValue[0];
@@ -292,6 +297,25 @@ export class ParameterPanel {
     let authString: string = vscode.workspace.getConfiguration().get<string>('stitch.basicAuthenticationString') ?? '';
 
     return authString;
+  }
+
+  private _deleteLine(index:number) {
+    this._codeCompanyValues.splice(index,1);
+    this._codeCustomerValues.splice(index,1);
+    this._parameterNameValues.splice(index,1);
+    this._parameterSearchValues.splice(index,1);
+    this._previousValues.splice(index,1);
+    this._newValues.splice(index,1);
+    this._changeReasonValues.splice(index,1);
+    this._setResponseValues.splice(index,1);
+    this._currentValues.splice(index,1);
+    this._currentChangeReasonValues.splice(index,1);
+    this._currentTimestampValues.splice(index,1);
+    this._getResponseValues.splice(index,1);
+
+    this._fieldValues[noflinesIndex] = (parseInt(this._fieldValues[noflinesIndex]) -1).toString();
+
+    this._focusLine = Math.min(index, this._codeCompanyValues.length -1);
   }
 
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {

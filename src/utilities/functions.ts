@@ -416,7 +416,8 @@ export async function getFileContentFromGlob(glob:string) : Promise<string> {
 }
 
 export function getDateTimeStamp() : string {
-	return (new Date()).toISOString().substring(0,19).replace(/[\-T:]/g,'');
+	// create datetimestamp in format YYYYMMDD_hhmmss
+	return (new Date()).toISOString().substring(0,19).replace(/[\-:]/g,'').replace(/T/g,'_');
 }
 
 export function isFile(path:string) : boolean {

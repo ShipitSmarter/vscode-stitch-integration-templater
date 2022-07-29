@@ -33,21 +33,21 @@ function main() {
   }
 
   // show parameter search options
-  const paramFields = document.querySelectorAll(".parameternamefield");
-  for (const field of paramFields) {
-    field.addEventListener("keydown",parameterOptionsShow);
-  }
+  // const paramFields = document.querySelectorAll(".parameternamefield");
+  // for (const field of paramFields) {
+  //   field.addEventListener("keydown",parameterOptionsShow);
+  // }
 
-  // new line on ctrl+enter in new value or change reason fields
-  const newLineFields = document.querySelectorAll(".newvaluefield,.changereasonfield");
-  for (const field of newLineFields) {
-    field.addEventListener("keydown",addNewLine);
+  // keydown actions inside grid
+  const lineFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
+  for (const field of lineFields) {
+    field.addEventListener("keydown",gridKeydown);
   }
 
   // parameter search options select
   const parameterOptionsFields = document.querySelectorAll(".parameteroptionsfield");
   for (const field of parameterOptionsFields) {
-    field.addEventListener("keydown", parameterOptionsSelect);
+    // field.addEventListener("keydown", parameterOptionsSelect);
     field.addEventListener("change",updateParameterFromOptions);
   }
 
@@ -131,6 +131,35 @@ function fieldChange(event) {
   }
 }
 
+function gridKeydown(event) {
+  const field = event.target;
+  const fclass = field.classList[0];
+
+  if (event.key === 'Enter' && event.ctrlKey) {
+    // on ctrl + enter
+
+    if (['newvaluefield','changereasonfield'].includes(fclass)) {
+      // in newvalue, changereason: add new line
+      addLine(event);
+    } else if(fclass === 'parameteroptionsfield') {
+      // in parameteroptions: select
+      parameterOptionsSelect(event);
+    }
+  } else if (event.key === 'Delete' && event.ctrlKey) {
+    // on ctrl + delete: any grid field
+
+    deleteLine(event);
+
+  } else if (event.key === 'Enter') {
+    // on just enter
+
+    if (fclass === 'parameternamefield') {
+      // pname: search
+      parameterOptionsShow(event);
+    }
+  }
+}
+
 function globalKeys(event) {
   if (event.key === 's' && event.ctrlKey) {
     // Ctrl + S: save input to file
@@ -157,57 +186,63 @@ function focusNewLine() {
   }
 }
 
-function addNewLine(event) {
+function addLine(event) {
   const field = event.target;
-  if (event.key === 'Enter' && event.ctrlKey) {
-    let nofLinesField = document.getElementById("noflines");
-    let nofLines = +nofLinesField.value;
-    let index = field.getAttribute("index");
 
-    if (+index === (nofLines-1)) {
-      nofLinesField.value = (nofLines + 1).toString();
-      nofLinesField.dispatchEvent(new Event('change'));
-    }
+  let nofLinesField = document.getElementById("noflines");
+  let nofLines = pasreInt(nofLinesField.value);
+  let index = parseInt(field.getAttribute("index"));
+
+  if (index === (nofLines-1)) {
+    nofLinesField.value = (nofLines + 1).toString();
+    nofLinesField.dispatchEvent(new Event('change'));
   }
+}
+
+function deleteLine(event) {
+  const field = event.target;
+
+  let nofLinesField = document.getElementById("noflines");
+  let nofLines = parseInt(nofLinesField.value);
+  let index = field.getAttribute("index");
+
+  if (parseInt(nofLines) > 1) {
+    vscodeApi.postMessage({ command: "deleteline", text: index });
+  } 
 }
 
 function parameterOptionsShow(event) {
   const field = event.target;
 
   // parameter search on enter
-  if (event.key === 'Enter') {
-    const index = field.id.replace('parametername','');
-    const codeCompany = document.getElementById("codecompany" + index).value;
-    const codeCustomer = document.getElementById("codecustomer" + index).value;
+  const index = field.id.replace('parametername','');
+  const codeCompany = document.getElementById("codecompany" + index).value;
+  const codeCustomer = document.getElementById("codecustomer" + index).value;
 
-    if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
-      parameterSearch(field.id);
-    } else {
-      errorMessage("Company, customer and parameter name values may not be empty");
-    }
-    
+  if (!isEmpty(codeCompany) && !isEmpty(codeCustomer) && !isEmpty(field.value)) {
+    parameterSearch(field.id);
+  } else {
+    errorMessage("Company, customer and parameter name values may not be empty");
   }
 }
 
 function parameterOptionsSelect(event) {
   const field = event.target;
 
-  if (event.key === 'Enter' && event.ctrlKey) {
-    // delete search options
-    vscodeApi.postMessage({ command: "deloptions", text: event.target.getAttribute("index") });
+  // delete search options
+  vscodeApi.postMessage({ command: "deloptions", text: event.target.getAttribute("index") });
 
-    // hide search options
-    field.hidden = true;
+  // hide search options
+  field.hidden = true;
 
-    // find parameter name field
-    const value = field.value.replace(/\s\([\s\S]*/g,'');
-    const index = field.getAttribute('index');
-    const parameterField = document.getElementById('parametername' + index);
+  // find parameter name field
+  const value = field.value.replace(/\s\([\s\S]*/g,'');
+  const index = field.getAttribute('index');
+  const parameterField = document.getElementById('parametername' + index);
 
-    // unhide parameter field and focus
-    parameterField.hidden = false;
-    parameterField.focus();
-  }
+  // unhide parameter field and focus
+  parameterField.hidden = false;
+  parameterField.focus();
 }
 
 function updateParameterFromOptions(event) {
