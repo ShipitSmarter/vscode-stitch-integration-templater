@@ -70,7 +70,7 @@ export class ParameterPanel {
   private _codeCompanies: CodeCompanyObject[] = [];
   private _configGlob: string = "**/templater/parameters/";
   private _settingsGlob: string = "**/.vscode/settings.json";
-  private _readmeSetting: string = "stitch.parameters.readme";
+  private _readmeSetting: string = "stitch.parameters.readmeLocation";
   private _settings: any;
   private _focusField: string = '';
 
@@ -304,6 +304,10 @@ export class ParameterPanel {
   }
 
   private async _openInfoFile() {
+    if (isEmpty(this._settings[this._readmeSetting])) {
+      vscode.window.showErrorMessage("Missing repo setting " + this._readmeSetting);
+      return;
+    }
     const filePath:string = await getWorkspaceFile(this._settings[this._readmeSetting]);
     if (!isEmpty(filePath)) {
       const openPath = vscode.Uri.file(filePath);
