@@ -1,6 +1,7 @@
 import { Uri, Webview, workspace , ExtensionContext, window, Terminal} from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+import * as vscode from "vscode";
 
 // type definitions
 type ScenarioObject = {
@@ -54,6 +55,8 @@ export async function getWorkspaceFile(matchString: string): Promise<string> {
 	let outPath = '';
 	if (functionsFiles.length > 0) {
 		outPath = cleanPath(functionsFiles[0].fsPath);
+	} else {
+		vscode.window.showErrorMessage('Could not locate file ' + matchString);
 	}
 	return outPath;
 }
@@ -415,8 +418,12 @@ export function backgroundColorString(color:string): string {
 }
 
 export async function getFileContentFromGlob(glob:string) : Promise<string> {
+	let content: string = '';
 	let path = await getWorkspaceFile(glob);
-	return fs.readFileSync(path, 'utf8');
+	if (!isEmpty(path)) {
+		content = fs.readFileSync(path, 'utf8');
+	}
+	return content;
 }
 
 export function getDateTimeStamp() : string {
