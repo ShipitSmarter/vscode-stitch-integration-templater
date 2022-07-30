@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.12
+- Get/set parameters
+  - Now gets tool readme location glob from repo setting `stitch.parameters.readmeLocation` (and shows error if setting is not present)
+
 ## 1.6.11
 - Get/set parameters
   - Save file
