@@ -304,17 +304,27 @@ export class ParameterPanel {
   }
 
   private async _openInfoFile() {
-    if (isEmpty(this._settings[this._readmeSetting])) {
+    let readmeLocation:string = this._settings[this._readmeSetting];
+
+    if (isEmpty(readmeLocation)) {
+      // settting missing
       vscode.window.showErrorMessage("Missing repo setting " + this._readmeSetting);
-      return;
+
+    } else if (readmeLocation.startsWith('**')) {
+      // location is a glob 
+      const filePath:string = await getWorkspaceFile(this._settings[this._readmeSetting]);
+      if (!isEmpty(filePath)) {
+        const openPath = vscode.Uri.file(filePath);
+        // const doc = await vscode.workspace.openTextDocument(openPath);
+        // vscode.window.showTextDocument(doc, vscode.ViewColumn.Two);
+        await vscode.commands.executeCommand("markdown.showPreview", openPath);
+      }
+    } else {
+      // location is a URL
+      // vscode.env.openExternal(vscode.Uri.parse(readmeLocation));
+      await vscode.commands.executeCommand("simpleBrowser.show",readmeLocation);
     }
-    const filePath:string = await getWorkspaceFile(this._settings[this._readmeSetting]);
-    if (!isEmpty(filePath)) {
-      const openPath = vscode.Uri.file(filePath);
-      // const doc = await vscode.workspace.openTextDocument(openPath);
-      // vscode.window.showTextDocument(doc, vscode.ViewColumn.Two);
-      await vscode.commands.executeCommand("markdown.showPreview", openPath);
-    }
+    
   }
 
   private _getAuth() : string {
@@ -798,7 +808,6 @@ export class ParameterPanel {
     if (this._urls.length === 0) {
       await this._refresh();
     }
-
 
     // reset focus field flag
     let focusField: string = this._focusField;
