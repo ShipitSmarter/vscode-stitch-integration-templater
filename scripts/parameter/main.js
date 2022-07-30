@@ -291,31 +291,48 @@ function showProd() {
   const documentBgColor = getComputedStyle(field).getPropertyValue('--vscode-editor-background');
   const fieldBgColor = getComputedStyle(field).getPropertyValue('--vscode-dropdown-background');
   
-  document.body.style.backgroundColor = field.value === 'PROD' ? reddify(documentBgColor) : '';
-  field.style.backgroundColor = field.value === 'PROD' ? reddify(fieldBgColor,true) : '';
+  document.body.style.backgroundColor = field.value === 'PROD' ? colorify(documentBgColor,'red',50) : '';
+  field.style.backgroundColor = field.value === 'PROD' ? colorify(fieldBgColor,'red',100) : '';
 }
 
-function reddify(rgbhex,intenser=false) {
+function colorify(rgbhex, color, intensity) {
   // current color elements
   const red = parseInt(rgbhex.substring(1,3),16);
   const green = parseInt(rgbhex.substring(3,5),16);
   const blue = parseInt(rgbhex.substring(5,7),16);
 
-  // red step diff (amount red should go 'up', if possible)
-  const redStep = intenser ? 100 : 50;
+  const rgbArray = [red, green, blue];
+  let colorIndex = -1;
+  switch (color) {
+    case 'red':
+      colorIndex = 0;
+      break;
+    case 'green':
+      colorIndex = 1;
+      break;
+    case 'blue': 
+      colorIndex = 2;
+      break;
+    default:
+      colorIndex = 0;
+      break;
+  }
 
-  // green/blue step (amount green/blue need to go down)
-  const redOverStep = 255 - (red + redStep);
-  const gbStep = Math.min(redOverStep, 0);
+  // 'rest' step (amount non-colors need to go down)
+  const colorOverStep = 255 - (rgbArray[colorIndex] + intensity);
+  const restStep = Math.min(colorOverStep, 0);
 
   // new color elements
-  const newRed = Math.min(red + redStep,255).toString(16);
-  const newGreen = Math.max(green + gbStep,0).toString(16);
-  const newBlue = Math.max(blue + gbStep,0).toString(16);
+  let colorified = '#';
+  for (let index = 0; index < rgbArray.length; index++) {
+    if (index === colorIndex) {
+      colorified += Math.min(rgbArray[index] + intensity,255).toString(16);
+    } else {
+      colorified += Math.max(rgbArray[index] + restStep,0).toString(16);
+    }
+  }
 
-  const reddified = '#' + newRed + newGreen + newBlue;
-
-  return reddified;
+  return colorified;
 }
 
 function processingGet(push = false) {
