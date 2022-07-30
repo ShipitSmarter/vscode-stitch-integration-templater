@@ -32,6 +32,7 @@ type UrlObject = {
 
 type ResponseObject = {
   status:number;
+  statusText:string;
   value:string;
   message:string;
 };
@@ -506,10 +507,6 @@ export class ParameterPanel {
     // const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
       this._setResponseValues[index] = await this._setParameter(url,this._getAuth(),this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
-
-      // if ((index % updatePer) === 0 || index === (this._codeCompanyValues.length -1)) {
-      //   this._updateWebview(extensionUri);
-      // }
     }
 
     this._processingSet = false;
@@ -536,29 +533,37 @@ export class ParameterPanel {
       });
       result = {
         status: response.status,
-        value: response.statusText,
-        message: response.statusText
+        statusText: response.statusText,
+        value: '',
+        message: ''
       };
 
     } catch (err:any) {
-      let message: string;
-      if (err.response.data.hasOwnProperty('errors')) {
-        message = err.response.data?.errors[0]?.message;
-      } else if (err.response.data.hasOwnProperty('Message')) {
-        message = err.response.data.Message;
-      } else {
-        message = '';
-      }
-
       result = {
         status: err.response.status,
-        value: err.response.statusText,
-        message: err.response.statusText + ' : ' + message
+        statusText: err.response.statusText,
+        value: '',
+        message: this._getMessageFromError(err)
       };
     }
 
     return result;
   };
+
+  private _getMessageFromError(err:any) : string {
+    let message: string;
+    if (err?.response?.data.hasOwnProperty('errors')) {
+      message = err.response.data.errors[0]?.message;
+    } else if (err?.response?.data?.hasOwnProperty('Message')) {
+      message = err.response.data.Message;
+    } else if (err.hasOwnProperty('message')) {
+      message = err.message;
+    } else {
+      message = '';
+    }
+
+    return message;
+  }
 
   private async _getCurrentValues() {
     // get base urls
@@ -614,15 +619,18 @@ export class ParameterPanel {
 
       result = {
         status: response.status,
+        statusText: response.statusText,
         value: value,
-        message: response.statusText
+        message: ''
       };
 
     } catch (err:any) {
+
       result = {
         status: err.response.status,
+        statusText: err.response.statusText,
         value: '',
-        message: err.response.statusText
+        message: this._getMessageFromError(err)
       };
     }
 

@@ -73,7 +73,12 @@ h1 {
 
 .setresponsefieldoption,
 .getresponsefieldoption {
-  color: #DDDDDD;
+  background-color: var(--vscode-inputValidation-errorBackground);
+}
+
+.setresponsefieldoption.ok,
+.getresponsefieldoption.ok {
+  background-color: var(--vscode-inputValidation-infoBackground);
 }
 
 #farright {
