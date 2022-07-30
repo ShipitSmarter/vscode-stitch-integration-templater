@@ -5,7 +5,8 @@ h1 {
 }
 
 #info {
-  color: #9999FF;
+  background-color: darkblue;
+  color: #DDDDDD;
 }
 
 .component-pname {
@@ -70,8 +71,9 @@ h1 {
   width: 6rem;
 }
 
-.setresponsefield {
-  font-size: large;
+.setresponsefieldoption,
+.getresponsefieldoption {
+  color: #DDDDDD;
 }
 
 #farright {

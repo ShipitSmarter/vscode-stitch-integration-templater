@@ -78,7 +78,7 @@ export class ParameterHtmlObject {
 				<div class="row11" id="main">
           <section id="farleft">
 					  <h1>Get/set parameters</h1>   
-            <vscode-badge id="info" class="floatleft">i</vscode-badge>    
+            <vscode-option id="info" title="Click to view documentation">info</vscode-option>    
           </section>
           <section id="farright">
 
@@ -274,7 +274,7 @@ export class ParameterHtmlObject {
       getResponseValues += /*html*/`
         <section class="component-option-fixed">
           <div id="getresponse${index}" class="getresponsefield" index="${index}">
-            <vscode-option ${bColorString}>${optionText}</vscode-option>
+            <vscode-option class="getresponsefieldoption" ${bColorString}>${optionText}</vscode-option>
           </div>
         </section>
       `;
@@ -372,7 +372,7 @@ export class ParameterHtmlObject {
       setResponseValues += /*html*/`
         <section class="component-option-fixed">
           <div id="setresponse${row}" class="setresponsefield" index="${row}">
-            <vscode-option ${bColorString} title="${this._setResponseValues[row]?.message ?? ''}">${optionText}</vscode-option>
+            <vscode-option ${bColorString} class="setresponsefieldoption" title="${this._setResponseValues[row]?.message ?? ''}">${optionText}</vscode-option>
           </div>
         </section>
       `;
