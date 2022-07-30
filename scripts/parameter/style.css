@@ -4,10 +4,6 @@ h1 {
   float:left;
 }
 
-#info {
-  color: #9999FF;
-}
-
 .component-pname {
   /* display:block; */
   /* white-space: nowrap; */
@@ -70,8 +66,18 @@ h1 {
   width: 6rem;
 }
 
-.setresponsefield {
-  font-size: large;
+.setresponsefieldoption,
+.getresponsefieldoption {
+  background-color: var(--vscode-inputValidation-errorBackground);
+}
+
+.setresponsefieldoption.ok,
+.getresponsefieldoption.ok {
+  background-color: var(--vscode-inputValidation-infoBackground);
+}
+
+#info {
+  background-color: var(--vscode-inputValidation-infoBackground);
 }
 
 #farright {

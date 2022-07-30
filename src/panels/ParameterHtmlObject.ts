@@ -14,6 +14,7 @@ const allChangeReasonsIndex = 7;
 // type defs
 type ResponseObject = {
   status:number;
+  statusText:string;
   value:string;
   message:string;
 };
@@ -78,7 +79,7 @@ export class ParameterHtmlObject {
 				<div class="row11" id="main">
           <section id="farleft">
 					  <h1>Get/set parameters</h1>   
-            <vscode-badge id="info" class="floatleft">i</vscode-badge>    
+            <vscode-option id="info" title="Click to view documentation">info</vscode-option>    
           </section>
           <section id="farright">
 
@@ -227,18 +228,29 @@ export class ParameterHtmlObject {
     return getParametersGrid;
   }
 
-  private _getBackgroundColorString(input:string) : string {
-    // if input is 'OK': green
-    // else if input is '': ''
-    // else: red
-    return input === 'OK' ? backgroundColorString('darkgreen') : (isEmpty(input) ? '' : backgroundColorString('maroon'));
-  }
-
-  private _getOptionText(status:number, message:string) : string {
+  private _getOptionText(response:ResponseObject) : string {
     // if message 'OK' : 'OK'
     // else if status 0: ''
     // else : '[status] : [message]'
-    return message === 'OK' ? message : ( status === 0 ? '' : (status.toString() + ' : ' + message));
+    return response?.statusText === 'OK' ? response?.statusText : ( response?.status === 0 ? '' : (response?.status.toString() + ' : ' + response?.statusText));
+  }
+
+  private _getResponseOption(idString:string, index:number, response:ResponseObject ): string {
+    let isOk:boolean = (response?.statusText ?? '') === 'OK';
+
+    let okClassString: string =  isOk ? ' ok' : '';
+    let optionText = this._getOptionText(response);
+    let titleString = isOk ? response?.statusText : `${response?.statusText ?? ''} : ${response?.message ?? ''}`;
+
+    let html: string = /*html*/`
+        <section class="component-option-fixed">
+          <div id="${idString}response${index}" class="${idString}responsefield" index="${index}" ${hiddenString(!isEmpty(response?.statusText ?? ''))}>
+            <vscode-option class="${idString}responsefieldoption${okClassString}" title="${titleString}">${optionText}</vscode-option>
+          </div>
+        </section>
+      `;
+
+    return html;
   }
 
   private _getCurrentValues(): string {
@@ -267,17 +279,8 @@ export class ParameterHtmlObject {
         </section>
       `;
 
-      // api response    
-      let bColorString:string =  this._getBackgroundColorString(this._getResponseValues[index]?.message ?? '');
-      let optionText = this._getOptionText(this._getResponseValues[index]?.status ?? 0, this._getResponseValues[index]?.message ?? '');
-      
-      getResponseValues += /*html*/`
-        <section class="component-option-fixed">
-          <div id="getresponse${index}" class="getresponsefield" index="${index}">
-            <vscode-option ${bColorString}>${optionText}</vscode-option>
-          </div>
-        </section>
-      `;
+      // api response      
+      getResponseValues += this._getResponseOption('get',index,this._getResponseValues[index]);
     }
 
     let html: string = /*html*/ `
@@ -367,16 +370,7 @@ export class ParameterHtmlObject {
       `;
 
       // api response
-      let bColorString:string =  this._getBackgroundColorString(this._setResponseValues[row]?.message ?? '');
-      let optionText = this._getOptionText(this._setResponseValues[row]?.status ?? 0, this._setResponseValues[row]?.value ?? '');
-      setResponseValues += /*html*/`
-        <section class="component-option-fixed">
-          <div id="setresponse${row}" class="setresponsefield" index="${row}">
-            <vscode-option ${bColorString} title="${this._setResponseValues[row]?.message ?? ''}">${optionText}</vscode-option>
-          </div>
-        </section>
-      `;
-
+      setResponseValues += this._getResponseOption('set',row, this._setResponseValues[row]);
     }
 
     let html: string = /*html*/ `

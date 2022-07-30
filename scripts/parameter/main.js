@@ -288,9 +288,51 @@ function getCompanyName(codeCompany) {
 
 function showProd() {
   const field = document.getElementById("environment");
+  const documentBgColor = getComputedStyle(field).getPropertyValue('--vscode-editor-background');
+  const fieldBgColor = getComputedStyle(field).getPropertyValue('--vscode-dropdown-background');
+  
+  document.body.style.backgroundColor = field.value === 'PROD' ? colorify(documentBgColor,'red',50) : '';
+  field.style.backgroundColor = field.value === 'PROD' ? colorify(fieldBgColor,'red',100) : '';
+}
 
-  document.body.style.backgroundColor = field.value === 'PROD' ? '#350000' : '';
-  field.style.backgroundColor = field.value === 'PROD' ? '#800000' : '';
+function colorify(rgbhex, color, intensity) {
+  // current color elements
+  const red = parseInt(rgbhex.substring(1,3),16);
+  const green = parseInt(rgbhex.substring(3,5),16);
+  const blue = parseInt(rgbhex.substring(5,7),16);
+
+  const rgbArray = [red, green, blue];
+  let colorIndex = -1;
+  switch (color) {
+    case 'red':
+      colorIndex = 0;
+      break;
+    case 'green':
+      colorIndex = 1;
+      break;
+    case 'blue': 
+      colorIndex = 2;
+      break;
+    default:
+      colorIndex = 0;
+      break;
+  }
+
+  // 'rest' step (amount non-colors need to go down)
+  const colorOverStep = 255 - (rgbArray[colorIndex] + intensity);
+  const restStep = Math.min(colorOverStep, 0);
+
+  // new color elements
+  let colorified = '#';
+  for (let index = 0; index < rgbArray.length; index++) {
+    if (index === colorIndex) {
+      colorified += Math.min(rgbArray[index] + intensity,255).toString(16);
+    } else {
+      colorified += Math.max(rgbArray[index] + restStep,0).toString(16);
+    }
+  }
+
+  return colorified;
 }
 
 function processingGet(push = false) {

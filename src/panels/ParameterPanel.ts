@@ -32,6 +32,7 @@ type UrlObject = {
 
 type ResponseObject = {
   status:number;
+  statusText:string;
   value:string;
   message:string;
 };
@@ -304,17 +305,30 @@ export class ParameterPanel {
   }
 
   private async _openInfoFile() {
-    if (isEmpty(this._settings[this._readmeSetting])) {
+    let readmeLocation:string = this._settings[this._readmeSetting];
+
+    if (isEmpty(readmeLocation)) {
+      // settting missing
       vscode.window.showErrorMessage("Missing repo setting " + this._readmeSetting);
-      return;
+
+    } else if (readmeLocation.startsWith('**')) {
+      // location is a glob 
+      const filePath:string = await getWorkspaceFile(this._settings[this._readmeSetting]);
+      if (!isEmpty(filePath)) {
+        const openPath = vscode.Uri.file(filePath);
+        // const doc = await vscode.workspace.openTextDocument(openPath);
+        // vscode.window.showTextDocument(doc, vscode.ViewColumn.Two);
+        await vscode.commands.executeCommand("markdown.showPreview", openPath);
+      }
+    } else {
+      // location is a URL: try tab in VSCode, else open in browser
+      try {
+        await vscode.commands.executeCommand("simpleBrowser.show",readmeLocation);
+      } catch (err) {
+        await vscode.env.openExternal(vscode.Uri.parse(readmeLocation));
+      }
     }
-    const filePath:string = await getWorkspaceFile(this._settings[this._readmeSetting]);
-    if (!isEmpty(filePath)) {
-      const openPath = vscode.Uri.file(filePath);
-      // const doc = await vscode.workspace.openTextDocument(openPath);
-      // vscode.window.showTextDocument(doc, vscode.ViewColumn.Two);
-      await vscode.commands.executeCommand("markdown.showPreview", openPath);
-    }
+    
   }
 
   private _getAuth() : string {
@@ -493,10 +507,6 @@ export class ParameterPanel {
     // const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
       this._setResponseValues[index] = await this._setParameter(url,this._getAuth(),this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
-
-      // if ((index % updatePer) === 0 || index === (this._codeCompanyValues.length -1)) {
-      //   this._updateWebview(extensionUri);
-      // }
     }
 
     this._processingSet = false;
@@ -523,29 +533,37 @@ export class ParameterPanel {
       });
       result = {
         status: response.status,
-        value: response.statusText,
-        message: response.statusText
+        statusText: response.statusText,
+        value: '',
+        message: ''
       };
 
     } catch (err:any) {
-      let message: string;
-      if (err.response.data.hasOwnProperty('errors')) {
-        message = err.response.data?.errors[0]?.message;
-      } else if (err.response.data.hasOwnProperty('Message')) {
-        message = err.response.data.Message;
-      } else {
-        message = '';
-      }
-
       result = {
         status: err.response.status,
-        value: err.response.statusText,
-        message: err.response.statusText + ' : ' + message
+        statusText: err.response.statusText,
+        value: '',
+        message: this._getMessageFromError(err)
       };
     }
 
     return result;
   };
+
+  private _getMessageFromError(err:any) : string {
+    let message: string;
+    if (err?.response?.data.hasOwnProperty('errors')) {
+      message = err.response.data.errors[0]?.message;
+    } else if (err?.response?.data?.hasOwnProperty('Message')) {
+      message = err.response.data.Message;
+    } else if (err.hasOwnProperty('message')) {
+      message = err.message;
+    } else {
+      message = '';
+    }
+
+    return message;
+  }
 
   private async _getCurrentValues() {
     // get base urls
@@ -601,15 +619,18 @@ export class ParameterPanel {
 
       result = {
         status: response.status,
+        statusText: response.statusText,
         value: value,
-        message: response.statusText
+        message: ''
       };
 
     } catch (err:any) {
+
       result = {
         status: err.response.status,
+        statusText: err.response.statusText,
         value: '',
-        message: err.response.statusText
+        message: this._getMessageFromError(err)
       };
     }
 
@@ -798,7 +819,6 @@ export class ParameterPanel {
     if (this._urls.length === 0) {
       await this._refresh();
     }
-
 
     // reset focus field flag
     let focusField: string = this._focusField;
