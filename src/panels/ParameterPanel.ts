@@ -68,9 +68,10 @@ export class ParameterPanel {
   private _urls: UrlObject[] = [];
   private _environmentOptions: string[] = [];
   private _codeCompanies: CodeCompanyObject[] = [];
-  private _settingsGlob: string = "**/templater/parameters/";
-  private _infoGlob: string = "**/docs/intro_get_set_parameters.md";
-  private _authLocation: string = 'parameters_auth/auth.json';
+  private _configGlob: string = "**/templater/parameters/";
+  private _settingsGlob: string = "**/.vscode/settings.json";
+  private _readmeSetting: string = "stitch.parameters.readmeLocation";
+  private _settings: any;
   private _focusField: string = '';
 
   // constructor
@@ -303,14 +304,16 @@ export class ParameterPanel {
   }
 
   private async _openInfoFile() {
-    const filePath:string = await getWorkspaceFile(this._infoGlob);
+    if (isEmpty(this._settings[this._readmeSetting])) {
+      vscode.window.showErrorMessage("Missing repo setting " + this._readmeSetting);
+      return;
+    }
+    const filePath:string = await getWorkspaceFile(this._settings[this._readmeSetting]);
     if (!isEmpty(filePath)) {
       const openPath = vscode.Uri.file(filePath);
       // const doc = await vscode.workspace.openTextDocument(openPath);
       // vscode.window.showTextDocument(doc, vscode.ViewColumn.Two);
       await vscode.commands.executeCommand("markdown.showPreview", openPath);
-    } else {
-      vscode.window.showErrorMessage(`Missing info file '${this._infoGlob}'`);
     }
   }
 
@@ -615,7 +618,7 @@ export class ParameterPanel {
 
   private async _getCompanies() {
     // get companies and codecompanies from translation file
-    let translationPath = await getWorkspaceFile(this._settingsGlob + 'CompanyToCodeCompany.csv');
+    let translationPath = await getWorkspaceFile(this._configGlob + 'CompanyToCodeCompany.csv');
     let translations = fs.readFileSync(translationPath, 'utf8').replace(/\r/g,'').split("\n");
 
     this._codeCompanies = new Array<CodeCompanyObject>(translations.length);
@@ -753,10 +756,10 @@ export class ParameterPanel {
     this._urls = [];
 
     // retrieve urls
-    this._urls[0] = await this._getUrlObject(this._settingsGlob + 'parameter_get.json','getparameters');
-    this._urls[1] = await this._getUrlObject(this._settingsGlob + 'parameter_set.json','setparameters');
-    this._urls[2] = await this._getUrlObject(this._settingsGlob + 'parameter_get_history.json','getparameterhistory');
-    this._urls[3] = await this._getUrlObject(this._settingsGlob + 'parameter_get_parameter_codes.json','getparametercodes');
+    this._urls[0] = await this._getUrlObject(this._configGlob + 'parameter_get.json','getparameters');
+    this._urls[1] = await this._getUrlObject(this._configGlob + 'parameter_set.json','setparameters');
+    this._urls[2] = await this._getUrlObject(this._configGlob + 'parameter_get_history.json','getparameterhistory');
+    this._urls[3] = await this._getUrlObject(this._configGlob + 'parameter_get_parameter_codes.json','getparametercodes');
 
   }
 
@@ -768,12 +771,13 @@ export class ParameterPanel {
 
   private async _getEnvironmentOptions() {
     // get module dropdown options from txt file
-    let fileContent: string = await getFileContentFromGlob(this._settingsGlob + 'EnvironmentOptions.txt');
+    let fileContent: string = await getFileContentFromGlob(this._configGlob + 'EnvironmentOptions.txt');
     this._environmentOptions = fileContent.split("\n").map(el => el.trim());
   }
 
 
   private async _refresh() {
+    this._settings = JSON.parse(await getFileContentFromGlob(this._settingsGlob));
     await this._getAPIDetails();
     await this._getEnvironmentOptions();
     this._fieldValues[environmentIndex] = this._environmentOptions[0];
