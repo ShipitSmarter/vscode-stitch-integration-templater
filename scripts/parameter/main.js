@@ -288,9 +288,34 @@ function getCompanyName(codeCompany) {
 
 function showProd() {
   const field = document.getElementById("environment");
+  const documentBgColor = getComputedStyle(field).getPropertyValue('--vscode-editor-background');
+  const fieldBgColor = getComputedStyle(field).getPropertyValue('--vscode-dropdown-background');
+  
+  document.body.style.backgroundColor = field.value === 'PROD' ? reddify(documentBgColor) : '';
+  field.style.backgroundColor = field.value === 'PROD' ? reddify(fieldBgColor,true) : '';
+}
 
-  document.body.style.backgroundColor = field.value === 'PROD' ? '#350000' : '';
-  field.style.backgroundColor = field.value === 'PROD' ? '#800000' : '';
+function reddify(rgbhex,intenser=false) {
+  // current color elements
+  const red = parseInt(rgbhex.substring(1,3),16);
+  const green = parseInt(rgbhex.substring(3,5),16);
+  const blue = parseInt(rgbhex.substring(5,7),16);
+
+  // red step diff (amount red should go 'up', if possible)
+  const redStep = intenser ? 100 : 50;
+
+  // green/blue step (amount green/blue need to go down)
+  const redOverStep = 255 - (red + redStep);
+  const gbStep = Math.min(redOverStep, 0);
+
+  // new color elements
+  const newRed = Math.min(red + redStep,255).toString(16);
+  const newGreen = Math.max(green + gbStep,0).toString(16);
+  const newBlue = Math.max(blue + gbStep,0).toString(16);
+
+  const reddified = '#' + newRed + newGreen + newBlue;
+
+  return reddified;
 }
 
 function processingGet(push = false) {
