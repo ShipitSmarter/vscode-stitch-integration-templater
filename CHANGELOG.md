@@ -1,5 +1,14 @@
 # Change Log
 
+## 1.6.13
+- Get/set parameters
+  - Style
+    - Link to documentation now shows as `info` badge (blue, next to panel header)
+    - Aligned get/set responses' colors with VSCode theme
+    - Fix: when selecting `PROD` environment, red hue of background and dropdown is now based on VSCode theme
+      - NOTE: if VSCode theme is changed, `get/set parameters` panel needs to be reopened for the `PROD` coloring to align
+  - Workspace setting `stitch.parameters.readmeLocation` can now contain either glob to local markdown file OR a url to an external web page
+
 ## 1.6.12
 - Get/set parameters
   - Now gets tool readme location glob from repo setting `stitch.parameters.readmeLocation` (and shows error if setting is not present)
