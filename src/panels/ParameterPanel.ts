@@ -320,9 +320,12 @@ export class ParameterPanel {
         await vscode.commands.executeCommand("markdown.showPreview", openPath);
       }
     } else {
-      // location is a URL
-      // vscode.env.openExternal(vscode.Uri.parse(readmeLocation));
-      await vscode.commands.executeCommand("simpleBrowser.show",readmeLocation);
+      // location is a URL: try tab in VSCode, else open in browser
+      try {
+        await vscode.commands.executeCommand("simpleBrowser.show",readmeLocation);
+      } catch (err) {
+        await vscode.env.openExternal(vscode.Uri.parse(readmeLocation));
+      }
     }
     
   }
