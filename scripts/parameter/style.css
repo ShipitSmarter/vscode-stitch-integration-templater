@@ -4,11 +4,6 @@ h1 {
   float:left;
 }
 
-#info {
-  background-color: darkblue;
-  color: #DDDDDD;
-}
-
 .component-pname {
   /* display:block; */
   /* white-space: nowrap; */
@@ -78,6 +73,10 @@ h1 {
 
 .setresponsefieldoption.ok,
 .getresponsefieldoption.ok {
+  background-color: var(--vscode-inputValidation-infoBackground);
+}
+
+#info {
   background-color: var(--vscode-inputValidation-infoBackground);
 }
 
