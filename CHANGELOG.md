@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.14
+- Get/set parameters
+  - Added option to navigate through the `Parameter inputs` grid using `Ctrl` + `up`/`down`/`left`/`right` arrow keys
+
 ## 1.6.13
 - Get/set parameters
   - Style
