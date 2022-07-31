@@ -141,20 +141,37 @@ function gridKeydown(event) {
   const field = event.target;
   const fclass = field.classList[0];
 
-  if (event.key === 'Enter' && event.ctrlKey) {
-    // on ctrl + enter
+  if (event.ctrlKey) {
+    // ctrl combinations
 
-    if (['newvaluefield','changereasonfield'].includes(fclass)) {
-      // in newvalue, changereason: add new line
-      addLine(event);
-    } else if(fclass === 'parameteroptionsfield') {
-      // in parameteroptions: select
-      parameterOptionsSelect(event);
+    if (event.key === 'Enter') {
+      // on ctrl + enter
+  
+      if (['newvaluefield','changereasonfield'].includes(fclass)) {
+        // in newvalue, changereason: add new line
+        addLine(event);
+      } else if(fclass === 'parameteroptionsfield') {
+        // in parameteroptions: select
+        parameterOptionsSelect(event);
+      }
+
+    } else if (event.key === 'Delete') {
+      // on ctrl + delete (any grid field): delete line
+      deleteLine(event);
+
+    } else if (event.key === 'ArrowUp') {
+      // ctrl + up: focus on grid field above
+      document.getElementById(findNeighbor(field.id,'up')).focus();
+    } else if (event.key === 'ArrowDown') {
+      // ctrl + down: focus on grid field below
+      document.getElementById(findNeighbor(field.id,'down')).focus();
+    } else if (event.key === 'ArrowLeft') {
+      // ctrl + left: focus on grid field left
+      document.getElementById(findNeighbor(field.id,'left')).focus();
+    } else if (event.key === 'ArrowRight') {
+      // ctrl + right: focus on grid field right
+      document.getElementById(findNeighbor(field.id,'right')).focus();
     }
-  } else if (event.key === 'Delete' && event.ctrlKey) {
-    // on ctrl + delete: any grid field
-
-    deleteLine(event);
 
   } else if (event.key === 'Enter') {
     // on just enter
@@ -164,6 +181,53 @@ function gridKeydown(event) {
       parameterOptionsShow(event);
     }
   }
+}
+
+function findNeighbor(fieldId,direction) {
+  // direction values: 'up','down','left','right'
+  const field = document.getElementById(fieldId);
+  const index = parseInt(field.getAttribute("index"));
+  const nofLines = parseInt(document.getElementById('noflines').value);
+  const gridOrder = ['codecompany', 'codecustomer','parametername','previousvalue','newvalue','changereason'];
+  const idBase = field.id.replace(/\d+/g,'');
+  const orderIndex = gridOrder.indexOf(idBase);
+
+  // find neighbor
+  let neighborId = '';
+  switch (direction) {
+    case 'up':
+      neighborId = idBase + Math.max(index -1,0).toString();
+      break;
+    case 'down':
+      neighborId = idBase + Math.min(index+1, nofLines-1).toString();
+      break;
+
+    case 'left':
+      if (idBase === gridOrder[0]) {
+        if (index === 0) {
+          neighborId = field.id;
+        } else {
+          neighborId = gridOrder[gridOrder.length -1] + (index-1).toString();
+        }
+      } else {
+        neighborId = gridOrder[orderIndex -1] + index.toString();
+      }
+      break;
+
+    case 'right':
+      if (idBase === gridOrder[gridOrder.length -1]) {
+        if (index === (nofLines-1)) {
+          neighborId = field.id;
+        } else {
+          neighborId = gridOrder[0] + (index + 1).toString();
+        }
+      } else {
+        neighborId = gridOrder[orderIndex +1] + index.toString();
+      }
+      break;
+  }
+  
+  return neighborId;
 }
 
 function infoClick(event) {
@@ -296,27 +360,15 @@ function showProd() {
 }
 
 function colorify(rgbhex, color, intensity) {
+  // only colors 'red', 'green', 'blue' are allowed
+
   // current color elements
   const red = parseInt(rgbhex.substring(1,3),16);
   const green = parseInt(rgbhex.substring(3,5),16);
   const blue = parseInt(rgbhex.substring(5,7),16);
 
   const rgbArray = [red, green, blue];
-  let colorIndex = -1;
-  switch (color) {
-    case 'red':
-      colorIndex = 0;
-      break;
-    case 'green':
-      colorIndex = 1;
-      break;
-    case 'blue': 
-      colorIndex = 2;
-      break;
-    default:
-      colorIndex = 0;
-      break;
-  }
+  let colorIndex = (color === 'red') ? 0 : ((color === 'green') ? 1 : 2);
 
   // 'rest' step (amount non-colors need to go down)
   const colorOverStep = 255 - (rgbArray[colorIndex] + intensity);
