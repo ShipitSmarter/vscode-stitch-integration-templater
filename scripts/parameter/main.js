@@ -394,7 +394,7 @@ function processingGet(push = false) {
   const isProcessing = !document.getElementById("processingget").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
@@ -408,7 +408,7 @@ function processingSet(push = false) {
   const isProcessing = !document.getElementById("processingset").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
