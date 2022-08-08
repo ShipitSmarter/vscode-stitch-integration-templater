@@ -114,6 +114,7 @@ function fieldChange(event) {
   switch (fieldType) {
     case 'previous':
       updateHighlightSet();
+    case 'newvaluefield':
       updateCurrentValuesHighlight();
       break;
 
