@@ -75,6 +75,13 @@ export class ParameterPanel {
   private _settings: any;
   private _focusField: string = '';
 
+  private _emptyResponse: ResponseObject = {
+    status: 0,
+    statusText: "",
+    value: "",
+    message: ""
+  }
+
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
     this._panel = panel;
@@ -222,11 +229,31 @@ export class ParameterPanel {
             this._updateWebview(extensionUri);
             break;
 
+          case 'clearvalue':
+            var classIndex = text.split('|');
+            var clas = classIndex[0];
+            var index = +classIndex[1];
+
+            switch(clas) {
+              case 'getresponse':
+                this._getResponseValues[index] = this._emptyResponse;
+                break;
+              case 'setresponse':
+                this._setResponseValues[index] = this._emptyResponse;
+                break;
+              case 'previousvalue':
+                this._previousValues[index] = "";
+                break;
+            }
+            break;
+
           case "savevalue":
             var classIndexValue = text.split('|');
             var clas = classIndexValue[0];
             var index = +classIndexValue[1];
-            var value = classIndexValue[2];
+            // value: everything after the second pipe '|'
+            var valueRegExp: RegExp = new RegExp(`^${classIndexValue[0]}\\\|${classIndexValue[1]}\\\|`);
+            var value = text.replace(valueRegExp,'');
             
             // do some updating and refreshing
             switch(clas) {

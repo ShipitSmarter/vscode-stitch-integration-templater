@@ -229,9 +229,9 @@ export class ParameterHtmlObject {
   }
 
   private _getOptionText(response:ResponseObject) : string {
-    // if message 'OK' : 'OK'
+    // if statusText 'OK' : 'OK'
     // else if status 0: ''
-    // else : '[status] : [message]'
+    // else : '[status] : [statusText]'
     return response?.statusText === 'OK' ? response?.statusText : ( response?.status === 0 ? '' : (response?.status.toString() + ' : ' + response?.statusText));
   }
 
@@ -245,7 +245,7 @@ export class ParameterHtmlObject {
     let html: string = /*html*/`
         <section class="component-option-fixed">
           <div id="${idString}response${index}" class="${idString}responsefield" index="${index}" ${hiddenString(!isEmpty(response?.statusText ?? ''))}>
-            <vscode-option class="${idString}responsefieldoption${okClassString}" title="${titleString}">${optionText}</vscode-option>
+            <vscode-option id="${idString}responsefieldoption${index}" class="${idString}responsefieldoption${okClassString}" title="${titleString}">${optionText}</vscode-option>
           </div>
         </section>
       `;

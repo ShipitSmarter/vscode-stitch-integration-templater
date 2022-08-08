@@ -1,5 +1,18 @@
 # Change Log
 
+## 1.6.15
+- Get/set parameters
+  - Now clears get/set responses and previous values when:
+    - company, customer or parameter name is updated
+    - environment is changed
+    - new value is updated (only `set` response is cleared)
+  - Fix:
+    - Now allows input of new values that contain pipes '`|`'
+    - Parameter dropdowns
+      - Highlight red when company/customer/parameter line is duplicate
+      - Disable while using `get` or `set` button
+    - Check if current and new values match on updating new value field
+
 ## 1.6.14
 - Get/set parameters
   - Added option to navigate through the `Parameter inputs` grid using `Ctrl` + `up`/`down`/`left`/`right` arrow keys
