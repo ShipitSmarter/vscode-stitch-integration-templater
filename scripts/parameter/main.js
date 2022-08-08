@@ -92,9 +92,9 @@ function fieldChange(event) {
   field.title = field.value;
 
   // update field outline and tooltip
-  if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType)) {
+  if (['codecompanyfield','codecustomerfield','parameternamefield','parameteroptionsfield'].includes(fieldType)) {
     // codecompany, codecustomeror parametername: check all three in all rows
-    const rowFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield");
+    const rowFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield");
     for (const rowField of rowFields) {
       updateFieldOutlineAndTooltip(rowField.id);
     }
@@ -515,7 +515,7 @@ function updateFieldOutlineAndTooltip(fieldId) {
     updateEmpty(field.id);
   } else if (check !== '' && check !== null) {
     updateWrong(field.id, getContentHint(fieldType));
-  } else if (['codecompanyfield','codecustomerfield','parameternamefield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
+  } else if (['codecompanyfield','codecustomerfield','parameternamefield','parameteroptionsfield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
     updateWrong(field.id, 'Company/customer/parameter combination is duplicate');
   } else {
     updateRight(field.id);
