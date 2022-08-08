@@ -226,7 +226,9 @@ export class ParameterPanel {
             var classIndexValue = text.split('|');
             var clas = classIndexValue[0];
             var index = +classIndexValue[1];
-            var value = classIndexValue[2];
+            // value: everything after the second pipe '|'
+            var valueRegExp: RegExp = new RegExp(`^${classIndexValue[0]}\\\|${classIndexValue[1]}\\\|`);
+            var value = text.replace(valueRegExp,'');
             
             // do some updating and refreshing
             switch(clas) {

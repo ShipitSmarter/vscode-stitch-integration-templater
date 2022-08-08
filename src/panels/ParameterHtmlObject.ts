@@ -229,9 +229,9 @@ export class ParameterHtmlObject {
   }
 
   private _getOptionText(response:ResponseObject) : string {
-    // if message 'OK' : 'OK'
+    // if statusText 'OK' : 'OK'
     // else if status 0: ''
-    // else : '[status] : [message]'
+    // else : '[status] : [statusText]'
     return response?.statusText === 'OK' ? response?.statusText : ( response?.status === 0 ? '' : (response?.status.toString() + ' : ' + response?.statusText));
   }
 
