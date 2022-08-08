@@ -75,6 +75,13 @@ export class ParameterPanel {
   private _settings: any;
   private _focusField: string = '';
 
+  private _emptyResponse: ResponseObject = {
+    status: 0,
+    statusText: "",
+    value: "",
+    message: ""
+  }
+
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
     this._panel = panel;
@@ -220,6 +227,24 @@ export class ParameterPanel {
           case 'deleteline':
             this._deleteLine(+text);
             this._updateWebview(extensionUri);
+            break;
+
+          case 'clearvalue':
+            var classIndex = text.split('|');
+            var clas = classIndex[0];
+            var index = +classIndex[1];
+
+            switch(clas) {
+              case 'getresponse':
+                this._getResponseValues[index] = this._emptyResponse;
+                break;
+              case 'setresponse':
+                this._setResponseValues[index] = this._emptyResponse;
+                break;
+              case 'previousvalue':
+                this._previousValues[index] = "";
+                break;
+            }
             break;
 
           case "savevalue":

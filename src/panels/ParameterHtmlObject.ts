@@ -245,7 +245,7 @@ export class ParameterHtmlObject {
     let html: string = /*html*/`
         <section class="component-option-fixed">
           <div id="${idString}response${index}" class="${idString}responsefield" index="${index}" ${hiddenString(!isEmpty(response?.statusText ?? ''))}>
-            <vscode-option class="${idString}responsefieldoption${okClassString}" title="${titleString}">${optionText}</vscode-option>
+            <vscode-option id="${idString}responsefieldoption${index}" class="${idString}responsefieldoption${okClassString}" title="${titleString}">${optionText}</vscode-option>
           </div>
         </section>
       `;

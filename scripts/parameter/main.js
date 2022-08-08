@@ -26,7 +26,7 @@ function main() {
   // save input fields
   const fields = document.querySelectorAll(".field,.codecompanyfield,.codecustomerfield,.parameternamefield,.newvaluefield,.changereasonfield");
   for (const field of fields) {
-    field.addEventListener("keyup", fieldChange);
+    field.addEventListener("input", fieldChange);
   }
 
   // update hover-overs on load
@@ -34,12 +34,6 @@ function main() {
   for (const field of allFields) {
     field.title = field.value;
   }
-
-  // show parameter search options
-  // const paramFields = document.querySelectorAll(".parameternamefield");
-  // for (const field of paramFields) {
-  //   field.addEventListener("keydown",parameterOptionsShow);
-  // }
 
   // keydown actions inside grid
   const lineFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
@@ -112,13 +106,32 @@ function fieldChange(event) {
 
   // additional actions
   switch (fieldType) {
+    case 'codecompanyfield':
+    case 'codecustomerfield':
+    case 'parameternamefield':
+      clearGetResponse(field.id);
+      clearSetResponse(field.id);
+      clearPreviousValue(field.id);
+      break;
     case 'previous':
       updateHighlightSet();
     case 'newvaluefield':
       updateCurrentValuesHighlight();
+      clearSetResponse(field.id);
       break;
 
     case 'environment':
+      // clear responses, previous values
+      const nofLines = parseInt(document.getElementById('noflines').value);
+
+      for (let index = 0; index<nofLines; index++) {
+        var fieldId = "codecompany" + index.toString();
+        clearGetResponse(fieldId);
+        clearSetResponse(fieldId);
+        clearPreviousValue(fieldId);
+      }
+
+      // update panel coloring
       showProd();
       break;
 
@@ -136,6 +149,41 @@ function fieldChange(event) {
       document.getElementById("savename").innerHTML = nameFromPath(field.value);
       break;
   }
+}
+
+function clearValue(id, index) {
+  const text = id + '|' + index;
+  vscodeApi.postMessage({ command: "clearvalue", text: text });
+}
+
+function clearGetResponse(fieldId) {
+  const field = document.getElementById(fieldId);
+  const index = field.getAttribute("index");
+  const getResponse = document.getElementById("getresponsefieldoption" + index);
+
+  getResponse.innerHTML = "";
+  getResponse.title = "";
+  clearValue('getresponse',index);
+}
+
+function clearSetResponse(fieldId) {
+  const field = document.getElementById(fieldId);
+  const index = field.getAttribute("index");
+  const setResponse = document.getElementById("setresponsefieldoption" + index);
+
+  setResponse.innerHTML = "";
+  setResponse.title = "";
+  clearValue('setresponse',index);
+}
+
+function clearPreviousValue(fieldId) {
+  const field = document.getElementById(fieldId);
+  const index = field.getAttribute("index");
+  const previousField = document.getElementById("previousvalue" + index);
+
+  previousField.value = "";
+  previousField.title = "";
+  clearValue('previousvalue',index);
 }
 
 function gridKeydown(event) {
@@ -314,7 +362,7 @@ function updateParameterFromOptions(event) {
 
   // update parameter value
   parameterField.value = value;
-  parameterField.dispatchEvent(new Event('keyup'));
+  parameterField.dispatchEvent(new InputEvent('input'));
 }
 
 function checkIfDuplicate(row) {
@@ -352,6 +400,7 @@ function getCompanyName(codeCompany) {
 }
 
 function showProd() {
+  // update panel coloring
   const field = document.getElementById("environment");
   const documentBgColor = getComputedStyle(field).getPropertyValue('--vscode-editor-background');
   const fieldBgColor = getComputedStyle(field).getPropertyValue('--vscode-dropdown-background');
