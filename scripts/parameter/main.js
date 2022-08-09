@@ -159,11 +159,23 @@ function clearValue(id, index) {
 function clearGetResponse(fieldId) {
   const field = document.getElementById(fieldId);
   const index = field.getAttribute("index");
-  const getResponse = document.getElementById("getresponsefieldoption" + index);
 
+  // clear response
+  const getResponse = document.getElementById("getresponsefieldoption" + index);
   getResponse.innerHTML = "";
   getResponse.title = "";
   clearValue('getresponse',index);
+
+  // clear current value/change reason/timestamp
+  const curValue = document.getElementById("currentvalue" + index);
+  const curCR = document.getElementById("currentchangereason" + index);
+  const curTime = document.getElementById("currenttimestamp" + index);
+
+  curValue.value = "";
+  curCR.value = "";
+  curTime.value = "";
+
+  clearValue('currentvalues',index);
 }
 
 function clearSetResponse(fieldId) {
