@@ -244,6 +244,11 @@ export class ParameterPanel {
               case 'previousvalue':
                 this._previousValues[index] = "";
                 break;
+              case 'currentvalues':
+                this._currentValues[index] = "";
+                this._currentChangeReasonValues[index] = "";
+                this._currentTimestampValues[index] = "";
+                break;
             }
             break;
 

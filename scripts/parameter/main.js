@@ -159,11 +159,23 @@ function clearValue(id, index) {
 function clearGetResponse(fieldId) {
   const field = document.getElementById(fieldId);
   const index = field.getAttribute("index");
-  const getResponse = document.getElementById("getresponsefieldoption" + index);
 
+  // clear response
+  const getResponse = document.getElementById("getresponsefieldoption" + index);
   getResponse.innerHTML = "";
   getResponse.title = "";
   clearValue('getresponse',index);
+
+  // clear current value/change reason/timestamp
+  const curValue = document.getElementById("currentvalue" + index);
+  const curCR = document.getElementById("currentchangereason" + index);
+  const curTime = document.getElementById("currenttimestamp" + index);
+
+  curValue.value = "";
+  curCR.value = "";
+  curTime.value = "";
+
+  clearValue('currentvalues',index);
 }
 
 function clearSetResponse(fieldId) {
@@ -236,9 +248,12 @@ function findNeighbor(fieldId,direction) {
   // direction values: 'up','down','left','right'
   const field = document.getElementById(fieldId);
   const index = parseInt(field.getAttribute("index"));
+  var idBase = field.id.replace(/\d+/g,'');
+  if (idBase === 'parameteroptions') {
+    idBase = 'parametername';
+  }
   const nofLines = parseInt(document.getElementById('noflines').value);
   const gridOrder = ['codecompany', 'codecustomer','parametername','previousvalue','newvalue','changereason'];
-  const idBase = field.id.replace(/\d+/g,'');
   const orderIndex = gridOrder.indexOf(idBase);
 
   // find neighbor
@@ -274,6 +289,11 @@ function findNeighbor(fieldId,direction) {
         neighborId = gridOrder[orderIndex +1] + index.toString();
       }
       break;
+  }
+
+  const neighborBase = neighborId.replace(/\d+/g,'');
+  if (document.getElementById(neighborId).hidden && neighborBase === 'parametername') {
+    neighborId = 'parameteroptions' + neighborId.replace(/\D+/g,'');
   }
   
   return neighborId;
