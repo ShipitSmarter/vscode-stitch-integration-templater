@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.6.16
+- Get/set parameters
+  - Fix:
+    - Fixed arrow navigation with parameter name dropdowns
+    - Now clears current value/change reason/timestamp when clearing get response
+
 ## 1.6.15
 - Get/set parameters
   - Now clears get/set responses and previous values when:
