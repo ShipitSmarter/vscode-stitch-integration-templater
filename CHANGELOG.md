@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.17
+- Integration automation
+  - Now writes authentication setting content to gitignored JSON file upon opening the panel, for later use by the PowerShell script
+
 ## 1.6.16
 - Get/set parameters
   - Fix:
