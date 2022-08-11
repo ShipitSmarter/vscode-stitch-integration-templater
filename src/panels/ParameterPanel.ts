@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory, getWorkspaceFiles } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory, getWorkspaceFiles, getAuth, checkAuth, saveAuth } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -80,7 +80,7 @@ export class ParameterPanel {
     statusText: "",
     value: "",
     message: ""
-  }
+  };
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, context: vscode.ExtensionContext, loadFile:string = '') {
@@ -163,7 +163,7 @@ export class ParameterPanel {
             break;
 
           case 'parametersearch':
-            if (this._checkAuthentication()){
+            if (checkAuth()){
               this._focusField = 'parameteroptions' + text;
               this._parameterSearchButton(+text).then( () => {
                 this._updateWebview(extensionUri);
@@ -171,7 +171,7 @@ export class ParameterPanel {
             }
             break;
           case 'getparameters':
-            if (this._checkAuthentication()){
+            if (checkAuth()){
               // clear previous responses and update webview
               this._clearResponses(true);
               this._processingGet = true;
@@ -190,7 +190,7 @@ export class ParameterPanel {
             break;
 
           case 'setparameters':
-            if (this._checkSaveFolder() && this._checkAuthentication())  {
+            if (this._checkSaveFolder() && checkAuth())  {
               this._setParametersButton(extensionUri).then(() => {
                 // confirm
                 vscode.window.showInformationMessage('Parameters set');
@@ -363,19 +363,6 @@ export class ParameterPanel {
     
   }
 
-  private _getAuth() : string {
-    // get user/pw from input/file
-    // let user: string = this._fieldValues[userIndex];
-    // let pw: string = this._fieldValues[pwIndex];
-    // let authString:string = Buffer.from(user + ':' + pw).toString('base64');
-    // return 'Basic ' + authString;
-
-    // get string from settings
-    let authString: string = vscode.workspace.getConfiguration().get<string>('stitch.basicAuthenticationString') ?? '';
-
-    return authString;
-  }
-
   private _deleteLine(index:number) {
     this._codeCompanyValues.splice(index,1);
     this._codeCustomerValues.splice(index,1);
@@ -428,14 +415,7 @@ export class ParameterPanel {
     return isValid;
   }
 
-  private _checkAuthentication() : boolean {
-    let isValid: boolean = this._getAuth().length > 10;
-    if (!isValid) {
-      vscode.window.showErrorMessage("Setting 'Stitch: Basic Authentication String' has not been set.");
-    }
 
-    return isValid;
-  }
 
   private _getPath(): boolean {
     let updatePath:boolean = false;
@@ -493,7 +473,7 @@ export class ParameterPanel {
   private async _parameterSearchButton(index:number) {
     if (!isEmpty(this._parameterNameValues[index]) && !isEmpty(this._codeCompanyValues[index]) && !isEmpty(this._codeCustomerValues[index])) {
       let urlGetParameterCodes: string = `${this._getUrl('getparametercodes')}?filter=${this._parameterNameValues[index] ?? ''}`;
-      let parameterCodesResponse: ResponseObject = await this._getApiCall(urlGetParameterCodes,this._getAuth(),this._codeCompanyValues[index]);
+      let parameterCodesResponse: ResponseObject = await this._getApiCall(urlGetParameterCodes,getAuth(),this._codeCompanyValues[index]);
   
       if (parameterCodesResponse.status === 200) {
         let responseJson = JSON.parse(parameterCodesResponse.value);
@@ -538,7 +518,7 @@ export class ParameterPanel {
     // set param values
     // const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
-      this._setResponseValues[index] = await this._setParameter(url,this._getAuth(),this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
+      this._setResponseValues[index] = await this._setParameter(url,getAuth(),this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
     }
 
     this._processingSet = false;
@@ -609,11 +589,11 @@ export class ParameterPanel {
       let urlGetHistory: string = `${baseUrlGetHistory}/${this._codeCustomerValues[index]}/${this._parameterNameValues[index]}/1`;
 
       // step 1: parameter service call
-      let parameterResponse: ResponseObject = await this._getApiCall(urlGetParameter,this._getAuth(),this._codeCompanyValues[index]);
+      let parameterResponse: ResponseObject = await this._getApiCall(urlGetParameter,getAuth(),this._codeCompanyValues[index]);
 
       // step 2: if not exists: '', else execute history call
       if (parameterResponse.status >= 200 && parameterResponse.status <= 299 ) {
-        let historyResponse: ResponseObject = await this._getApiCall(urlGetHistory,this._getAuth(),this._codeCompanyValues[index]);
+        let historyResponse: ResponseObject = await this._getApiCall(urlGetHistory,getAuth(),this._codeCompanyValues[index]);
         let responseJson = JSON.parse(historyResponse.value);      
         this._currentValues[index] = responseJson[0].paramValue;
         this._currentChangeReasonValues[index] = responseJson[0].changeReason;

@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 
@@ -97,6 +97,9 @@ export class CreateIntegrationPanel {
 
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
+
+    // get authentication string from setting and save to file (to be used by PowerShell)
+    saveAuth();
   }
 
   // METHODS

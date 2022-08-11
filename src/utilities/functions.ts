@@ -453,3 +453,55 @@ export function isDirectory(path:string) : boolean {
 
 	return isDir;
 }
+
+export async function getRootPath() : Promise<string> {
+	let functionsPath: string = await getWorkspaceFile('**/scripts/functions.ps1');
+	let rootPath: string = parentPath(parentPath(parentPath(parentPath(cleanPath(functionsPath)))));
+	return rootPath;
+}
+
+export async function saveAuth() {
+	// constants
+	const fileRelPath: string = 'authentication/auth.json';
+
+    // get file path
+    let filePath = (await getRootPath()) + '/' + fileRelPath;
+
+    // get file content
+    let fileContent:string = `{\r\n    "BasicAuthenticationString": "${getAuth()}"\r\n}`;
+
+	// show error if auth string has not been set
+	checkAuth();
+
+    // make dir if not exists
+    let fileDir = parentPath(filePath);
+    fs.mkdirSync(fileDir,{ recursive: true });
+
+    // write to file
+    fs.writeFileSync(filePath,fileContent,{encoding:'utf8',flag:'w'});
+
+    // tell the world
+    vscode.window.showInformationMessage(`Saved auth to ${nameFromPath(filePath)}`);
+  }
+
+  export function getAuth() : string {
+    // get user/pw from input/file
+    // let user: string = this._fieldValues[userIndex];
+    // let pw: string = this._fieldValues[pwIndex];
+    // let authString:string = Buffer.from(user + ':' + pw).toString('base64');
+    // return 'Basic ' + authString;
+
+    // get string from settings
+    let authString: string = vscode.workspace.getConfiguration().get<string>('stitch.basicAuthenticationString') ?? '';
+
+    return authString;
+  }
+
+  export function checkAuth() : boolean {
+    let isValid: boolean = getAuth().length > 10;
+    if (!isValid) {
+      vscode.window.showErrorMessage("Setting 'Stitch: Basic Authentication String' has not been set.");
+    }
+
+    return isValid;
+  }
