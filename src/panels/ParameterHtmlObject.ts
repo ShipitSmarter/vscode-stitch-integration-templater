@@ -10,6 +10,7 @@ const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
+const saveNameIndex = 8;
 
 // type defs
 type ResponseObject = {
@@ -36,6 +37,7 @@ export class ParameterHtmlObject {
     private _codeCustomerValues: string[],
     private _parameterNameValues: string[],
     private _parameterSearchValues: string[][],
+    private _codeCustomerSearchValues: string[][],
     private _previousValues: string[],
     private _newValues: string[],
     private _changeReasonValues: string[],
@@ -163,18 +165,18 @@ export class ParameterHtmlObject {
         <vscode-divider role="separator"></vscode-divider>
 
         <section class="component-example">
-          <div class="floatleftnopadding" title="Must contain a valid directory or file path">
-            Save file to:
-          </div>
-          <div class="floatleftlesspadding">
+          <div class="floatleftnopadding">
+            <p title="Must contain an existing directory">Save folder</p>
             <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
           </div>
 
-          <div class="floatsavename">
-            <vscode-tag id="savename">${nameFromPath(this._fieldValues[saveIndex] ?? '')}</vscode-tag>
+          <div class="floatleftlesspadding">
+            <p title="If no file is given, system will generate file name">Save file</p>
+            <vscode-text-field id="savename" class="field" index="${saveNameIndex}" ${valueString(this._fieldValues[saveNameIndex])}></vscode-text-field>
           </div>
 
           <div class="floatleft">
+            <p> - </p>
             ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary')}
           </div>
         </section>
@@ -327,10 +329,16 @@ export class ParameterHtmlObject {
         </section>
       `;
 
+      var showCodeCustomerSearch: boolean = (this._codeCustomerSearchValues[row] !== undefined) && (this._codeCustomerSearchValues[row].length > 0);
+      let selectedCodeCustomerOption = showCodeCustomerSearch ? this._codeCustomerSearchValues[row].filter(el => el.includes(`(${this._codeCustomerValues[row]})`))[0] ?? this._codeCustomerValues[row] ?? '' : '';
+
       // code customer
       codeCustomers += /*html*/`
         <section class="component-minvmargin">
-          <vscode-text-field id="codecustomer${row}" class="codecustomerfield" index="${row}" tabindex="${row +1}1" ${valueString(this._codeCustomerValues[row])} placeholder="CodeCustomer"></vscode-text-field>
+          <vscode-text-field id="codecustomer${row}" class="codecustomerfield" index="${row}" tabindex="${row +1}1" ${valueString(this._codeCustomerValues[row])} placeholder="CodeCustomer" ${hiddenString(!showCodeCustomerSearch)}></vscode-text-field>
+          <select id="codecustomeroptions${row}" class="codecustomeroptionsfield" index="${row}" tabindex="${row +1}2" position="below" title="${selectedCodeCustomerOption}" ${hiddenString(showCodeCustomerSearch)}>
+            ${selectOptions(this._codeCustomerSearchValues[row] ?? [''],selectedCodeCustomerOption)}
+          </select>
         </section>
       `;
 
@@ -341,7 +349,7 @@ export class ParameterHtmlObject {
         <section class="component-pname">
           <div class="floatpname">
             <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" tabindex="${row +1}3" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
-            <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}2" position="below" title="${selectedOption}" ${hiddenString(showSearch)}>
+            <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}4" position="below" title="${selectedOption}" ${hiddenString(showSearch)}>
               ${selectOptions(this._parameterSearchValues[row] ?? [''],selectedOption)}
             </select>
           </div>

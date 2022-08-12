@@ -19,7 +19,8 @@ h1 {
   width: 15rem;
 }
 
-.parameteroptionsfield {
+.parameteroptionsfield,
+.codecustomeroptionsfield {
   height: 1.65rem;
   line-height: 1.65rem;
   font-size: 0.8rem;
@@ -31,7 +32,8 @@ h1 {
   margin-bottom: 0.1rem;
 }
 
-.parameteroptionsfield:focus {
+.parameteroptionsfield:focus,
+.codecustomeroptionsfield:focus {
   border-color: var(--vscode-focusBorder);
   outline: none;
 }
@@ -61,8 +63,16 @@ h1 {
   width: 20rem;
 }
 
-.codecompanyfield,
+#savename {
+  width: 16rem;
+}
+
+.codecustomeroptionsfield,
 .codecustomerfield {
+  width: 15rem;
+}
+
+.codecompanyfield {
   width: 6rem;
 }
 
@@ -103,17 +113,5 @@ h1 {
 .floatpname {
   float: left;
   margin-bottom: 0.5rem;
-}
-
-.floatsavename {
-  float: left;
-  margin-bottom: 0.5rem;
-  display:block;
-  white-space: nowrap;
-  width: 15rem;
-}
-
-#savename {
-  font-size: 0.8rem;
 }
 

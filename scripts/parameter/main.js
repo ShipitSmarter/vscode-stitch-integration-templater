@@ -36,7 +36,7 @@ function main() {
   }
 
   // keydown actions inside grid
-  const lineFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
+  const lineFields = document.querySelectorAll(".codecompanyfield,.codecustomerfield,.codecustomeroptionsfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
   for (const field of lineFields) {
     field.addEventListener("keydown",gridKeydown);
   }
@@ -46,6 +46,13 @@ function main() {
   for (const field of parameterOptionsFields) {
     // field.addEventListener("keydown", parameterOptionsSelect);
     field.addEventListener("change",updateParameterFromOptions);
+  }
+
+  // code customer search options select
+  const codeCustomerOptionsFields = document.querySelectorAll(".codecustomeroptionsfield");
+  for (const field of codeCustomerOptionsFields) {
+    // field.addEventListener("keydown", parameterOptionsSelect);
+    field.addEventListener("change",updateCodeCustomerFromOptions);
   }
 
   // global keyboard shortcuts
@@ -143,11 +150,6 @@ function fieldChange(event) {
         updateFieldOutlineAndTooltip(cr.id);
       }
       break;
-
-    case 'save':
-      // update name value
-      document.getElementById("savename").innerHTML = nameFromPath(field.value);
-      break;
   }
 }
 
@@ -214,6 +216,9 @@ function gridKeydown(event) {
       } else if(fclass === 'parameteroptionsfield') {
         // in parameteroptions: select
         parameterOptionsSelect(event);
+      } else if(fclass === 'codecustomeroptionsfield') {
+        // in codecustomeroptions: select
+        codeCustomerOptionsSelect(event);
       }
 
     } else if (event.key === 'Delete') {
@@ -240,6 +245,9 @@ function gridKeydown(event) {
     if (fclass === 'parameternamefield') {
       // pname: search
       parameterOptionsShow(event);
+    } else if (fclass === 'codecustomerfield') {
+      // pname: search
+      codeCustomerOptionsShow(event);
     }
   }
 }
@@ -251,6 +259,8 @@ function findNeighbor(fieldId,direction) {
   var idBase = field.id.replace(/\d+/g,'');
   if (idBase === 'parameteroptions') {
     idBase = 'parametername';
+  } else if (idBase === 'codecustomeroptions') {
+    idBase = 'codecustomer';
   }
   const nofLines = parseInt(document.getElementById('noflines').value);
   const gridOrder = ['codecompany', 'codecustomer','parametername','previousvalue','newvalue','changereason'];
@@ -294,6 +304,8 @@ function findNeighbor(fieldId,direction) {
   const neighborBase = neighborId.replace(/\d+/g,'');
   if (document.getElementById(neighborId).hidden && neighborBase === 'parametername') {
     neighborId = 'parameteroptions' + neighborId.replace(/\D+/g,'');
+  } else if (document.getElementById(neighborId).hidden && neighborBase === 'codecustomer') {
+    neighborId = 'codecustomeroptions' + neighborId.replace(/\D+/g,'');
   }
   
   return neighborId;
@@ -350,6 +362,20 @@ function parameterOptionsShow(event) {
   }
 }
 
+function codeCustomerOptionsShow(event) {
+  const field = event.target;
+
+  // parameter search on enter
+  const index = field.id.replace('codecustomer','');
+  const codeCompany = document.getElementById("codecompany" + index).value;
+
+  if (!isEmpty(codeCompany) && !isEmpty(field.value)) {
+    codeCustomerSearch(field.id);
+  } else {
+    errorMessage("Company and customer values may not be empty");
+  }
+}
+
 function parameterOptionsSelect(event) {
   const field = event.target;
 
@@ -360,7 +386,6 @@ function parameterOptionsSelect(event) {
   field.hidden = true;
 
   // find parameter name field
-  const value = field.value.replace(/\s\([\s\S]*/g,'');
   const index = field.getAttribute('index');
   const parameterField = document.getElementById('parametername' + index);
 
@@ -369,11 +394,27 @@ function parameterOptionsSelect(event) {
   parameterField.focus();
 }
 
-function updateParameterFromOptions(event) {
+function codeCustomerOptionsSelect(event) {
   const field = event.target;
 
-  // update options hover-over
-  field.title = field.value;
+  // delete search options
+  vscodeApi.postMessage({ command: "delcodecustomeroptions", text: event.target.getAttribute("index") });
+
+  // hide search options
+  field.hidden = true;
+
+  // find code customer field
+  const index = field.getAttribute('index');
+  const codeCustomerField = document.getElementById('codecustomer' + index);
+
+  // unhide parameter field and focus
+  codeCustomerField.hidden = false;
+  codeCustomerField.focus();
+}
+
+
+function updateParameterFromOptions(event) {
+  const field = event.target;
 
   // find parameter name field
   const value = field.value.replace(/\s\([\s\S]*/g,'');
@@ -383,6 +424,25 @@ function updateParameterFromOptions(event) {
   // update parameter value
   parameterField.value = value;
   parameterField.dispatchEvent(new InputEvent('input'));
+
+  // update options hover-over
+  field.title = field.value;
+}
+
+function updateCodeCustomerFromOptions(event) {
+  const field = event.target;
+
+  // find code customer field
+  const value = field.value.replace(/[\s\S]*\(/g,'').replace(/\)[\s\S]*/g,'');
+  const index = field.getAttribute('index');
+  const codeCustomerField = document.getElementById('codecustomer' + index);
+
+  // update parameter value
+  codeCustomerField.value = value;
+  codeCustomerField.dispatchEvent(new InputEvent('input'));
+
+  // update options hover-over
+  field.title = field.value;
 }
 
 function checkIfDuplicate(row) {
@@ -464,7 +524,7 @@ function processingGet(push = false) {
   const isProcessing = !document.getElementById("processingget").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.codecustomeroptionsfield,.parameternamefield,.parameteroptionsfield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
@@ -478,7 +538,7 @@ function processingSet(push = false) {
   const isProcessing = !document.getElementById("processingset").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.codecustomeroptionsfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
@@ -655,6 +715,11 @@ function invalidForm() {
 function parameterSearch(fieldId) {
   const index = document.getElementById(fieldId).getAttribute('index');
   vscodeApi.postMessage({ command: "parametersearch", text: index });
+}
+
+function codeCustomerSearch(fieldId) {
+  const index = document.getElementById(fieldId).getAttribute('index');
+  vscodeApi.postMessage({ command: "codecustomersearch", text: index });
 }
 
 function getParameters() {
