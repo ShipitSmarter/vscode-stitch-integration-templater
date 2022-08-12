@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.6.18
+- Get/set parameters
+  - Introduced separate field for file name to save to (non-mandatory, system will generate file name if empty)
+  - Now allows searching on `CodeCustomer` value using `Enter` (and return to typing with `Ctrl` + `Enter`), similar to `Parameter Name`
+
 ## 1.6.17
 - Integration automation
   - Now writes authentication setting content to gitignored JSON file upon opening the panel, for later use by the PowerShell script
