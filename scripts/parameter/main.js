@@ -259,6 +259,8 @@ function findNeighbor(fieldId,direction) {
   var idBase = field.id.replace(/\d+/g,'');
   if (idBase === 'parameteroptions') {
     idBase = 'parametername';
+  } else if (idBase === 'codecustomeroptions') {
+    idBase = 'codecustomer';
   }
   const nofLines = parseInt(document.getElementById('noflines').value);
   const gridOrder = ['codecompany', 'codecustomer','parametername','previousvalue','newvalue','changereason'];
@@ -302,6 +304,8 @@ function findNeighbor(fieldId,direction) {
   const neighborBase = neighborId.replace(/\d+/g,'');
   if (document.getElementById(neighborId).hidden && neighborBase === 'parametername') {
     neighborId = 'parameteroptions' + neighborId.replace(/\D+/g,'');
+  } else if (document.getElementById(neighborId).hidden && neighborBase === 'codecustomer') {
+    neighborId = 'codecustomeroptions' + neighborId.replace(/\D+/g,'');
   }
   
   return neighborId;
@@ -520,7 +524,7 @@ function processingGet(push = false) {
   const isProcessing = !document.getElementById("processingget").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.codecustomeroptionsfield,.parameternamefield,.parameteroptionsfield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
@@ -534,7 +538,7 @@ function processingSet(push = false) {
   const isProcessing = !document.getElementById("processingset").hidden;
 
   if (isProcessing) {
-    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
+    const disableFields = document.querySelectorAll("#environment,#noflines,#previous,#allchangereasons,#setparameters,#getparameters,#load,.codecompanyfield,.codecustomerfield,.codecustomeroptionsfield,.parameternamefield,.parameteroptionsfield,.previousvaluefield,.newvaluefield,.changereasonfield");
     for (const dField of disableFields) {
       dField.disabled = true;
     }
