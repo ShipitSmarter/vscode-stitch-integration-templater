@@ -143,11 +143,6 @@ function fieldChange(event) {
         updateFieldOutlineAndTooltip(cr.id);
       }
       break;
-
-    case 'save':
-      // update name value
-      //sdocument.getElementById("savename").innerHTML = nameFromPath(field.value);
-      break;
   }
 }
 
@@ -372,9 +367,6 @@ function parameterOptionsSelect(event) {
 function updateParameterFromOptions(event) {
   const field = event.target;
 
-  // update options hover-over
-  field.title = field.value;
-
   // find parameter name field
   const value = field.value.replace(/\s\([\s\S]*/g,'');
   const index = field.getAttribute('index');
@@ -383,6 +375,9 @@ function updateParameterFromOptions(event) {
   // update parameter value
   parameterField.value = value;
   parameterField.dispatchEvent(new InputEvent('input'));
+
+  // update options hover-over
+  field.title = field.value;
 }
 
 function checkIfDuplicate(row) {
