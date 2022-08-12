@@ -14,6 +14,7 @@ const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
+const saveNameIndex = 8;
 
 // type defs
 type ParameterObject = {
@@ -206,8 +207,11 @@ export class ParameterPanel {
             if (this._checkSaveFolder())  {
               // save to file
               let fileNameProposed:string = 'Saved_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
-              let isDir:boolean = isDirectory(this._fieldValues[saveIndex]);
-              let filePath: string = this._fieldValues[saveIndex] + (isDir ? ('/' + fileNameProposed) : '');
+              //let isDir:boolean = isDirectory(this._fieldValues[saveIndex]);
+              //let filePath: string = this._fieldValues[saveIndex] + (isDir ? ('/' + fileNameProposed) : '');
+              let fileName = isEmpty(this._fieldValues[saveNameIndex]) ? fileNameProposed : this._fieldValues[saveNameIndex];
+              let filePath: string = this._fieldValues[saveIndex] + '/' + fileName;
+              
               this._writeFile(filePath);
               // confirm
               vscode.window.showInformationMessage('Input saved to ' + nameFromPath(filePath));
@@ -285,11 +289,6 @@ export class ParameterPanel {
 
                     // update webview
                     this._updateWebview(extensionUri);
-                    break;
-                  case filesIndex:
-                    if (this._getPath()) {
-                      this._updateWebview(extensionUri);
-                    }
                     break;
 
                 }
@@ -407,7 +406,7 @@ export class ParameterPanel {
   }
 
   private _checkSaveFolder(): boolean {
-    let isValid: boolean = (fs.existsSync(this._fieldValues[saveIndex]) || fs.existsSync(parentPath(cleanPath(this._fieldValues[saveIndex]))));
+    let isValid: boolean = (fs.existsSync(this._fieldValues[saveIndex]));
     if (!isValid) {
       vscode.window.showErrorMessage('Save folder is not an existing directory');
     }
@@ -422,7 +421,8 @@ export class ParameterPanel {
     if (fs.existsSync(this._fieldValues[filesIndex])) {
       // let path: string = parentPath(cleanPath(this._fieldValues[filesIndex]));
       // this._fieldValues[saveIndex] = path;
-      this._fieldValues[saveIndex] = this._fieldValues[filesIndex];
+      this._fieldValues[saveIndex] = parentPath(cleanPath(this._fieldValues[filesIndex]));
+      this._fieldValues[saveNameIndex] = nameFromPath(cleanPath(this._fieldValues[filesIndex]));
 
       updatePath = true;
     }

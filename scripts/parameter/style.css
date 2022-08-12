@@ -61,6 +61,10 @@ h1 {
   width: 20rem;
 }
 
+#savename {
+  width: 16rem;
+}
+
 .codecompanyfield,
 .codecustomerfield {
   width: 6rem;
@@ -103,17 +107,5 @@ h1 {
 .floatpname {
   float: left;
   margin-bottom: 0.5rem;
-}
-
-.floatsavename {
-  float: left;
-  margin-bottom: 0.5rem;
-  display:block;
-  white-space: nowrap;
-  width: 15rem;
-}
-
-#savename {
-  font-size: 0.8rem;
 }
 

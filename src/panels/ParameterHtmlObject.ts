@@ -10,6 +10,7 @@ const filesIndex = 4;
 const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
+const saveNameIndex = 8;
 
 // type defs
 type ResponseObject = {
@@ -163,18 +164,18 @@ export class ParameterHtmlObject {
         <vscode-divider role="separator"></vscode-divider>
 
         <section class="component-example">
-          <div class="floatleftnopadding" title="Must contain a valid directory or file path">
-            Save file to:
-          </div>
-          <div class="floatleftlesspadding">
+          <div class="floatleftnopadding">
+            <p title="Must contain an existing directory">Save folder</p>
             <vscode-text-field id="save" class="field" index="${saveIndex}" ${valueString(this._fieldValues[saveIndex])}></vscode-text-field>
           </div>
 
-          <div class="floatsavename">
-            <vscode-tag id="savename">${nameFromPath(this._fieldValues[saveIndex] ?? '')}</vscode-tag>
+          <div class="floatleftlesspadding">
+            <p title="If no file is given, system will generate file name">Save file</p>
+            <vscode-text-field id="savename" class="field" index="${saveNameIndex}" ${valueString(this._fieldValues[saveNameIndex])}></vscode-text-field>
           </div>
 
           <div class="floatleft">
+            <p> - </p>
             ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary')}
           </div>
         </section>

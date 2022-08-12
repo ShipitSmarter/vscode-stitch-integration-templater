@@ -146,7 +146,7 @@ function fieldChange(event) {
 
     case 'save':
       // update name value
-      document.getElementById("savename").innerHTML = nameFromPath(field.value);
+      //sdocument.getElementById("savename").innerHTML = nameFromPath(field.value);
       break;
   }
 }
