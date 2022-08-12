@@ -168,6 +168,9 @@ export class ParameterPanel {
             if (checkAuth()){
               this._focusField = 'codecustomeroptions' + text;
               this._codeCustomerSearch(+text).then( () => {
+                if (this._codeCustomerSearchValues[+text].length === 0 ) {
+                  this._focusField = 'codecustomer' + text;
+                }
                 this._updateWebview(extensionUri);
               });
             }
