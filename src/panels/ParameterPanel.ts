@@ -53,6 +53,7 @@ export class ParameterPanel {
   private _codeCustomerValues: string[] = [];
   private _parameterNameValues: string[] = [];
   private _parameterSearchValues: string[][] = [];
+  private _codeCustomerSearchValues: string[][] = [];
   private _previousValues: string[] = [];
   private _newValues: string[] = [];
   private _setResponseValues: ResponseObject[] = [];
@@ -163,6 +164,15 @@ export class ParameterPanel {
             // });
             break;
 
+          case 'codecustomersearch':
+            if (checkAuth()){
+              this._focusField = 'codecustomeroptions' + text;
+              this._codeCustomerSearch(+text).then( () => {
+                this._updateWebview(extensionUri);
+              });
+            }
+            break;
+
           case 'parametersearch':
             if (checkAuth()){
               this._focusField = 'parameteroptions' + text;
@@ -226,6 +236,11 @@ export class ParameterPanel {
           case 'deloptions':
             let row:number = +text;
             this._parameterSearchValues[row] = [];
+            break;
+
+          case 'delcodecustomeroptions':
+            let line:number = +text;
+            this._codeCustomerSearchValues[line] = [];
             break;
 
           case 'deleteline':
@@ -485,8 +500,26 @@ export class ParameterPanel {
         }
   
         this._parameterSearchValues[index] = dropdownOptions;
+      }
+    }
+  }
+
+  private async _codeCustomerSearch(index:number) {
+    if (!isEmpty(this._codeCustomerValues[index]) && !isEmpty(this._codeCompanyValues[index])) { 
+
+      let urlGetCodeCustomers: string = `${this._getUrl('getcodecustomers')}&filter=${this._codeCustomerValues[index] ?? ''}`;
+      let codeCustomersResponse: ResponseObject = await this._getApiCall(urlGetCodeCustomers,getAuth(),this._codeCompanyValues[index]);
   
-        let piet = 'bla';
+      if (codeCustomersResponse.status === 200) {
+        let responseJson = JSON.parse(codeCustomersResponse.value);
+  
+        let dropdownOptions: string[] = [];
+        dropdownOptions[0] = this._codeCustomerValues[index];
+        for (let row = 0; row < Math.min(15,responseJson.length ?? 15); row++) {
+          dropdownOptions[row+1] = responseJson[row].agentLabel;
+        }
+  
+        this._codeCustomerSearchValues[index] = dropdownOptions;
       }
     }
   }
@@ -793,6 +826,7 @@ export class ParameterPanel {
     this._urls[1] = await this._getUrlObject(this._configGlob + 'parameter_set.json','setparameters');
     this._urls[2] = await this._getUrlObject(this._configGlob + 'parameter_get_history.json','getparameterhistory');
     this._urls[3] = await this._getUrlObject(this._configGlob + 'parameter_get_parameter_codes.json','getparametercodes');
+    this._urls[4] = await this._getUrlObject(this._configGlob + 'parameter_get_codecustomers.json','getcodecustomers');
 
   }
 
@@ -844,6 +878,7 @@ export class ParameterPanel {
       this._codeCustomerValues,
       this._parameterNameValues,
       this._parameterSearchValues,
+      this._codeCustomerSearchValues,
       this._previousValues,
       this._newValues,
       this._changeReasonValues,

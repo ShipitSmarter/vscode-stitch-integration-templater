@@ -19,7 +19,8 @@ h1 {
   width: 15rem;
 }
 
-.parameteroptionsfield {
+.parameteroptionsfield,
+.codecustomeroptionsfield {
   height: 1.65rem;
   line-height: 1.65rem;
   font-size: 0.8rem;
@@ -31,7 +32,8 @@ h1 {
   margin-bottom: 0.1rem;
 }
 
-.parameteroptionsfield:focus {
+.parameteroptionsfield:focus,
+.codecustomeroptionsfield:focus {
   border-color: var(--vscode-focusBorder);
   outline: none;
 }
@@ -65,8 +67,12 @@ h1 {
   width: 16rem;
 }
 
-.codecompanyfield,
+.codecustomeroptionsfield,
 .codecustomerfield {
+  width: 15rem;
+}
+
+.codecompanyfield {
   width: 6rem;
 }
 
