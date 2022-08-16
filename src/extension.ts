@@ -29,7 +29,8 @@ export function activate(context: vscode.ExtensionContext) {
 	// Create parameter panel and open CSV file
 	const parameterLoadCommand = vscode.commands.registerCommand("stitch.parameters-loadcsv", (uri,files) => {
 		if(typeof files !== 'undefined' && files.length > 0) {
-			const filePath: string = files[0].path.substring(1);
+			// const filePath: string = files[0].path.substring(1);
+			const filePath = files[0].fsPath;
 			ParameterPanel.render(context.extensionUri, context, filePath);
 		}
 	});
