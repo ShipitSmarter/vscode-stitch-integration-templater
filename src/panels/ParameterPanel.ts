@@ -724,19 +724,20 @@ export class ParameterPanel {
     // load file
     const fileContent = fs.readFileSync(filePath, {encoding:'utf8'});
 
-    // try csv-parse
+    // parse
     const content = csvParse.parse( fileContent, {
       columns: true,
       skip_empty_lines: true,
       skip_records_with_empty_values: true,
-      delimiter: this._delimiter
+      delimiter: this._delimiter,
+      relax_quotes: true
     });
 
     // update line arrays
     this._fieldValues[noflinesIndex] = content.length + '';
     this._cropLines(content.length);
 
-    // convert to object array
+    // convert to object arrays
     for (let index=0; index < content.length; index++) {
       // fill parameters
       this._codeCompanyValues[index]    = content[index].CodeCompany;
@@ -759,18 +760,6 @@ export class ParameterPanel {
         break;
       }
     }
-  }
-
-  private _csvEncode(input:string): string {
-    // replace single quotes by double quotes
-    let output = input.replace(/\"/g,'""');
-
-    // if contains delimiter: wrap in quotes
-    if (output.includes(this._delimiter)) {
-      output = `"${output}"`;
-    }
-
-    return output;
   }
 
   private _writeFile(filePath:string) {

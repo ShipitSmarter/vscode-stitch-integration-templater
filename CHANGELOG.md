@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.6.20
+- Get/set parameters
+  - Fix:
+    - Fixed issue with importing CSVs with unquoted values containing quotes
+
 ## 1.6.19
 - Get/set parameters
   - Fix:
