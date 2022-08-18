@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.6.19
+- Get/set parameters
+  - Fix:
+    - Fixed issue with missing characters when importing/exporting CSVs with complex characters
+
 ## 1.6.18
 - Get/set parameters
   - Introduced separate field for file name to save to (non-mandatory, system will generate file name if empty)
