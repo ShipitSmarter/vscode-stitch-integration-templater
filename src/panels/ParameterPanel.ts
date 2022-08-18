@@ -3,7 +3,8 @@ import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, 
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
-import * as csvParse from "csv-parse";
+import * as csvParse from "csv-parse/sync";
+import * as csvStringify from "csv-stringify/sync";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -718,71 +719,32 @@ export class ParameterPanel {
     this._extendedHistoryValues = this._extendedHistoryValues.slice(0,lines);
   }
 
-  private _preParse(input:string):string {
-    // preparse: replace double quotes, delimiter by strings
-    let quote = '{quote}';
-    let delim = '{delim}';
-
-    // replace in-value quotes
-    let prep = input.replace(/""/g,quote);
-
-    // replace in-value delimiters (from https://stackoverflow.com/a/37675638/1716283)
-    prep = (this._delimiter + prep + this._delimiter).replace(/(?<=;")[\s\S]*(?=";)/g, (m:string) => {
-      return m.replace(/;/g, delim);
-     });
-    // remove first and last added delimiters
-    prep = prep.replace(/^;/,'').replace(/;$/,'');
-
-    // remove remaining quotes
-    prep = prep.replace(/"/g,'');
-
-    return prep;
-  }
-
-  private _postParse(input:string):string {
-    // postparse: replace strings by original characters
-    let quote = '{quote}';
-    let delim = '{delim}';
-
-    let post = input.replace(new RegExp(quote,'g'),'"').replace(new RegExp(delim,'g'),this._delimiter);
-
-    return post;
-  }
-
   private _loadFile(filePath:string) {
 
     // load file
     const fileContent = fs.readFileSync(filePath, {encoding:'utf8'});
 
-    let skipheader:boolean = true;
-    let parameterLines: string[] = fileContent.replace(/\r/g,'').split('\n');
-
-    // remove empty lines and header line
-    parameterLines = parameterLines.filter(el => !el.startsWith(this._delimiter)).filter(el => !isEmpty(el));
-    if (skipheader) {
-      parameterLines.shift();
-    }
+    // try csv-parse
+    const content = csvParse.parse( fileContent, {
+      columns: true,
+      skip_empty_lines: true,
+      skip_records_with_empty_values: true,
+      delimiter: this._delimiter
+    });
 
     // update line arrays
-    this._fieldValues[noflinesIndex] = parameterLines.length + '';
-    this._cropLines(parameterLines.length);
+    this._fieldValues[noflinesIndex] = content.length + '';
+    this._cropLines(content.length);
 
     // convert to object array
-    //let parameterObjects: ParameterObject[] = new Array<ParameterObject>(parameterLines.length);
-    for (let index=0; index < parameterLines.length; index++) {
-
-      // preparse: replace in-value delimiters and quotes
-      let prep = this._preParse(parameterLines[index]);
-
-      let line: string[] = prep.split(this._delimiter);
-
+    for (let index=0; index < content.length; index++) {
       // fill parameters
-      this._codeCompanyValues[index] = this._postParse(line[0]);
-      this._codeCustomerValues[index] = this._postParse(line[1]);
-      this._parameterNameValues[index] = this._postParse(line[2]);
-      this._previousValues[index] = this._postParse(line[3]);
-      this._newValues[index] = this._postParse(line[4]);
-      this._changeReasonValues[index] = this._postParse(line[5]);
+      this._codeCompanyValues[index]    = content[index].CodeCompany;
+      this._codeCustomerValues[index]   = content[index].CodeCustomer;
+      this._parameterNameValues[index]  = content[index].Name;
+      this._previousValues[index]       = content[index].PreviousValue;
+      this._newValues[index]            = content[index].NewValue;
+      this._changeReasonValues[index]   = content[index].ChangeReason;
     }
 
     // clear responses, parameter options
@@ -799,26 +761,42 @@ export class ParameterPanel {
     }
   }
 
-  private _writeFile(filePath:string) {
-    // construct file content
-    let fileContent: string = 'CodeCompany;CodeCustomer;Name;PreviousValue;NewValue;ChangeReason\r\n';
-    for (let index=0; index < this._codeCompanyValues.length; index++) {
-      // construct line
-      fileContent +=  (this._codeCompanyValues[index] ?? '') + this._delimiter
-                    + (this._codeCustomerValues[index] ?? '') + this._delimiter
-                    + (this._parameterNameValues[index] ?? '') + this._delimiter
-                    + (this._previousValues[index] ?? '') + this._delimiter
-                    + (this._newValues[index] ?? '') + this._delimiter
-                    + (this._changeReasonValues[index]?? '');
+  private _csvEncode(input:string): string {
+    // replace single quotes by double quotes
+    let output = input.replace(/\"/g,'""');
 
-      // add newline
-      if (index !== this._codeCompanyValues.length -1) {
-        fileContent += '\r\n';
-      }
+    // if contains delimiter: wrap in quotes
+    if (output.includes(this._delimiter)) {
+      output = `"${output}"`;
     }
 
+    return output;
+  }
+
+  private _writeFile(filePath:string) {
+    // construct file content array
+    let fileContentArray: string[][] = [['CodeCompany','CodeCustomer','Name','PreviousValue','NewValue','ChangeReason']];
+    for (let index=0; index < this._codeCompanyValues.length; index++) {
+      // add each line
+      fileContentArray[index +1] = [
+        this._codeCompanyValues[index] ?? '',
+        this._codeCustomerValues[index] ?? '',
+        this._parameterNameValues[index] ?? '',
+        this._previousValues[index] ?? '',
+        this._newValues[index] ?? '',
+        this._changeReasonValues[index]?? ''
+      ];
+    }
+
+    // stringify
+    const output = csvStringify.stringify(fileContentArray,
+      {
+        delimiter: this._delimiter
+      }
+    );
+
     // write to file
-    fs.writeFileSync(filePath,fileContent,{encoding:'utf8',flag:'w'});
+    fs.writeFileSync(filePath,output,{encoding:'utf8',flag:'w'});
   }
 
   private async _getAPIDetails() {
