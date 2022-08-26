@@ -497,6 +497,21 @@ export async function saveAuth() {
     return authString;
   }
 
+  export function getUserPwdFromAuth(auth:string) : string[] {
+
+	// ignore everything before and including the space (if present)
+	const pureAuth:string = auth.replace(/[\s\S]*\s/g,'');
+
+	// decode
+	const buffer = Buffer.from(pureAuth,'base64');
+	const userPwd = buffer.toString();
+	
+	const user = userPwd.replace(/:[\s\S]*/g,''); 		// user is anything before the first colon
+	const pwd  = userPwd.replace(/^[^:]*:/g,''); 		// pwd is anything after the first colon
+
+	return [user, pwd];
+  }
+
   export function checkAuth() : boolean {
     let isValid: boolean = getAuth().length > 10;
     if (!isValid) {

@@ -11,6 +11,11 @@ function main() {
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
 
+  // create parameter codes button action (if button exists)
+  for (const createParameterCodesButton of document.querySelectorAll("#createnewparametercodes")) {
+    createParameterCodesButton.addEventListener('click', createParameterCodes);
+  }
+
   // new parameter code tile buttons
   for (const newparambutton of document.querySelectorAll(".newparametercode")) {
     newparambutton.addEventListener("click", clickTile);
@@ -746,6 +751,10 @@ function parameterSearch(fieldId) {
 function codeCustomerSearch(fieldId) {
   const index = document.getElementById(fieldId).getAttribute('index');
   vscodeApi.postMessage({ command: "codecustomersearch", text: index });
+}
+
+function createParameterCodes() {
+  vscodeApi.postMessage({ command: "createparametercodes", text: "real fast!" });
 }
 
 function getParameters() {
