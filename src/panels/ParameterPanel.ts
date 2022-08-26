@@ -169,6 +169,9 @@ export class ParameterPanel {
             // });
             break;
 
+          case 'createparametercodes':
+            this._createParameterCodes();
+            break;
           case 'removeselectedparametercode':
             this._selectedNewParameterCodes = this._selectedNewParameterCodes.filter(el => el !== text);
             break;
@@ -541,6 +544,26 @@ export class ParameterPanel {
     }
   }
 
+  private async _createParameterCodes() {
+    // get url
+    const userPwd:string[] = getUserPwdFromAuth(getAuth());
+    const user = userPwd[0];
+    const pwd = userPwd[1];
+    const url:string = this._getUrl('code_param_create');
+    const fullUrl = `${url}?userid=${user}&password=${pwd}`;
+
+    // apply create
+    var responses:ResponseObject[] = [];
+    for (let index=0; index<this._newParameterCodes.length; index++) {
+      var pcode = this._newParameterCodes[index];
+      if (this._selectedNewParameterCodes.includes(pcode)) {
+        responses.push(await this._createParameterCode(fullUrl,pcode,this._newParameterDescriptionValues[index] ?? '',this._newParameterExplanationValues[index] ?? ''));
+      }
+    }
+
+    var henk = responses;
+  }
+
   private async _setParametersButton(extensionUri: vscode.Uri) {
 
     // get url
@@ -588,6 +611,40 @@ export class ParameterPanel {
     }
 
     this._processingSet = false;
+  }
+
+  private async _createParameterCode(url:string,codeParam:string, description:string,explanation:string="") : Promise<ResponseObject> {
+    let result: ResponseObject;
+    try {
+      const response = await axios({
+        method: "POST",
+        data: {
+          CodeParam: codeParam,
+          Description: description,
+          Explanation: explanation
+      },
+        url: url,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      result = {
+        status: response.status,
+        statusText: response.statusText,
+        value: '',
+        message: ''
+      };
+
+    } catch (err:any) {
+      result = {
+        status: err.response.status,
+        statusText: err.response.statusText,
+        value: '',
+        message: this._getMessageFromError(err)
+      };
+    }
+
+    return result;
   }
 
   private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) : Promise<ResponseObject> {
