@@ -16,6 +16,13 @@ function main() {
     newparambutton.addEventListener("click", clickTile);
   }
 
+   // save new parameter description/explanation
+   const newparameterfields = document.querySelectorAll(".newparameterdescription,.newparameterexplanation");
+   for (const field of newparameterfields) {
+     field.addEventListener("input", fieldChange);
+   }
+ 
+
   // info onclick
   document.getElementById("info").addEventListener("click",infoClick);
 
@@ -35,7 +42,7 @@ function main() {
   }
 
   // update hover-overs on load
-  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield,.currentchangereasonfield");
+  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield,.currentchangereasonfield,.newparameterdescription,.newparameterexplanation");
   for (const field of allFields) {
     field.title = field.value;
   }

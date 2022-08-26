@@ -55,6 +55,8 @@ export class ParameterHtmlObject {
     private _codeCompanies: CodeCompanyObject[],
     private _focusField: string,
     private _newParameterCodes: string[],
+    private _newParameterDescriptionValues: string[],
+    private _newParameterExplanationValues: string[],
     private _selectedNewParameterCodes: string[]
   ) { }
 
@@ -195,20 +197,36 @@ export class ParameterHtmlObject {
   private _getCreateParameterCodes(): string {
 
     // list of parameter code buttons
-    let newParamButtons: string = '';
-    for (const newParamCode of this._newParameterCodes) {
-      newParamButtons += this._getButton(newParamCode, newParamCode,'',this._selectedNewParameterCodes.includes(newParamCode) ? 'primary' : 'secondary','','newparametercode');
+    let newParamGrid: string = '';
+    for (let index = 0; index < this._newParameterCodes.length; index++) {
+      let newParamCode:string = this._newParameterCodes[index];
+      newParamGrid += /*html*/ `
+        <section class="component-nomargin">
+          ${this._getButton(newParamCode, newParamCode,'',this._selectedNewParameterCodes.includes(newParamCode) ? 'primary' : 'secondary','','newparametercode')}
+        </section>
+        <section class="component-nomargin">
+          <vscode-text-field id="${newParamCode}_description" class="newparameterdescription" index="${index}" value="${escapeHtml(this._newParameterDescriptionValues[index] ?? '')}"></vscode-text-field>
+        </section>
+        <section class="component-nomargin">
+          <vscode-text-field id="${newParamCode}_explanation" class="newparameterexplanation" index="${index}" value="${escapeHtml(this._newParameterExplanationValues[index] ?? '')}"></vscode-text-field>
+        </section>
+        `;
     }
 
     let html: string = /*html*/ `
       <section class="rowsingle">
         <h3 title="Deselect parameter codes that should not be created">Create missing parameter codes</h3>
 
-        <section class="component-example">
-          ${newParamButtons}
+        <section class="flexwrapper">
+          <section class="row111">
+            <div>Param code</div>
+            <div>Description</div>
+            <div>Explanation</div>
+            ${newParamGrid}
+          </section>
         </section>
 
-        <section class="component-example">
+        <section class="component-topmargin">
             ${this._getButton('createnewparametercodes','Create','codicon-add','primary')}
         </section>
 

@@ -12,6 +12,11 @@ h1 {
   margin-top: 0.5rem;
 }
 
+.newparameterdescription,
+.newparameterexplanation {
+  width: 15rem;
+}
+
 .parameternamefield,
 .parameteroptionsfield,
 .previousvaluefield,

@@ -78,6 +78,8 @@ export class ParameterPanel {
   private _settings: any;
   private _focusField: string = '';
   private _newParameterCodes: string[] = [];
+  private _newParameterDescriptionValues: string[] = [];
+  private _newParameterExplanationValues: string[] = [];
   private _selectedNewParameterCodes: string[] = [];
 
   private _emptyResponse: ResponseObject = {
@@ -320,7 +322,12 @@ export class ParameterPanel {
 
                 }
                 break;
-
+              case 'newparameterdescription':
+                this._newParameterDescriptionValues[index] = value;
+                break;
+              case 'newparameterexplanation':
+                this._newParameterExplanationValues[index] = value;
+                break;
               case 'codecompanyfield':
                 this._codeCompanyValues[index] = value;
                 break;
@@ -541,6 +548,8 @@ export class ParameterPanel {
 
     // clear any previously found 'new' parameter codes
     this._newParameterCodes = [];
+    this._newParameterDescriptionValues = [];
+    this._newParameterExplanationValues = [];
     this._selectedNewParameterCodes = [];
 
     // refresh current values
@@ -888,6 +897,8 @@ export class ParameterPanel {
       this._codeCompanies,
       focusField,
       this._newParameterCodes,
+      this._newParameterDescriptionValues,
+      this._newParameterExplanationValues,
       this._selectedNewParameterCodes
     );
 
