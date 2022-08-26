@@ -77,6 +77,8 @@ export class ParameterPanel {
   private _readmeSetting: string = "stitch.parameters.readmeLocation";
   private _settings: any;
   private _focusField: string = '';
+  private _newParameterCodes: string[] = [];
+  private _selectedNewParameterCodes: string[] = [];
 
   private _emptyResponse: ResponseObject = {
     status: 0,
@@ -165,6 +167,12 @@ export class ParameterPanel {
             // });
             break;
 
+          case 'removeselectedparametercode':
+            this._selectedNewParameterCodes = this._selectedNewParameterCodes.filter(el => el !== text);
+            break;
+          case 'addselectedparametercode':
+            this._selectedNewParameterCodes.push(text);
+            break;
           case 'codecustomersearch':
             if (checkAuth()){
               this._focusField = 'codecustomeroptions' + text;
@@ -433,8 +441,6 @@ export class ParameterPanel {
     return isValid;
   }
 
-
-
   private _getPath(): boolean {
     let updatePath:boolean = false;
     if (fs.existsSync(this._fieldValues[filesIndex])) {
@@ -533,6 +539,10 @@ export class ParameterPanel {
     // get url
     let url: string = this._getUrl('setparameters');
 
+    // clear any previously found 'new' parameter codes
+    this._newParameterCodes = [];
+    this._selectedNewParameterCodes = [];
+
     // refresh current values
     await this._getCurrentValues();
 
@@ -556,6 +566,16 @@ export class ParameterPanel {
     // const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
       this._setResponseValues[index] = await this._setParameter(url,getAuth(),this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
+      
+      // if param does not exist: add to new parameter codes array
+      if (this._setResponseValues[index].status === 500) {
+        let pcode:string = this._parameterNameValues[index];
+        
+        if (!this._newParameterCodes.includes(pcode)) {
+          this._newParameterCodes.push(pcode);
+          this._selectedNewParameterCodes.push(pcode);
+        }
+      }
     }
 
     this._processingSet = false;
@@ -797,6 +817,8 @@ export class ParameterPanel {
     this._urls[2] = await this._getUrlObject(this._configGlob + 'parameter_get_history.json','getparameterhistory');
     this._urls[3] = await this._getUrlObject(this._configGlob + 'parameter_get_parameter_codes.json','getparametercodes');
     this._urls[4] = await this._getUrlObject(this._configGlob + 'parameter_get_codecustomers.json','getcodecustomers');
+    this._urls[5] = await this._getUrlObject(this._configGlob + 'code_param_get.json','code_param_get');
+    this._urls[5] = await this._getUrlObject(this._configGlob + 'code_param_create.json','code_param_create');
 
   }
 
@@ -864,7 +886,9 @@ export class ParameterPanel {
       this._processingGet,
       this._environmentOptions,
       this._codeCompanies,
-      focusField
+      focusField,
+      this._newParameterCodes,
+      this._selectedNewParameterCodes
     );
 
     let html =  parameterHtmlObject.getHtml();

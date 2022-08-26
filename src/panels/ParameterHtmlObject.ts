@@ -53,7 +53,9 @@ export class ParameterHtmlObject {
     private _processingGet: boolean,
     private _environmentOptions: string[],
     private _codeCompanies: CodeCompanyObject[],
-    private _focusField: string
+    private _focusField: string,
+    private _newParameterCodes: string[],
+    private _selectedNewParameterCodes: string[]
   ) { }
 
   // METHODS
@@ -94,6 +96,8 @@ export class ParameterHtmlObject {
         </section>
 
         ${this._getSaveItems()}
+
+        ${this._getCreateParameterCodes()}
         
         <section class="rowflex">
           <section class="rowsingle">
@@ -135,10 +139,11 @@ export class ParameterHtmlObject {
     return html;
   }
 
-  private _getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = ''): string {
+  private _getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = '',clas:string = ''): string {
     let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
+    let classString:string = isEmpty(clas) ? '' : `class="${clas}"`;
     let button: string = /*html*/ `
-      <vscode-button id="${id}" appearance="${appearance}" ${hidden}>
+      <vscode-button id="${id}" ${classString} appearance="${appearance}" ${hidden}>
         ${title}
         ${codiconString}
       </vscode-button>
@@ -185,6 +190,33 @@ export class ParameterHtmlObject {
       <section class="rowsingle">`;
 
       return html;
+  }
+
+  private _getCreateParameterCodes(): string {
+
+    // list of parameter code buttons
+    let newParamButtons: string = '';
+    for (const newParamCode of this._newParameterCodes) {
+      newParamButtons += this._getButton(newParamCode, newParamCode,'',this._selectedNewParameterCodes.includes(newParamCode) ? 'primary' : 'secondary','','newparametercode');
+    }
+
+    let html: string = /*html*/ `
+      <section class="rowsingle">
+        <h3 title="Deselect parameter codes that should not be created">Create missing parameter codes</h3>
+
+        <section class="component-example">
+          ${newParamButtons}
+        </section>
+
+        <section class="component-example">
+            ${this._getButton('createnewparametercodes','Create','codicon-add','primary')}
+        </section>
+
+
+        <vscode-divider role="separator"></vscode-divider>
+      <section class="rowsingle">`;
+
+      return this._newParameterCodes.length === 0 ? '' : html;
   }
 
   private _getDetailsGrid(): string {

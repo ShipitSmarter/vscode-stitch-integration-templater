@@ -11,6 +11,11 @@ function main() {
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
 
+  // new parameter code tile buttons
+  for (const newparambutton of document.querySelectorAll(".newparametercode")) {
+    newparambutton.addEventListener("click", clickTile);
+  }
+
   // info onclick
   document.getElementById("info").addEventListener("click",infoClick);
 
@@ -75,6 +80,20 @@ function main() {
     document.getElementById(focusId).focus();
   }
 }
+
+function clickTile(event) {
+  const field = event.target;
+
+  // update tile appearance and update selected param code array
+  if (field.getAttribute('appearance') === 'primary'){
+    field.setAttribute('appearance','secondary');
+    vscodeApi.postMessage({ command: "removeselectedparametercode", text: field.id });
+
+  } else {
+    field.setAttribute('appearance','primary');
+    vscodeApi.postMessage({ command: "addselectedparametercode", text: field.id });
+  }
+};
 
 function fieldChange(event) {
   const field = event.target;
