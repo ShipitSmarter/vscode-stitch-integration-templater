@@ -206,7 +206,7 @@ export class ParameterHtmlObject {
           <vscode-checkbox id="createnewparameter${index}" class="createnewparametercheckbox" index="${index}" ${checkedString(this._selectedNewParameterCodes.includes(newParamCode))}></vscode-checkbox>
         </section>
         <section class="component-nomargin">
-          <vscode-text-field id="newparametercode${index}" class="newparametercode" index="${index}" value="${newParamCode}" readonly></vscode-text-field>
+          <vscode-text-field id="newparametercode${index}" class="newparametercode" index="${index}" value="${newParamCode}" title="${newParamCode}" readonly></vscode-text-field>
         </section>
         <section class="component-nomargin">
           <vscode-text-field id="newparameterdescription${index}" class="newparameterdescription" index="${index}" value="${escapeHtml(this._newParameterDescriptionValues[index] ?? '')}"></vscode-text-field>

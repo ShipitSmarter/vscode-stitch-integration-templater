@@ -4,6 +4,7 @@ h1 {
   float:left;
 }
 
+.newparametercode,
 .newparameterdescription,
 .newparameterexplanation {
   width: 15rem;
