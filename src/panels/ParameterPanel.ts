@@ -177,7 +177,11 @@ export class ParameterPanel {
             break;
 
           case 'createparametercodes':
-            this._createParameterCodes();
+            this._createParameterCodes().then(() => {
+              this._checkParameterCodes().then(() => {
+                this._updateWebview(extensionUri);
+              });
+            });
             break;
           case 'codecustomersearch':
             if (checkAuth()){
@@ -612,7 +616,7 @@ export class ParameterPanel {
       }
     }
 
-    var henk = responses;
+    vscode.window.showInformationMessage(`Created parameters: ${this._selectedNewParameterCodes.sort().join(', ')}`);
   }
   
   private async _createParameterCode(url:string,codeParam:string, description:string,explanation:string="") : Promise<ResponseObject> {
