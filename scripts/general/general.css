@@ -15,10 +15,18 @@
   margin: 0.25rem 0;
 }
 
-.row1111 {
+.grid4flex {
   display: grid;
   grid-auto-rows: min-content;
   grid-template-columns: min-content min-content min-content min-content;
+  column-gap: 0.7rem;
+  row-gap: 0.3rem;
+}
+
+.grid7flex {
+  display: grid;
+  grid-auto-rows: min-content;
+  grid-template-columns: min-content min-content min-content min-content min-content min-content min-content;
   column-gap: 0.7rem;
   row-gap: 0.3rem;
 }

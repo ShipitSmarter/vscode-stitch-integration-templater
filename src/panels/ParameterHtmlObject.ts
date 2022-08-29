@@ -219,8 +219,8 @@ export class ParameterHtmlObject {
 
     let newParamSection:string = this._newParameterCodes.length === 0 ? '' : /*html*/ `
       <section class="flexwrapper">
-        <section class="row1111">
-          <div>-</div> 
+        <section class="grid4flex">
+          <div>-</div>
           <div>Param code</div>
           <div>Description</div>
           <div>Explanation</div>
@@ -306,7 +306,7 @@ export class ParameterHtmlObject {
     let titleString = isOk ? response?.statusText : `${response?.statusText ?? ''} : ${response?.message ?? ''}`;
 
     let html: string = /*html*/`
-        <section class="component-option-fixed">
+        <section class="component-nomargin">
           <div id="${idString}response${index}" class="${idString}responsefield" index="${index}" ${hiddenString(!isEmpty(response?.statusText ?? ''))}>
             <vscode-option id="${idString}responsefieldoption${index}" class="${idString}responsefieldoption${okClassString}" title="${titleString}">${optionText}</vscode-option>
           </div>
@@ -317,85 +317,64 @@ export class ParameterHtmlObject {
   }
 
   private _getCurrentValues(): string {
-    let currentValues: string = ``;
-    let currentChangeReasons: string = '';
-    let currentTimestamps: string = '';
-    let getResponseValues: string = '';
+    let currentValuesGrid: string = '';
 
     for (let index = 0; index < +this._fieldValues[noflinesIndex]; index++) {
 
-      currentValues += /*html*/`
-        <section class="component-minvmargin">
+      currentValuesGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-text-field id="currentvalue${index}" class="currentvaluefield" value="${escapeHtml(this._currentValues[index] ?? '')}" readonly></vscode-text-field>
         </section>
       `;
 
-      currentChangeReasons += /*html*/`
-        <section class="component-minvmargin">
+      currentValuesGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-text-field id="currentchangereason${index}" class="currentchangereasonfield" value="${this._currentChangeReasonValues[index] ?? ''}" readonly></vscode-text-field>
         </section>
       `;
 
-      currentTimestamps += /*html*/`
-        <section class="component-minvmargin">
+      currentValuesGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-text-field id="currenttimestamp${index}" class="currenttimestampfield" value="${this._currentTimestampValues[index] ?? ''}" title="${this._extendedHistoryValues[index] ?? ''}" readonly></vscode-text-field>
         </section>
       `;
 
       // api response      
-      getResponseValues += this._getResponseOption('get',index,this._getResponseValues[index]);
+      currentValuesGrid += this._getResponseOption('get',index,this._getResponseValues[index]);
     }
 
     let html: string = /*html*/ `
-      <section class="component-example">
-        <section class="floatleftnopadding">
-          <p>Current value</p>
-          ${currentValues}
+      <section class="flexwrapper">
+        <section class="grid4flex">
+          <div>Current value</div>
+          <div>Change reason</div>
+          <div>Timestamp</div>
+          <div class="responsediv">Get Response</div>
+          ${currentValuesGrid}
         </section>
-
-        <section class="floatleftnopadding">
-          <p>Change reason</p>
-          ${currentChangeReasons}
-        </section>
-
-        <section class="floatleftnopadding">
-          <p>Timestamp</p>
-          ${currentTimestamps}
-        </section>
-
-        <section class="floatleft">
-          <p>Get Response</p>
-          ${getResponseValues}
-        </section>
-      </section>`;
+      </section>
+      `;
 
     return html;
   }
 
   private _parameterInputs(): string {
     let nofRows = +this._fieldValues[noflinesIndex];
-    let codeCompanys: string = '';
-    let codeCustomers: string = '';
-    let parameterNames: string = '';
-    let previousValues: string = '';
-    let newValues: string = '';
-    let changeReasonValues: string = '';
-    let setResponseValues: string = '';
+    let inputGrid: string = '';
     for (let row = 0; row < nofRows; row++) {
 
       // code company
-      codeCompanys += /*html*/`
-        <section class="component-minvmargin">
+      inputGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-text-field id="codecompany${row}" class="codecompanyfield" index="${row}" tabindex="${row +1}0" ${valueString(this._codeCompanyValues[row])} placeholder="CodeCompany"></vscode-text-field>
         </section>
       `;
 
+      // code customer
       var showCodeCustomerSearch: boolean = (this._codeCustomerSearchValues[row] !== undefined) && (this._codeCustomerSearchValues[row].length > 0);
       let selectedCodeCustomerOption = showCodeCustomerSearch ? this._codeCustomerSearchValues[row].filter(el => el.includes(`(${this._codeCustomerValues[row]})`))[0] ?? this._codeCustomerValues[row] ?? '' : '';
-
-      // code customer
-      codeCustomers += /*html*/`
-        <section class="component-minvmargin">
+      inputGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-text-field id="codecustomer${row}" class="codecustomerfield" index="${row}" tabindex="${row +1}1" ${valueString(this._codeCustomerValues[row])} placeholder="CodeCustomer" ${hiddenString(!showCodeCustomerSearch)}></vscode-text-field>
           <select id="codecustomeroptions${row}" class="codecustomeroptionsfield" index="${row}" tabindex="${row +1}2" position="below" title="${selectedCodeCustomerOption}" ${hiddenString(showCodeCustomerSearch)}>
             ${selectOptions(this._codeCustomerSearchValues[row] ?? [''],selectedCodeCustomerOption)}
@@ -403,76 +382,58 @@ export class ParameterHtmlObject {
         </section>
       `;
 
+      // parameter name
       var showSearch: boolean = (this._parameterSearchValues[row] !== undefined) && (this._parameterSearchValues[row].length > 0);
       let selectedOption = showSearch ? this._parameterSearchValues[row].filter(el => el.startsWith(this._parameterNameValues[row] + ' '))[0] ?? this._parameterNameValues[row] ?? '' : '';
 
-      parameterNames += /*html*/`
-        <section class="component-pname">
-          <div class="floatpname">
+      inputGrid += /*html*/`
+        <section class="component-nomargin">
             <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" tabindex="${row +1}3" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
             <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}4" position="below" title="${selectedOption}" ${hiddenString(showSearch)}>
               ${selectOptions(this._parameterSearchValues[row] ?? [''],selectedOption)}
             </select>
-          </div>
         </section>
       `;
 
       // previous parameter value
-      previousValues += /*html*/`
-        <section class="component-minvmargin">
+      inputGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-text-field id="previousvalue${row}" class="previousvaluefield" index="${row}" tabindex="-1" ${valueString(escapeHtml(this._previousValues[row]??''))} readonly></vscode-text-field>
         </section>
       `;
 
       // new parameter value
-      newValues += /*html*/`
-        <section class="component-minvmargin">
+      inputGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" tabindex="${row +1}5" ${valueString(escapeHtml(this._newValues[row]??''))} placeholder="new parameter value"></vscode-text-field>
         </section>
       `;
 
       // change reason
-      changeReasonValues += /*html*/`
-        <section class="component-minvmargin">
+      inputGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-text-field id="changereason${row}" class="changereasonfield" index="${row}" tabindex="${row +1}6" ${valueString(escapeHtml(this._changeReasonValues[row]??''))} placeholder="change reason"></vscode-text-field>
         </section>
       `;
 
       // api response
-      setResponseValues += this._getResponseOption('set',row, this._setResponseValues[row]);
+      inputGrid += this._getResponseOption('set',row, this._setResponseValues[row]);
     }
 
     let html: string = /*html*/ `
-      <section class="component-example">
-        <section class="floatleftnopadding">
-          <p>CodeCompany</p>
-          ${codeCompanys}
+      <section class="flexwrapper">
+        <section class="grid7flex">
+          <div>CodeCompany</div>
+          <div>CodeCustomer</div>
+          <div title="Enter to search, Ctrl + Enter to type">Parameter Name</div>
+          <div>Previous Value</div>
+          <div>New Value</div>
+          <div>Change Reason</div>
+          <div class="responsediv">Set Response</div>
+          ${inputGrid}
         </section>
-        <section class="floatleftnopadding">
-          <p>CodeCustomer</p>
-          ${codeCustomers}
-        </section>
-        <section class="floatleftnopadding">
-          <p title="Enter to search, Ctrl + Enter to type">Parameter Name</p>
-          ${parameterNames}
-        </section>
-        <section class="floatleftnopadding">
-          <p>Previous Value</p>
-          ${previousValues}
-        </section>
-        <section class="floatleftnopadding">
-          <p>New Value</p>
-          ${newValues}
-        </section>
-        <section class="floatleftnopadding">
-          <p>Change Reason</p>
-          ${changeReasonValues}
-        </section>
-        <section class="floatleft">
-          <p>Set Response</p>
-          ${setResponseValues}
-        </section>
-      </section>`;
+      </section>
+      `;
 
     return html;
   }
