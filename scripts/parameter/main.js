@@ -10,6 +10,7 @@ function main() {
   document.getElementById("getparameters").addEventListener("click", getParameters);
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
+  document.getElementById("addline").addEventListener("click",addLine);
 
   // check new parameter codes button action
   document.getElementById("checknewparametercodes").addEventListener("click",checkParameterCodes);
@@ -372,9 +373,13 @@ function addLine(event) {
 
   let nofLinesField = document.getElementById("noflines");
   let nofLines = parseInt(nofLinesField.value);
-  let index = parseInt(field.getAttribute("index"));
+  let index = -1;
 
-  if (index === (nofLines-1)) {
+  if (['newvaluefield','changereasonfield'].includes(field.classList[0]) ) {
+    index = parseInt(field.getAttribute("index"));
+  }  
+
+  if (index === (nofLines-1) || field.id === 'addline') {
     nofLinesField.value = (nofLines + 1).toString();
     nofLinesField.dispatchEvent(new Event('change'));
   }

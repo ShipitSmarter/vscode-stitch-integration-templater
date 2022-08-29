@@ -431,6 +431,9 @@ export class ParameterHtmlObject {
           <div>Change Reason</div>
           <div class="responsediv">Set Response</div>
           ${inputGrid}
+          <div>
+          ${this._getButton('addline','+','','primary')}
+          </div>
         </section>
       </section>
       `;
