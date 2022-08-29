@@ -830,7 +830,8 @@ export class ParameterPanel {
   private _loadFile(filePath:string) {
 
     // load file
-    const fileContent = fs.readFileSync(filePath, {encoding:'utf8'});
+    // fix for BOM from: https://github.com/nodejs/node-v0.x-archive/issues/1918#issuecomment-2480359
+    const fileContent = fs.readFileSync(filePath, {encoding:'utf8'}).replace(/^\uFEFF/, '');
 
     // parse
     const content = csvParse.parse( fileContent, {
