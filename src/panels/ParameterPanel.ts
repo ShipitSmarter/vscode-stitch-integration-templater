@@ -563,6 +563,40 @@ export class ParameterPanel {
 
     var henk = responses;
   }
+  
+  private async _createParameterCode(url:string,codeParam:string, description:string,explanation:string="") : Promise<ResponseObject> {
+    let result: ResponseObject;
+    try {
+      const response = await axios({
+        method: "POST",
+        data: {
+          CodeParam: codeParam,
+          Description: description,
+          Explanation: explanation
+      },
+        url: url,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      result = {
+        status: response.status,
+        statusText: response.statusText,
+        value: '',
+        message: ''
+      };
+
+    } catch (err:any) {
+      result = {
+        status: err.response.status,
+        statusText: err.response.statusText,
+        value: '',
+        message: this._getMessageFromError(err)
+      };
+    }
+
+    return result;
+  }
 
   private async _setParametersButton(extensionUri: vscode.Uri) {
 
@@ -611,40 +645,6 @@ export class ParameterPanel {
     }
 
     this._processingSet = false;
-  }
-
-  private async _createParameterCode(url:string,codeParam:string, description:string,explanation:string="") : Promise<ResponseObject> {
-    let result: ResponseObject;
-    try {
-      const response = await axios({
-        method: "POST",
-        data: {
-          CodeParam: codeParam,
-          Description: description,
-          Explanation: explanation
-      },
-        url: url,
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      result = {
-        status: response.status,
-        statusText: response.statusText,
-        value: '',
-        message: ''
-      };
-
-    } catch (err:any) {
-      result = {
-        status: err.response.status,
-        statusText: err.response.statusText,
-        value: '',
-        message: this._getMessageFromError(err)
-      };
-    }
-
-    return result;
   }
 
   private async _setParameter(baseurl:string, authorization:string, parameterName:string, codeCompany:string, codeCustomer:string,parameterValue:string, changeReason:string) : Promise<ResponseObject> {

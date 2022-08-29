@@ -213,28 +213,34 @@ export class ParameterHtmlObject {
         `;
     }
 
+    let newParamSection:string = this._newParameterCodes.length === 0 ? '' : /*html*/ `
+      <section class="flexwrapper">
+        <section class="row111">
+          <div>Param code</div>
+          <div>Description</div>
+          <div>Explanation</div>
+          ${newParamGrid}
+        </section>
+      </section>
+
+      <section class="component-topmargin">
+          ${this._getButton('createnewparametercodes','Create','codicon-add','primary')}
+      </section>
+    `;
+
     let html: string = /*html*/ `
       <section class="rowsingle">
         <h3 title="Deselect parameter codes that should not be created">Create missing parameter codes</h3>
-
-        <section class="flexwrapper">
-          <section class="row111">
-            <div>Param code</div>
-            <div>Description</div>
-            <div>Explanation</div>
-            ${newParamGrid}
-          </section>
+        <section class="component-vmargin">
+            ${this._getButton('checknewparametercodes','Check','codicon-refresh','primary')}
         </section>
 
-        <section class="component-topmargin">
-            ${this._getButton('createnewparametercodes','Create','codicon-add','primary')}
-        </section>
-
+        ${newParamSection}
 
         <vscode-divider role="separator"></vscode-divider>
       <section class="rowsingle">`;
 
-      return this._newParameterCodes.length === 0 ? '' : html;
+      return html;
   }
 
   private _getDetailsGrid(): string {
