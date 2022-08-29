@@ -20,8 +20,11 @@ function main() {
   }
 
   // new parameter code tile buttons
-  for (const newparambutton of document.querySelectorAll(".newparametercode")) {
-    newparambutton.addEventListener("click", clickTile);
+  for (const newparamcheckbox of document.querySelectorAll(".createnewparametercheckbox")) {
+    newparamcheckbox.addEventListener("change", fieldChange);
+
+    // update missing parameter code fields according to checkbox
+    updateNewParameterField(newparamcheckbox.getAttribute("index"));
   }
 
    // save new parameter description/explanation
@@ -88,27 +91,12 @@ function main() {
   processingSet();
   processingGet();
 
-
   // set focus on field if not empty
   var focusId = document.getElementById("focusfield").value;
   if (!isEmpty(focusId)) {
     document.getElementById(focusId).focus();
   }
 }
-
-function clickTile(event) {
-  const field = event.target;
-
-  // update tile appearance and update selected param code array
-  if (field.getAttribute('appearance') === 'primary'){
-    field.setAttribute('appearance','secondary');
-    vscodeApi.postMessage({ command: "removeselectedparametercode", text: field.id });
-
-  } else {
-    field.setAttribute('appearance','primary');
-    vscodeApi.postMessage({ command: "addselectedparametercode", text: field.id });
-  }
-};
 
 function fieldChange(event) {
   const field = event.target;
@@ -184,6 +172,29 @@ function fieldChange(event) {
         updateFieldOutlineAndTooltip(cr.id);
       }
       break;
+
+    case 'createnewparametercheckbox':
+      updateNewParameterField(field.getAttribute("index"));
+      break;
+  }
+}
+
+function updateNewParameterField(index) {
+  const pcheckbox = document.getElementById("createnewparameter" + index);
+  const pcode = document.getElementById("newparametercode" + index);
+  const pdescription = document.getElementById("newparameterdescription" + index);
+  const pexplanation = document.getElementById("newparameterexplanation" + index);
+
+  if (pcheckbox.checked) {
+    pcode.readOnly = true;
+    pcode.disabled = false;
+    pdescription.disabled = false;
+    pexplanation.disabled = false;
+  } else {
+    pcode.readOnly = false;
+    pcode.disabled = true;
+    pdescription.disabled = true;
+    pexplanation.disabled = true;
   }
 }
 
@@ -632,6 +643,11 @@ function unequalHighlight(fieldId) {
   field.style.outline = "1px dashed orange";
 }
 
+function missingHighlight(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px dashed orange";
+}
+
 function infoMessage(info) {
   vscodeApi.postMessage({ command: "showinformationmessage", text: info });
 }
@@ -650,6 +666,11 @@ function saveValue(fieldId) {
 
 function refreshContent() {
   vscodeApi.postMessage({ command: "refreshcontent", text: "" });
+}
+
+function getMissingParameterArray() {
+  const missingPField = document.getElementById("missingparametercodes");
+  return missingPField.value.split('|');
 }
 
 function updateFieldOutlineAndTooltip(fieldId) {
@@ -681,6 +702,8 @@ function updateFieldOutlineAndTooltip(fieldId) {
     updateWrong(field.id, getContentHint(fieldType));
   } else if (['codecompanyfield','codecustomerfield','parameternamefield','parameteroptionsfield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
     updateWrong(field.id, 'Company/customer/parameter combination is duplicate');
+  } else if (fieldType === 'parameternamefield' && getMissingParameterArray().includes(field.value)) {
+    missingHighlight(field.id);
   } else {
     updateRight(field.id);
     isCorrect= true;

@@ -5,6 +5,7 @@ import * as fs from "fs";
 import axios from 'axios';
 import * as csvParse from "csv-parse/sync";
 import * as csvStringify from "csv-stringify/sync";
+import { getHeapStatistics } from "v8";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -178,12 +179,6 @@ export class ParameterPanel {
           case 'createparametercodes':
             this._createParameterCodes();
             break;
-          case 'removeselectedparametercode':
-            this._selectedNewParameterCodes = this._selectedNewParameterCodes.filter(el => el !== text);
-            break;
-          case 'addselectedparametercode':
-            this._selectedNewParameterCodes.push(text);
-            break;
           case 'codecustomersearch':
             if (checkAuth()){
               this._focusField = 'codecustomeroptions' + text;
@@ -225,12 +220,20 @@ export class ParameterPanel {
 
           case 'setparameters':
             if (this._checkSaveFolder() && checkAuth())  {
-              this._setParametersButton(extensionUri).then(() => {
-                // confirm
-                vscode.window.showInformationMessage('Parameters set');
-                // update panel
-                this._updateWebview(extensionUri);
+              this._checkParameterCodes().then((paramsExist) => {
+                if (paramsExist) {
+                  this._setParametersButton(extensionUri).then(() => {
+                    // confirm
+                    vscode.window.showInformationMessage('Parameters set');
+                    // update panel
+                    this._updateWebview(extensionUri);
+                  });
+                } else {
+                  vscode.window.showErrorMessage('Some parameter codes must first be created');
+                  this._updateWebview(extensionUri);
+                }
               });
+              
             } else {
               this._updateWebview(extensionUri);
             }
@@ -357,6 +360,14 @@ export class ParameterPanel {
                 break;
               case 'showauth':
                 this._showAuth = toBoolean(value);
+                break;
+              case 'createnewparametercheckbox':
+                let pcode = this._newParameterCodes[index];
+                if (toBoolean(value)) {
+                  this._selectedNewParameterCodes.push(pcode);
+                } else {
+                  this._selectedNewParameterCodes = this._selectedNewParameterCodes.filter(el => el !== pcode);
+                }
                 break;
             }
             
@@ -550,7 +561,7 @@ export class ParameterPanel {
     }
   }
 
-  private async _checkParameterCodes() {
+  private async _checkParameterCodes() : Promise<boolean> {
 
     // clear any previously found 'new' parameter codes
     this._newParameterCodes = [];
@@ -575,6 +586,13 @@ export class ParameterPanel {
         this._selectedNewParameterCodes.push(pcode);
       }
     }
+
+    // if no missing parameter codes: show info message
+    if (this._newParameterCodes.length === 0) {
+      vscode.window.showInformationMessage('All listed parameters exist');
+    }
+
+    return this._newParameterCodes.length === 0;
   }
 
   private async _createParameterCodes() {

@@ -95,6 +95,7 @@ export class ParameterHtmlObject {
         <section id="hidden">
             ${this._codeCompanyFields()}
             <vscode-text-field id="focusfield" ${valueString(this._focusField)} hidden></vscode-text-field>
+            <vscode-text-field id="missingparametercodes" ${valueString(this._newParameterCodes.join('|'))} hidden></vscode-text-field>
         </section>
 
         ${this._getSaveItems()}
@@ -202,20 +203,24 @@ export class ParameterHtmlObject {
       let newParamCode:string = this._newParameterCodes[index];
       newParamGrid += /*html*/ `
         <section class="component-nomargin">
-          ${this._getButton(newParamCode, newParamCode,'',this._selectedNewParameterCodes.includes(newParamCode) ? 'primary' : 'secondary','','newparametercode')}
+          <vscode-checkbox id="createnewparameter${index}" class="createnewparametercheckbox" index="${index}" ${checkedString(this._selectedNewParameterCodes.includes(newParamCode))}></vscode-checkbox>
         </section>
         <section class="component-nomargin">
-          <vscode-text-field id="${newParamCode}_description" class="newparameterdescription" index="${index}" value="${escapeHtml(this._newParameterDescriptionValues[index] ?? '')}"></vscode-text-field>
+          <vscode-text-field id="newparametercode${index}" class="newparametercode" index="${index}" value="${newParamCode}" readonly></vscode-text-field>
         </section>
         <section class="component-nomargin">
-          <vscode-text-field id="${newParamCode}_explanation" class="newparameterexplanation" index="${index}" value="${escapeHtml(this._newParameterExplanationValues[index] ?? '')}"></vscode-text-field>
+          <vscode-text-field id="newparameterdescription${index}" class="newparameterdescription" index="${index}" value="${escapeHtml(this._newParameterDescriptionValues[index] ?? '')}"></vscode-text-field>
+        </section>
+        <section class="component-nomargin">
+          <vscode-text-field id="newparameterexplanation${index}" class="newparameterexplanation" index="${index}" value="${escapeHtml(this._newParameterExplanationValues[index] ?? '')}"></vscode-text-field>
         </section>
         `;
     }
 
     let newParamSection:string = this._newParameterCodes.length === 0 ? '' : /*html*/ `
       <section class="flexwrapper">
-        <section class="row111">
+        <section class="row1111">
+          <div>-</div> 
           <div>Param code</div>
           <div>Description</div>
           <div>Explanation</div>
