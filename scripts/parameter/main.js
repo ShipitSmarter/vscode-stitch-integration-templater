@@ -11,6 +11,9 @@ function main() {
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
 
+  // check new parameter codes button action
+  document.getElementById("checknewparametercodes").addEventListener("click",checkParameterCodes);
+
   // create parameter codes button action (if button exists)
   for (const createParameterCodesButton of document.querySelectorAll("#createnewparametercodes")) {
     createParameterCodesButton.addEventListener('click', createParameterCodes);
@@ -753,6 +756,9 @@ function codeCustomerSearch(fieldId) {
   vscodeApi.postMessage({ command: "codecustomersearch", text: index });
 }
 
+function checkParameterCodes() {
+  vscodeApi.postMessage({ command: "checkparametercodes", text: "real fast!" });
+}
 function createParameterCodes() {
   vscodeApi.postMessage({ command: "createparametercodes", text: "real fast!" });
 }

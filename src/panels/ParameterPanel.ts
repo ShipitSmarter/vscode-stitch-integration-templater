@@ -168,6 +168,12 @@ export class ParameterPanel {
             //   this._updateWebview(extensionUri);
             // });
             break;
+          
+          case 'checkparametercodes':
+            this._checkParameterCodes().then( () => {
+              this._updateWebview(extensionUri);
+            });
+            break;
 
           case 'createparametercodes':
             this._createParameterCodes();
@@ -544,6 +550,33 @@ export class ParameterPanel {
     }
   }
 
+  private async _checkParameterCodes() {
+
+    // clear any previously found 'new' parameter codes
+    this._newParameterCodes = [];
+    this._newParameterDescriptionValues = [];
+    this._newParameterExplanationValues = [];
+    this._selectedNewParameterCodes = [];
+
+    // get url
+    const userPwd:string[] = getUserPwdFromAuth(getAuth());
+    const user = userPwd[0];
+    const pwd = userPwd[1];
+    const url:string = this._getUrl('code_param_get');
+    const fullUrl = `${url}?userid=${user}&password=${pwd}`;
+
+    for (let index = 0; index < this._parameterNameValues.length; index++) {
+      let pcode: string = this._parameterNameValues[index];
+
+      let response: ResponseObject = await this._getApiCall(`${fullUrl}&code_param=${pcode}`,'','');
+
+      if (!this._newParameterCodes.includes(pcode) && isEmpty(response.value)) {
+        this._newParameterCodes.push(pcode);
+        this._selectedNewParameterCodes.push(pcode);
+      }
+    }
+  }
+
   private async _createParameterCodes() {
     // get url
     const userPwd:string[] = getUserPwdFromAuth(getAuth());
@@ -603,12 +636,6 @@ export class ParameterPanel {
     // get url
     let url: string = this._getUrl('setparameters');
 
-    // clear any previously found 'new' parameter codes
-    this._newParameterCodes = [];
-    this._newParameterDescriptionValues = [];
-    this._newParameterExplanationValues = [];
-    this._selectedNewParameterCodes = [];
-
     // refresh current values
     await this._getCurrentValues();
 
@@ -636,11 +663,6 @@ export class ParameterPanel {
       // if param does not exist: add to new parameter codes array
       if (this._setResponseValues[index].status === 500) {
         let pcode:string = this._parameterNameValues[index];
-        
-        if (!this._newParameterCodes.includes(pcode)) {
-          this._newParameterCodes.push(pcode);
-          this._selectedNewParameterCodes.push(pcode);
-        }
       }
     }
 
@@ -884,7 +906,7 @@ export class ParameterPanel {
     this._urls[3] = await this._getUrlObject(this._configGlob + 'parameter_get_parameter_codes.json','getparametercodes');
     this._urls[4] = await this._getUrlObject(this._configGlob + 'parameter_get_codecustomers.json','getcodecustomers');
     this._urls[5] = await this._getUrlObject(this._configGlob + 'code_param_get.json','code_param_get');
-    this._urls[5] = await this._getUrlObject(this._configGlob + 'code_param_create.json','code_param_create');
+    this._urls[6] = await this._getUrlObject(this._configGlob + 'code_param_create.json','code_param_create');
 
   }
 
