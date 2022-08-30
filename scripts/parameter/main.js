@@ -648,9 +648,10 @@ function unequalHighlight(fieldId) {
   field.style.outline = "1px dashed orange";
 }
 
-function missingHighlight(fieldId) {
+function updateMissing(fieldId) {
   let field = document.getElementById(fieldId);
   field.style.outline = "1px dashed orange";
+  field.title = 'Parameter code does not exist; must be created first'
 }
 
 function infoMessage(info) {
@@ -708,7 +709,7 @@ function updateFieldOutlineAndTooltip(fieldId) {
   } else if (['codecompanyfield','codecustomerfield','parameternamefield','parameteroptionsfield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
     updateWrong(field.id, 'Company/customer/parameter combination is duplicate');
   } else if (fieldType === 'parameternamefield' && getMissingParameterArray().includes(field.value)) {
-    missingHighlight(field.id);
+    updateMissing(field.id);
   } else {
     updateRight(field.id);
     isCorrect= true;
