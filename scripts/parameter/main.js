@@ -789,7 +789,26 @@ function checkParameterCodes() {
   vscodeApi.postMessage({ command: "checkparametercodes", text: "real fast!" });
 }
 function createParameterCodes() {
-  vscodeApi.postMessage({ command: "createparametercodes", text: "real fast!" });
+  // check if all fields are filled
+  var valid = true;
+  const newParamCheckboxes = document.querySelectorAll(".createnewparametercheckbox");
+  for (const newParamCheckbox of newParamCheckboxes) {
+    let index = newParamCheckbox.getAttribute("index");
+    let description = document.getElementById("newparameterdescription" + index);
+    let explanation = document.getElementById("newparameterexplanation" + index);
+
+    if (newParamCheckbox.checked && (isEmpty(description.value) || isEmpty(explanation.value))) {
+      valid = false;
+      break;
+    }
+  }
+
+  if (valid) {
+    vscodeApi.postMessage({ command: "createparametercodes", text: "real fast!" });
+  } else {
+    vscodeApi.postMessage({ command: "showerrormessage", text: "Description and explanation fields must be filled in to create parameter codes" });
+  }
+  
 }
 
 function getParameters() {

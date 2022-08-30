@@ -171,7 +171,11 @@ export class ParameterPanel {
             break;
           
           case 'checkparametercodes':
-            this._checkParameterCodes().then( () => {
+            this._checkParameterCodes().then( (paramsExist) => {
+              // if no missing parameter codes: show info message
+              if (paramsExist) {
+                vscode.window.showInformationMessage('All listed parameters exist');
+              }
               this._updateWebview(extensionUri);
             });
             break;
@@ -589,11 +593,6 @@ export class ParameterPanel {
         this._newParameterCodes.push(pcode);
         this._selectedNewParameterCodes.push(pcode);
       }
-    }
-
-    // if no missing parameter codes: show info message
-    if (this._newParameterCodes.length === 0) {
-      vscode.window.showInformationMessage('All listed parameters exist');
     }
 
     return this._newParameterCodes.length === 0;
