@@ -1,5 +1,20 @@
 # Change Log
 
+## 1.6.21
+- Get/set parameters
+  - Create missing parameters functionality
+    - 'Check' button to check for missing parameters
+    - Grid with missing parameter codes, description and explanation fields, checkboxes to select/unselect which to create
+    - 'Create' button to create
+    - Missing parameter code check added to 'set parameters' button action; when there are missing parameters:
+      - Will show list of missing parameters and 'create' option
+      - Will highlight missing parameter code fields in input grid
+      - Will not execute 'set' action
+  - Added '+' button at bottom of input grid to add a line
+  - Fix:
+    - Fixed not-loading CodeCompany values from utf8-with-BOM encoded CSV
+    - Fixed get/set response outlining with rest of grid in case of 100+ lines
+
 ## 1.6.20
 - Get/set parameters
   - Fix:
