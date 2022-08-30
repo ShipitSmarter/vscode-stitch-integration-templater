@@ -15,10 +15,37 @@
   margin: 0.25rem 0;
 }
 
+.grid4flex {
+  display: grid;
+  grid-auto-rows: min-content;
+  grid-template-columns: min-content min-content min-content min-content;
+  column-gap: 0.7rem;
+  row-gap: 0.3rem;
+}
+
+.grid7flex {
+  display: grid;
+  grid-auto-rows: min-content;
+  grid-template-columns: min-content min-content min-content min-content min-content min-content min-content;
+  column-gap: 0.7rem;
+  row-gap: 0.3rem;
+}
+
+.flexwrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
 .component-example {
   margin-bottom: 0.5rem;
   width: 100%;
   /* vertical-align: text-top; */
+}
+
+.component-topmargin {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
 }
 
 .component-vmargin {

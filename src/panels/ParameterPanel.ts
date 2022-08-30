@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory, getWorkspaceFiles, getAuth, checkAuth, saveAuth } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory, getWorkspaceFiles, getAuth, checkAuth, saveAuth, getUserPwdFromAuth } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
 import * as csvParse from "csv-parse/sync";
 import * as csvStringify from "csv-stringify/sync";
+import { getHeapStatistics } from "v8";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -77,6 +78,10 @@ export class ParameterPanel {
   private _readmeSetting: string = "stitch.parameters.readmeLocation";
   private _settings: any;
   private _focusField: string = '';
+  private _newParameterCodes: string[] = [];
+  private _newParameterDescriptionValues: string[] = [];
+  private _newParameterExplanationValues: string[] = [];
+  private _selectedNewParameterCodes: string[] = [];
 
   private _emptyResponse: ResponseObject = {
     status: 0,
@@ -164,7 +169,24 @@ export class ParameterPanel {
             //   this._updateWebview(extensionUri);
             // });
             break;
+          
+          case 'checkparametercodes':
+            this._checkParameterCodes().then( (paramsExist) => {
+              // if no missing parameter codes: show info message
+              if (paramsExist) {
+                vscode.window.showInformationMessage('All listed parameters exist');
+              }
+              this._updateWebview(extensionUri);
+            });
+            break;
 
+          case 'createparametercodes':
+            this._createParameterCodes().then(() => {
+              this._checkParameterCodes().then(() => {
+                this._updateWebview(extensionUri);
+              });
+            });
+            break;
           case 'codecustomersearch':
             if (checkAuth()){
               this._focusField = 'codecustomeroptions' + text;
@@ -206,12 +228,20 @@ export class ParameterPanel {
 
           case 'setparameters':
             if (this._checkSaveFolder() && checkAuth())  {
-              this._setParametersButton(extensionUri).then(() => {
-                // confirm
-                vscode.window.showInformationMessage('Parameters set');
-                // update panel
-                this._updateWebview(extensionUri);
+              this._checkParameterCodes().then((paramsExist) => {
+                if (paramsExist) {
+                  this._setParametersButton(extensionUri).then(() => {
+                    // confirm
+                    vscode.window.showInformationMessage('Parameters set');
+                    // update panel
+                    this._updateWebview(extensionUri);
+                  });
+                } else {
+                  vscode.window.showErrorMessage('Some parameter codes must first be created');
+                  this._updateWebview(extensionUri);
+                }
               });
+              
             } else {
               this._updateWebview(extensionUri);
             }
@@ -312,7 +342,12 @@ export class ParameterPanel {
 
                 }
                 break;
-
+              case 'newparameterdescription':
+                this._newParameterDescriptionValues[index] = value;
+                break;
+              case 'newparameterexplanation':
+                this._newParameterExplanationValues[index] = value;
+                break;
               case 'codecompanyfield':
                 this._codeCompanyValues[index] = value;
                 break;
@@ -333,6 +368,14 @@ export class ParameterPanel {
                 break;
               case 'showauth':
                 this._showAuth = toBoolean(value);
+                break;
+              case 'createnewparametercheckbox':
+                let pcode = this._newParameterCodes[index];
+                if (toBoolean(value)) {
+                  this._selectedNewParameterCodes.push(pcode);
+                } else {
+                  this._selectedNewParameterCodes = this._selectedNewParameterCodes.filter(el => el !== pcode);
+                }
                 break;
             }
             
@@ -433,8 +476,6 @@ export class ParameterPanel {
     return isValid;
   }
 
-
-
   private _getPath(): boolean {
     let updatePath:boolean = false;
     if (fs.existsSync(this._fieldValues[filesIndex])) {
@@ -528,6 +569,89 @@ export class ParameterPanel {
     }
   }
 
+  private async _checkParameterCodes() : Promise<boolean> {
+
+    // clear any previously found 'new' parameter codes
+    this._newParameterCodes = [];
+    this._newParameterDescriptionValues = [];
+    this._newParameterExplanationValues = [];
+    this._selectedNewParameterCodes = [];
+
+    // get url
+    const userPwd:string[] = getUserPwdFromAuth(getAuth());
+    const user = userPwd[0];
+    const pwd = userPwd[1];
+    const url:string = this._getUrl('code_param_get');
+    const fullUrl = `${url}?userid=${user}&password=${pwd}`;
+
+    for (let index = 0; index < this._parameterNameValues.length; index++) {
+      let pcode: string = this._parameterNameValues[index];
+
+      let response: ResponseObject = await this._getApiCall(`${fullUrl}&code_param=${pcode}`,'','');
+
+      if (!this._newParameterCodes.includes(pcode) && isEmpty(response.value)) {
+        this._newParameterCodes.push(pcode);
+        this._selectedNewParameterCodes.push(pcode);
+      }
+    }
+
+    return this._newParameterCodes.length === 0;
+  }
+
+  private async _createParameterCodes() {
+    // get url
+    const userPwd:string[] = getUserPwdFromAuth(getAuth());
+    const user = userPwd[0];
+    const pwd = userPwd[1];
+    const url:string = this._getUrl('code_param_create');
+    const fullUrl = `${url}?userid=${user}&password=${pwd}`;
+
+    // apply create
+    var responses:ResponseObject[] = [];
+    for (let index=0; index<this._newParameterCodes.length; index++) {
+      var pcode = this._newParameterCodes[index];
+      if (this._selectedNewParameterCodes.includes(pcode)) {
+        responses.push(await this._createParameterCode(fullUrl,pcode,this._newParameterDescriptionValues[index] ?? '',this._newParameterExplanationValues[index] ?? ''));
+      }
+    }
+
+    vscode.window.showInformationMessage(`Created parameters: ${this._selectedNewParameterCodes.sort().join(', ')}`);
+  }
+  
+  private async _createParameterCode(url:string,codeParam:string, description:string,explanation:string="") : Promise<ResponseObject> {
+    let result: ResponseObject;
+    try {
+      const response = await axios({
+        method: "POST",
+        data: {
+          CodeParam: codeParam,
+          Description: description,
+          Explanation: explanation
+      },
+        url: url,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      result = {
+        status: response.status,
+        statusText: response.statusText,
+        value: '',
+        message: ''
+      };
+
+    } catch (err:any) {
+      result = {
+        status: err.response.status,
+        statusText: err.response.statusText,
+        value: '',
+        message: this._getMessageFromError(err)
+      };
+    }
+
+    return result;
+  }
+
   private async _setParametersButton(extensionUri: vscode.Uri) {
 
     // get url
@@ -556,6 +680,11 @@ export class ParameterPanel {
     // const updatePer: number = 3;
     for (let index = 0; index < this._codeCompanyValues.length; index++) {
       this._setResponseValues[index] = await this._setParameter(url,getAuth(),this._parameterNameValues[index],this._codeCompanyValues[index],this._codeCustomerValues[index],setValues[index], this._changeReasonValues[index]);
+      
+      // if param does not exist: add to new parameter codes array
+      if (this._setResponseValues[index].status === 500) {
+        let pcode:string = this._parameterNameValues[index];
+      }
     }
 
     this._processingSet = false;
@@ -722,7 +851,8 @@ export class ParameterPanel {
   private _loadFile(filePath:string) {
 
     // load file
-    const fileContent = fs.readFileSync(filePath, {encoding:'utf8'});
+    // fix for BOM from: https://github.com/nodejs/node-v0.x-archive/issues/1918#issuecomment-2480359
+    const fileContent = fs.readFileSync(filePath, {encoding:'utf8'}).replace(/^\uFEFF/, '');
 
     // parse
     const content = csvParse.parse( fileContent, {
@@ -797,6 +927,8 @@ export class ParameterPanel {
     this._urls[2] = await this._getUrlObject(this._configGlob + 'parameter_get_history.json','getparameterhistory');
     this._urls[3] = await this._getUrlObject(this._configGlob + 'parameter_get_parameter_codes.json','getparametercodes');
     this._urls[4] = await this._getUrlObject(this._configGlob + 'parameter_get_codecustomers.json','getcodecustomers');
+    this._urls[5] = await this._getUrlObject(this._configGlob + 'code_param_get.json','code_param_get');
+    this._urls[6] = await this._getUrlObject(this._configGlob + 'code_param_create.json','code_param_create');
 
   }
 
@@ -864,7 +996,11 @@ export class ParameterPanel {
       this._processingGet,
       this._environmentOptions,
       this._codeCompanies,
-      focusField
+      focusField,
+      this._newParameterCodes,
+      this._newParameterDescriptionValues,
+      this._newParameterExplanationValues,
+      this._selectedNewParameterCodes
     );
 
     let html =  parameterHtmlObject.getHtml();

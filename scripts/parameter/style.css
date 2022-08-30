@@ -4,12 +4,10 @@ h1 {
   float:left;
 }
 
-.component-pname {
-  /* display:block; */
-  /* white-space: nowrap; */
-  /* width: 17rem; */
-  width: 100%;
-  margin-top: 0.5rem;
+.newparametercode,
+.newparameterdescription,
+.newparameterexplanation {
+  width: 15rem;
 }
 
 .parameternamefield,
@@ -105,13 +103,7 @@ h1 {
   padding-left: 4.5rem;
 }
 
-.floatpsearch {
-  float: left;
-  padding-left: 0.5rem;
-}
-
-.floatpname {
-  float: left;
-  margin-bottom: 0.5rem;
+.responsediv {
+  white-space: nowrap;
 }
 

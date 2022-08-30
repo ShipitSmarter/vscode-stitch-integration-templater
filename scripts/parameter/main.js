@@ -10,6 +10,30 @@ function main() {
   document.getElementById("getparameters").addEventListener("click", getParameters);
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
+  document.getElementById("addline").addEventListener("click",addLine);
+
+  // check new parameter codes button action
+  document.getElementById("checknewparametercodes").addEventListener("click",checkParameterCodes);
+
+  // create parameter codes button action (if button exists)
+  for (const createParameterCodesButton of document.querySelectorAll("#createnewparametercodes")) {
+    createParameterCodesButton.addEventListener('click', createParameterCodes);
+  }
+
+  // new parameter code tile buttons
+  for (const newparamcheckbox of document.querySelectorAll(".createnewparametercheckbox")) {
+    newparamcheckbox.addEventListener("change", fieldChange);
+
+    // update missing parameter code fields according to checkbox
+    updateNewParameterField(newparamcheckbox.getAttribute("index"));
+  }
+
+   // save new parameter description/explanation
+   const newparameterfields = document.querySelectorAll(".newparameterdescription,.newparameterexplanation");
+   for (const field of newparameterfields) {
+     field.addEventListener("input", fieldChange);
+   }
+ 
 
   // info onclick
   document.getElementById("info").addEventListener("click",infoClick);
@@ -30,7 +54,7 @@ function main() {
   }
 
   // update hover-overs on load
-  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield,.currentchangereasonfield");
+  const allFields = document.querySelectorAll(".field,.parameternamefield,.previousvaluefield,.newvaluefield,.changereasonfield,.currentvaluefield,.currentchangereasonfield,.newparameterdescription,.newparameterexplanation");
   for (const field of allFields) {
     field.title = field.value;
   }
@@ -67,7 +91,6 @@ function main() {
   // disable certain fields when processing requests
   processingSet();
   processingGet();
-
 
   // set focus on field if not empty
   var focusId = document.getElementById("focusfield").value;
@@ -150,6 +173,29 @@ function fieldChange(event) {
         updateFieldOutlineAndTooltip(cr.id);
       }
       break;
+
+    case 'createnewparametercheckbox':
+      updateNewParameterField(field.getAttribute("index"));
+      break;
+  }
+}
+
+function updateNewParameterField(index) {
+  const pcheckbox = document.getElementById("createnewparameter" + index);
+  const pcode = document.getElementById("newparametercode" + index);
+  const pdescription = document.getElementById("newparameterdescription" + index);
+  const pexplanation = document.getElementById("newparameterexplanation" + index);
+
+  if (pcheckbox.checked) {
+    pcode.readOnly = true;
+    pcode.disabled = false;
+    pdescription.disabled = false;
+    pexplanation.disabled = false;
+  } else {
+    pcode.readOnly = false;
+    pcode.disabled = true;
+    pdescription.disabled = true;
+    pexplanation.disabled = true;
   }
 }
 
@@ -327,9 +373,13 @@ function addLine(event) {
 
   let nofLinesField = document.getElementById("noflines");
   let nofLines = parseInt(nofLinesField.value);
-  let index = parseInt(field.getAttribute("index"));
+  let index = -1;
 
-  if (index === (nofLines-1)) {
+  if (['newvaluefield','changereasonfield'].includes(field.classList[0]) ) {
+    index = parseInt(field.getAttribute("index"));
+  }  
+
+  if (index === (nofLines-1) || field.id === 'addline') {
     nofLinesField.value = (nofLines + 1).toString();
     nofLinesField.dispatchEvent(new Event('change'));
   }
@@ -598,6 +648,12 @@ function unequalHighlight(fieldId) {
   field.style.outline = "1px dashed orange";
 }
 
+function updateMissing(fieldId) {
+  let field = document.getElementById(fieldId);
+  field.style.outline = "1px dashed orange";
+  field.title = 'Parameter code does not exist; must be created first'
+}
+
 function infoMessage(info) {
   vscodeApi.postMessage({ command: "showinformationmessage", text: info });
 }
@@ -616,6 +672,11 @@ function saveValue(fieldId) {
 
 function refreshContent() {
   vscodeApi.postMessage({ command: "refreshcontent", text: "" });
+}
+
+function getMissingParameterArray() {
+  const missingPField = document.getElementById("missingparametercodes");
+  return missingPField.value.split('|');
 }
 
 function updateFieldOutlineAndTooltip(fieldId) {
@@ -647,6 +708,8 @@ function updateFieldOutlineAndTooltip(fieldId) {
     updateWrong(field.id, getContentHint(fieldType));
   } else if (['codecompanyfield','codecustomerfield','parameternamefield','parameteroptionsfield'].includes(fieldType) && checkIfDuplicate(+field.getAttribute('index'))) {
     updateWrong(field.id, 'Company/customer/parameter combination is duplicate');
+  } else if (fieldType === 'parameternamefield' && getMissingParameterArray().includes(field.value)) {
+    updateMissing(field.id);
   } else {
     updateRight(field.id);
     isCorrect= true;
@@ -720,6 +783,32 @@ function parameterSearch(fieldId) {
 function codeCustomerSearch(fieldId) {
   const index = document.getElementById(fieldId).getAttribute('index');
   vscodeApi.postMessage({ command: "codecustomersearch", text: index });
+}
+
+function checkParameterCodes() {
+  vscodeApi.postMessage({ command: "checkparametercodes", text: "real fast!" });
+}
+function createParameterCodes() {
+  // check if all fields are filled
+  var valid = true;
+  const newParamCheckboxes = document.querySelectorAll(".createnewparametercheckbox");
+  for (const newParamCheckbox of newParamCheckboxes) {
+    let index = newParamCheckbox.getAttribute("index");
+    let description = document.getElementById("newparameterdescription" + index);
+    let explanation = document.getElementById("newparameterexplanation" + index);
+
+    if (newParamCheckbox.checked && (isEmpty(description.value) || isEmpty(explanation.value))) {
+      valid = false;
+      break;
+    }
+  }
+
+  if (valid) {
+    vscodeApi.postMessage({ command: "createparametercodes", text: "real fast!" });
+  } else {
+    vscodeApi.postMessage({ command: "showerrormessage", text: "Description and explanation fields must be filled in to create parameter codes" });
+  }
+  
 }
 
 function getParameters() {
