@@ -514,11 +514,11 @@ export class ParameterPanel {
     return newArray;
   }
 
-  private _getUrl(type:string) : string {
+  private _getUrl(type:string, environment:string = this._environment()) : string {
     const urls: UrlObject = this._urls.filter(el => el.type === type)[0];
 
     let url: string = '';
-    switch (this._environment()) {
+    switch (environment) {
       case 'ACC':
         url = urls.acc;
         break;
@@ -592,6 +592,28 @@ export class ParameterPanel {
       if (!this._newParameterCodes.includes(pcode) && isEmpty(response.value)) {
         this._newParameterCodes.push(pcode);
         this._selectedNewParameterCodes.push(pcode);
+      }
+    }
+
+    // if newParameterCodes is not empty and environment is PROD: check ACC to propose code descriptions/explanations
+    if (this._newParameterCodes.length !== 0 && this._fieldValues[environmentIndex] === 'PROD') {
+      for (let index = 0; index < this._newParameterCodes.length; index++) {
+        let pcode = this._newParameterCodes[index];
+        let accUrl = `${this._getUrl('code_param_get','ACC')}?userid=${user}&password=${pwd}&code_param=${pcode}`;
+        let response: ResponseObject = await this._getApiCall(accUrl,'','');
+
+        if (response.value !== '') {
+          try {
+            let rContent = JSON.parse(response.value);
+            this._newParameterDescriptionValues[index] = rContent?.Description ?? '';
+            this._newParameterExplanationValues[index] = rContent?.Explanation ?? '';
+            let henk = '';
+          } catch (err) {
+            // on error: do nothing
+          }
+        }
+        
+
       }
     }
 
