@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.22
+- Get/set parameters
+  - When creating new parameter codes on PROD, checks if exists in ACC, and if so, pre-fills with description and explanation from ACC
+
 ## 1.6.21
 - Get/set parameters
   - Create missing parameters functionality
