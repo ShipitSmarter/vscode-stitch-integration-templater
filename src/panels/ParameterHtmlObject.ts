@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, backgroundColorString, escapeHtml, isEmpty, selectOptions, nameFromPath} from "../utilities/functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, hiddenString, removeQuotes, disabledString, backgroundColorString, escapeHtml, isEmpty, selectOptions, nameFromPath, getButton} from "../utilities/functions";
 
 // fixed fields indices
 const parameterIndex = 0;
@@ -109,7 +109,7 @@ export class ParameterHtmlObject {
 
           <section class="component-example">
             <div class="floatleftgetparameters">
-              ${this._getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
+              ${getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
             </div>
             <div class="floatleftnopadding">
               <vscode-progress-ring id="processingget" ${hiddenString(this._processingGet)}></vscode-progress-ring>
@@ -140,18 +140,6 @@ export class ParameterHtmlObject {
 	  `;
 
     return html;
-  }
-
-  private _getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = '',clas:string = ''): string {
-    let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
-    let classString:string = isEmpty(clas) ? '' : `class="${clas}"`;
-    let button: string = /*html*/ `
-      <vscode-button id="${id}" ${classString} appearance="${appearance}" ${hidden}>
-        ${title}
-        ${codiconString}
-      </vscode-button>
-      `;
-    return button;
   }
 
   private _codeCompanyFields(): string {
@@ -185,7 +173,7 @@ export class ParameterHtmlObject {
 
           <div class="floatleft">
             <p> - </p>
-            ${this._getButton('savetofile','Save input','codicon-arrow-right','secondary')}
+            ${getButton('savetofile','Save input','codicon-arrow-right','secondary')}
           </div>
         </section>
 
@@ -229,7 +217,7 @@ export class ParameterHtmlObject {
       </section>
 
       <section class="component-topmargin">
-          ${this._getButton('createnewparametercodes','Create','codicon-add','primary')}
+          ${getButton('createnewparametercodes','Create','codicon-add','primary')}
       </section>
     `;
 
@@ -237,7 +225,7 @@ export class ParameterHtmlObject {
       <section class="rowsingle">
         <h3 title="Deselect parameter codes that should not be created">Create missing parameter codes</h3>
         <section class="component-vmargin">
-            ${this._getButton('checknewparametercodes','Check','codicon-refresh','primary')}
+            ${getButton('checknewparametercodes','Check','codicon-refresh','primary')}
         </section>
 
         ${newParamSection}
@@ -272,7 +260,7 @@ export class ParameterHtmlObject {
           <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
         </div>
         <div class="floatleftlesspadding">
-          ${this._getButton('setparameters','Set Parameters','codicon-arrow-right')}
+          ${getButton('setparameters','Set Parameters','codicon-arrow-right')}
         </div>
         <div class="floatleftnopadding">
           <vscode-progress-ring id="processingset" ${hiddenString(this._processingSet)}></vscode-progress-ring>
@@ -432,7 +420,7 @@ export class ParameterHtmlObject {
           <div class="responsediv">Set Response</div>
           ${inputGrid}
           <div>
-          ${this._getButton('addline','+','','primary')}
+          ${getButton('addline','+','','primary')}
           </div>
         </section>
       </section>
