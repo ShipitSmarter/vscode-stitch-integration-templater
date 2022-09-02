@@ -420,7 +420,7 @@ export class ParameterHtmlObject {
           <div class="responsediv">Set Response</div>
           ${inputGrid}
           <div>
-          ${getButton('addline','+','','primary')}
+            ${getButton('addline','+','','primary')}
           </div>
         </section>
       </section>
