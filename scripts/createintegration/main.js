@@ -33,6 +33,13 @@ function main() {
   
   // on panel creation: update field outlines and tooltips
   checkFields();
+
+  // on panel creation: re-save all step name dropdowns with value equal to modulename
+  for (const stepNameField of document.querySelectorAll(".stepdropdown")) {
+    if (stepNameField.value === document.getElementById("modulename").value) {
+      stepNameField.dispatchEvent(new Event('change'));
+    }
+}
 }
 
 function isCreate() {
