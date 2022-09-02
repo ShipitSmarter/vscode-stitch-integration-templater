@@ -11,6 +11,7 @@ function main() {
   // button onclick event listeners
   document.getElementById("createintegration").addEventListener("click", createIntegration);
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
+  document.getElementById("addstep").addEventListener("click",addStep);
 
   // input fields
   const fields = document.querySelectorAll(".field,.dropdown,.stepdropdown,.existingscenariocheckbox");
@@ -214,4 +215,14 @@ function createIntegration() {
   } else {
     vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
   }
+}
+
+function addStep(event) {
+  const field = event.target;
+
+  let nofStepsField = document.getElementById("nofsteps");
+  let nofSteps = parseInt(nofStepsField.value);
+
+  nofStepsField.value = (nofSteps + 1).toString();
+  nofStepsField.dispatchEvent(new Event('change'));
 }

@@ -219,14 +219,12 @@ export class CreateIntegrationHtmlObject {
   }
 
   private _stepInputs(nofSteps: number): string {
-    let subStepNames: string = '';
-    let subStepTypes: string = '';
-    let subStepMethods: string = '';
+    let stepGrid: string = '';
     for (let step = 0; step < +nofSteps; step++) {
 
       // step name dropdown
-      subStepNames += /*html*/`
-        <section class="component-vmargin">
+      stepGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-dropdown id="stepname${step}" index="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
             <vscode-option>${this._fieldValues[moduleIndex]}</vscode-option>
             ${dropdownOptions(this._stepOptions)}
@@ -236,8 +234,8 @@ export class CreateIntegrationHtmlObject {
 
 
       // step type dropdown
-      subStepTypes += /*html*/`
-        <section class="component-vmargin">
+      stepGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-dropdown id="steptype${step}" index="${step}" ${valueString(this._stepTypes[step])} class="steptypedropdown" position="below">
             ${dropdownOptions(this._stepTypeOptions)}
           </vscode-dropdown>
@@ -245,8 +243,8 @@ export class CreateIntegrationHtmlObject {
       `;
 
       // step method dropdown
-      subStepMethods += /*html*/`
-        <section class="component-vmargin">
+      stepGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-dropdown id="stepmethod${step}" index="${step}" ${valueString(this._stepMethods[step])} class="stepmethoddropdown" ${disabledString(this._stepTypes[step] === 'http')} position="below">
             ${dropdownOptions(this._stepMethodOptions)}
           </vscode-dropdown>
@@ -255,20 +253,18 @@ export class CreateIntegrationHtmlObject {
     }
 
     let html: string = /*html*/ `
-      <section class="component-example">
-        <section class="floatleftnopadding">
-          <p>Name</p>
-          ${subStepNames}
-        </section>
-        <section class="floatleftnopadding">
-          <p>Type</p>
-          ${subStepTypes}
-        </section>
-        <section class="floatleftnopadding">
-          <p>Method</p>
-          ${subStepMethods}
-        </section>
-      </section>`;
+      <section class="flexwrapper">
+          <section class="grid3flex">
+              <div>Name</div>
+              <div>Type</div>
+              <div>Method</div>
+              ${stepGrid}
+              <div>
+                  ${getButton('addstep','+','','primary')}
+              </div>
+          </section>
+      </section>
+      `;
 
     return html;
   }
