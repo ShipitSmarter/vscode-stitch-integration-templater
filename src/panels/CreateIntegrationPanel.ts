@@ -202,6 +202,10 @@ export class CreateIntegrationPanel {
                     // apply 'check' 
                     this._checkIntegrationExists(extensionUri, 'check');
                     break;
+
+                  case nofScenariosIndex:
+                    this._updateWebview(extensionUri);
+                    break;
                 }
                 
                 break;
