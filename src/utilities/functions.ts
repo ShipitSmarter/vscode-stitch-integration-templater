@@ -520,3 +520,15 @@ export async function saveAuth() {
 
     return isValid;
   }
+
+  export function getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = '',clas:string = ''): string {
+    let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
+    let classString:string = isEmpty(clas) ? '' : `class="${clas}"`;
+    let button: string = /*html*/ `
+      <vscode-button id="${id}" ${classString} appearance="${appearance}" ${hidden}>
+        ${title}
+        ${codiconString}
+      </vscode-button>
+      `;
+    return button;
+  }

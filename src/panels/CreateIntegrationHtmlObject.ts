@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean, isModular } from "../utilities/functions";
+import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean, isModular, getButton } from "../utilities/functions";
 import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
@@ -10,6 +10,13 @@ const carrierCodeIndex = 3;
 const nofStepsIndex = 5;
 const nofScenariosIndex = 6;
 
+// type definitions
+type ModularElementObject = {
+  parent:string, 
+  element:string, 
+  multi:boolean
+};
+
 export class CreateIntegrationHtmlObject {
   // PROPERTIES
   public static currentHtmlObject: CreateIntegrationHtmlObject | undefined;
@@ -18,7 +25,7 @@ export class CreateIntegrationHtmlObject {
   public constructor(  
     private _uris: vscode.Uri[],  
     private _availableScenarios: string[], 
-    private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
+    private _modularElementsWithParents: ModularElementObject[],
     private _fieldValues: string[],
     private _stepFieldValues: string[],
     private _scenarioFieldValues: string[],
@@ -57,6 +64,12 @@ export class CreateIntegrationHtmlObject {
       this._scenarioCustomFields
     );
 
+    let wrappedScenarioGrid: string = /*html*/ `
+      <section class="rowsingle" id="scenariogrid">
+        ${scenarioGrid.getHtml()}
+      </section>
+    `;
+
     // define panel HTML
     let html =  /*html*/`
 		<!DOCTYPE html>
@@ -80,7 +93,7 @@ export class CreateIntegrationHtmlObject {
           </section>
 				</div>
         
-        <section class="rowflex">
+        <section class="${this._modularElementsWithParents.length > 0 ? 'rowflex' : 'rowsingle'}">
 
           <section class="rowsingle">
             <section class="component-container">
@@ -96,9 +109,7 @@ export class CreateIntegrationHtmlObject {
             </section>
           </section>
 
-          <section class="rowsingle">
-            ${scenarioGrid.getHtml()}
-          </section>
+          ${this._modularElementsWithParents.length > 0 ? wrappedScenarioGrid : ''}
         </section>
 
 			</body>
@@ -208,14 +219,12 @@ export class CreateIntegrationHtmlObject {
   }
 
   private _stepInputs(nofSteps: number): string {
-    let subStepNames: string = '';
-    let subStepTypes: string = '';
-    let subStepMethods: string = '';
+    let stepGrid: string = '';
     for (let step = 0; step < +nofSteps; step++) {
 
       // step name dropdown
-      subStepNames += /*html*/`
-        <section class="component-vmargin">
+      stepGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-dropdown id="stepname${step}" index="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
             <vscode-option>${this._fieldValues[moduleIndex]}</vscode-option>
             ${dropdownOptions(this._stepOptions)}
@@ -225,8 +234,8 @@ export class CreateIntegrationHtmlObject {
 
 
       // step type dropdown
-      subStepTypes += /*html*/`
-        <section class="component-vmargin">
+      stepGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-dropdown id="steptype${step}" index="${step}" ${valueString(this._stepTypes[step])} class="steptypedropdown" position="below">
             ${dropdownOptions(this._stepTypeOptions)}
           </vscode-dropdown>
@@ -234,8 +243,8 @@ export class CreateIntegrationHtmlObject {
       `;
 
       // step method dropdown
-      subStepMethods += /*html*/`
-        <section class="component-vmargin">
+      stepGrid += /*html*/`
+        <section class="component-nomargin">
           <vscode-dropdown id="stepmethod${step}" index="${step}" ${valueString(this._stepMethods[step])} class="stepmethoddropdown" ${disabledString(this._stepTypes[step] === 'http')} position="below">
             ${dropdownOptions(this._stepMethodOptions)}
           </vscode-dropdown>
@@ -244,20 +253,18 @@ export class CreateIntegrationHtmlObject {
     }
 
     let html: string = /*html*/ `
-      <section class="component-example">
-        <section class="floatleftnopadding">
-          <p>Name</p>
-          ${subStepNames}
-        </section>
-        <section class="floatleftnopadding">
-          <p>Type</p>
-          ${subStepTypes}
-        </section>
-        <section class="floatleftnopadding">
-          <p>Method</p>
-          ${subStepMethods}
-        </section>
-      </section>`;
+      <section class="flexwrapper">
+          <section class="grid3flex">
+              <div>Name</div>
+              <div>Type</div>
+              <div>Method</div>
+              ${stepGrid}
+              <div>
+                  ${getButton('addstep','+','','primary')}
+              </div>
+          </section>
+      </section>
+      `;
 
     return html;
   }

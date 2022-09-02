@@ -4,6 +4,9 @@ import { isEmpty } from "../general/general.js";
 let currentInput = document.querySelectorAll(".scenariofield")[0];
 
 export function addScenarioEventListeners(vscodeApi) {
+  // add scenario button
+  document.getElementById("addscenario").addEventListener("click",addScenario);
+  
   // tile buttons
   for (const tilebutton of document.querySelectorAll(".modulartile")) {
     tilebutton.addEventListener("click", clickTile(vscodeApi));
@@ -589,4 +592,13 @@ export function isCustomNameDuplicate(fieldId) {
   
   return isDuplicate;
 }
-  
+
+export function addScenario(event) {
+  const field = event.target;
+
+  let nofScenariosField = document.getElementById("nofscenarios");
+  let nofScenarios = parseInt(nofScenariosField.value);
+
+  nofScenariosField.value = (nofScenarios + 1).toString();
+  nofScenariosField.dispatchEvent(new Event('change'));
+}

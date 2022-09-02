@@ -3,12 +3,15 @@ import { isEmpty } from "../general/general.js";
 
 const vscodeApi = acquireVsCodeApi();
 
+const scenarioGridExists = !!document.getElementById("scenariogrid");
+
 window.addEventListener("load", main);
 
 function main() {
   // button onclick event listeners
   document.getElementById("createintegration").addEventListener("click", createIntegration);
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
+  document.getElementById("addstep").addEventListener("click",addStep);
 
   // input fields
   const fields = document.querySelectorAll(".field,.dropdown,.stepdropdown,.existingscenariocheckbox");
@@ -29,10 +32,19 @@ function main() {
   }
 
   // scenario grid fields
-  addScenarioEventListeners(vscodeApi);
+  if (scenarioGridExists) {
+    addScenarioEventListeners(vscodeApi);
+  }  
   
   // on panel creation: update field outlines and tooltips
   checkFields();
+
+  // on panel creation: re-save all step name dropdowns with value equal to modulename
+  for (const stepNameField of document.querySelectorAll(".stepdropdown")) {
+    if (stepNameField.value === document.getElementById("modulename").value) {
+      stepNameField.dispatchEvent(new Event('change'));
+    }
+  }
 }
 
 function isCreate() {
@@ -51,14 +63,6 @@ function fieldChange(event) {
     // input fields: check contents
     case 'field':
       updateFieldOutlineAndTooltip(field.id);
-      break;
-
-    // dropdown: delete scenarios if module dropdown change, refresh panel
-    case 'dropdown':
-      if (field.id === 'modulename') {
-        vscodeApi.postMessage({ command: "clearscenarios", text: '' });
-      }
-      //vscodeApi.postMessage({ command: "refreshpanel", text: '' });
       break;
     
     // existingscenariocheckbox: update associated existing scenario field
@@ -109,8 +113,10 @@ function checkFields() {
   }
 
   // check scenario fields
-  check = checkScenarioFields() ? check : false;
-
+  if (scenarioGridExists) {
+    check = checkScenarioFields() ? check : false;
+  }
+  
   return check;
 }
 
@@ -209,4 +215,14 @@ function createIntegration() {
   } else {
     vscodeApi.postMessage({ command: "showerrormessage", text: "Form contains invalid content. Hover over fields for content hints." });
   }
+}
+
+function addStep(event) {
+  const field = event.target;
+
+  let nofStepsField = document.getElementById("nofsteps");
+  let nofSteps = parseInt(nofStepsField.value);
+
+  nofStepsField.value = (nofSteps + 1).toString();
+  nofStepsField.dispatchEvent(new Event('change'));
 }

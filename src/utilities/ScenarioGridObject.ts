@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, readonlyString, hiddenString} from "./functions";
+import {  dropdownOptions, toBoolean, uniqueArray, uniqueSort, arrayFrom1, arrayFrom0, nth, checkedString, valueString, readonlyString, hiddenString, getButton} from "./functions";
 
 // type definitions
 type ScenarioObject = {
@@ -44,7 +44,7 @@ export class ScenarioGridObject {
         private _nofPackages: string[],
         private _scenarioCustomFields: string[]
     ) { }
-
+    
     public getHtml(): string {
         
         let scenariosGrid = /*html*/ `    
@@ -80,41 +80,35 @@ export class ScenarioGridObject {
 
     private _modularScenarioInputs(): string {
         
-        let scenarioNames: string = ``;
-        let multiDropdowns: string = ``;
+        let scenarioNameGrid: string = ``;
         for (let scenario = 0; scenario < +this._nofScenarios; scenario++) {
-            scenarioNames += this._getScenarioInputField(scenario);
-            multiDropdowns += /*html*/ `
-                <section class="component-example">
+            scenarioNameGrid += /*html*/ `
+                <section class="component-nomargin">
                     <vscode-dropdown id="nofpackages${scenario}" class ="nofpackages" index="${scenario}" ${valueString(this._nofPackages[scenario] ?? '1')} position="below">
                         ${dropdownOptions(arrayFrom1(9))}
                     </vscode-dropdown>
                 </section>`;
+            scenarioNameGrid += this._getScenarioInputField(scenario);
         }
 
         return /*html*/`
-        <section class="component-example">
-            <section class="floatleftnopadding">
-                <section class="component-example">
-                    <p># Packages</p>
-                </section>
-                ${multiDropdowns}
+        <section class="flexwrapper">
+            <section class="grid2flex">
+                <div># Packages</div>
+                <div>Scenario name</div>
+                ${scenarioNameGrid}
+                <div>
+                    ${getButton('addscenario','+','','primary')}
+                </div>
             </section>
-            <section class="floatleftnopadding">
-                <section class="component-example">
-                    <p>Scenario name</p>
-                </section>
-                ${scenarioNames}
-            </section>
-        </section>`;
+        </section>
+        `;
     }
 
     private _getScenarioInputField(index:number) : string {
         return /*html*/ `
-        <section class="component-example">
+        <section class="component-nomargin">
             <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" hidden></vscode-text-field>
-        </section>
-        <section class="component-example">
             <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
         </section>`;
     }
