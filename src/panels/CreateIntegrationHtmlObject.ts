@@ -65,7 +65,7 @@ export class CreateIntegrationHtmlObject {
     );
 
     let wrappedScenarioGrid: string = /*html*/ `
-      <section class="rowsingle">
+      <section class="rowsingle" id="scenariogrid">
         ${scenarioGrid.getHtml()}
       </section>
     `;

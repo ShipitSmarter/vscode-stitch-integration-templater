@@ -3,6 +3,8 @@ import { isEmpty } from "../general/general.js";
 
 const vscodeApi = acquireVsCodeApi();
 
+const scenarioGridExists = !!document.getElementById("scenariogrid");
+
 window.addEventListener("load", main);
 
 function main() {
@@ -29,7 +31,9 @@ function main() {
   }
 
   // scenario grid fields
-  addScenarioEventListeners(vscodeApi);
+  if (scenarioGridExists) {
+    addScenarioEventListeners(vscodeApi);
+  }  
   
   // on panel creation: update field outlines and tooltips
   checkFields();
@@ -39,7 +43,7 @@ function main() {
     if (stepNameField.value === document.getElementById("modulename").value) {
       stepNameField.dispatchEvent(new Event('change'));
     }
-}
+  }
 }
 
 function isCreate() {
@@ -108,8 +112,10 @@ function checkFields() {
   }
 
   // check scenario fields
-  check = checkScenarioFields() ? check : false;
-
+  if (scenarioGridExists) {
+    check = checkScenarioFields() ? check : false;
+  }
+  
   return check;
 }
 
