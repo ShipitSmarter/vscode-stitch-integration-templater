@@ -10,6 +10,13 @@ const carrierCodeIndex = 3;
 const nofStepsIndex = 5;
 const nofScenariosIndex = 6;
 
+// type definitions
+type ModularElementObject = {
+  parent:string, 
+  element:string, 
+  multi:boolean
+};
+
 export class CreateIntegrationHtmlObject {
   // PROPERTIES
   public static currentHtmlObject: CreateIntegrationHtmlObject | undefined;
@@ -18,7 +25,7 @@ export class CreateIntegrationHtmlObject {
   public constructor(  
     private _uris: vscode.Uri[],  
     private _availableScenarios: string[], 
-    private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
+    private _modularElementsWithParents: ModularElementObject[],
     private _fieldValues: string[],
     private _stepFieldValues: string[],
     private _scenarioFieldValues: string[],
@@ -57,6 +64,12 @@ export class CreateIntegrationHtmlObject {
       this._scenarioCustomFields
     );
 
+    let wrappedScenarioGrid: string = /*html*/ `
+      <section class="rowsingle">
+        ${scenarioGrid.getHtml()}
+      </section>
+    `;
+
     // define panel HTML
     let html =  /*html*/`
 		<!DOCTYPE html>
@@ -80,7 +93,7 @@ export class CreateIntegrationHtmlObject {
           </section>
 				</div>
         
-        <section class="rowflex">
+        <section class="${this._modularElementsWithParents.length > 0 ? 'rowflex' : 'rowsingle'}">
 
           <section class="rowsingle">
             <section class="component-container">
@@ -96,9 +109,7 @@ export class CreateIntegrationHtmlObject {
             </section>
           </section>
 
-          <section class="rowsingle">
-            ${scenarioGrid.getHtml()}
-          </section>
+          ${this._modularElementsWithParents.length > 0 ? wrappedScenarioGrid : ''}
         </section>
 
 			</body>

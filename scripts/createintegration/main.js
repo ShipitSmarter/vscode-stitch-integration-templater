@@ -59,14 +59,6 @@ function fieldChange(event) {
     case 'field':
       updateFieldOutlineAndTooltip(field.id);
       break;
-
-    // dropdown: delete scenarios if module dropdown change, refresh panel
-    case 'dropdown':
-      if (field.id === 'modulename') {
-        vscodeApi.postMessage({ command: "clearscenarios", text: '' });
-      }
-      //vscodeApi.postMessage({ command: "refreshpanel", text: '' });
-      break;
     
     // existingscenariocheckbox: update associated existing scenario field
     case 'existingscenariocheckbox':

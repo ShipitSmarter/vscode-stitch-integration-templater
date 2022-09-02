@@ -157,10 +157,6 @@ export class CreateIntegrationPanel {
             vscode.window.showInformationMessage(text);
             break;
 
-          case 'clearscenarios':
-            this._scenarioFieldValues = [];
-            break;
-
           case "savemultivalue":
             // extract
             var idIndexValue = text.split('|');
@@ -197,10 +193,19 @@ export class CreateIntegrationPanel {
                         this._stepMethods[ii] = this._stepMethodOptions[0];
                       }
                     }
+                    this._updateWebview(extensionUri);
+                    break;
+
+                  case moduleIndex:
+                    // clear existing scenarios
+                    this._scenarioFieldValues = [];
+                    // apply 'check' 
+                    this._checkIntegrationExists(extensionUri, 'check');
                     break;
                 }
-                this._updateWebview(extensionUri);
+                
                 break;
+                
               case 'field':
                 this._fieldValues[index] = value;
                 break;
