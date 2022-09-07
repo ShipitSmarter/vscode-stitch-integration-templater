@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.24
+- General
+  - Added 'Sort Scriban functions file' right-mouse-menu option to explorer for .sbn files (depends on local presence of ShipitSmarter PowerShell functions suite)
+
 ## 1.6.23
 - Carrier integration
   - Added '+' button add steps

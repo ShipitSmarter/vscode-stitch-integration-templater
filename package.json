@@ -2,7 +2,7 @@
   "name": "stitch-integration-templater",
   "displayName": "Stitch integration templater",
   "description": "Provides dashboard for creating and updating Stitch carrier integrations",
-  "version": "1.6.23",
+  "version": "1.6.24",
   "publisher": "ShipitSmarter",
   "author": {
     "name": "ShipitSmarter",
@@ -34,7 +34,8 @@
     "onCommand:stitch.integration-templater",
     "onCommand:stitch.postman-collection",
     "onCommand:stitch.parameters",
-    "onCommand:stitch.parameters-loadcsv"
+    "onCommand:stitch.parameters-loadcsv",
+    "onCommand:stitch.scriban-functions-sort"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -54,6 +55,10 @@
       {
         "command": "stitch.parameters-loadcsv",
         "title": "Load file to 'get/set parameters'"
+      },
+      {
+        "command": "stitch.scriban-functions-sort",
+        "title": "Sort Scriban functions file"
       }
     ],
     "menus": {
@@ -61,6 +66,11 @@
         {
           "command": "stitch.parameters-loadcsv",
           "when": "resourceExtname == .csv && config.stitch.parameters.enabled",
+          "group": "stitch"
+        },
+        {
+          "command": "stitch.scriban-functions-sort",
+          "when": "resourceExtname == .sbn",
           "group": "stitch"
         }
       ]
