@@ -11,7 +11,9 @@ function main() {
   // button onclick event listeners
   document.getElementById("createintegration").addEventListener("click", createIntegration);
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
-  document.getElementById("addstep").addEventListener("click",addStep);
+  if (isCreate()) {
+    document.getElementById("addstep").addEventListener("click",addStep);
+  }
 
   // input fields
   const fields = document.querySelectorAll(".field,.dropdown,.stepdropdown,.existingscenariocheckbox");

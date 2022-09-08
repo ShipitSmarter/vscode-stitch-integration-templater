@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.6.25
+- Carrier integration
+  - Fix: panel buttons unresponsive when `update`
+
 ## 1.6.24
 - General
   - Added 'Sort Scriban functions file' right-mouse-menu option to explorer for .sbn files (depends on local presence of ShipitSmarter PowerShell functions suite)
