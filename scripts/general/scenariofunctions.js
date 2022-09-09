@@ -385,13 +385,10 @@ export function updatePackageTypes(curInput) {
 
   // show only appropriate packages
   for (const field of document.querySelectorAll(".packagetype")) {
-    let headerField = document.getElementById("packagetypeheader" + field.getAttribute("index"));
-    if (field.getAttribute("index") < nofPackages) {
+    if (field.getAttribute("index") < nofPackages && field.getAttribute("scenarioIndex") === index) {
       field.hidden = false;
-      headerField.hidden = false;
     } else {
       field.hidden = true;
-      headerField.hidden = true;
     }
   }
 }

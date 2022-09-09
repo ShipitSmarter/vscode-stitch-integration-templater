@@ -64,7 +64,6 @@ export class ScenarioGridObject {
                                 </section>
 
                                 ${this._modularScenarioInputs()}
-                                ${this._shipmentPackageTypes()}
                             </div>                    
                         </div>
                         
@@ -106,28 +105,19 @@ export class ScenarioGridObject {
         `;
     }
 
-    private _shipmentPackageTypes(): string {
+    private _shipmentPackageTypes(scenarioIndex:number): string {
         
         let shipmentPackageTypeGrid: string = ``;
         for (let index = 0; index <= 9; index++) {
             shipmentPackageTypeGrid += /*html*/ `
-                <div id="packagetypeheader${index}">Package ${index}</div>
-                <section class="component-nomargin">
-                    <vscode-dropdown id="packagetype${index}" class ="packagetype" index="${index}" position="below">
-                        ${dropdownOptions(arrayFrom1(9))}
-                    </vscode-dropdown>
-                </section>`;
-                
+                <vscode-dropdown id="scenario${scenarioIndex}packagetype${index}" class ="packagetype" scenarioindex="${scenarioIndex}" index="${index}" position="below" hidden>
+                    ${dropdownOptions(arrayFrom1(9))}
+                </vscode-dropdown>`;    
         }
 
         return /*html*/`
-        <h3>Shipment package types</h3>
         <section class="flexwrapper">
-            <section class="grid2flexmax">
-                <div>#</div>
-                <div>Type</div>
-                ${shipmentPackageTypeGrid}
-            </section>
+            ${shipmentPackageTypeGrid}
         </section>
         `;
     }
@@ -137,6 +127,9 @@ export class ScenarioGridObject {
         <section class="component-nomargin">
             <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" hidden></vscode-text-field>
             <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
+            <section class="component-example">
+                ${this._shipmentPackageTypes(index)}
+            </section>
         </section>`;
     }
 
