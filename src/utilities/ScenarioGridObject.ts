@@ -111,7 +111,7 @@ export class ScenarioGridObject {
         let shipmentPackageTypeGrid: string = ``;
         for (let index = 0; index <= 9; index++) {
             shipmentPackageTypeGrid += /*html*/ `
-                <div>Package ${index}</div>
+                <div id="packagetypeheader${index}">Package ${index}</div>
                 <section class="component-nomargin">
                     <vscode-dropdown id="packagetype${index}" class ="packagetype" index="${index}" position="below">
                         ${dropdownOptions(arrayFrom1(9))}

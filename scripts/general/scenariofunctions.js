@@ -43,6 +43,9 @@ export function addScenarioEventListeners(vscodeApi) {
 
   // check currentInput content and update tiles
   updateTiles(currentInput.value);
+
+  // check currentInput nofPackages and update package type dropdowns
+  updatePackageTypes(currentInput);
 }
 
 export var clickTile = function (vscodeApi) { return function (event) {
@@ -123,6 +126,9 @@ export var changePackages = function (vscodeApi) { return  function (event) {
       updateMultiFieldOutlineAndTooltip(field.id);
     }
 
+    // update package types
+    updatePackageTypes(currentInput);
+
 };};
 
 function isModularScenario(scenario) {
@@ -156,6 +162,9 @@ export function modularScenarioFocus(event) {
     
     // update tiles
     updateTiles(currentInput.value);
+
+    // update package types
+    updatePackageTypes(currentInput);
 
     // set all tiles enabled
     if (previousInput.id.startsWith('existing') && !currentInput.id.startsWith('existing')) {
@@ -366,6 +375,25 @@ export function updateTiles(content) {
         setSecondary(tile.id);
       }
     }
+}
+
+export function updatePackageTypes(curInput) {
+  // get number of packages
+  let index = curInput.getAttribute("index");
+  let nofPackagesField = document.getElementById("nofpackages" + index);
+  let nofPackages = nofPackagesField.value;
+
+  // show only appropriate packages
+  for (const field of document.querySelectorAll(".packagetype")) {
+    let headerField = document.getElementById("packagetypeheader" + field.getAttribute("index"));
+    if (field.getAttribute("index") < nofPackages) {
+      field.hidden = false;
+      headerField.hidden = false;
+    } else {
+      field.hidden = true;
+      headerField.hidden = true;
+    }
+  }
 }
 
 export function countInString(string, element) {
