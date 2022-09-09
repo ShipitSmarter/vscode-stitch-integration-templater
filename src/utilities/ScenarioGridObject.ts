@@ -37,6 +37,7 @@ export class ScenarioGridObject {
     public constructor (
         private _availableScenarios: string[],
         private _modularElementsWithParents: ModularElementObject[],
+        private _packageTypes: string[],
         private _scenarioFieldValues: string[],
         private _nofScenarios: number,
         private _nofScenariosIndex: number,
@@ -111,7 +112,7 @@ export class ScenarioGridObject {
         for (let index = 0; index <= 9; index++) {
             shipmentPackageTypeGrid += /*html*/ `
                 <vscode-dropdown id="scenario${scenarioIndex}packagetype${index}" class ="packagetype" scenarioindex="${scenarioIndex}" index="${index}" position="below" hidden>
-                    ${dropdownOptions(arrayFrom1(9))}
+                    ${dropdownOptions(this._packageTypes)}
                 </vscode-dropdown>`;    
         }
 

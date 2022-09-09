@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles, isModular} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles, isModular, getPackageTypes} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -58,6 +58,7 @@ export class CreatePostmanCollectionPanel {
   private _scenarioFieldValues: string[] = [];
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: ModularElementObject[] = [];
+  private _packageTypes: string[] = [];
   private _independent: boolean = false;
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
@@ -605,6 +606,7 @@ export class CreatePostmanCollectionPanel {
     await this._getCarrierCodes();
     this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+    this._packageTypes                = await getPackageTypes(this._fieldValues[moduleIndex]);
     this._pmcObjects                  = await getPostmanCollectionFiles();
   }
 
@@ -624,6 +626,7 @@ export class CreatePostmanCollectionPanel {
       this._initializeValues();
       this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+      this._packageTypes                = await getPackageTypes(this._fieldValues[moduleIndex]);
       this._pmcObjects                  = await getPostmanCollectionFiles();
     }
 
@@ -649,6 +652,7 @@ export class CreatePostmanCollectionPanel {
       this._scenarioFieldValues,
       this._availableScenarios,
       this._modularElementsWithParents,
+      this._packageTypes,
       this._independent,
       this._multiFieldValues,
       this._nofPackages,

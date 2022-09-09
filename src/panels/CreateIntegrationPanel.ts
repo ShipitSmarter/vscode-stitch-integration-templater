@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 
@@ -54,6 +54,7 @@ export class CreateIntegrationPanel {
   private _currentIntegration : IntegrationObject = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: ModularElementObject[] = [];
+  private _packageTypes: string[] = [];
   private _functionsPath: string = '';
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
@@ -608,6 +609,7 @@ export class CreateIntegrationPanel {
     this._integrationObjects = await getAvailableIntegrations('integration');
     this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+    this._packageTypes = await getPackageTypes(this._fieldValues[moduleIndex]);
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
@@ -635,6 +637,7 @@ export class CreateIntegrationPanel {
       [toolkitUri,codiconsUri,mainUri,styleUri],
       reducedAvailableScenarios,
       this._modularElementsWithParents,
+      this._packageTypes,
       this._fieldValues,
       this._stepFieldValues,
       this._scenarioFieldValues,

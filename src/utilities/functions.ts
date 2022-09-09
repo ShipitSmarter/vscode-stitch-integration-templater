@@ -115,6 +115,11 @@ export async function getModularElementsWithParents(module:string): Promise<Modu
       let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
       let elementParentName = parentPath(cleanPath(elementXmls[index])).split('/').pop() ?? '';
 
+	  // skip elements of parent 'packages'
+	  if (elementParentName.includes('packages') ) {
+		continue;
+	  }
+
 	  // only show parent indicator if not [module]
       if (elementParentName === module) {
         elementParentName = '';
@@ -132,7 +137,13 @@ export async function getModularElementsWithParents(module:string): Promise<Modu
 	  };
     }
 
-    return parentsElementsMulti.sort();
+    return parentsElementsMulti.filter(el => el !== null).sort();
+}
+
+export async function getPackageTypes(module:string) : Promise<string[]> {
+	let packageXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*packages*/*.xml');
+	let packageNames: string[] = packageXmls.map(path => (cleanPath(path).split('/').pop() ?? '').replace(/.xml$/, ''));
+	return packageNames;
 }
 
 export async function getPostmanCollectionFiles(): Promise<FileObject[]> {

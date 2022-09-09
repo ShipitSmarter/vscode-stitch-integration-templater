@@ -26,6 +26,7 @@ export class CreateIntegrationHtmlObject {
     private _uris: vscode.Uri[],  
     private _availableScenarios: string[], 
     private _modularElementsWithParents: ModularElementObject[],
+    private _packageTypes: string[],
     private _fieldValues: string[],
     private _stepFieldValues: string[],
     private _scenarioFieldValues: string[],
@@ -56,6 +57,7 @@ export class CreateIntegrationHtmlObject {
     let scenarioGrid: ScenarioGridObject = new ScenarioGridObject(
       this._availableScenarios, 
       this._modularElementsWithParents, 
+      this._packageTypes,
       this._scenarioFieldValues, 
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
