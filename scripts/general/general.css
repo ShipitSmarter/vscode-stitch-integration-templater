@@ -23,6 +23,14 @@
   row-gap: 0.3rem;
 }
 
+.grid2flexmax {
+  display: grid;
+  grid-auto-rows: min-content;
+  grid-template-columns: max-content max-content;
+  column-gap: 0.7rem;
+  row-gap: 0.3rem;
+}
+
 .grid3flex {
   display: grid;
   grid-auto-rows: min-content;

@@ -64,6 +64,7 @@ export class ScenarioGridObject {
                                 </section>
 
                                 ${this._modularScenarioInputs()}
+                                ${this._shipmentPackageTypes()}
                             </div>                    
                         </div>
                         
@@ -100,6 +101,32 @@ export class ScenarioGridObject {
                 <div>
                     ${getButton('addscenario','+','','primary')}
                 </div>
+            </section>
+        </section>
+        `;
+    }
+
+    private _shipmentPackageTypes(): string {
+        
+        let shipmentPackageTypeGrid: string = ``;
+        for (let index = 0; index <= 9; index++) {
+            shipmentPackageTypeGrid += /*html*/ `
+                <div>Package ${index}</div>
+                <section class="component-nomargin">
+                    <vscode-dropdown id="packagetype${index}" class ="packagetype" index="${index}" position="below">
+                        ${dropdownOptions(arrayFrom1(9))}
+                    </vscode-dropdown>
+                </section>`;
+                
+        }
+
+        return /*html*/`
+        <h3>Shipment package types</h3>
+        <section class="flexwrapper">
+            <section class="grid2flexmax">
+                <div>#</div>
+                <div>Type</div>
+                ${shipmentPackageTypeGrid}
             </section>
         </section>
         `;
