@@ -58,6 +58,7 @@ export class CreateIntegrationPanel {
   private _functionsPath: string = '';
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
+  private _scenarioPackageTypes: string[][] = [];
   private _moduleOptions: string[] = [];
   private _stepOptions: string[] = [];
   private _stepTypeOptions: string[] = [];
@@ -646,6 +647,7 @@ export class CreateIntegrationPanel {
       this._createUpdateValue,
       this._multiFieldValues,
       this._nofPackages,
+      this._scenarioPackageTypes,
       this._moduleOptions,
       this._stepOptions,
       this._stepTypeOptions,

@@ -35,6 +35,7 @@ export class CreatePostmanCollectionHtmlObject {
     private _independent: boolean,
     private _multiFieldValues: {[details: string] : string;},
     private _nofPackages: string[],
+    private _scenarioPackageTypes: string[][],
     private _pmcObjects : {parent:string, file:string, path:string}[],
     private _showLoad: boolean,
     private _scenarioCustomFields: string[]
@@ -58,6 +59,7 @@ export class CreatePostmanCollectionHtmlObject {
       nofScenariosIndex,
       this._multiFieldValues,
       this._nofPackages,
+      this._scenarioPackageTypes,
       this._scenarioCustomFields
     );
 

@@ -43,6 +43,7 @@ export class ScenarioGridObject {
         private _nofScenariosIndex: number,
         private _multiFieldValues: {[details: string] : string;},
         private _nofPackages: string[],
+        private _scenarioPackageTypes: string[][],
         private _scenarioCustomFields: string[]
     ) { }
     

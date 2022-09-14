@@ -35,6 +35,7 @@ export class CreateIntegrationHtmlObject {
     private _createUpdateValue: string,
     private _multiFieldValues: {[details: string] : string;},
     private _nofPackages: string[],
+    private _scenarioPackageTypes: string[][],
     private _moduleOptions: string[],
     private _stepOptions: string[],
     private _stepTypeOptions: string[],
@@ -63,6 +64,7 @@ export class CreateIntegrationHtmlObject {
       nofScenariosIndex,
       this._multiFieldValues,
       this._nofPackages,
+      this._scenarioPackageTypes,
       this._scenarioCustomFields
     );
 

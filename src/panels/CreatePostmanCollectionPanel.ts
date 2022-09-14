@@ -62,6 +62,7 @@ export class CreatePostmanCollectionPanel {
   private _independent: boolean = false;
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
+  private _scenarioPackageTypes: string[][] = [];
   private _integrationObjects: IntegrationObject[] = [];
 
   private _pmcObjects : FileObject[] = [];
@@ -656,6 +657,7 @@ export class CreatePostmanCollectionPanel {
       this._independent,
       this._multiFieldValues,
       this._nofPackages,
+      this._scenarioPackageTypes,
       this._pmcObjects,
       this._showLoad,
       this._scenarioCustomFields
