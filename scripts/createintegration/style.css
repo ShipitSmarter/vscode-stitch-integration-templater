@@ -26,6 +26,12 @@
   width: 7rem;
 }
 
-.packagetype {
+.packagetype,
+.addpackagetype,
+.removepackagetype {
   margin: 0.1rem;
+}
+
+.removepackagetype {
+  background-color: red;
 }

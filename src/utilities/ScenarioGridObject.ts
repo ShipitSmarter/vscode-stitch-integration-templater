@@ -119,6 +119,8 @@ export class ScenarioGridObject {
         return /*html*/`
         <section class="flexwrapper">
             ${shipmentPackageTypeGrid}
+            ${getButton('removepackagetype' + scenarioIndex,'-','','primary','','removepackagetype')}
+            ${getButton('addpackagetype' + scenarioIndex,'+','','primary','','addpackagetype')}
         </section>
         `;
     }
@@ -128,7 +130,7 @@ export class ScenarioGridObject {
         <section class="component-nomargin">
             <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" hidden></vscode-text-field>
             <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
-            <section class="component-example">
+            <section class="packagetypes" id="packagetypes${index}" index="${index}">
                 ${this._shipmentPackageTypes(index)}
             </section>
         </section>`;

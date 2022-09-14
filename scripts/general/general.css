@@ -60,10 +60,19 @@
   flex-wrap: wrap;
 }
 
-.component-example {
+.component-example,
+.packagetypes {
   margin-bottom: 0.5rem;
   width: 100%;
   /* vertical-align: text-top; */
+}
+
+.component-example > * {
+  margin: 0.25rem;
+}
+  
+.component-example > p {
+  margin-bottom: 0.5rem;
 }
 
 .component-topmargin {
@@ -110,15 +119,6 @@
   width: 100%;
   margin: 1rem;
   padding: 0.5rem;
-}
-
-
-.component-example > * {
-  margin: 0.25rem;
-}
-  
-.component-example > p {
-  margin-bottom: 0.5rem;
 }
 
 .row11 {

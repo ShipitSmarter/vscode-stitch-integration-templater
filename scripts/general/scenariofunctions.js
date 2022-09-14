@@ -391,6 +391,11 @@ export function updatePackageTypes(curInput) {
       field.hidden = true;
     }
   }
+
+  // show only appropriate package type groups
+  for (const field of document.querySelectorAll(".packagetypes")) {
+    field.hidden = field.getAttribute("index") === index ? false : true;
+  }
 }
 
 export function countInString(string, element) {
