@@ -35,6 +35,16 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener("change", changePackages(vscodeApi));
   }
 
+  // add package buttons
+  for (const field of document.querySelectorAll(".addpackagetype")) {
+    field.addEventListener("click",addPackage);
+  }
+
+  // remove package buttons
+  for (const field of document.querySelectorAll(".removepackagetype")) {
+    field.addEventListener("click",removePackage);
+  }
+
   // multi fields
   for (const field of document.querySelectorAll(".multifield")) {
     // field.addEventListener("change",multiFieldChange(vscodeApi));
@@ -130,6 +140,32 @@ export var changePackages = function (vscodeApi) { return  function (event) {
     updatePackageTypes(currentInput);
 
 };};
+
+function addPackage(event) {
+  const addField = event.target;
+  const index = addField.id.replace("addpackagetype","");
+
+  // update appropriate nofPackages and trigger change event
+  const nofPackagesField = document.getElementById("nofpackages" + index);
+  const nofPackages = parseInt(nofPackagesField.value);
+  if (nofPackages < 9) {
+    nofPackagesField.value = (nofPackages + 1).toString();
+    nofPackagesField.dispatchEvent(new Event("change"));
+  }
+}
+
+function removePackage(event) {
+  const addField = event.target;
+  const index = addField.id.replace("removepackagetype","");
+
+  // update appropriate nofPackages and trigger change event
+  const nofPackagesField = document.getElementById("nofpackages" + index);
+  const nofPackages = parseInt(nofPackagesField.value);
+  if (nofPackages > 0) {
+    nofPackagesField.value = (nofPackages - 1).toString();
+    nofPackagesField.dispatchEvent(new Event("change"));
+  }
+}
 
 function isModularScenario(scenario) {
   return scenario.startsWith('m-');
