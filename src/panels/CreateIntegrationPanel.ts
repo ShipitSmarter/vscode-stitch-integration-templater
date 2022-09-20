@@ -159,6 +159,15 @@ export class CreateIntegrationPanel {
             vscode.window.showInformationMessage(text);
             break;
 
+          case 'changepackagetype':
+            var scenarioIndexValue = text.split('|');
+            var scenarioIndex = +scenarioIndexValue[0];
+            var index = +scenarioIndexValue[1];
+            var value = scenarioIndexValue[2];
+            let henk = this._scenarioPackageTypes;
+            this._scenarioPackageTypes[scenarioIndex][index] = value;
+            break;
+
           case "savemultivalue":
             // extract
             var idIndexValue = text.split('|');
@@ -206,6 +215,9 @@ export class CreateIntegrationPanel {
                     break;
 
                   case nofScenariosIndex:
+                    for (let i = 0; i < +this._fieldValues[nofScenariosIndex]; i++) {
+                      this._updatePackageTypes(i);
+                    }
                     this._updateWebview(extensionUri);
                     break;
                 }
@@ -238,6 +250,7 @@ export class CreateIntegrationPanel {
                 break;
               case 'nofpackagesdropdown':
                 this._nofPackages[index] = value;
+                this._updatePackageTypes(index);
                 break;
             }
             break;
@@ -246,6 +259,26 @@ export class CreateIntegrationPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private _updatePackageTypes(index:number) {
+    // crop package types array
+    this._scenarioPackageTypes = this._scenarioPackageTypes.slice(0, +this._fieldValues[nofScenariosIndex]);
+
+    // crop package types array index (if not empty)
+    if (this._scenarioPackageTypes[index] !== undefined ) {
+      this._scenarioPackageTypes[index] = this._scenarioPackageTypes[index].slice(0, +this._nofPackages[index]);
+    }
+
+    // fill all empty values with default
+    for (let i = 0; i < +(this._nofPackages[index] ?? 1); i++) {
+      if (this._scenarioPackageTypes[index] === undefined) {
+        this._scenarioPackageTypes[index] = [this._packageTypes[0]];
+      }
+      if (isEmpty(this._scenarioPackageTypes[index][i])) {
+        this._scenarioPackageTypes[index][i] = this._packageTypes[0];
+      }
+    }
   }
 
   private _getIntegrationObject() : IntegrationObject {
@@ -625,6 +658,7 @@ export class CreateIntegrationPanel {
       await this._refresh();
       this._stepTypes[0] = this._stepTypeOptions[0];
       this._stepMethods[0] = this._stepMethodOptions[0];
+      this._updatePackageTypes(0);
     }
 
     // crop flexible field arrays

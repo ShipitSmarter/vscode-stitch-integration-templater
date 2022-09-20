@@ -25,6 +25,11 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener('focus',modularScenarioFocus);
   }
 
+  // package type dropdowns
+  for (const field of document.querySelectorAll(".packagetype")) {
+    field.addEventListener("change",changePackageType(vscodeApi));
+  }
+
   // existing scenario custom fields
   for (const field of document.querySelectorAll(".existingscenariocustomfield")) {
     field.addEventListener('focus',modularScenarioFocus);
@@ -139,6 +144,14 @@ export var changePackages = function (vscodeApi) { return  function (event) {
     // update package types
     updatePackageTypes(currentInput);
 
+};};
+
+export var changePackageType = function (vscodeApi) { return  function (event) {
+  const field = event.target;
+  const index = field.getAttribute("index");
+  const scenarioIndex = field.getAttribute("scenarioindex");
+
+  vscodeApi.postMessage({ command: "changepackagetype", text: scenarioIndex + '|' + index + '|' + field.value });
 };};
 
 function addPackage(event) {

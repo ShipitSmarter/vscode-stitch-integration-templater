@@ -143,7 +143,7 @@ export async function getModularElementsWithParents(module:string): Promise<Modu
 export async function getPackageTypes(module:string) : Promise<string[]> {
 	let packageXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*packages*/*.xml');
 	let packageNames: string[] = packageXmls.map(path => (cleanPath(path).split('/').pop() ?? '').replace(/.xml$/, ''));
-	return packageNames;
+	return packageNames.sort();
 }
 
 export async function getPostmanCollectionFiles(): Promise<FileObject[]> {

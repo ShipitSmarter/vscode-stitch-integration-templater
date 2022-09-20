@@ -112,7 +112,7 @@ export class ScenarioGridObject {
         let shipmentPackageTypeGrid: string = ``;
         for (let index = 0; index <= 9; index++) {
             shipmentPackageTypeGrid += /*html*/ `
-                <vscode-dropdown id="scenario${scenarioIndex}packagetype${index}" class ="packagetype" scenarioindex="${scenarioIndex}" index="${index}" position="below" hidden>
+                <vscode-dropdown id="scenario${scenarioIndex}packagetype${index}" class ="packagetype" scenarioindex="${scenarioIndex}" index="${index}" position="below" ${valueString(this._scenarioPackageTypes[scenarioIndex][index])} hidden>
                     ${dropdownOptions(this._packageTypes)}
                 </vscode-dropdown>`;    
         }
