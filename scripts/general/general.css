@@ -194,4 +194,14 @@ h1 {
 .modulartile,
 .multifield {
   vertical-align: middle;
-}  
+}
+
+.packagetype,
+.addpackagetype,
+.removepackagetype {
+  margin: 0.1rem;
+}
+
+.removepackagetype {
+  background-color: red;
+}

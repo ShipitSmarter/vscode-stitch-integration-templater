@@ -176,6 +176,14 @@ export class CreatePostmanCollectionPanel {
             vscode.window.showInformationMessage(text);
             break;
 
+          case 'changepackagetype':
+            var scenarioIndexValue = text.split('|');
+            var scenarioIndex = +scenarioIndexValue[0];
+            var index = +scenarioIndexValue[1];
+            var value = scenarioIndexValue[2];
+            this._scenarioPackageTypes[scenarioIndex][index] = value;
+            break;
+
           case "savemultivalue":
             // extract
             var idIndexValue = text.split('|');
@@ -231,6 +239,11 @@ export class CreatePostmanCollectionPanel {
                     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
                     this._scenarioCustomFields = this._scenarioCustomFields.slice(0, +this._fieldValues[nofScenariosIndex]);
                     this._nofPackages = this._nofPackages.slice(0, +this._fieldValues[nofScenariosIndex]);
+
+                    // update package types array
+                    for (let i = 0; i < +this._fieldValues[nofScenariosIndex]; i++) {
+                      this._updatePackageTypes(i);
+                    }
                     this._updateWebview(extensionUri);
                     break;
                 }
@@ -285,6 +298,7 @@ export class CreatePostmanCollectionPanel {
 
               case 'nofpackagesdropdown':
                 this._nofPackages[index] = value;
+                this._updatePackageTypes(index);
                 break;
 
               case 'scenariofield':
@@ -308,6 +322,26 @@ export class CreatePostmanCollectionPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private _updatePackageTypes(index:number) {
+    // crop package types array
+    this._scenarioPackageTypes = this._scenarioPackageTypes.slice(0, +this._fieldValues[nofScenariosIndex]);
+
+    // crop package types array index (if not empty)
+    if (this._scenarioPackageTypes[index] !== undefined ) {
+      this._scenarioPackageTypes[index] = this._scenarioPackageTypes[index].slice(0, +this._nofPackages[index]);
+    }
+
+    // fill all empty values with default
+    for (let i = 0; i < +(this._nofPackages[index] ?? 1); i++) {
+      if (this._scenarioPackageTypes[index] === undefined) {
+        this._scenarioPackageTypes[index] = [this._packageTypes[0]];
+      }
+      if (isEmpty(this._scenarioPackageTypes[index][i])) {
+        this._scenarioPackageTypes[index][i] = this._packageTypes[0];
+      }
+    }
   }
 
   private _getIntegrationObject() : IntegrationObject {
@@ -629,6 +663,7 @@ export class CreatePostmanCollectionPanel {
       this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
       this._packageTypes                = await getPackageTypes(this._fieldValues[moduleIndex]);
       this._pmcObjects                  = await getPostmanCollectionFiles();
+      this._updatePackageTypes(0);
     }
 
     // crop flexible header field values

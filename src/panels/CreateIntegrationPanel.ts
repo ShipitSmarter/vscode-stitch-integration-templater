@@ -164,7 +164,6 @@ export class CreateIntegrationPanel {
             var scenarioIndex = +scenarioIndexValue[0];
             var index = +scenarioIndexValue[1];
             var value = scenarioIndexValue[2];
-            let henk = this._scenarioPackageTypes;
             this._scenarioPackageTypes[scenarioIndex][index] = value;
             break;
 
