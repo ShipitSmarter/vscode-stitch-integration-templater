@@ -131,7 +131,7 @@ export class ScenarioGridObject {
     private _getScenarioInputField(index:number) : string {
         return /*html*/ `
         <section class="component-nomargin">
-            <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" hidden></vscode-text-field>
+            <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" disabled></vscode-text-field>
             <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
             <section class="packagetypes" id="packagetypes${index}" index="${index}">
                 ${this._shipmentPackageTypes(index)}
