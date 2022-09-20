@@ -508,9 +508,9 @@ export function checkModularScenario(fieldId) {
   let maxValue = getNofPackages(field.id)+"";
 
   for (const element of currentElements) {
-    let multiValue = element.replace(/[^\_]+\_/g,'');
+    let multiValue = element.replace(/[^\_]+\_/g,'').replace(/\D/g,'');
 
-    if (element.includes('_') && (multiValue.match(/\D/g) || multiValue.includes('0') || containsHigherDigits(multiValue, maxValue) || containsRepeatingDigits(multiValue, maxValue))) {
+    if (element.includes('_') && (multiValue.includes('0') || containsHigherDigits(multiValue, maxValue) || containsRepeatingDigits(multiValue, maxValue))) {
       isCorrect = false;
       break;
     }
