@@ -120,6 +120,8 @@ export class ScenarioGridObject {
         return /*html*/`
         <section class="flexwrapper">
             ${shipmentPackageTypeGrid}
+        </section>
+        <section class="flexwrapper">
             ${getButton('removepackagetype' + scenarioIndex,'-','','primary','','removepackagetype')}
             ${getButton('addpackagetype' + scenarioIndex,'+','','primary','','addpackagetype')}
         </section>
