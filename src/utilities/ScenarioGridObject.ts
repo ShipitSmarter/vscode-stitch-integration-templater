@@ -58,7 +58,7 @@ export class ScenarioGridObject {
                                 <h2>Scenarios</h2>
                                 <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
 
-                                <section class="component-example">
+                                <section class="component-example" hidden>
                                     <p>Number of Scenarios</p>
                                     <vscode-dropdown id="nofscenarios" class="dropdown" index="${this._nofScenariosIndex}" ${valueString(this._nofScenarios+'' ?? '0')} position="below">
                                         ${dropdownOptions(arrayFrom1(100))}
@@ -97,7 +97,8 @@ export class ScenarioGridObject {
         <section class="flexwrapper">
             <section class="grid1flex">
                 ${scenarioNameGrid}
-                <div>
+                <div class="flexwrapper">
+                    ${getButton('removescenario','-','','primary')}
                     ${getButton('addscenario','+','','primary')}
                 </div>
             </section>

@@ -214,10 +214,13 @@ h1 {
 
 .packagetype,
 .addpackagetype,
-.removepackagetype {
+.removepackagetype,
+#addscenario,
+#removescenario {
   margin: 0.1rem;
 }
 
-.removepackagetype {
+.removepackagetype,
+#removescenario {
   background-color: red;
 }

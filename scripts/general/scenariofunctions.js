@@ -4,8 +4,9 @@ import { isEmpty } from "../general/general.js";
 let currentInput = document.querySelectorAll(".scenariofield")[0];
 
 export function addScenarioEventListeners(vscodeApi) {
-  // add scenario button
+  // add/remove scenario buttons
   document.getElementById("addscenario").addEventListener("click",addScenario);
+  document.getElementById("removescenario").addEventListener("click",removeScenario);
   
   // tile buttons
   for (const tilebutton of document.querySelectorAll(".modulartile")) {
@@ -508,7 +509,7 @@ export function hideAllPackageTypes() {
   for (const field of document.querySelectorAll(".packagetypes")) {
     let scenarioIndex = field.getAttribute("index");
     let scenarioGroup = document.getElementById("scenariogroup" + scenarioIndex);
-    
+
     field.hidden = true;
     scenarioGroup.style.border = "none";
   }
@@ -778,4 +779,16 @@ export function addScenario(event) {
 
   nofScenariosField.value = (nofScenarios + 1).toString();
   nofScenariosField.dispatchEvent(new Event('change'));
+}
+
+export function removeScenario(event) {
+  const field = event.target;
+
+  let nofScenariosField = document.getElementById("nofscenarios");
+  let nofScenarios = parseInt(nofScenariosField.value);
+
+  if (nofScenarios > 1) {
+    nofScenariosField.value = (nofScenarios - 1).toString();
+    nofScenariosField.dispatchEvent(new Event('change'));
+  }
 }
