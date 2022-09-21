@@ -39,15 +39,15 @@ Contributes the following commands, which are available from the *Command Palett
     ![Load CSV file to get/set parameters](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/load_file_to_get_set_parameters.png)
 
 
-    Note: to enable this, .vscode/settings.json must have setting `stich.parameters.enabled` = `true`.
+    Note: to enable this, `.vscode/settings.json` must have setting `stich.parameters.enabled` = `true`.
 
 ## Right-mouse-menu button: `Sort Scriban functions file`
-- In order to sort functions in a given Scriban file (using the ShipitSmarter integration automation PowerShell script), right-click on a given Scriban file and select `Sort Scriban functions file`:
+- In order to sort functions alphabetically in a given Scriban file (using the ShipitSmarter integration automation PowerShell script), right-click on a given Scriban file and select `Sort Scriban functions file`:
 
     ![Sort Scriban functions file](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/sort_scriban_functions_file.png)
 
 
-    Note: to enable this, .vscode/settings.json must have setting `stich.sortscriban.enabled` = `true`.
+    Note: to enable this, `.vscode/settings.json` must have setting `stich.sortscriban.enabled` = `true`.
 
 ### Setting: `Stitch: Basic Authentication String`
 - In order for API calls to SiS APIs from the extension to work, one must update the setting through `Ctrl` + `,` -> `Stitch: Basic Authentication String`: 

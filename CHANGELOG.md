@@ -3,8 +3,12 @@
 ## 1.7.0
 - Modular scenarios
   - Now allows selection of package type per shipment package for each scenario
+  - Added `remove scenario` button, removed `number of scenarios` dropdown
+  - Added `add -`/`remove package` buttons for each scenario, removed `number of packages` dropdown
+  - Added tag to show number of packages behind each scenario name field
 - Carrier integration
   - Now shows number of packages and package types (if specified) as tags for existing modular scenarios
+  - Added `remove step` button, removed `number of steps` dropdown
 
 ## 1.6.25
 - Carrier integration
