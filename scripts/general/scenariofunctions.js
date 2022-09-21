@@ -4,8 +4,9 @@ import { isEmpty } from "../general/general.js";
 let currentInput = document.querySelectorAll(".scenariofield")[0];
 
 export function addScenarioEventListeners(vscodeApi) {
-  // add scenario button
+  // add/remove scenario buttons
   document.getElementById("addscenario").addEventListener("click",addScenario);
+  document.getElementById("removescenario").addEventListener("click",removeScenario);
   
   // tile buttons
   for (const tilebutton of document.querySelectorAll(".modulartile")) {
@@ -25,6 +26,11 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener('focus',modularScenarioFocus);
   }
 
+  // package type dropdowns
+  for (const field of document.querySelectorAll(".packagetype")) {
+    field.addEventListener("change",changePackageType(vscodeApi));
+  }
+
   // existing scenario custom fields
   for (const field of document.querySelectorAll(".existingscenariocustomfield")) {
     field.addEventListener('focus',modularScenarioFocus);
@@ -35,6 +41,16 @@ export function addScenarioEventListeners(vscodeApi) {
     field.addEventListener("change", changePackages(vscodeApi));
   }
 
+  // add package buttons
+  for (const field of document.querySelectorAll(".addpackagetype")) {
+    field.addEventListener("click",addPackage);
+  }
+
+  // remove package buttons
+  for (const field of document.querySelectorAll(".removepackagetype")) {
+    field.addEventListener("click",removePackage);
+  }
+
   // multi fields
   for (const field of document.querySelectorAll(".multifield")) {
     // field.addEventListener("change",multiFieldChange(vscodeApi));
@@ -43,6 +59,9 @@ export function addScenarioEventListeners(vscodeApi) {
 
   // check currentInput content and update tiles
   updateTiles(currentInput.value);
+
+  // check currentInput nofPackages and update package type dropdowns
+  updatePackageTypes(currentInput);
 }
 
 export var clickTile = function (vscodeApi) { return function (event) {
@@ -104,26 +123,62 @@ export var changePackages = function (vscodeApi) { return  function (event) {
     // save
     vscodeApi.postMessage({ command: "savevalue", text: 'nofpackagesdropdown|' + index + '|' + nofPackages });
 
+    // update tag
+    document.getElementById("nofpackagestag" + index).innerHTML = nofPackages; 
+
     // select associated scenario field
     const scenarioField = document.getElementById("scenario" + index);
     scenarioField.dispatchEvent(new Event('click'));
 
     // update scenario field with new nofPackages
-    let newValue = scenarioField.value.replace(/-multi_\d-/g,"-multi_" + nofPackages + "-");
-    updateModularValue(scenarioField.id, newValue);
-
-    // trigger 'change' event to save and check content
-    scenarioField.dispatchEvent(new Event('change')); 
-
-    // update scenario field validity check
-    //updateScenarioFieldOutlineAndTooltip(scenarioField.id);
+    updateScenarioMultiBase(scenarioField.id);
 
     // check all multifield values
     for (const field of document.querySelectorAll(".multifield")) {
       updateMultiFieldOutlineAndTooltip(field.id);
     }
 
+    // update package types
+    updatePackageTypes(currentInput);
+
 };};
+
+export var changePackageType = function (vscodeApi) { return  function (event) {
+  const field = event.target;
+  const index = field.getAttribute("index");
+  const scenarioIndex = field.getAttribute("scenarioindex");
+
+  const scenarioField = document.getElementById("scenario" + scenarioIndex);
+  updateScenarioMultiBase(scenarioField.id);
+
+  vscodeApi.postMessage({ command: "changepackagetype", text: scenarioIndex + '|' + index + '|' + field.value });
+};};
+
+function addPackage(event) {
+  const addField = event.target;
+  const index = addField.id.replace("addpackagetype","");
+
+  // update appropriate nofPackages and trigger change event
+  const nofPackagesField = document.getElementById("nofpackages" + index);
+  const nofPackages = parseInt(nofPackagesField.value);
+  if (nofPackages < 9) {
+    nofPackagesField.value = (nofPackages + 1).toString();
+    nofPackagesField.dispatchEvent(new Event("change"));
+  }
+}
+
+function removePackage(event) {
+  const addField = event.target;
+  const index = addField.id.replace("removepackagetype","");
+
+  // update appropriate nofPackages and trigger change event
+  const nofPackagesField = document.getElementById("nofpackages" + index);
+  const nofPackages = parseInt(nofPackagesField.value);
+  if (nofPackages > 1) {
+    nofPackagesField.value = (nofPackages - 1).toString();
+    nofPackagesField.dispatchEvent(new Event("change"));
+  }
+}
 
 function isModularScenario(scenario) {
   return scenario.startsWith('m-');
@@ -157,6 +212,13 @@ export function modularScenarioFocus(event) {
     // update tiles
     updateTiles(currentInput.value);
 
+    // update package types
+    if (currentInput.id.startsWith('existing')) {
+      hideAllPackageTypes();
+    } else {
+      updatePackageTypes(currentInput);
+    }
+    
     // set all tiles enabled
     if (previousInput.id.startsWith('existing') && !currentInput.id.startsWith('existing')) {
       for (const tilebutton of document.querySelectorAll(".modulartile,.multifield")) {
@@ -187,16 +249,18 @@ export function saveScenarioValue(fieldId, vscodeApi) {
 }
 
 export function getNofPackages(scenarioFieldId) {
-  let nofPackages = 1;
-
   let scenarioField = document.getElementById(scenarioFieldId);
-  let nofPackagesField = document.querySelectorAll("#nofpackages" + scenarioField.getAttribute('index'));
 
+  // get nofPackages from scenario structure (if present)
+  let nofPackages = scenarioField.value.replace(/^m-multi_/,'').substring(0,1);
+
+  // alternatively: get nofPackages from nofPackages field
+  let nofPackagesField = document.querySelectorAll("#nofpackages" + scenarioField.getAttribute('index'));
   if (nofPackagesField.length > 0) {
     nofPackages = nofPackagesField[0].value;
   }
 
-  return +nofPackages;
+  return parseInt(nofPackages);
 }
 
 export function lowestUnusedDigitOr1() {
@@ -237,9 +301,34 @@ function updateModularValue(fieldId, newValue) {
   }
 }
 
-export function setPrimary(fieldId,vscodeApi) {
+export function updateScenarioMultiBase(fieldId) {
+  let scenarioField = document.getElementById(fieldId);
+
+  let newValue = scenarioField.value.replace(/^m-[^-]*-/g, getMultiBase(scenarioField.id) + "-");
+  updateModularValue(scenarioField.id, newValue);
+
+  // trigger 'change' event to save and check content
+  scenarioField.dispatchEvent(new Event('change'));
+}
+
+export function getMultiBase(fieldId) {
   let field = document.getElementById(fieldId);
-  const base = 'm-multi_' + getNofPackages(currentInput.id);
+  let scenarioIndex = field.getAttribute("index");
+  let np = getNofPackages(field.id);
+
+  // add start or base string with nofpackages
+  var base = 'm-multi_' + np;
+
+  // add package types to base string
+  for (let index = 0; index < parseInt(np); index++) {
+    base += ':' + document.getElementById("scenario" + scenarioIndex + "packagetype" + index.toString()).value;
+  }
+
+  return base;
+}
+
+export function setPrimary(fieldId,vscodeApi) {
+  let field = document.getElementById(fieldId);  
   const parent = field.getAttribute('parent');
   const element = field.getAttribute('name');
   const fullName = parent + ':' + element;
@@ -278,7 +367,7 @@ export function setPrimary(fieldId,vscodeApi) {
   let addstring = fullName + (multifield.length > 0 ? '_' + multifield[0].value : '');
   if (!check) {
     let curValue = currentInput.value;
-    let newValue = currentInput.value + (isEmpty(curValue) ? (base + '-') : '-') + addstring;
+    let newValue = currentInput.value + (isEmpty(curValue) ? (getMultiBase(currentInput.id) + '-') : '-') + addstring;
 
     // update value
     updateModularValue(currentInput.id, newValue);
@@ -288,9 +377,36 @@ export function setPrimary(fieldId,vscodeApi) {
   }
 }
 
+export function showPrimary(fieldId) {
+  let field = document.getElementById(fieldId);  
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
+
+  // change tile appearance
+  field.setAttribute('appearance','primary');
+
+  // show multifield if present
+  let multifield = document.querySelectorAll("#multifield" + parent + element);
+
+  if (multifield.length > 0) {
+    // extract multi value from scenario field (if present)
+    let multiregex = new RegExp('-' + fullName + '_([^-]*)(-|$)');
+    let matchMultiInScenario = currentInput.value.match(multiregex);
+    if (matchMultiInScenario) {
+      multifield[0].value = matchMultiInScenario[1];
+      //show multi field
+      multifield[0].hidden = false;
+
+      // update validity check
+      updateMultiFieldOutlineAndTooltip(multifield[0].id);
+    } 
+    
+  }
+}
+
 export function setSecondary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
-  const base = 'm-multi_' + getNofPackages(currentInput.id);
   const parent = field.getAttribute('parent');
   const element = field.getAttribute('name');
   const fullName = parent + ':' + element;
@@ -325,12 +441,36 @@ export function setSecondary(fieldId,vscodeApi) {
   let tempNewValue = curValue.replace(multiregex, '$1').replace(nonmultiregex, '$1');
 
   // update field
-  let newValue = (tempNewValue === base) ? '' : tempNewValue;
+  let newValue = (tempNewValue === getMultiBase(currentInput.id)) ? '' : tempNewValue;
   updateModularValue(currentInput.id, newValue);
 
   // if updated: trigger 'change' event to save and check content
   if (currentInput.value !== oldValue) {
     currentInput.dispatchEvent(new Event('change'));
+  }
+}
+
+export function showSecondary(fieldId) {
+  let field = document.getElementById(fieldId);
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
+
+  // change appearance
+  field.setAttribute('appearance','secondary');
+
+  // clear multifield if present
+  let multifield = document.querySelectorAll("#multifield" + parent + element);
+  if (multifield.length > 0) {
+
+    //clear multi value
+    multifield[0].value = '';
+
+    //hide multi field
+    multifield[0].hidden = true;
+
+    // update validity check
+    updateMultiFieldOutlineAndTooltip(multifield[0].id);
   }
 }
 
@@ -351,21 +491,62 @@ export function checkScenarioFields() {
 }
   
 export function updateTiles(content) {
-    // let currentElements = content.split('-');
-    
     let tiles = document.querySelectorAll(".modulartile");
     for (const tile of tiles) {
       let element = tile.getAttribute('name');
       let parent = tile.getAttribute('parent');
       let fullName = parent + ':' + element;
       let regex = new RegExp('-' + fullName + '([-_]|$)');
-      // if (currentElements.includes(tile.id)) {
+
       if (content.match(regex)) {
-        setPrimary(tile.id);
+        // setPrimary(tile.id);
+        showPrimary(tile.id);
       } else {
-        setSecondary(tile.id);
+        // setSecondary(tile.id);
+        showSecondary(tile.id);
       }
     }
+}
+
+export function hideAllPackageTypes() {
+  for (const field of document.querySelectorAll(".packagetypes")) {
+    let scenarioIndex = field.getAttribute("index");
+    let scenarioGroup = document.getElementById("scenariogroup" + scenarioIndex);
+
+    field.hidden = true;
+    scenarioGroup.style.border = "none";
+  }
+}
+
+export function updatePackageTypes(curInput) {
+  // get number of packages
+  let index = curInput.getAttribute("index");
+  let nofPackagesField = document.getElementById("nofpackages" + index);
+  let nofPackages = nofPackagesField.value;
+
+  // show only appropriate packages
+  for (const field of document.querySelectorAll(".packagetype")) {
+    if (field.getAttribute("index") < nofPackages && field.getAttribute("scenarioIndex") === index) {
+      field.hidden = false;
+    } else {
+      field.hidden = true;
+    }
+  }
+
+  // show only appropriate package type groups (and scenario outline)
+  for (const field of document.querySelectorAll(".packagetypes")) {
+    let scenarioIndex = field.getAttribute("index");
+    let scenarioGroup = document.getElementById("scenariogroup" + scenarioIndex);
+
+    if (scenarioIndex === index) {
+      field.hidden = false;
+      scenarioGroup.style.border = "0.5px solid blue";
+    } else {
+      field.hidden = true;
+      scenarioGroup.style.border = "none";
+    }
+
+  }
 }
 
 export function countInString(string, element) {
@@ -409,9 +590,9 @@ export function checkModularScenario(fieldId) {
   let maxValue = getNofPackages(field.id)+"";
 
   for (const element of currentElements) {
-    let multiValue = element.replace(/[^\_]+\_/g,'');
+    let multiValue = element.replace(/[^\_]+\_/g,'').replace(/\D[\s\S]*/g,'');
 
-    if (element.includes('_') && (multiValue.match(/\D/g) || multiValue.includes('0') || containsHigherDigits(multiValue, maxValue) || containsRepeatingDigits(multiValue, maxValue))) {
+    if (element.includes('_') && (multiValue.includes('0') || containsHigherDigits(multiValue, maxValue) || containsRepeatingDigits(multiValue, maxValue))) {
       isCorrect = false;
       break;
     }
@@ -601,4 +782,16 @@ export function addScenario(event) {
 
   nofScenariosField.value = (nofScenarios + 1).toString();
   nofScenariosField.dispatchEvent(new Event('change'));
+}
+
+export function removeScenario(event) {
+  const field = event.target;
+
+  let nofScenariosField = document.getElementById("nofscenarios");
+  let nofScenarios = parseInt(nofScenariosField.value);
+
+  if (nofScenarios > 1) {
+    nofScenariosField.value = (nofScenarios - 1).toString();
+    nofScenariosField.dispatchEvent(new Event('change'));
+  }
 }

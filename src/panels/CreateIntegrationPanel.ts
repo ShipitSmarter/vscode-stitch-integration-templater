@@ -1,7 +1,8 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
+import { getHeapStatistics } from "v8";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -54,9 +55,11 @@ export class CreateIntegrationPanel {
   private _currentIntegration : IntegrationObject = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: ModularElementObject[] = [];
+  private _packageTypes: string[] = [];
   private _functionsPath: string = '';
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
+  private _scenarioPackageTypes: string[][] = [];
   private _moduleOptions: string[] = [];
   private _stepOptions: string[] = [];
   private _stepTypeOptions: string[] = [];
@@ -157,6 +160,14 @@ export class CreateIntegrationPanel {
             vscode.window.showInformationMessage(text);
             break;
 
+          case 'changepackagetype':
+            var scenarioIndexValue = text.split('|');
+            var scenarioIndex = +scenarioIndexValue[0];
+            var index = +scenarioIndexValue[1];
+            var value = scenarioIndexValue[2];
+            this._scenarioPackageTypes[scenarioIndex][index] = value;
+            break;
+
           case "savemultivalue":
             // extract
             var idIndexValue = text.split('|');
@@ -204,6 +215,9 @@ export class CreateIntegrationPanel {
                     break;
 
                   case nofScenariosIndex:
+                    for (let i = 0; i < +this._fieldValues[nofScenariosIndex]; i++) {
+                      this._updatePackageTypes(i);
+                    }
                     this._updateWebview(extensionUri);
                     break;
                 }
@@ -236,6 +250,7 @@ export class CreateIntegrationPanel {
                 break;
               case 'nofpackagesdropdown':
                 this._nofPackages[index] = value;
+                this._updatePackageTypes(index);
                 break;
             }
             break;
@@ -244,6 +259,26 @@ export class CreateIntegrationPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private _updatePackageTypes(index:number) {
+    // crop package types array
+    this._scenarioPackageTypes = this._scenarioPackageTypes.slice(0, +this._fieldValues[nofScenariosIndex]);
+
+    // crop package types array index (if not empty)
+    if (this._scenarioPackageTypes[index] !== undefined ) {
+      this._scenarioPackageTypes[index] = this._scenarioPackageTypes[index].slice(0, +this._nofPackages[index]);
+    }
+
+    // fill all empty values with default
+    for (let i = 0; i < +(this._nofPackages[index] ?? 1); i++) {
+      if (this._scenarioPackageTypes[index] === undefined) {
+        this._scenarioPackageTypes[index] = [this._packageTypes[0]];
+      }
+      if (isEmpty(this._scenarioPackageTypes[index][i])) {
+        this._scenarioPackageTypes[index][i] = this._packageTypes[0];
+      }
+    }
   }
 
   private _getIntegrationObject() : IntegrationObject {
@@ -339,6 +374,9 @@ export class CreateIntegrationPanel {
       this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
       this._scenarioCustomFields = [];
+      this._nofPackages = [];
+      this._scenarioPackageTypes = [];
+      this._updatePackageTypes(0);
       this._checkIntegrationExists(extensionUri);
   }
 
@@ -406,6 +444,9 @@ export class CreateIntegrationPanel {
       this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
       this._scenarioCustomFields = [];
+      this._nofPackages = [];
+      this._scenarioPackageTypes = [];
+      this._updatePackageTypes(0);
       this._checkIntegrationExists(extensionUri);
   }
 
@@ -608,6 +649,7 @@ export class CreateIntegrationPanel {
     this._integrationObjects = await getAvailableIntegrations('integration');
     this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+    this._packageTypes = await getPackageTypes(this._fieldValues[moduleIndex]);
   }
 
   private async _getWebviewContent(webview: vscode.Webview, extensionUri: vscode.Uri): Promise<string> {
@@ -622,6 +664,7 @@ export class CreateIntegrationPanel {
       await this._refresh();
       this._stepTypes[0] = this._stepTypeOptions[0];
       this._stepMethods[0] = this._stepMethodOptions[0];
+      this._updatePackageTypes(0);
     }
 
     // crop flexible field arrays
@@ -635,6 +678,7 @@ export class CreateIntegrationPanel {
       [toolkitUri,codiconsUri,mainUri,styleUri],
       reducedAvailableScenarios,
       this._modularElementsWithParents,
+      this._packageTypes,
       this._fieldValues,
       this._stepFieldValues,
       this._scenarioFieldValues,
@@ -643,6 +687,7 @@ export class CreateIntegrationPanel {
       this._createUpdateValue,
       this._multiFieldValues,
       this._nofPackages,
+      this._scenarioPackageTypes,
       this._moduleOptions,
       this._stepOptions,
       this._stepTypeOptions,

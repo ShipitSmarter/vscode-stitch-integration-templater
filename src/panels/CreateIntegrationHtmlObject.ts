@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean, isModular, getButton } from "../utilities/functions";
+import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean, isModular, getButton, getPackageTypesFromStructure } from "../utilities/functions";
 import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
@@ -26,6 +26,7 @@ export class CreateIntegrationHtmlObject {
     private _uris: vscode.Uri[],  
     private _availableScenarios: string[], 
     private _modularElementsWithParents: ModularElementObject[],
+    private _packageTypes: string[],
     private _fieldValues: string[],
     private _stepFieldValues: string[],
     private _scenarioFieldValues: string[],
@@ -34,6 +35,7 @@ export class CreateIntegrationHtmlObject {
     private _createUpdateValue: string,
     private _multiFieldValues: {[details: string] : string;},
     private _nofPackages: string[],
+    private _scenarioPackageTypes: string[][],
     private _moduleOptions: string[],
     private _stepOptions: string[],
     private _stepTypeOptions: string[],
@@ -56,11 +58,13 @@ export class CreateIntegrationHtmlObject {
     let scenarioGrid: ScenarioGridObject = new ScenarioGridObject(
       this._availableScenarios, 
       this._modularElementsWithParents, 
+      this._packageTypes,
       this._scenarioFieldValues, 
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
       this._multiFieldValues,
       this._nofPackages,
+      this._scenarioPackageTypes,
       this._scenarioCustomFields
     );
 
@@ -188,7 +192,7 @@ export class CreateIntegrationHtmlObject {
           <div class="component-sub-container">
             <h2>Steps</h2>
 
-            <section class="component-example">
+            <section class="component-example" hidden>
               <p>Number of steps</p>
               <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${valueString(this._fieldValues[nofStepsIndex])} position="below">
                 ${dropdownOptions(arrayFrom1(10))}
@@ -259,13 +263,22 @@ export class CreateIntegrationHtmlObject {
               <div>Type</div>
               <div>Method</div>
               ${stepGrid}
-              <div>
+              <div class="flexwrapper">
+                  ${getButton('removestep','-','','primary')}
                   ${getButton('addstep','+','','primary')}
               </div>
           </section>
       </section>
       `;
 
+    return html;
+  }
+
+  private _getTagsFromArray(inArray:string[]) : string {
+    let html: string = '';
+    for (let index = 0; index < inArray.length; index++) {
+      html += /*html*/ `<vscode-tag>${inArray[index]}</vscode-tag>`;
+    }
     return html;
   }
 
@@ -282,11 +295,15 @@ export class CreateIntegrationHtmlObject {
         disabledReadonly = 'readonly';
       }
 
+      // add multipackage tags
+
+
       html += /*html*/`
-        <section class="component-example">
+        <section class="component-example nowrap baseline">
           <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" index="${index}" ${checked}></vscode-checkbox>
           <vscode-text-field id="existingscenario${index}" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" hidden></vscode-text-field>
           <vscode-text-field id="existingscenariocustom${index}" class="existingscenariocustomfield" value="${this._existingScenarioCustomFields[index]}" ${outlineString} ${disabledReadonly}></vscode-text-field>
+          ${this._getTagsFromArray(getPackageTypesFromStructure(this._existingScenarioFieldValues[index]))}
         </section>
       `;
     }

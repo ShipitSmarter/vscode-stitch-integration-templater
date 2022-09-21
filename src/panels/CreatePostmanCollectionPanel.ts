@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles, isModular} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles, isModular, getPackageTypes, getPackageTypesFromStructure} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -58,9 +58,11 @@ export class CreatePostmanCollectionPanel {
   private _scenarioFieldValues: string[] = [];
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: ModularElementObject[] = [];
+  private _packageTypes: string[] = [];
   private _independent: boolean = false;
   private _multiFieldValues: {[details: string] : string;} = {};
   private _nofPackages: string[] = [];
+  private _scenarioPackageTypes: string[][] = [];
   private _integrationObjects: IntegrationObject[] = [];
 
   private _pmcObjects : FileObject[] = [];
@@ -174,6 +176,14 @@ export class CreatePostmanCollectionPanel {
             vscode.window.showInformationMessage(text);
             break;
 
+          case 'changepackagetype':
+            var scenarioIndexValue = text.split('|');
+            var scenarioIndex = +scenarioIndexValue[0];
+            var index = +scenarioIndexValue[1];
+            var value = scenarioIndexValue[2];
+            this._scenarioPackageTypes[scenarioIndex][index] = value;
+            break;
+
           case "savemultivalue":
             // extract
             var idIndexValue = text.split('|');
@@ -229,6 +239,11 @@ export class CreatePostmanCollectionPanel {
                     this._scenarioFieldValues = this._scenarioFieldValues.slice(0, +this._fieldValues[nofScenariosIndex]);
                     this._scenarioCustomFields = this._scenarioCustomFields.slice(0, +this._fieldValues[nofScenariosIndex]);
                     this._nofPackages = this._nofPackages.slice(0, +this._fieldValues[nofScenariosIndex]);
+
+                    // update package types array
+                    for (let i = 0; i < +this._fieldValues[nofScenariosIndex]; i++) {
+                      this._updatePackageTypes(i);
+                    }
                     this._updateWebview(extensionUri);
                     break;
                 }
@@ -283,6 +298,7 @@ export class CreatePostmanCollectionPanel {
 
               case 'nofpackagesdropdown':
                 this._nofPackages[index] = value;
+                this._updatePackageTypes(index);
                 break;
 
               case 'scenariofield':
@@ -306,6 +322,26 @@ export class CreatePostmanCollectionPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private _updatePackageTypes(index:number) {
+    // crop package types array
+    this._scenarioPackageTypes = this._scenarioPackageTypes.slice(0, +this._fieldValues[nofScenariosIndex]);
+
+    // crop package types array index (if not empty)
+    if (this._scenarioPackageTypes[index] !== undefined ) {
+      this._scenarioPackageTypes[index] = this._scenarioPackageTypes[index].slice(0, +this._nofPackages[index]);
+    }
+
+    // fill all empty values with default
+    for (let i = 0; i < +(this._nofPackages[index] ?? 1); i++) {
+      if (this._scenarioPackageTypes[index] === undefined) {
+        this._scenarioPackageTypes[index] = [this._packageTypes[0]];
+      }
+      if (isEmpty(this._scenarioPackageTypes[index][i])) {
+        this._scenarioPackageTypes[index][i] = this._packageTypes[0];
+      }
+    }
   }
 
   private _getIntegrationObject() : IntegrationObject {
@@ -356,6 +392,7 @@ export class CreatePostmanCollectionPanel {
       this._scenarioFieldValues = [];
       this._scenarioCustomFields = [];
       this._nofPackages = [];
+      this._scenarioPackageTypes = [];
       for (let index = 0; index < pmc.item.length; index++) {
   
         this._scenarioFieldValues[index] = pmc.item[index].structure;
@@ -367,6 +404,12 @@ export class CreatePostmanCollectionPanel {
           this._nofPackages[index] = nofPackages[0];
         }
 
+        // extract package types
+        var pt: string[] = getPackageTypesFromStructure(pmc.item[index].structure);
+        // remove nofPackages (first element)
+        pt.shift();
+        // save to scenarioPackageTypes index
+        this._scenarioPackageTypes[index] = pt;
       }
     }
 
@@ -605,6 +648,7 @@ export class CreatePostmanCollectionPanel {
     await this._getCarrierCodes();
     this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+    this._packageTypes                = await getPackageTypes(this._fieldValues[moduleIndex]);
     this._pmcObjects                  = await getPostmanCollectionFiles();
   }
 
@@ -624,7 +668,9 @@ export class CreatePostmanCollectionPanel {
       this._initializeValues();
       this._availableScenarios          = await getAvailableScenarios(this._fieldValues[moduleIndex]);
       this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
+      this._packageTypes                = await getPackageTypes(this._fieldValues[moduleIndex]);
       this._pmcObjects                  = await getPostmanCollectionFiles();
+      this._updatePackageTypes(0);
     }
 
     // crop flexible header field values
@@ -649,9 +695,11 @@ export class CreatePostmanCollectionPanel {
       this._scenarioFieldValues,
       this._availableScenarios,
       this._modularElementsWithParents,
+      this._packageTypes,
       this._independent,
       this._multiFieldValues,
       this._nofPackages,
+      this._scenarioPackageTypes,
       this._pmcObjects,
       this._showLoad,
       this._scenarioCustomFields

@@ -37,11 +37,13 @@ export class ScenarioGridObject {
     public constructor (
         private _availableScenarios: string[],
         private _modularElementsWithParents: ModularElementObject[],
+        private _packageTypes: string[],
         private _scenarioFieldValues: string[],
         private _nofScenarios: number,
         private _nofScenariosIndex: number,
         private _multiFieldValues: {[details: string] : string;},
         private _nofPackages: string[],
+        private _scenarioPackageTypes: string[][],
         private _scenarioCustomFields: string[]
     ) { }
     
@@ -56,7 +58,7 @@ export class ScenarioGridObject {
                                 <h2>Scenarios</h2>
                                 <vscode-text-field id="modularelements" value="${this._modularElementsWithParents.map(el => el.element).sort().join(',')}" hidden></vscode-text-field>
 
-                                <section class="component-example">
+                                <section class="component-example" hidden>
                                     <p>Number of Scenarios</p>
                                     <vscode-dropdown id="nofscenarios" class="dropdown" index="${this._nofScenariosIndex}" ${valueString(this._nofScenarios+'' ?? '0')} position="below">
                                         ${dropdownOptions(arrayFrom1(100))}
@@ -83,8 +85,8 @@ export class ScenarioGridObject {
         let scenarioNameGrid: string = ``;
         for (let scenario = 0; scenario < +this._nofScenarios; scenario++) {
             scenarioNameGrid += /*html*/ `
-                <section class="component-nomargin">
-                    <vscode-dropdown id="nofpackages${scenario}" class ="nofpackages" index="${scenario}" ${valueString(this._nofPackages[scenario] ?? '1')} position="below">
+                <section class="component-nomargin" hidden>
+                    <vscode-dropdown id="nofpackages${scenario}" class ="nofpackages" index="${scenario}" ${valueString(this._nofPackages[scenario] ?? '1')} position="below" hidden>
                         ${dropdownOptions(arrayFrom1(9))}
                     </vscode-dropdown>
                 </section>`;
@@ -93,11 +95,10 @@ export class ScenarioGridObject {
 
         return /*html*/`
         <section class="flexwrapper">
-            <section class="grid2flex">
-                <div># Packages</div>
-                <div>Scenario name</div>
+            <section class="grid1flex">
                 ${scenarioNameGrid}
-                <div>
+                <div class="flexwrapper">
+                    ${getButton('removescenario','-','','primary')}
                     ${getButton('addscenario','+','','primary')}
                 </div>
             </section>
@@ -105,11 +106,38 @@ export class ScenarioGridObject {
         `;
     }
 
+    private _shipmentPackageTypes(scenarioIndex:number): string {
+        
+        let shipmentPackageTypeGrid: string = ``;
+        for (let index = 0; index <= 9; index++) {
+            shipmentPackageTypeGrid += /*html*/ `
+                <vscode-dropdown id="scenario${scenarioIndex}packagetype${index}" class ="packagetype" scenarioindex="${scenarioIndex}" index="${index}" position="below" ${valueString(this._scenarioPackageTypes[scenarioIndex][index])} hidden>
+                    ${dropdownOptions(this._packageTypes)}
+                </vscode-dropdown>`;    
+        }
+
+        return /*html*/`
+        <section class="flexwrapper">
+            ${shipmentPackageTypeGrid}
+        </section>
+        <section class="flexwrapper">
+            ${getButton('removepackagetype' + scenarioIndex,'-','','primary','','removepackagetype')}
+            ${getButton('addpackagetype' + scenarioIndex,'+','','primary','','addpackagetype')}
+        </section>
+        `;
+    }
+
     private _getScenarioInputField(index:number) : string {
         return /*html*/ `
-        <section class="component-nomargin">
+        <section class="component-nomargin" id="scenariogroup${index}">
             <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" hidden></vscode-text-field>
-            <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
+            <div class="baseline nowrap">
+                <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
+                <vscode-tag id="nofpackagestag${index}">${this._nofPackages[index] ?? '1'}</vscode-tag>
+            </div>
+            <section class="packagetypes" id="packagetypes${index}" index="${index}">
+                ${this._shipmentPackageTypes(index)}
+            </section>
         </section>`;
     }
 

@@ -115,6 +115,11 @@ export async function getModularElementsWithParents(module:string): Promise<Modu
       let elementName = (cleanPath(elementXmls[index]).split('/').pop() ?? '').replace(/.xml$/, '');
       let elementParentName = parentPath(cleanPath(elementXmls[index])).split('/').pop() ?? '';
 
+	  // skip elements of parent 'packages'
+	  if (elementParentName.includes('packages') ) {
+		continue;
+	  }
+
 	  // only show parent indicator if not [module]
       if (elementParentName === module) {
         elementParentName = '';
@@ -132,7 +137,13 @@ export async function getModularElementsWithParents(module:string): Promise<Modu
 	  };
     }
 
-    return parentsElementsMulti.sort();
+    return parentsElementsMulti.filter(el => el !== null).sort();
+}
+
+export async function getPackageTypes(module:string) : Promise<string[]> {
+	let packageXmls: string[] = await getWorkspaceFiles('**/scenario-templates/modular/' + module + '/**/*packages*/*.xml');
+	let packageNames: string[] = packageXmls.map(path => (cleanPath(path).split('/').pop() ?? '').replace(/.xml$/, ''));
+	return packageNames.sort();
 }
 
 export async function getPostmanCollectionFiles(): Promise<FileObject[]> {
@@ -249,7 +260,7 @@ export function isScenarioValid(scenario:string, availableScenarios: string[], m
 	if (modular) {
 		let currentElements = scenario.split('-');
 		for (const element of currentElements) {
-			if (!modularElements.includes(element.replace(/\_\d+/g,''))) {
+			if (!modularElements.includes(element.replace(/\_[\s\S]+/g,''))) {
 				isValid = false;
 				break;
 			}
@@ -482,53 +493,61 @@ export async function saveAuth() {
 
     // tell the world
     vscode.window.showInformationMessage(`Saved auth to ${nameFromPath(filePath)}`);
-  }
+}
 
-  export function getAuth() : string {
-    // get user/pw from input/file
-    // let user: string = this._fieldValues[userIndex];
-    // let pw: string = this._fieldValues[pwIndex];
-    // let authString:string = Buffer.from(user + ':' + pw).toString('base64');
-    // return 'Basic ' + authString;
+export function getAuth() : string {
+// get user/pw from input/file
+// let user: string = this._fieldValues[userIndex];
+// let pw: string = this._fieldValues[pwIndex];
+// let authString:string = Buffer.from(user + ':' + pw).toString('base64');
+// return 'Basic ' + authString;
 
-    // get string from settings
-    let authString: string = vscode.workspace.getConfiguration().get<string>('stitch.basicAuthenticationString') ?? '';
+// get string from settings
+let authString: string = vscode.workspace.getConfiguration().get<string>('stitch.basicAuthenticationString') ?? '';
 
-    return authString;
-  }
+return authString;
+}
 
-  export function getUserPwdFromAuth(auth:string) : string[] {
+export function getUserPwdFromAuth(auth:string) : string[] {
 
-	// ignore everything before and including the space (if present)
-	const pureAuth:string = auth.replace(/[\s\S]*\s/g,'');
+// ignore everything before and including the space (if present)
+const pureAuth:string = auth.replace(/[\s\S]*\s/g,'');
 
-	// decode
-	const buffer = Buffer.from(pureAuth,'base64');
-	const userPwd = buffer.toString();
-	
-	const user = userPwd.replace(/:[\s\S]*/g,''); 		// user is anything before the first colon
-	const pwd  = userPwd.replace(/^[^:]*:/g,''); 		// pwd is anything after the first colon
+// decode
+const buffer = Buffer.from(pureAuth,'base64');
+const userPwd = buffer.toString();
 
-	return [user, pwd];
-  }
+const user = userPwd.replace(/:[\s\S]*/g,''); 		// user is anything before the first colon
+const pwd  = userPwd.replace(/^[^:]*:/g,''); 		// pwd is anything after the first colon
 
-  export function checkAuth() : boolean {
-    let isValid: boolean = getAuth().length > 10;
-    if (!isValid) {
-      vscode.window.showErrorMessage("Setting 'Stitch: Basic Authentication String' has not been set.");
-    }
+return [user, pwd];
+}
 
-    return isValid;
-  }
+export function checkAuth() : boolean {
+let isValid: boolean = getAuth().length > 10;
+if (!isValid) {
+	vscode.window.showErrorMessage("Setting 'Stitch: Basic Authentication String' has not been set.");
+}
 
-  export function getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = '',clas:string = ''): string {
-    let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
-    let classString:string = isEmpty(clas) ? '' : `class="${clas}"`;
-    let button: string = /*html*/ `
-      <vscode-button id="${id}" ${classString} appearance="${appearance}" ${hidden}>
-        ${title}
-        ${codiconString}
-      </vscode-button>
-      `;
-    return button;
-  }
+return isValid;
+}
+
+export function getPackageTypesFromStructure(structure:string) : string[] {
+	let pt: string[] = [];
+	if (isModular(structure)) {
+		pt = structure.replace(/^m-multi_/,'').replace(/-[\s\S]*/g,'').split(':');
+	}
+	return pt;
+} 
+
+export function getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = '',clas:string = ''): string {
+let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
+let classString:string = isEmpty(clas) ? '' : `class="${clas}"`;
+let button: string = /*html*/ `
+	<vscode-button id="${id}" ${classString} appearance="${appearance}" ${hidden}>
+	${title}
+	${codiconString}
+	</vscode-button>
+	`;
+return button;
+}

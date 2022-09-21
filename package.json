@@ -2,7 +2,7 @@
   "name": "stitch-integration-templater",
   "displayName": "Stitch integration templater",
   "description": "Provides dashboard for creating and updating Stitch carrier integrations",
-  "version": "1.6.25",
+  "version": "1.7.0",
   "publisher": "ShipitSmarter",
   "author": {
     "name": "ShipitSmarter",
@@ -70,7 +70,7 @@
         },
         {
           "command": "stitch.scriban-functions-sort",
-          "when": "resourceExtname == .sbn",
+          "when": "resourceExtname == .sbn && config.stitch.sortscriban.enabled",
           "group": "stitch"
         }
       ]

@@ -31,9 +31,11 @@ export class CreatePostmanCollectionHtmlObject {
     private _scenarioFieldValues: string[],
     private _availableScenarios: string[], 
     private _modularElementsWithParents: {parent:string, element:string, multi:boolean}[],
+    private _packageTypes: string[],
     private _independent: boolean,
     private _multiFieldValues: {[details: string] : string;},
     private _nofPackages: string[],
+    private _scenarioPackageTypes: string[][],
     private _pmcObjects : {parent:string, file:string, path:string}[],
     private _showLoad: boolean,
     private _scenarioCustomFields: string[]
@@ -51,11 +53,13 @@ export class CreatePostmanCollectionHtmlObject {
     let scenarioGrid: ScenarioGridObject = new ScenarioGridObject(
       this._availableScenarios, 
       this._modularElementsWithParents, 
+      this._packageTypes,
       this._scenarioFieldValues, 
       +this._fieldValues[nofScenariosIndex], 
       nofScenariosIndex,
       this._multiFieldValues,
       this._nofPackages,
+      this._scenarioPackageTypes,
       this._scenarioCustomFields
     );
 
