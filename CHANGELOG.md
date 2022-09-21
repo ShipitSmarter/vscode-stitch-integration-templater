@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.7.0
+- Modular scenarios
+  - Now allows selection of package type per shipment package for each scenario
+- Carrier integration
+  - Now shows number of packages and package types (if specified) as tags for existing modular scenarios
+
 ## 1.6.25
 - Carrier integration
   - Fix: panel buttons unresponsive when `update`

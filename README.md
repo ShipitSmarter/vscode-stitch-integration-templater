@@ -24,7 +24,7 @@ Contributes the following commands, which are available from the *Command Palett
 
 
 ### Modular scenarios
-- Both Integration and Postman collection panels allow you to create modular scenarios using tile selection:
+- Both Integration and Postman collection panels allow you to create modular scenarios using tile and package type selection:
 
     ![Modular tiles](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/scenariotiles-use-gif.gif)
 
@@ -34,12 +34,20 @@ Contributes the following commands, which are available from the *Command Palett
     ![Get Set Parameters](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/get_set_parameters_use.png)
 
 
-    It is also possible to right-click on a CSV file and select `Load file to 'get/set parameters'` to load it directly to a new or existing instance of the panel:
+    In order to load a CSV file, select `Load file to 'get/set parameters'` from the right-mouse-menu in the Explorer sidebar to load it directly to a new or existing instance of the panel:
     
     ![Load CSV file to get/set parameters](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/load_file_to_get_set_parameters.png)
 
 
     Note: to enable this, .vscode/settings.json must have setting `stich.parameters.enabled` = `true`.
+
+## Right-mouse-menu button: `Sort Scriban functions file`
+- In order to sort functions in a given Scriban file (using the ShipitSmarter integration automation PowerShell script), right-click on a given Scriban file and select `Sort Scriban functions file`:
+
+    ![Sort Scriban functions file](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/sort_scriban_functions_file.png)
+
+
+    Note: to enable this, .vscode/settings.json must have setting `stich.sortscriban.enabled` = `true`.
 
 ### Setting: `Stitch: Basic Authentication String`
 - In order for API calls to SiS APIs from the extension to work, one must update the setting through `Ctrl` + `,` -> `Stitch: Basic Authentication String`: 
