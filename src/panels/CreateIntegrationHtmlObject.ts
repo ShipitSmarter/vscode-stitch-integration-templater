@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean, isModular, getButton } from "../utilities/functions";
+import { getUri, valueString, checkedString, hiddenString, disabledString, dropdownOptions, arrayFrom1, toBoolean, isModular, getButton, getPackageTypesFromStructure } from "../utilities/functions";
 import { ScenarioGridObject } from "../utilities/ScenarioGridObject";
 
 // fixed fields indices
@@ -273,6 +273,14 @@ export class CreateIntegrationHtmlObject {
     return html;
   }
 
+  private _getTagsFromArray(inArray:string[]) : string {
+    let html: string = '';
+    for (let index = 0; index < inArray.length; index++) {
+      html += /*html*/ `<vscode-tag>${inArray[index]}</vscode-tag>`;
+    }
+    return html;
+  }
+
   private _existingScenarios(): string {
     let html: string = ``;
 
@@ -286,11 +294,15 @@ export class CreateIntegrationHtmlObject {
         disabledReadonly = 'readonly';
       }
 
+      // add multipackage tags
+
+
       html += /*html*/`
-        <section class="component-example">
+        <section class="component-example nowrap baseline">
           <vscode-checkbox id="runexistingscenario${index}" class="existingscenariocheckbox" index="${index}" ${checked}></vscode-checkbox>
           <vscode-text-field id="existingscenario${index}" class="existingscenariofield" value="${this._existingScenarioFieldValues[index]}" hidden></vscode-text-field>
           <vscode-text-field id="existingscenariocustom${index}" class="existingscenariocustomfield" value="${this._existingScenarioCustomFields[index]}" ${outlineString} ${disabledReadonly}></vscode-text-field>
+          ${this._getTagsFromArray(getPackageTypesFromStructure(this._existingScenarioFieldValues[index]))}
         </section>
       `;
     }

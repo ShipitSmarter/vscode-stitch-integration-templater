@@ -532,6 +532,14 @@ if (!isValid) {
 return isValid;
 }
 
+export function getPackageTypesFromStructure(structure:string) : string[] {
+	let pt: string[] = [];
+	if (isModular(structure)) {
+		pt = structure.replace(/^m-multi_/,'').replace(/-[\s\S]*/g,'').split(':');
+	}
+	return pt;
+} 
+
 export function getButton(id:string, title:string, codicon:string = '',appearance:string = 'primary',hidden:string = '',clas:string = ''): string {
 let codiconString: string = isEmpty(codicon) ? '' : `<span slot="start" class="codicon ${codicon}"></span>`;
 let classString:string = isEmpty(clas) ? '' : `class="${clas}"`;

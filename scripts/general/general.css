@@ -60,11 +60,18 @@
   flex-wrap: wrap;
 }
 
+.nowrap {
+  white-space: nowrap;
+}
+
+.baseline > * {
+  vertical-align: text-top;
+}
+
 .component-example,
 .packagetypes {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   width: 100%;
-  /* vertical-align: text-top; */
 }
 
 .component-example > * {

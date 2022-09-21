@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles, isModular, getPackageTypes} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, uniqueSort, toBoolean, isEmpty, getAvailableIntegrations, getFromScript, getAvailableScenarios, getModularElements, getModularElementsWithParents, getPostmanCollectionFiles, isModular, getPackageTypes, getPackageTypesFromStructure} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreatePostmanCollectionHtmlObject } from "./CreatePostmanCollectionHtmlObject";
 import { create } from "domain";
@@ -405,9 +405,11 @@ export class CreatePostmanCollectionPanel {
         }
 
         // extract package types
-        var pt: string[] = pmc.item[index].structure.replace(/^m-multi_\d:/,'').replace(/-[\s\S]*/g,'').split(':');
+        var pt: string[] = getPackageTypesFromStructure(pmc.item[index].structure);
+        // remove nofPackages (first element)
+        pt.shift();
+        // save to scenarioPackageTypes index
         this._scenarioPackageTypes[index] = pt;
-
       }
     }
 
