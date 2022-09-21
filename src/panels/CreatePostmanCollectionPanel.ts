@@ -392,6 +392,7 @@ export class CreatePostmanCollectionPanel {
       this._scenarioFieldValues = [];
       this._scenarioCustomFields = [];
       this._nofPackages = [];
+      this._scenarioPackageTypes = [];
       for (let index = 0; index < pmc.item.length; index++) {
   
         this._scenarioFieldValues[index] = pmc.item[index].structure;
@@ -402,6 +403,10 @@ export class CreatePostmanCollectionPanel {
         if (nofPackages) {
           this._nofPackages[index] = nofPackages[0];
         }
+
+        // extract package types
+        var pt: string[] = pmc.item[index].structure.replace(/^m-multi_\d:/,'').replace(/-[\s\S]*/g,'').split(':');
+        this._scenarioPackageTypes[index] = pt;
 
       }
     }
