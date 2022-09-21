@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
+import { getHeapStatistics } from "v8";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -373,6 +374,9 @@ export class CreateIntegrationPanel {
       this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
       this._scenarioCustomFields = [];
+      this._nofPackages = [];
+      this._scenarioPackageTypes = [];
+      this._updatePackageTypes(0);
       this._checkIntegrationExists(extensionUri);
   }
 
@@ -440,6 +444,9 @@ export class CreateIntegrationPanel {
       this._fieldValues[nofScenariosIndex] = "1";
       this._scenarioFieldValues = [];
       this._scenarioCustomFields = [];
+      this._nofPackages = [];
+      this._scenarioPackageTypes = [];
+      this._updatePackageTypes(0);
       this._checkIntegrationExists(extensionUri);
   }
 
