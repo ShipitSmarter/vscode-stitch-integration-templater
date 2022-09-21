@@ -70,7 +70,7 @@
         },
         {
           "command": "stitch.scriban-functions-sort",
-          "when": "resourceExtname == .sbn",
+          "when": "resourceExtname == .sbn && config.stitch.sortscriban.enabled",
           "group": "stitch"
         }
       ]
