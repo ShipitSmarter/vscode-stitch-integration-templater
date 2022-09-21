@@ -15,6 +15,15 @@
   margin: 0.25rem 0;
 }
 
+.grid1flex {
+  display: grid;
+  grid-auto-rows: min-content;
+  grid-template-columns: min-content;
+  column-gap: 0.7rem;
+  row-gap: 0.3rem;
+}
+
+
 .grid2flex {
   display: grid;
   grid-auto-rows: min-content;
@@ -187,7 +196,7 @@ h1 {
 }
 
 .scenariocustomfield {
-  width: 23rem;
+  width: 22rem;
 }
 
 #nofpackages{

@@ -85,8 +85,8 @@ export class ScenarioGridObject {
         let scenarioNameGrid: string = ``;
         for (let scenario = 0; scenario < +this._nofScenarios; scenario++) {
             scenarioNameGrid += /*html*/ `
-                <section class="component-nomargin">
-                    <vscode-dropdown id="nofpackages${scenario}" class ="nofpackages" index="${scenario}" ${valueString(this._nofPackages[scenario] ?? '1')} position="below">
+                <section class="component-nomargin" hidden>
+                    <vscode-dropdown id="nofpackages${scenario}" class ="nofpackages" index="${scenario}" ${valueString(this._nofPackages[scenario] ?? '1')} position="below" hidden>
                         ${dropdownOptions(arrayFrom1(9))}
                     </vscode-dropdown>
                 </section>`;
@@ -95,9 +95,7 @@ export class ScenarioGridObject {
 
         return /*html*/`
         <section class="flexwrapper">
-            <section class="grid2flex">
-                <div># Packages</div>
-                <div>Scenario name</div>
+            <section class="grid1flex">
                 ${scenarioNameGrid}
                 <div>
                     ${getButton('addscenario','+','','primary')}
