@@ -209,8 +209,12 @@ export function modularScenarioFocus(event) {
     updateTiles(currentInput.value);
 
     // update package types
-    updatePackageTypes(currentInput);
-
+    if (currentInput.id.startsWith('existing')) {
+      hideAllPackageTypes();
+    } else {
+      updatePackageTypes(currentInput);
+    }
+    
     // set all tiles enabled
     if (previousInput.id.startsWith('existing') && !currentInput.id.startsWith('existing')) {
       for (const tilebutton of document.querySelectorAll(".modulartile,.multifield")) {
@@ -241,16 +245,18 @@ export function saveScenarioValue(fieldId, vscodeApi) {
 }
 
 export function getNofPackages(scenarioFieldId) {
-  let nofPackages = 1;
-
   let scenarioField = document.getElementById(scenarioFieldId);
-  let nofPackagesField = document.querySelectorAll("#nofpackages" + scenarioField.getAttribute('index'));
 
+  // get nofPackages from scenario structure (if present)
+  let nofPackages = scenarioField.value.replace(/^m-multi_/,'').substring(0,1);
+
+  // alternatively: get nofPackages from nofPackages field
+  let nofPackagesField = document.querySelectorAll("#nofpackages" + scenarioField.getAttribute('index'));
   if (nofPackagesField.length > 0) {
     nofPackages = nofPackagesField[0].value;
   }
 
-  return +nofPackages;
+  return parseInt(nofPackages);
 }
 
 export function lowestUnusedDigitOr1() {
@@ -367,6 +373,34 @@ export function setPrimary(fieldId,vscodeApi) {
   }
 }
 
+export function showPrimary(fieldId) {
+  let field = document.getElementById(fieldId);  
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
+
+  // change tile appearance
+  field.setAttribute('appearance','primary');
+
+  // show multifield if present
+  let multifield = document.querySelectorAll("#multifield" + parent + element);
+
+  if (multifield.length > 0) {
+    // extract multi value from scenario field (if present)
+    let multiregex = new RegExp('-' + fullName + '_([^-]*)(-|$)');
+    let matchMultiInScenario = currentInput.value.match(multiregex);
+    if (matchMultiInScenario) {
+      multifield[0].value = matchMultiInScenario[1];
+      //show multi field
+      multifield[0].hidden = false;
+
+      // update validity check
+      updateMultiFieldOutlineAndTooltip(multifield[0].id);
+    } 
+    
+  }
+}
+
 export function setSecondary(fieldId,vscodeApi) {
   let field = document.getElementById(fieldId);
   const parent = field.getAttribute('parent');
@@ -412,6 +446,30 @@ export function setSecondary(fieldId,vscodeApi) {
   }
 }
 
+export function showSecondary(fieldId) {
+  let field = document.getElementById(fieldId);
+  const parent = field.getAttribute('parent');
+  const element = field.getAttribute('name');
+  const fullName = parent + ':' + element;
+
+  // change appearance
+  field.setAttribute('appearance','secondary');
+
+  // clear multifield if present
+  let multifield = document.querySelectorAll("#multifield" + parent + element);
+  if (multifield.length > 0) {
+
+    //clear multi value
+    multifield[0].value = '';
+
+    //hide multi field
+    multifield[0].hidden = true;
+
+    // update validity check
+    updateMultiFieldOutlineAndTooltip(multifield[0].id);
+  }
+}
+
 export function checkScenarioFields() {
     // check if any incorrect field contents and update fields outlining and tooltip in the process
     var check = true;
@@ -429,21 +487,27 @@ export function checkScenarioFields() {
 }
   
 export function updateTiles(content) {
-    // let currentElements = content.split('-');
-    
     let tiles = document.querySelectorAll(".modulartile");
     for (const tile of tiles) {
       let element = tile.getAttribute('name');
       let parent = tile.getAttribute('parent');
       let fullName = parent + ':' + element;
       let regex = new RegExp('-' + fullName + '([-_]|$)');
-      // if (currentElements.includes(tile.id)) {
+
       if (content.match(regex)) {
-        setPrimary(tile.id);
+        // setPrimary(tile.id);
+        showPrimary(tile.id);
       } else {
-        setSecondary(tile.id);
+        // setSecondary(tile.id);
+        showSecondary(tile.id);
       }
     }
+}
+
+export function hideAllPackageTypes() {
+  for (const field of document.querySelectorAll(".packagetypes")) {
+    field.hidden = true;
+  }
 }
 
 export function updatePackageTypes(curInput) {
@@ -508,7 +572,7 @@ export function checkModularScenario(fieldId) {
   let maxValue = getNofPackages(field.id)+"";
 
   for (const element of currentElements) {
-    let multiValue = element.replace(/[^\_]+\_/g,'').replace(/\D/g,'');
+    let multiValue = element.replace(/[^\_]+\_/g,'').replace(/\D[\s\S]*/g,'');
 
     if (element.includes('_') && (multiValue.includes('0') || containsHigherDigits(multiValue, maxValue) || containsRepeatingDigits(multiValue, maxValue))) {
       isCorrect = false;

@@ -260,7 +260,7 @@ export function isScenarioValid(scenario:string, availableScenarios: string[], m
 	if (modular) {
 		let currentElements = scenario.split('-');
 		for (const element of currentElements) {
-			if (!modularElements.includes(element.replace(/\_\d+/g,''))) {
+			if (!modularElements.includes(element.replace(/\_[\s\S]+/g,''))) {
 				isValid = false;
 				break;
 			}
