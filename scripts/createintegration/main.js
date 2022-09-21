@@ -13,6 +13,7 @@ function main() {
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
   if (isCreate()) {
     document.getElementById("addstep").addEventListener("click",addStep);
+    document.getElementById("removestep").addEventListener("click",removeStep);
   }
 
   // input fields
@@ -227,4 +228,16 @@ function addStep(event) {
 
   nofStepsField.value = (nofSteps + 1).toString();
   nofStepsField.dispatchEvent(new Event('change'));
+}
+
+function removeStep(event) {
+  const field = event.target;
+
+  let nofStepsField = document.getElementById("nofsteps");
+  let nofSteps = parseInt(nofStepsField.value);
+
+  if (nofSteps > 1) {
+    nofStepsField.value = (nofSteps - 1).toString();
+    nofStepsField.dispatchEvent(new Event('change'));
+  }
 }

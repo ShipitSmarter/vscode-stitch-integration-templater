@@ -24,3 +24,12 @@
 #carriercode {
   width: 7rem;
 }
+
+#addstep,
+#removestep {
+  margin: 0.1rem;
+}
+
+#removestep {
+  background-color: red;
+}

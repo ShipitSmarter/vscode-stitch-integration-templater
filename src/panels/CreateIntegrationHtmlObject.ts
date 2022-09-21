@@ -192,7 +192,7 @@ export class CreateIntegrationHtmlObject {
           <div class="component-sub-container">
             <h2>Steps</h2>
 
-            <section class="component-example">
+            <section class="component-example" hidden>
               <p>Number of steps</p>
               <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${valueString(this._fieldValues[nofStepsIndex])} position="below">
                 ${dropdownOptions(arrayFrom1(10))}
@@ -263,7 +263,8 @@ export class CreateIntegrationHtmlObject {
               <div>Type</div>
               <div>Method</div>
               ${stepGrid}
-              <div>
+              <div class="flexwrapper">
+                  ${getButton('removestep','-','','primary')}
                   ${getButton('addstep','+','','primary')}
               </div>
           </section>
