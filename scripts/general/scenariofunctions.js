@@ -506,7 +506,11 @@ export function updateTiles(content) {
 
 export function hideAllPackageTypes() {
   for (const field of document.querySelectorAll(".packagetypes")) {
+    let scenarioIndex = field.getAttribute("index");
+    let scenarioGroup = document.getElementById("scenariogroup" + scenarioIndex);
+    
     field.hidden = true;
+    scenarioGroup.style.border = "none";
   }
 }
 
@@ -525,9 +529,19 @@ export function updatePackageTypes(curInput) {
     }
   }
 
-  // show only appropriate package type groups
+  // show only appropriate package type groups (and scenario outline)
   for (const field of document.querySelectorAll(".packagetypes")) {
-    field.hidden = field.getAttribute("index") === index ? false : true;
+    let scenarioIndex = field.getAttribute("index");
+    let scenarioGroup = document.getElementById("scenariogroup" + scenarioIndex);
+
+    if (scenarioIndex === index) {
+      field.hidden = false;
+      scenarioGroup.style.border = "0.5px solid blue";
+    } else {
+      field.hidden = true;
+      scenarioGroup.style.border = "none";
+    }
+
   }
 }
 
