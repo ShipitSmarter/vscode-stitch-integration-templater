@@ -131,7 +131,10 @@ export class ScenarioGridObject {
         return /*html*/ `
         <section class="component-nomargin" id="scenariogroup${index}">
             <vscode-text-field id="scenario${index}" index="${index}" ${valueString(this._scenarioFieldValues[index])} class="scenariofield" hidden></vscode-text-field>
-            <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
+            <div class="baseline nowrap">
+                <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
+                <vscode-tag id="nofpackagestag${index}">${this._nofPackages[index] ?? '1'}</vscode-tag>
+            </div>
             <section class="packagetypes" id="packagetypes${index}" index="${index}">
                 ${this._shipmentPackageTypes(index)}
             </section>

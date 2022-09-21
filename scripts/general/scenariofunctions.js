@@ -123,6 +123,9 @@ export var changePackages = function (vscodeApi) { return  function (event) {
     // save
     vscodeApi.postMessage({ command: "savevalue", text: 'nofpackagesdropdown|' + index + '|' + nofPackages });
 
+    // update tag
+    document.getElementById("nofpackagestag" + index).innerHTML = nofPackages; 
+
     // select associated scenario field
     const scenarioField = document.getElementById("scenario" + index);
     scenarioField.dispatchEvent(new Event('click'));
