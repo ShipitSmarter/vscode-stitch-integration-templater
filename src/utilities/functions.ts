@@ -10,12 +10,15 @@ type ScenarioObject = {
 };
   
 type IntegrationObject = {
-	path:string, carrier:string, 
-	api:string, module:string, 
+	path:string, 
+	carrier:string, 
+	api:string, 
+	module:string, 
 	carriercode:string,
 	modular: boolean, 
 	scenarios:string[], 
-	validscenarios: ScenarioObject[]
+	validscenarios: ScenarioObject[],
+	steps: string[]
 };
   
 type ModularElementObject = {
@@ -202,6 +205,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 		let api: string       = getFromScript(scriptContent, 'CarrierAPI');
 		let module: string    = getFromScript(scriptContent,'Module');
 		let modular: boolean  = toBoolean(getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
+		let apiSubPath = isEmpty(api) ? '' : (api + '/');
 
 		// if integration path does not exist: skip
 		let integrationPath = parentPath(cleanPath(script)) + `/${api}/${module}`;
@@ -212,15 +216,19 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 
 		// check if any scenarios available, and if not, skip (because cannot make postman collection)
 		if (panel === 'postman') {
-			let scenarioGlob = modular ? `**/carriers/${carrier}/${api}/${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
+			let scenarioGlob = modular ? `**/carriers/${carrier}/${apiSubPath}${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
 			let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
 			if (scenarios.length === 0) {
 				continue;
 			}
 		}
+		
+		// extract steps from integration json
+		let integrationJsonPath: string = await getWorkspaceFile(`**/carriers/${carrier}/${apiSubPath}${module}/*.integration.json`);
+		let steps: string[] = getStepsFromIntegrationJson(integrationJsonPath);
 
 		// obtain valid scenarios from scenarios folder
-		let scenariosDir: string = parentPath(cleanPath(script)) + `/${api}/${module}/scenarios`;
+		let scenariosDir: string = parentPath(cleanPath(script)) + `/${apiSubPath}${module}/scenarios`;
 		let scenarioDir = fs.readdirSync(scenariosDir);
 		let integrationScenarios = scenarioDir.filter(el => !el.includes('.')).sort();
 
@@ -245,13 +253,34 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 			carriercode: getFromScript(scriptContent,'CARRIERCODE'),
 			modular: 	 modular,
 			scenarios:   scenarioNameStructures.map(el => el.name),
-			validscenarios: validScenarios
+			validscenarios: validScenarios,
+			steps: 		 steps
 		};
 
 		newIndex++;
 	}
 
 	return integrationObjects.slice(0,newIndex);
+}
+
+export function getStepsFromIntegrationJson(integrationJsonPath:string) : string[] {
+	const content = fs.readFileSync(integrationJsonPath, 'utf8');
+	const jsonContent = JSON.parse(content);
+
+	let steps = [];
+	for (let index = 0; index < jsonContent.Steps.length; index++) {
+		let step = jsonContent.Steps[index];
+		let stepId = step.Id;
+		let stepType = (step.$type.match(/(?<=\.)[^\.]*(?=Configuration)/)[0] ?? '').toLowerCase();
+		let stepMethod = step?.Method?.toLowerCase();
+		steps[index] = `${step.Id}:${stepType}`;
+
+		if (stepType === 'http') {
+			steps[index] += `-${stepMethod}`;
+		}
+	}
+
+	return steps;
 }
 
 export function isScenarioValid(scenario:string, availableScenarios: string[], modularElements: string[]) : boolean {

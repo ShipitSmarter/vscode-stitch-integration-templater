@@ -24,7 +24,8 @@ type IntegrationObject = {
   carriercode:string,
    modular: boolean, 
    scenarios:string[], 
-   validscenarios: ScenarioObject[]
+   validscenarios: ScenarioObject[],
+   steps: string[]
 };
 
 type ModularElementObject = {
@@ -51,7 +52,7 @@ export class CreateIntegrationPanel {
   private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: string = 'create';      // pre-allocate with 'create'
   private _integrationObjects:     IntegrationObject[] = [];
-  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios: [{name:'', structure:''}]};
+  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios: [{name:'', structure:''}], steps: []};
   private _currentIntegration : IntegrationObject = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: ModularElementObject[] = [];
@@ -303,6 +304,20 @@ export class CreateIntegrationPanel {
       this._existingScenarioFieldValues = this._currentIntegration.validscenarios.map(el => el.structure);
       this._existingScenarioCustomFields = this._currentIntegration.validscenarios.map(el => el.name);
 
+      // update step info from existing scenario
+      this._fieldValues[nofStepsIndex] = this._currentIntegration.steps.length;
+      this._stepFieldValues = this._currentIntegration.steps.map(el => el.replace(/:[\s\S]*/,''));
+      this._stepTypes = this._currentIntegration.steps.map(el => el.replace(/^[\s\S]*:/,'').replace(/\-[\s\S]*$/,''));
+
+      this._stepMethods = [];
+      for (let index=0; index < this._currentIntegration.steps.length; index++) {
+        if (this._currentIntegration.steps[index].includes('-')) {
+          this._stepMethods[index] = this._currentIntegration.steps[index].replace(/^[\s\S]*\-/,'');
+        } else {
+          this._stepMethods[index] = '';
+        }
+      }
+
     } else {
       // integrationpath does not exist: 'create'
       this._createUpdateValue = 'create';
@@ -357,7 +372,17 @@ export class CreateIntegrationPanel {
           structure: scenarios[index]
         };
       }
+
+      // construct steps array
+      let steps: string[] = [];
+      for (let index=0; index < +this._fieldValues[nofStepsIndex]; index++) {
+        steps[index] = this._stepFieldValues[index] + ':' + this._stepTypes[index];
+        if (this._stepTypes[index] === 'http') {
+          steps[index] += '-' + this._stepMethods[index];
+        }
+      }
       
+      // construct integration element and add to integration objects
       this._currentIntegration = {
         path: this._getScriptPath(this._functionsPath), 
         carrier: this._fieldValues[carrierIndex], 
@@ -366,7 +391,8 @@ export class CreateIntegrationPanel {
         carriercode: this._fieldValues[carrierCodeIndex], 
         modular: true, 
         scenarios: scenarioNames, 
-        validscenarios: scenarioObjects
+        validscenarios: scenarioObjects,
+        steps: steps
       };
       this._integrationObjects.push(this._currentIntegration);
 

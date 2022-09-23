@@ -7,27 +7,11 @@ type ScenarioObject = {
     structure: string
 };
   
-type IntegrationObject = {
-    path:string, carrier:string, 
-    api:string, module:string, 
-    carriercode:string,
-     modular: boolean, 
-     scenarios:string[], 
-     validscenarios: ScenarioObject[]
-};
-  
 type ModularElementObject = {
     parent:string, 
     element:string, 
     multi:boolean
 };
-  
-type FileObject = {
-    parent: string,
-    file: string,
-    path: string
-};
-  
 
 export class ScenarioGridObject {
     // PROPERTIES
@@ -135,7 +119,7 @@ export class ScenarioGridObject {
                 <vscode-text-field id="scenariocustom${index}" index="${index}" ${valueString(this._scenarioCustomFields[index])} class="scenariocustomfield" placeholder="${(index + 1) + nth(index + 1)} scenario name..."></vscode-text-field>
                 <vscode-tag id="nofpackagestag${index}">${this._nofPackages[index] ?? '1'}</vscode-tag>
             </div>
-            <section class="packagetypes" id="packagetypes${index}" index="${index}">
+            <section class="packagetypes" id="packagetypes${index}" index="${index}" hidden>
                 ${this._shipmentPackageTypes(index)}
             </section>
         </section>`;
