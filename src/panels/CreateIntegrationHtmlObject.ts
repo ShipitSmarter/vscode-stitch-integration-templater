@@ -43,7 +43,8 @@ export class CreateIntegrationHtmlObject {
     private _stepMethodOptions: string[],
     private _stepMethods: string[],
     private _scenarioCustomFields: string[],
-    private _existingScenarioCustomFields: string[]
+    private _existingScenarioCustomFields: string[],
+    private _existingSteps: string[]
     ) { }
 
   // METHODS
@@ -88,6 +89,11 @@ export class CreateIntegrationHtmlObject {
 			</head>
 			<body>
 
+        <div hidden>
+          <vscode-text-field id="createupdate" value="${this._createUpdateValue}" hidden></vscode-text-field>
+          <vscode-text-field id="existingsteps" value="${this._existingSteps.join(',')}" hidden></vscode-text-field>
+        </div>
+
 				<div class="row11" id="main">
           <section id="farleft">
 					  <h1>Create or update carrier integration</h1> 
@@ -96,7 +102,7 @@ export class CreateIntegrationHtmlObject {
             ${this._getCreateUpdateButton()}
           </section>
 				</div>
-        
+
         <section class="${this._modularElementsWithParents.length > 0 ? 'rowflex' : 'rowsingle'}">
 
           <section class="rowsingle">
@@ -147,8 +153,6 @@ export class CreateIntegrationHtmlObject {
         ${this._ifCreate('Create') + this._ifUpdate('Update')} integration
         <span slot="start" class="codicon ${this._ifCreate('codicon-add') + this._ifUpdate('codicon-arrow-right')}"></span>
       </vscode-button>
-      
-      <vscode-text-field id="createupdate" value="${this._createUpdateValue}" hidden></vscode-text-field>
       `;
     return createUpdateButton;
   }
@@ -194,9 +198,8 @@ export class CreateIntegrationHtmlObject {
 
             <section class="component-example" hidden>
               <p>Number of steps</p>
-              <vscode-dropdown id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${valueString(this._fieldValues[nofStepsIndex])} position="below">
-                ${dropdownOptions(arrayFrom1(10))}
-              </vscode-dropdown>
+              <vscode-text-field id="nofsteps" class="dropdown" index="${nofStepsIndex}" ${valueString(this._fieldValues[nofStepsIndex])}>
+              </vscode-text-field>
             </section>
 
             ${this._stepInputs(+this._fieldValues[nofStepsIndex])}
@@ -223,14 +226,17 @@ export class CreateIntegrationHtmlObject {
   }
 
   private _stepInputs(nofSteps: number): string {
+    let stepOptions = this._stepOptions;
+    if (!this._existingSteps.includes(this._fieldValues[moduleIndex])) {
+      stepOptions.unshift(this._fieldValues[moduleIndex]);
+    }
     let stepGrid: string = '';
     for (let step = 0; step < +nofSteps; step++) {
-
+      let enableStep: boolean = !this._existingSteps.includes(this._stepFieldValues[step]);
       // step name dropdown
       let stepNameDropdown = /*html*/`
         <vscode-dropdown id="stepname${step}" index="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
-          <vscode-option>${this._fieldValues[moduleIndex]}</vscode-option>
-          ${dropdownOptions(this._stepOptions)}
+          ${dropdownOptions(stepOptions)}
         </vscode-dropdown>
       `;
 
@@ -240,14 +246,14 @@ export class CreateIntegrationHtmlObject {
 
       stepGrid += /*html*/`
         <section class="component-nomargin">
-          ${this._createUpdateValue === 'create' ? stepNameDropdown : stepNameField}
+          ${enableStep ? stepNameDropdown : stepNameField}
         </section>
       `;
 
       // step type dropdown
       stepGrid += /*html*/`
         <section class="component-nomargin">
-          <vscode-dropdown id="steptype${step}" index="${step}" ${valueString(this._stepTypes[step])} class="steptypedropdown" position="below" ${this._ifUpdate('disabled')}>
+          <vscode-dropdown id="steptype${step}" index="${step}" ${valueString(this._stepTypes[step])} class="steptypedropdown" position="below" ${disabledString(enableStep)}>
             ${dropdownOptions(this._stepTypeOptions)}
           </vscode-dropdown>
         </section>
@@ -256,7 +262,7 @@ export class CreateIntegrationHtmlObject {
       // step method dropdown
       stepGrid += /*html*/`
         <section class="component-nomargin">
-          <vscode-dropdown id="stepmethod${step}" index="${step}" ${valueString(this._stepMethods[step])} class="stepmethoddropdown" ${disabledString(this._stepTypes[step] === 'http' && this._createUpdateValue === 'create')} position="below">
+          <vscode-dropdown id="stepmethod${step}" index="${step}" ${valueString(this._stepMethods[step])} class="stepmethoddropdown" ${disabledString(this._stepTypes[step] === 'http' && enableStep)} position="below">
             ${dropdownOptions(this._stepMethodOptions)}
           </vscode-dropdown>
         </section>

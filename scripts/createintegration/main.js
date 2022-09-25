@@ -4,17 +4,14 @@ import { isEmpty } from "../general/general.js";
 const vscodeApi = acquireVsCodeApi();
 
 const scenarioGridExists = !!document.getElementById("scenariogrid");
-
 window.addEventListener("load", main);
 
 function main() {
   // button onclick event listeners
   document.getElementById("createintegration").addEventListener("click", createIntegration);
   document.getElementById("checkintegrationexists").addEventListener("click", checkIntegrationPath);
-  if (isCreate()) {
-    document.getElementById("addstep").addEventListener("click",addStep);
-    document.getElementById("removestep").addEventListener("click",removeStep);
-  }
+  document.getElementById("addstep").addEventListener("click",addStep);
+  document.getElementById("removestep").addEventListener("click",removeStep);
 
   // input fields
   const fields = document.querySelectorAll(".field,.dropdown,.stepdropdown,.existingscenariocheckbox");
@@ -53,6 +50,11 @@ function main() {
 function isCreate() {
   // check if create or update
   return (document.getElementById('createupdate').value === 'create');
+}
+
+function getExistingSteps() {
+  // return existing steps from hidden field
+  return document.getElementById("existingsteps").value.split(",");
 }
 
 function fieldChange(event) {
@@ -236,7 +238,7 @@ function removeStep(event) {
   let nofStepsField = document.getElementById("nofsteps");
   let nofSteps = parseInt(nofStepsField.value);
 
-  if (nofSteps > 1) {
+  if (nofSteps > getExistingSteps().length) {
     nofStepsField.value = (nofSteps - 1).toString();
     nofStepsField.dispatchEvent(new Event('change'));
   }

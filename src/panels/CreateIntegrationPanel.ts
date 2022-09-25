@@ -305,7 +305,7 @@ export class CreateIntegrationPanel {
       this._existingScenarioCustomFields = this._currentIntegration.validscenarios.map(el => el.name);
 
       // update step info from existing scenario
-      this._fieldValues[nofStepsIndex] = this._currentIntegration.steps.length;
+      this._fieldValues[nofStepsIndex] = this._currentIntegration.steps.length.toString();
       this._stepFieldValues = this._currentIntegration.steps.map(el => el.replace(/:[\s\S]*/,''));
       this._stepTypes = this._currentIntegration.steps.map(el => el.replace(/^[\s\S]*:/,'').replace(/\-[\s\S]*$/,''));
 
@@ -699,6 +699,9 @@ export class CreateIntegrationPanel {
     // show only available scenarios which are not already in the existing scenarios
     let reducedAvailableScenarios = this._availableScenarios.filter(el => !this._existingScenarioCustomFields.includes(this._getNewScenarioValue(el)));
 
+    // existing step names
+    let existingSteps = this._currentIntegration.steps.map(el => el.replace(/:[\s\S]*/,''));
+
     // Create panel Html object and retrieve html
     let createIntegrationHtmlObject: CreateIntegrationHtmlObject = new CreateIntegrationHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
@@ -715,13 +718,14 @@ export class CreateIntegrationPanel {
       this._nofPackages,
       this._scenarioPackageTypes,
       this._moduleOptions,
-      this._stepOptions,
+      this._stepOptions.filter(el => !existingSteps.includes(el)),
       this._stepTypeOptions,
       this._stepTypes,
       this._stepMethodOptions,
       this._stepMethods,
       this._scenarioCustomFields,
-      this._existingScenarioCustomFields
+      this._existingScenarioCustomFields,
+      existingSteps
     );
 
     let html =  createIntegrationHtmlObject.getHtml();
