@@ -13,6 +13,15 @@ function main() {
   document.getElementById("addstep").addEventListener("click",addStep);
   document.getElementById("removestep").addEventListener("click",removeStep);
 
+  // step up/down buttons
+  for (const field of document.querySelectorAll(".stepup")) {
+    field.addEventListener("click",stepUp);
+  }
+
+  for (const field of document.querySelectorAll(".stepdown")) {
+    field.addEventListener("click",stepDown);
+  }
+
   // input fields
   const fields = document.querySelectorAll(".field,.dropdown,.stepdropdown,.existingscenariocheckbox");
   for (const field of fields) {
@@ -248,5 +257,104 @@ function removeStep(event) {
   if (nofSteps > getExistingSteps().length) {
     nofStepsField.value = (nofSteps - 1).toString();
     nofStepsField.dispatchEvent(new Event('change'));
+  }
+}
+
+function switchSteps(index1, index2) {
+  // get current values
+  let stepName1 = document.getElementById("stepname" + index1);
+  let stepType1 = document.getElementById("steptype" + index1);
+  let stepMethod1 = document.getElementById("stepmethod" + index1);
+
+  let stepName1Value = stepName1.value;
+  let stepType1Value = stepType1.value;
+  let stepMethod1Value = stepMethod1.value;
+
+  let stepName1Existing = getExistingSteps().includes(stepName1Value);
+
+  let stepName2 = document.getElementById("stepname" + index2);
+  let stepType2 = document.getElementById("steptype" + index2);
+  let stepMethod2 = document.getElementById("stepmethod" + index2);
+
+  let stepName2Value = stepName2.value;
+  let stepType2Value = stepType2.value;
+  let stepMethod2Value = stepMethod2.value;
+
+  let stepName2Existing = getExistingSteps().includes(stepName2Value);
+
+  // switch values
+  stepName1.value = stepName2Value;
+  stepType1.value = stepType2Value;
+  stepMethod1.value = stepMethod2Value;
+
+  stepName2.value = stepName1Value;
+  stepType2.value = stepType1Value;
+  stepMethod2.value = stepMethod1Value;
+
+  // show/hide
+  if (stepName1Existing) {
+    hideStep(index2);
+  } else {
+    showStep(index2);
+  }
+
+  if (stepName2Existing) {
+    hideStep(index1);
+  } else {
+    showStep(index1);
+  }
+
+}
+
+function showStep(index) {
+  let stepNameField = document.getElementById("stepname" + index);
+  let stepTypeField = document.getElementById("steptype" + index);
+  let stepMethodField = document.getElementById("stepmethod" + index);
+  let stepUpButton = document.getElementById("stepup" + index);
+  let stepDownButton = document.getElementById("stepdown" + index);
+
+  stepNameField.disabled = false;
+  stepTypeField.disabled = false;
+  if(stepTypeField.value === 'http') {
+    stepMethodField.disabled = false;
+  } else {
+    stepMethodField.disabled = true;
+  }
+  stepUpButton.hidden = false;
+  stepDownButton.hidden = false;
+}
+
+function hideStep(index) {
+  let stepNameField = document.getElementById("stepname" + index);
+  let stepTypeField = document.getElementById("steptype" + index);
+  let stepMethodField = document.getElementById("stepmethod" + index);
+  let stepUpButton = document.getElementById("stepup" + index);
+  let stepDownButton = document.getElementById("stepdown" + index);
+
+  stepNameField.disabled = true;
+  stepTypeField.disabled = true;
+  stepMethodField.disabled = true;
+  stepUpButton.hidden = true;
+  stepDownButton.hidden = true;
+}
+
+function stepUp(event) {
+  let stepUpButton = event.target;
+  const index = parseInt(stepUpButton.id.replace("stepup",''));
+
+  if (index > 0) {
+    // switchSteps(index.toString(),(index-1).toString());
+    vscodeApi.postMessage({ command: "switchsteps", text: (index.toString() + "|" + (index-1).toString()) });
+  }
+}
+
+function stepDown(event) {
+  let nofSteps = parseInt(document.getElementById("nofsteps").value);
+  let stepDownButton = event.target;
+  const index = parseInt(stepDownButton.id.replace("stepdown",''));
+
+  if (index < (nofSteps-1)) {
+    //switchSteps(index.toString(),(index+1).toString());
+    vscodeApi.postMessage({ command: "switchsteps", text: (index.toString() + "|" + (index+1).toString()) });
   }
 }

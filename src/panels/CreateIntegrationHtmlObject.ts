@@ -265,10 +265,12 @@ export class CreateIntegrationHtmlObject {
 
       // step method dropdown
       stepGrid += /*html*/`
-        <section class="component-nomargin">
+        <section class="component-nomargin baseline nowrap">
           <vscode-dropdown id="stepmethod${step}" index="${step}" ${valueString(this._stepMethods[step])} class="stepmethoddropdown" ${disabledString(this._stepTypes[step] === 'http' && enableStep)} position="below">
             ${dropdownOptions(this._stepMethodOptions)}
           </vscode-dropdown>
+          ${getButton('stepup' + step,'^','','primary',hiddenString(enableStep),'stepup')}
+          ${getButton('stepdown' + step,'v','','primary',hiddenString(enableStep),'stepdown')}
         </section>
       `;
     }

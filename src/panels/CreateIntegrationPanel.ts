@@ -3,6 +3,7 @@ import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, pa
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 import { getHeapStatistics } from "v8";
+import { runInThisContext } from "vm";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -161,6 +162,12 @@ export class CreateIntegrationPanel {
             vscode.window.showInformationMessage(text);
             break;
 
+          case 'switchsteps':
+            const indices: string[] = text.split('|');
+            this.switchSteps(+indices[0],+indices[1]);
+            this._updateWebview(extensionUri);
+            break;
+
           case 'changepackagetype':
             var scenarioIndexValue = text.split('|');
             var scenarioIndex = +scenarioIndexValue[0];
@@ -260,6 +267,24 @@ export class CreateIntegrationPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private switchSteps(index1:number, index2:number) {
+    // save values of index 1
+    const stepName1 = this._stepFieldValues[index1];
+    const stepType1 = this._stepTypes[index1];
+    const stepMethod1 = this._stepMethods[index1];
+
+    // replace with values of index 2
+    this._stepFieldValues[index1] = this._stepFieldValues[index2];
+    this._stepTypes[index1] = this._stepTypes[index2];
+    this._stepMethods[index1] = this._stepMethods[index2];
+
+    // replace values of index 2 with originals of index 1
+    this._stepFieldValues[index2] = stepName1;
+    this._stepTypes[index2] = stepType1;
+    this._stepMethods[index2] = stepMethod1;
+
   }
 
   private _updatePackageTypes(index:number) {
