@@ -45,7 +45,13 @@ export class CreateIntegrationHtmlObject {
     private _scenarioCustomFields: string[],
     private _existingScenarioCustomFields: string[],
     private _existingSteps: string[]
-    ) { }
+    ) {
+
+      // add module to stepOptions if applicable
+      if (!this._existingSteps.includes(this._fieldValues[moduleIndex])) {
+        this._stepOptions.unshift(this._fieldValues[moduleIndex]);
+      }
+     }
 
   // METHODS
   public getHtml() {
@@ -92,6 +98,7 @@ export class CreateIntegrationHtmlObject {
         <div hidden>
           <vscode-text-field id="createupdate" value="${this._createUpdateValue}" hidden></vscode-text-field>
           <vscode-text-field id="existingsteps" value="${this._existingSteps.join(',')}" hidden></vscode-text-field>
+          <vscode-text-field id="stepoptions" value="${this._stepOptions.join(',')}" hidden></vscode-text-field>
         </div>
 
 				<div class="row11" id="main">
@@ -226,17 +233,14 @@ export class CreateIntegrationHtmlObject {
   }
 
   private _stepInputs(nofSteps: number): string {
-    let stepOptions = this._stepOptions;
-    if (!this._existingSteps.includes(this._fieldValues[moduleIndex])) {
-      stepOptions.unshift(this._fieldValues[moduleIndex]);
-    }
+ 
     let stepGrid: string = '';
     for (let step = 0; step < +nofSteps; step++) {
       let enableStep: boolean = !this._existingSteps.includes(this._stepFieldValues[step]);
       // step name dropdown
       let stepNameDropdown = /*html*/`
         <vscode-dropdown id="stepname${step}" index="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
-          ${dropdownOptions(stepOptions)}
+          ${dropdownOptions(this._stepOptions)}
         </vscode-dropdown>
       `;
 

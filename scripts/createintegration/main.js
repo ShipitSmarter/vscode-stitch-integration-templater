@@ -225,11 +225,18 @@ function createIntegration() {
 function addStep(event) {
   const field = event.target;
 
+  let existingSteps = document.getElementById("existingsteps").value.split(',');
+  let stepOptions = document.getElementById("stepoptions").value.split(',');
+  let possibleSteps = existingSteps.concat(stepOptions).filter(el => !isEmpty(el));
+  let maxSteps = possibleSteps.length;
+
   let nofStepsField = document.getElementById("nofsteps");
   let nofSteps = parseInt(nofStepsField.value);
 
-  nofStepsField.value = (nofSteps + 1).toString();
-  nofStepsField.dispatchEvent(new Event('change'));
+  if (nofSteps < maxSteps) {
+    nofStepsField.value = (nofSteps + 1).toString();
+    nofStepsField.dispatchEvent(new Event('change'));
+  }
 }
 
 function removeStep(event) {
