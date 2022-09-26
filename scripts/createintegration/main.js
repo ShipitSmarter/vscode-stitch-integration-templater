@@ -255,8 +255,17 @@ function removeStep(event) {
   let nofSteps = parseInt(nofStepsField.value);
 
   if (nofSteps > getExistingSteps().length) {
-    nofStepsField.value = (nofSteps - 1).toString();
-    nofStepsField.dispatchEvent(new Event('change'));
+    // find lowest 'new' step and remove
+    for (let index=(nofSteps -1); index >= 0; index-- ) {
+      var stepName = document.getElementById("stepname" + index.toString()).value;
+      if (!getExistingSteps().includes(stepName)) {
+        vscodeApi.postMessage({ command: "removestepindex", text: index.toString() });
+        break;
+      }
+    }
+
+    // nofStepsField.value = (nofSteps - 1).toString();
+    // nofStepsField.dispatchEvent(new Event('change'));
   }
 }
 

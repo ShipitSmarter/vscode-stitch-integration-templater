@@ -164,7 +164,13 @@ export class CreateIntegrationPanel {
 
           case 'switchsteps':
             const indices: string[] = text.split('|');
-            this.switchSteps(+indices[0],+indices[1]);
+            this._switchSteps(+indices[0],+indices[1]);
+            this._updateWebview(extensionUri);
+            break;
+
+          case 'removestepindex':
+            const removeIndex = +text;
+            this._removeStepIndex(removeIndex);
             this._updateWebview(extensionUri);
             break;
 
@@ -196,22 +202,7 @@ export class CreateIntegrationPanel {
                 this._fieldValues[index] = value;
                 switch (index) {
                   case nofStepsIndex :
-                    for (let ii = 0; ii < value; ii++) {
-                      // pre-fill empty step names
-                      if (!this._stepFieldValues[ii]) {
-                        this._stepFieldValues[ii] = [this._fieldValues[carrierIndex]].concat(this._stepOptions)[ii % (this._stepOptions.length + 1)];
-                      }
-
-                      // pre-fill empty step types
-                      if (!this._stepTypes[ii]) {
-                        this._stepTypes[ii] = this._stepTypeOptions[0];
-                      }
-
-                      // pre-fill empty step methods
-                      if (!this._stepMethods[ii]) {
-                        this._stepMethods[ii] = this._stepMethodOptions[0];
-                      }
-                    }
+                    this._stepsPrefillAndCrop(+value);
                     this._updateWebview(extensionUri);
                     break;
 
@@ -269,7 +260,32 @@ export class CreateIntegrationPanel {
     );
   }
 
-  private switchSteps(index1:number, index2:number) {
+  private _stepsPrefillAndCrop(newLength: number) {
+    // prefill if larger than before
+    for (let ii = 0; ii < newLength; ii++) {
+      // pre-fill empty step names
+      if (!this._stepFieldValues[ii]) {
+        this._stepFieldValues[ii] = [this._fieldValues[carrierIndex]].concat(this._stepOptions)[ii % (this._stepOptions.length + 1)];
+      }
+
+      // pre-fill empty step types
+      if (!this._stepTypes[ii]) {
+        this._stepTypes[ii] = this._stepTypeOptions[0];
+      }
+
+      // pre-fill empty step methods
+      if (!this._stepMethods[ii]) {
+        this._stepMethods[ii] = this._stepMethodOptions[0];
+      }
+    }
+
+    // crop if smaller than before
+    this._stepFieldValues.slice(0,newLength);
+    this._stepTypes.slice(0,newLength);
+    this._stepMethods.slice(0,newLength);
+  }
+
+  private _switchSteps(index1:number, index2:number) {
     // save values of index 1
     const stepName1 = this._stepFieldValues[index1];
     const stepType1 = this._stepTypes[index1];
@@ -285,6 +301,22 @@ export class CreateIntegrationPanel {
     this._stepTypes[index2] = stepType1;
     this._stepMethods[index2] = stepMethod1;
 
+  }
+
+  private _removeStepIndex(removeIndex:number) {
+    let nofSteps = +this._fieldValues[nofStepsIndex];
+    for (let index = removeIndex; index < (nofSteps -1); index++) {
+      // replace with values of next index
+      this._stepFieldValues[index] = this._stepFieldValues[index + 1];
+      this._stepTypes[index] = this._stepTypes[index + 1];
+      this._stepMethods[index] = this._stepMethods[index + 1];
+    }
+
+    // update nofSteps
+    this._fieldValues[nofStepsIndex] = (nofSteps-1).toString();
+
+    // crop associated arrays
+    this._stepsPrefillAndCrop(nofSteps-1);
   }
 
   private _updatePackageTypes(index:number) {
