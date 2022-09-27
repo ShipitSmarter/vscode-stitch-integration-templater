@@ -12,6 +12,15 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(createIntegrationCommand);
 	
+	// Create integration panel and open integration json file
+	const integrationLoadCommand = vscode.commands.registerCommand("stitch.integration-templater-loadjson", (uri,files) => {
+		if(typeof files !== 'undefined' && files.length > 0) {
+			const filePath = files[0].fsPath;
+			CreateIntegrationPanel.render(context.extensionUri, 0, context, filePath);
+		}
+	});
+	context.subscriptions.push(integrationLoadCommand);
+
 	// Create Postman collection panel
 	const createPostmanCollectionCommand = vscode.commands.registerCommand("stitch.postman-collection", () => {
 		CreatePostmanCollectionPanel.render(context.extensionUri, 0, context);

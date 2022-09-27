@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes, nameFromPath} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 import { getHeapStatistics } from "v8";
@@ -72,7 +72,7 @@ export class CreateIntegrationPanel {
   private _existingScenarioCustomFields: string[] = [];
 
   // constructor
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext, loadFile:string = '') {
     this._panel = panel;
 
     // predefine some fixed fields
@@ -103,21 +103,27 @@ export class CreateIntegrationPanel {
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
 
+    // if loadFile: load file
+    this._loadFileIfPresent(extensionUri,loadFile);
+
     // get authentication string from setting and save to file (to be used by PowerShell)
     saveAuth();
   }
 
   // METHODS
   // initial rendering
-  public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
+  public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext, loadFile:string = '') {
     if (CreateIntegrationPanel.currentPanel) {
       CreateIntegrationPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
+
+      // if loadFile: load file
+      CreateIntegrationPanel.currentPanel._loadFileIfPresent(extensionUri,loadFile);
     } else {
       const panel = vscode.window.createWebviewPanel("create-integration", "Create or update carrier integration", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
-      CreateIntegrationPanel.currentPanel = new CreateIntegrationPanel(panel, extensionUri, nofSteps, context);
+      CreateIntegrationPanel.currentPanel = new CreateIntegrationPanel(panel, extensionUri, nofSteps, context, loadFile);
     }
   }
 
@@ -258,6 +264,23 @@ export class CreateIntegrationPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
+    if (!isEmpty(loadFile)) {
+      // get paths
+      let modulePath = parentPath(cleanPath(loadFile));
+      let apiPath = parentPath(modulePath);
+      let carrierPath = parentPath(apiPath);
+
+      // update fields
+      this._fieldValues[carrierIndex] = nameFromPath(carrierPath);
+      this._fieldValues[apiIndex] = nameFromPath(apiPath);
+      this._fieldValues[moduleIndex] = nameFromPath(modulePath);
+      
+      // check button
+      this._checkIntegrationExists(extensionUri, 'check');
+    }
   }
 
   private _stepsPrefillAndCrop(newLength: number) {
