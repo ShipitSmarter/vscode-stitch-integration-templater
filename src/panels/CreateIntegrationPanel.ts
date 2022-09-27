@@ -389,6 +389,18 @@ export class CreateIntegrationPanel {
     this._updateWebview(extensionUri);
   }
 
+  private _getStepsArray() : string[] {
+    let steps: string[] = [];
+    for (let index=0; index < +this._fieldValues[nofStepsIndex]; index++) {
+      steps[index] = this._stepFieldValues[index] + ':' + this._stepTypes[index];
+      if (this._stepTypes[index] === 'http') {
+        steps[index] += '-' + this._stepMethods[index];
+      }
+    }
+
+    return steps;
+  }
+
   private _createIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
       // get current integration
       this._currentIntegration = this._getIntegrationObject();
@@ -431,13 +443,7 @@ export class CreateIntegrationPanel {
       }
 
       // construct steps array
-      let steps: string[] = [];
-      for (let index=0; index < +this._fieldValues[nofStepsIndex]; index++) {
-        steps[index] = this._stepFieldValues[index] + ':' + this._stepTypes[index];
-        if (this._stepTypes[index] === 'http') {
-          steps[index] += '-' + this._stepMethods[index];
-        }
-      }
+      let steps: string[] = this._getStepsArray();
       
       // construct integration element and add to integration objects
       this._currentIntegration = {
@@ -482,6 +488,10 @@ export class CreateIntegrationPanel {
 
       // replace scenarios in script content
       let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
+
+      // replace steps
+      let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"\n';
+      newScriptContent = newScriptContent.replace(/(?<=\$Steps\s*=\s*@\()[^\)]*(?=\))/, stepsString);
 
       // replace CreateOrUpdate value
       newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
@@ -636,22 +646,8 @@ export class CreateIntegrationPanel {
     // scenarios
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
 
-    // steps fields: step name
-    let nofSteps = this._fieldValues[nofStepsIndex];
-    let stepsString: string = '';
-    for (let index = 0; index < +nofSteps; index++) {
-      let step: string = this._stepFieldValues[index] + '';
-      let type: string = this._stepTypes[index] + '';
-      let method: string = this._stepMethods[index] + '';
-      let methodString = (type === 'http') ? ('-' + method) : '';
-
-      // steps
-      stepsString += '\n    "' + step + ':' + type + methodString + '"';
-      if (index !== +nofSteps - 1) {
-        stepsString += ',';
-      }
-    }
-    // replace
+    // steps
+    let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"';
     newScriptContent = newScriptContent.replace('[steps]', stepsString);
 
     // return script content
