@@ -531,6 +531,7 @@ export class CreateIntegrationPanel {
       this._currentIntegration.path = newScriptPath;
       this._currentIntegration.scenarios = this._currentIntegration.scenarios.concat(newScenarios).sort();
       this._currentIntegration.validscenarios = this._currentIntegration.validscenarios.concat(scenarioObjects).sort();
+      this._currentIntegration.steps = this._getStepsArray();
       this._integrationObjects[intIndex] = this._currentIntegration;
 
       // refresh window
@@ -647,8 +648,8 @@ export class CreateIntegrationPanel {
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
 
     // steps
-    let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"';
-    newScriptContent = newScriptContent.replace('[steps]', stepsString);
+    let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"\n';
+    newScriptContent = newScriptContent.replace(/(?<=\$Steps\s*=\s*@\()[^\)]*(?=\))/, stepsString);
 
     // return script content
     return newScriptContent;
