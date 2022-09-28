@@ -505,7 +505,6 @@ export class CreateIntegrationPanel {
       // get template content
       let templateContent = fs.readFileSync(this._getTemplatePath(this._functionsPath), 'utf8');
 
-
       // replace all values in template
       let newScriptContent = this._replaceInScriptTemplate(templateContent);
 

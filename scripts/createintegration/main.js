@@ -207,7 +207,7 @@ function updateFieldOutlineAndTooltip(fieldId) {
   if (!checkContent(fieldType, field.value)) {
     updateFieldWrong(field.id,fieldType);
     isCorrect = false;
-  } else if (['carriername','carrierapiname','carriercode'].includes(field.id) && isEmpty(field.value)) {
+  } else if (['carriername','carriercode'].includes(field.id) && isEmpty(field.value)) {
     updateFieldEmpty(field.id);
     isCorrect = false;
   } else {
