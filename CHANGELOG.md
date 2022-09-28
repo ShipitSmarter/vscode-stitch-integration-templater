@@ -1,5 +1,13 @@
 # Change Log
 
+## 1.7.2
+- Carrier integration
+  - Now allows updating any integration (also ones which were not generated with the dashboard)
+  - Now allows loading existing integrations without an `api` subdirectory
+  - Performance: load integration details only when selected, not all at once at opening of dashboard or when hitting `refresh`
+- Postman collection
+  - Allow manual input of CarrierCode when not using the `independent` option
+
 ## 1.7.1
 - Carrier integration
   - Now allows adding steps to existing integrations (on `update`)

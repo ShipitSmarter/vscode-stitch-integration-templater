@@ -240,7 +240,7 @@ export class CreatePostmanCollectionHtmlObject {
       <section class="component-example">
         <div class="floatleft">
           <p>Carrier Code</p>
-          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${valueString(this._fieldValues[carrierCodeIndex])} readonly></vscode-text-field>
+          <vscode-text-field id="carriercode" class="field" index="${carrierCodeIndex}" ${valueString(this._fieldValues[carrierCodeIndex])} ${this._independent ? 'readonly' : ''}></vscode-text-field>
         </div>
         <div class="floatleft">
           <p>Account number</p>

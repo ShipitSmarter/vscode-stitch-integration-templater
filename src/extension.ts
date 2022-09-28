@@ -70,9 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showInformationMessage(`File ${fileName} has been sorted`);
 		}));
 
-		
 	});
 	context.subscriptions.push(sortScribanFunctionsFileCommand);
-	
 	
 }

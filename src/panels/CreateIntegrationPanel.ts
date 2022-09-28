@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes, nameFromPath} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes, nameFromPath, getElementsFromIntegrationPath, getIntegrationSubpath, getIntegration} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 import { getHeapStatistics } from "v8";
@@ -19,14 +19,15 @@ type ScenarioObject = {
   structure: string
 };
 
+type ElementsObject = {carrier:string, api:string, module:string};
+
 type IntegrationObject = {
   path:string, carrier:string, 
   api:string, module:string, 
   carriercode:string,
-   modular: boolean, 
-   scenarios:string[], 
-   validscenarios: ScenarioObject[],
-   steps: string[]
+  scenarios:string[], 
+  validscenarios: ScenarioObject[],
+  steps: string[]
 };
 
 type ModularElementObject = {
@@ -52,8 +53,8 @@ export class CreateIntegrationPanel {
   private _existingScenarioFieldValues: string[] = [];
   private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: string = 'create';      // pre-allocate with 'create'
-  private _integrationObjects:     IntegrationObject[] = [];
-  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios: [{name:'', structure:''}], steps: []};
+  //private _integrationObjects:     IntegrationObject[] = [];
+  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', scenarios: [], validscenarios: [{name:'', structure:''}], steps: []};
   private _currentIntegration : IntegrationObject = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: ModularElementObject[] = [];
@@ -269,14 +270,12 @@ export class CreateIntegrationPanel {
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
     if (!isEmpty(loadFile)) {
       // get paths
-      let modulePath = parentPath(cleanPath(loadFile));
-      let apiPath = parentPath(modulePath);
-      let carrierPath = parentPath(apiPath);
+      let elements = getElementsFromIntegrationPath(loadFile);
 
       // update fields
-      this._fieldValues[carrierIndex] = nameFromPath(carrierPath);
-      this._fieldValues[apiIndex] = nameFromPath(apiPath);
-      this._fieldValues[moduleIndex] = nameFromPath(modulePath);
+      this._fieldValues[carrierIndex] = elements.carrier;
+      this._fieldValues[apiIndex] = elements.api;
+      this._fieldValues[moduleIndex] = elements.module;
       
       // check button
       this._checkIntegrationExists(extensionUri, 'check');
@@ -362,8 +361,24 @@ export class CreateIntegrationPanel {
     }
   }
 
-  private _getIntegrationObject() : IntegrationObject {
-    return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0] ?? this._emptyIntegrationObject;
+  private async _getIntegrationObject() : Promise<IntegrationObject> {
+    let elements:ElementsObject = {
+      carrier: this._fieldValues[carrierIndex],
+      api: this._fieldValues[apiIndex],
+      module: this._fieldValues[moduleIndex]
+    };
+
+    // if matches to current integration: return current; else: extract from integration json path
+    let outIntegrationObject: IntegrationObject = this._currentIntegration;
+
+    if (elements.carrier !== this._currentIntegration.carrier || elements.api !== this._currentIntegration.api || elements.module !== this._currentIntegration.module) {
+      let subPath: string = getIntegrationSubpath(elements);
+      let integrationJsonPath: string = await getWorkspaceFile('**/carriers/'+ subPath + '/*.integration.json');
+      
+      outIntegrationObject = await getIntegration(integrationJsonPath);
+    }
+
+    return outIntegrationObject;
   }
 
   private async _checkIntegrationExists(extensionUri: vscode.Uri, source:string = '') {
@@ -373,7 +388,7 @@ export class CreateIntegrationPanel {
     }
 
     // get current integration
-    this._currentIntegration = this._getIntegrationObject();
+    this._currentIntegration = await this._getIntegrationObject();
 
     // if current integration is not empty: exists -> 'update'
     if (this._currentIntegration !== this._emptyIntegrationObject) {
@@ -407,7 +422,6 @@ export class CreateIntegrationPanel {
     // clean existing scenario checkbox values upon clicking 'check' button
     this._existingScenarioCheckboxValues = [];
 
-
     // update panel
     this._updateWebview(extensionUri);
   }
@@ -424,9 +438,9 @@ export class CreateIntegrationPanel {
     return steps;
   }
 
-  private _createIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
+  private async _createIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
       // get current integration
-      this._currentIntegration = this._getIntegrationObject();
+      this._currentIntegration = await this._getIntegrationObject();
 
       // if current integration is not empty: 'update' -> show error and refresh form
       if (this._currentIntegration !== this._emptyIntegrationObject) {
@@ -474,13 +488,13 @@ export class CreateIntegrationPanel {
         carrier: this._fieldValues[carrierIndex], 
         api: this._fieldValues[apiIndex], 
         module: this._fieldValues[moduleIndex], 
-        carriercode: this._fieldValues[carrierCodeIndex], 
-        modular: true, 
+        carriercode: this._fieldValues[carrierCodeIndex],
         scenarios: scenarioNames, 
         validscenarios: scenarioObjects,
         steps: steps
       };
-      this._integrationObjects.push(this._currentIntegration);
+
+      //this._integrationObjects.push(this._currentIntegration);
 
       // refresh window
       this._fieldValues[nofScenariosIndex] = "1";
@@ -492,9 +506,9 @@ export class CreateIntegrationPanel {
       this._checkIntegrationExists(extensionUri);
   }
 
-  private _updateIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
+  private async _updateIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
       // get current integration
-      this._currentIntegration = this._getIntegrationObject();
+      this._currentIntegration = await this._getIntegrationObject();
 
       // if current integration is empty: 'create' -> show error and refresh form
       if (this._currentIntegration === this._emptyIntegrationObject) {
@@ -506,35 +520,15 @@ export class CreateIntegrationPanel {
       // show info message
       vscode.window.showInformationMessage('Updating integration ' + this._getIntegrationName());
 
-      // load script content
-      let scriptContent = fs.readFileSync(this._currentIntegration.path, 'utf8');
-
-      // replace scenarios in script content
-      let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
-
-      // replace steps
-      let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"\n';
-      newScriptContent = newScriptContent.replace(/(?<=\$Steps\s*=\s*@\()[^\)]*(?=\))/, stepsString);
-
-      // replace CreateOrUpdate value
-      newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
-
-      // replace New-UpdateIntegration function call -> should be last line from template
+      // get template content
       let templateContent = fs.readFileSync(this._getTemplatePath(this._functionsPath), 'utf8');
-      let newNewUpdateIntegration = (templateContent.match(/\r?\n[^\r\n]*\s*$/) ?? [''])[0].trim();
-      newScriptContent = newScriptContent.replace(/New-UpdateIntegration\s[\S\s]+$/g,newNewUpdateIntegration);
 
-      // remove modular value if present
-      newScriptContent = newScriptContent.replace(/\$ModularXMLs[^\r\n]+[\r\n]/g, '');
+      // replace all values in template
+      let newScriptContent = this._replaceInScriptTemplate(templateContent);
 
       // save to file
-      let newScriptPath:string = parentPath(cleanPath(this._currentIntegration.path)) + '/' + this._getScriptName();
+      let newScriptPath:string = this._getCarrierPath(this._functionsPath) + '/' + this._getScriptName();
       fs.writeFileSync(newScriptPath, newScriptContent, 'utf8');
-
-      // if new script path not equal to previous script path: delete old script file
-      if (newScriptPath !== this._currentIntegration.path) {
-        fs.rmSync(this._currentIntegration.path);
-      }
 
       // execute powershell
       this._runScript(terminal, this._functionsPath);
@@ -550,12 +544,10 @@ export class CreateIntegrationPanel {
           structure: newScenarios[index]
         };
       }
-      let intIndex : number = this._integrationObjects.findIndex(el => el.path === this._currentIntegration.path);
-      this._currentIntegration.path = newScriptPath;
+
       this._currentIntegration.scenarios = this._currentIntegration.scenarios.concat(newScenarios).sort();
       this._currentIntegration.validscenarios = this._currentIntegration.validscenarios.concat(scenarioObjects).sort();
       this._currentIntegration.steps = this._getStepsArray();
-      this._integrationObjects[intIndex] = this._currentIntegration;
 
       // refresh window
       this._fieldValues[nofScenariosIndex] = "1";
@@ -656,16 +648,11 @@ export class CreateIntegrationPanel {
     // replace fixed field values
     for (let index = 0; index < this._fieldValues.length; index++) {
       let replaceString = '[fieldValues' + index + ']';
-      if (this._fieldValues[index] !== undefined) {
-        newScriptContent = newScriptContent.replace(replaceString, this._fieldValues[index] + "");
-      }
+      newScriptContent = newScriptContent.replace(replaceString, (this._fieldValues[index] ?? "") + "");
     }
 
     // createupdate
     newScriptContent = newScriptContent.replace('[createupdate]', this._createUpdateValue + "");
-
-    // modular
-    // newScriptContent = newScriptContent.replace('[modular]', this._modularValue + "");
 
     // scenarios
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
@@ -749,7 +736,7 @@ export class CreateIntegrationPanel {
     await this._getStepTypeOptions();
     await this._getStepMethodOptions();
     this._functionsPath      = await getWorkspaceFile('**/scripts/functions.ps1');
-    this._integrationObjects = await getAvailableIntegrations('integration');
+    //this._integrationObjects = await getAvailableIntegrations('integration');
     this._availableScenarios = await getAvailableScenarios(this._fieldValues[moduleIndex]);
     this._modularElementsWithParents  = await getModularElementsWithParents(this._fieldValues[moduleIndex]);
     this._packageTypes = await getPackageTypes(this._fieldValues[moduleIndex]);
@@ -763,10 +750,13 @@ export class CreateIntegrationPanel {
     const styleUri = getUri(webview, extensionUri, ["scripts", "createintegration", "style.css"]);
 
     // first time only: get integrations, available scenarios, modular elements
-    if (this._integrationObjects.length === 0) {
+    if (this._moduleOptions.length === 0) {
       await this._refresh();
-      this._stepTypes[0] = this._stepTypeOptions[0];
-      this._stepMethods[0] = this._stepMethodOptions[0];
+      if (isEmpty(this._stepTypes[0])) {
+        this._stepTypes[0] = this._stepTypeOptions[0];
+        this._stepMethods[0] = this._stepMethodOptions[0];
+      }
+      
       this._updatePackageTypes(0);
     }
 
