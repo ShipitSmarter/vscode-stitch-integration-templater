@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes, nameFromPath} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes, nameFromPath, getElementsFromIntegrationPath} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 import { getHeapStatistics } from "v8";
@@ -268,14 +268,12 @@ export class CreateIntegrationPanel {
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
     if (!isEmpty(loadFile)) {
       // get paths
-      let modulePath = parentPath(cleanPath(loadFile));
-      let apiPath = parentPath(modulePath);
-      let carrierPath = parentPath(apiPath);
+      let elements = getElementsFromIntegrationPath(loadFile);
 
       // update fields
-      this._fieldValues[carrierIndex] = nameFromPath(carrierPath);
-      this._fieldValues[apiIndex] = nameFromPath(apiPath);
-      this._fieldValues[moduleIndex] = nameFromPath(modulePath);
+      this._fieldValues[carrierIndex] = elements.carrier;
+      this._fieldValues[apiIndex] = elements.api;
+      this._fieldValues[moduleIndex] = elements.module;
       
       // check button
       this._checkIntegrationExists(extensionUri, 'check');
@@ -507,38 +505,13 @@ export class CreateIntegrationPanel {
       // get template content
       let templateContent = fs.readFileSync(this._getTemplatePath(this._functionsPath), 'utf8');
 
-      // // load script content
-      // let scriptContent = fs.readFileSync(this._currentIntegration.path, 'utf8');
-
-      // // replace scenarios in script content
-      // let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
-
-      // // replace steps
-      // let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"\n';
-      // newScriptContent = newScriptContent.replace(/(?<=\$Steps\s*=\s*@\()[^\)]*(?=\))/, stepsString);
-
-      // // replace CreateOrUpdate value
-      // newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
-
-      // // replace New-UpdateIntegration function call -> should be last line from template
-      // let newNewUpdateIntegration = (templateContent.match(/\r?\n[^\r\n]*\s*$/) ?? [''])[0].trim();
-      // newScriptContent = newScriptContent.replace(/New-UpdateIntegration\s[\S\s]+$/g,newNewUpdateIntegration);
-
-      // // remove modular value if present
-      // newScriptContent = newScriptContent.replace(/\$ModularXMLs[^\r\n]+[\r\n]/g, '');
 
       // replace all values in template
       let newScriptContent = this._replaceInScriptTemplate(templateContent);
 
       // save to file
-      //let newScriptDirectory: string = parentPath(cleanPath(this._currentIntegration.path)).replace(/(?<=\/carriers\/[^\/]+)[\s\S]*$/,'');
       let newScriptPath:string = this._getCarrierPath(this._functionsPath) + '/' + this._getScriptName();
       fs.writeFileSync(newScriptPath, newScriptContent, 'utf8');
-
-      // if new script path not equal to previous script path: delete old script file
-      // if (newScriptPath !== this._currentIntegration.path) {
-      //   fs.rmSync(this._currentIntegration.path);
-      // }
 
       // execute powershell
       this._runScript(terminal, this._functionsPath);
