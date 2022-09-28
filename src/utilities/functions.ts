@@ -19,6 +19,8 @@ type IntegrationObject = {
 	validscenarios: ScenarioObject[],
 	steps: string[]
 };
+
+type ElementsObject = {carrier:string, api:string, module:string};
   
 type ModularElementObject = {
 	parent:string, 
@@ -183,36 +185,17 @@ export function getScenarioAndStructure(path:string) : ScenarioObject {
 	};
 }
 
-export async function getAvailableIntegrations(panel:string) : Promise<IntegrationObject[]> {
-	// panel input: 'integration' or 'postman'
+export async function getIntegration(inputIntegrationJsonPath:string) : Promise<IntegrationObject> {
+	let outIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', scenarios: [], validscenarios: [{name:'', structure:''}], steps: []};
 
-	// integration script path array
-	let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
-	let integrationJsons: string[] = await getWorkspaceFiles('**/carriers/**/*.integration.json');
-
-	// pre-allocate output
-	let integrationObjects : IntegrationObject[] = new Array<IntegrationObject>(integrationScripts.length);
-
-	// build integration array
-	let newIndex: number = 0;
-	for (let index = 0; index < integrationJsons.length; index++) {
-		// get subpath after 'carriers' and remove file name
-		let integrationJsonPath = cleanPath(integrationJsons[index]);
+	if (!isEmpty(inputIntegrationJsonPath)) {
+		const integrationJsonPath: string = cleanPath(inputIntegrationJsonPath);
 
 		let elements = getElementsFromIntegrationPath(integrationJsonPath);
 
 		let carrier: string   = elements.carrier;
 		let api: string       = elements.api;
 		let module: string    = elements.module;
-
-		// check if any scenarios available, and if not, skip (because cannot make postman collection)
-		if (panel === 'postman') {
-			let scenarioGlob = `**/scenario-templates/${module}/**/*.xml`;
-			let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
-			if (scenarios.length === 0) {
-				continue;
-			}
-		}
 		
 		// extract steps from integration json
 		let steps: string[] = getStepsFromIntegrationJson(integrationJsonPath);
@@ -232,8 +215,8 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 		let modularElements = (await getModularElementsWithParents(module)).map(el => (isEmpty(el.parent) ? '' : (el.parent.replace(/[^_]*_/g,'') + ':')) + el.element);
 		let validScenarios : ScenarioObject[] = scenarioNameStructures.filter(el => isScenarioValid(el.structure, availableScenarios, modularElements));
 
-		// add array element
-		integrationObjects[newIndex] = {
+		// return integration object
+		outIntegrationObject = {
 			path: 		 integrationJsonPath,
 			carrier: 	 carrier,
 			api: 		 api,
@@ -244,14 +227,45 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 			validscenarios: validScenarios,
 			steps: 		 steps
 		};
+	}
 
+	return outIntegrationObject;		
+}
+
+export async function getAvailableIntegrations(panel:string) : Promise<IntegrationObject[]> {
+	// panel input: 'integration' or 'postman'
+
+	// integration script path array
+	//let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
+	let integrationJsons: string[] = await getWorkspaceFiles('**/carriers/**/*.integration.json');
+
+	// pre-allocate output
+	let integrationObjects : IntegrationObject[] = new Array<IntegrationObject>(integrationJsons.length);
+
+	// build integration array
+	let newIndex: number = 0;
+	for (let index = 0; index < integrationJsons.length; index++) {
+		// extract integration object
+		let intObject: IntegrationObject = await getIntegration(integrationJsons[index]);
+
+		// check if any scenarios available, and if not, skip (because cannot make postman collection)
+		if (panel === 'postman') {
+			let scenarioGlob = `**/scenario-templates/${intObject.module}/**/*.xml`;
+			let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
+			if (scenarios.length === 0) {
+				continue;
+			}
+		}
+		
+		// add array element
+		integrationObjects[newIndex] = intObject;
 		newIndex++;
 	}
 
 	return integrationObjects.slice(0,newIndex);
 }
 
-export function getElementsFromIntegrationPath(integrationJsonPath:string) : {carrier:string, api:string, module:string} {
+export function getElementsFromIntegrationPath(integrationJsonPath:string) : ElementsObject {
 	let integrationSubPath: string = cleanPath(integrationJsonPath).replace(/[\s\S]*\/carriers\//,'').replace(/\/[^\/]*$/,'');
 	let subPathElements : string[] = integrationSubPath.split('/');
 
@@ -260,6 +274,11 @@ export function getElementsFromIntegrationPath(integrationJsonPath:string) : {ca
 		api: 		subPathElements.length === 3 ? subPathElements[1] : '',
 		module: 	subPathElements.pop() ?? ''
 	};
+}
+
+export function getIntegrationSubpath(elements:ElementsObject) : string {
+	let apiSubPath: string = isEmpty(elements.api) ? '' : `${elements.api}/`;
+	return `${elements.carrier}/${apiSubPath}${elements.module}`;
 }
 
 export function getStepsFromIntegrationJson(integrationJsonPath:string) : string[] {
