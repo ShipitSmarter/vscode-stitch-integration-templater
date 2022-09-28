@@ -15,7 +15,6 @@ type IntegrationObject = {
 	api:string, 
 	module:string, 
 	carriercode:string,
-	modular: boolean, 
 	scenarios:string[], 
 	validscenarios: ScenarioObject[],
 	steps: string[]
@@ -189,6 +188,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 
 	// integration script path array
 	let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
+	let integrationJsons: string[] = await getWorkspaceFiles('**/carriers/**/*.integration.json');
 
 	// pre-allocate output
 	let integrationObjects : IntegrationObject[] = new Array<IntegrationObject>(integrationScripts.length);
@@ -204,7 +204,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 		let carrier: string   = getFromScript(scriptContent,'CarrierName');
 		let api: string       = getFromScript(scriptContent, 'CarrierAPI');
 		let module: string    = getFromScript(scriptContent,'Module');
-		let modular: boolean  = toBoolean(getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
+		// let modular: boolean  = toBoolean(getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
 		let apiSubPath = isEmpty(api) ? '' : (api + '/');
 
 		// if integration path does not exist: skip
@@ -216,7 +216,7 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 
 		// check if any scenarios available, and if not, skip (because cannot make postman collection)
 		if (panel === 'postman') {
-			let scenarioGlob = modular ? `**/carriers/${carrier}/${apiSubPath}${module}/scenario-xmls/*.xml` : `**/scenario-templates/${module}/**/*.xml`;
+			let scenarioGlob = `**/scenario-templates/${module}/**/*.xml`;
 			let scenarios: string[] = await getWorkspaceFiles(scenarioGlob);
 			if (scenarios.length === 0) {
 				continue;
@@ -251,7 +251,6 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 			api: 		 api,
 			module: 	 module,
 			carriercode: getFromScript(scriptContent,'CARRIERCODE'),
-			modular: 	 modular,
 			scenarios:   scenarioNameStructures.map(el => el.name),
 			validscenarios: validScenarios,
 			steps: 		 steps

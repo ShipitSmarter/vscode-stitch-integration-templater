@@ -26,9 +26,9 @@ type IntegrationObject = {
   path:string, carrier:string, 
   api:string, module:string, 
   carriercode:string,
-   modular: boolean, 
-   scenarios:string[], 
-   validscenarios: ScenarioObject[]
+  scenarios:string[], 
+  validscenarios: ScenarioObject[],
+  steps: string[]
 };
 
 type ModularElementObject = {

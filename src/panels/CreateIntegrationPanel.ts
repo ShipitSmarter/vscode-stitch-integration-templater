@@ -23,10 +23,9 @@ type IntegrationObject = {
   path:string, carrier:string, 
   api:string, module:string, 
   carriercode:string,
-   modular: boolean, 
-   scenarios:string[], 
-   validscenarios: ScenarioObject[],
-   steps: string[]
+  scenarios:string[], 
+  validscenarios: ScenarioObject[],
+  steps: string[]
 };
 
 type ModularElementObject = {
@@ -53,7 +52,7 @@ export class CreateIntegrationPanel {
   private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: string = 'create';      // pre-allocate with 'create'
   private _integrationObjects:     IntegrationObject[] = [];
-  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', modular: false, scenarios: [], validscenarios: [{name:'', structure:''}], steps: []};
+  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', scenarios: [], validscenarios: [{name:'', structure:''}], steps: []};
   private _currentIntegration : IntegrationObject = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: ModularElementObject[] = [];
@@ -474,8 +473,7 @@ export class CreateIntegrationPanel {
         carrier: this._fieldValues[carrierIndex], 
         api: this._fieldValues[apiIndex], 
         module: this._fieldValues[moduleIndex], 
-        carriercode: this._fieldValues[carrierCodeIndex], 
-        modular: true, 
+        carriercode: this._fieldValues[carrierCodeIndex],
         scenarios: scenarioNames, 
         validscenarios: scenarioObjects,
         steps: steps
