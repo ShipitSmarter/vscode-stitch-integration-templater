@@ -195,24 +195,32 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 
 	// build integration array
 	let newIndex: number = 0;
-	for (let index = 0; index < integrationScripts.length; index++) {
-		let script = integrationScripts[index];
-		// load script content
-		let scriptContent = fs.readFileSync(script, 'utf8');
+	for (let index = 0; index < integrationJsons.length; index++) {
+		// get subpath after 'carriers' and remove file name
+		let integrationJsonPath = cleanPath(integrationJsons[index]);
+		let integrationSubPath = integrationJsonPath.replace(/[\s\S]*\/carriers\//,'').replace(/\/[^\/]*$/,'');
+		let subPathElements : string[] = integrationSubPath.split('/');
+
+		// // load script content
+		// let scriptContent = fs.readFileSync(script, 'utf8');
 
 		// extract carrier, api, module
-		let carrier: string   = getFromScript(scriptContent,'CarrierName');
-		let api: string       = getFromScript(scriptContent, 'CarrierAPI');
-		let module: string    = getFromScript(scriptContent,'Module');
+		// let carrier: string   = getFromScript(scriptContent,'CarrierName');
+		// let api: string       = getFromScript(scriptContent, 'CarrierAPI');
+		// let module: string    = getFromScript(scriptContent,'Module');
+		let carrier: string   = subPathElements[0] ?? '';
+		let api: string       = subPathElements.length === 3 ? subPathElements[1] : '';
+		let module: string    = subPathElements.pop() ?? '';
+
 		// let modular: boolean  = toBoolean(getFromScript(scriptContent, 'ModularXMLs').replace(/\$/,''));
 		let apiSubPath = isEmpty(api) ? '' : (api + '/');
 
 		// if integration path does not exist: skip
-		let integrationPath = parentPath(cleanPath(script)) + `/${api}/${module}`;
-		let exists = fs.existsSync(integrationPath);
-		if (!exists) {
-			continue;
-		}
+		// let integrationPath = parentPath(cleanPath(script)) + `/${api}/${module}`;
+		// let exists = fs.existsSync(integrationPath);
+		// if (!exists) {
+		// 	continue;
+		// }
 
 		// check if any scenarios available, and if not, skip (because cannot make postman collection)
 		if (panel === 'postman') {
@@ -224,11 +232,12 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 		}
 		
 		// extract steps from integration json
-		let integrationJsonPath: string = await getWorkspaceFile(`**/carriers/${carrier}/${apiSubPath}${module}/*.integration.json`);
+		// let integrationJsonPath: string = await getWorkspaceFile(`**/carriers/${carrier}/${apiSubPath}${module}/*.integration.json`);
 		let steps: string[] = getStepsFromIntegrationJson(integrationJsonPath);
 
 		// obtain valid scenarios from scenarios folder
-		let scenariosDir: string = parentPath(cleanPath(script)) + `/${apiSubPath}${module}/scenarios`;
+		//let scenariosDir: string = parentPath(cleanPath(script)) + `/${apiSubPath}${module}/scenarios`;
+		let scenariosDir: string = parentPath(integrationJsonPath) + '/scenarios';
 		let scenarioDir = fs.readdirSync(scenariosDir);
 		let integrationScenarios = scenarioDir.filter(el => !el.includes('.')).sort();
 
@@ -246,11 +255,12 @@ export async function getAvailableIntegrations(panel:string) : Promise<Integrati
 
 		// add array element
 		integrationObjects[newIndex] = {
-			path: 		 script,
+			path: 		 integrationJsonPath,
 			carrier: 	 carrier,
 			api: 		 api,
 			module: 	 module,
-			carriercode: getFromScript(scriptContent,'CARRIERCODE'),
+			// carriercode: getFromScript(scriptContent,'CARRIERCODE'),
+			carriercode: '',
 			scenarios:   scenarioNameStructures.map(el => el.name),
 			validscenarios: validScenarios,
 			steps: 		 steps

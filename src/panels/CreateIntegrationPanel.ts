@@ -504,35 +504,41 @@ export class CreateIntegrationPanel {
       // show info message
       vscode.window.showInformationMessage('Updating integration ' + this._getIntegrationName());
 
-      // load script content
-      let scriptContent = fs.readFileSync(this._currentIntegration.path, 'utf8');
-
-      // replace scenarios in script content
-      let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
-
-      // replace steps
-      let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"\n';
-      newScriptContent = newScriptContent.replace(/(?<=\$Steps\s*=\s*@\()[^\)]*(?=\))/, stepsString);
-
-      // replace CreateOrUpdate value
-      newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
-
-      // replace New-UpdateIntegration function call -> should be last line from template
+      // get template content
       let templateContent = fs.readFileSync(this._getTemplatePath(this._functionsPath), 'utf8');
-      let newNewUpdateIntegration = (templateContent.match(/\r?\n[^\r\n]*\s*$/) ?? [''])[0].trim();
-      newScriptContent = newScriptContent.replace(/New-UpdateIntegration\s[\S\s]+$/g,newNewUpdateIntegration);
 
-      // remove modular value if present
-      newScriptContent = newScriptContent.replace(/\$ModularXMLs[^\r\n]+[\r\n]/g, '');
+      // // load script content
+      // let scriptContent = fs.readFileSync(this._currentIntegration.path, 'utf8');
+
+      // // replace scenarios in script content
+      // let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
+
+      // // replace steps
+      // let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"\n';
+      // newScriptContent = newScriptContent.replace(/(?<=\$Steps\s*=\s*@\()[^\)]*(?=\))/, stepsString);
+
+      // // replace CreateOrUpdate value
+      // newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
+
+      // // replace New-UpdateIntegration function call -> should be last line from template
+      // let newNewUpdateIntegration = (templateContent.match(/\r?\n[^\r\n]*\s*$/) ?? [''])[0].trim();
+      // newScriptContent = newScriptContent.replace(/New-UpdateIntegration\s[\S\s]+$/g,newNewUpdateIntegration);
+
+      // // remove modular value if present
+      // newScriptContent = newScriptContent.replace(/\$ModularXMLs[^\r\n]+[\r\n]/g, '');
+
+      // replace all values in template
+      let newScriptContent = this._replaceInScriptTemplate(templateContent);
 
       // save to file
-      let newScriptPath:string = parentPath(cleanPath(this._currentIntegration.path)) + '/' + this._getScriptName();
+      //let newScriptDirectory: string = parentPath(cleanPath(this._currentIntegration.path)).replace(/(?<=\/carriers\/[^\/]+)[\s\S]*$/,'');
+      let newScriptPath:string = this._getCarrierPath(this._functionsPath) + '/' + this._getScriptName();
       fs.writeFileSync(newScriptPath, newScriptContent, 'utf8');
 
       // if new script path not equal to previous script path: delete old script file
-      if (newScriptPath !== this._currentIntegration.path) {
-        fs.rmSync(this._currentIntegration.path);
-      }
+      // if (newScriptPath !== this._currentIntegration.path) {
+      //   fs.rmSync(this._currentIntegration.path);
+      // }
 
       // execute powershell
       this._runScript(terminal, this._functionsPath);
@@ -549,7 +555,7 @@ export class CreateIntegrationPanel {
         };
       }
       let intIndex : number = this._integrationObjects.findIndex(el => el.path === this._currentIntegration.path);
-      this._currentIntegration.path = newScriptPath;
+      //this._currentIntegration.path = newScriptPath;
       this._currentIntegration.scenarios = this._currentIntegration.scenarios.concat(newScenarios).sort();
       this._currentIntegration.validscenarios = this._currentIntegration.validscenarios.concat(scenarioObjects).sort();
       this._currentIntegration.steps = this._getStepsArray();
