@@ -102,6 +102,10 @@ function fieldChange(event) {
         checkbox.checked = field.checked;
       }  
       break;
+
+    case 'stepdropdown' :
+      field.title = field.value;
+      break;
   }
   
 }

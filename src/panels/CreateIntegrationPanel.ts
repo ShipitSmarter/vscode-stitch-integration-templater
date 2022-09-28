@@ -752,8 +752,11 @@ export class CreateIntegrationPanel {
     // first time only: get integrations, available scenarios, modular elements
     if (this._moduleOptions.length === 0) {
       await this._refresh();
-      this._stepTypes[0] = this._stepTypeOptions[0];
-      this._stepMethods[0] = this._stepMethodOptions[0];
+      if (isEmpty(this._stepTypes[0])) {
+        this._stepTypes[0] = this._stepTypeOptions[0];
+        this._stepMethods[0] = this._stepMethodOptions[0];
+      }
+      
       this._updatePackageTypes(0);
     }
 

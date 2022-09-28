@@ -21,6 +21,10 @@
 }
 
 .stepdropdown,
+.stepfield {
+  width: 10rem;
+}
+
 #carriercode {
   width: 7rem;
 }

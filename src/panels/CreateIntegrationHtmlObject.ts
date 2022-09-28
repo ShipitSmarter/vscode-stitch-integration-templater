@@ -239,13 +239,13 @@ export class CreateIntegrationHtmlObject {
       let enableStep: boolean = !this._existingSteps.includes(this._stepFieldValues[step]);
       // step name dropdown
       let stepNameDropdown = /*html*/`
-        <vscode-dropdown id="stepname${step}" index="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below">
+        <vscode-dropdown id="stepname${step}" index="${step}" ${valueString(this._stepFieldValues[step])} class="stepdropdown" position="below" title="${this._stepFieldValues[step]}">
           ${dropdownOptions(this._stepOptions)}
         </vscode-dropdown>
       `;
 
       let stepNameField = /*html*/ `
-        <vscode-text-field id="stepname${step}" index="${step}" class="stepfield" ${valueString(this._stepFieldValues[step])} disabled></vscode-text-field>
+        <vscode-text-field id="stepname${step}" index="${step}" class="stepfield" ${valueString(this._stepFieldValues[step])} title="${this._stepFieldValues[step]}" disabled></vscode-text-field>
       `;
 
       stepGrid += /*html*/`
