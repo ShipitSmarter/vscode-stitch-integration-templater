@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.7.1
+- Carrier integration
+  - Now allows adding steps to existing integrations (on `update`)
+  - Now it is possible to open an existing integration by right-clicking the associated `*.integration.json` file in the Explorer side-bar and selecting option `Load file to create/update integration panel`
+
 ## 1.7.0
 - Modular scenarios
   - Now allows selection of package type per shipment package for each scenario

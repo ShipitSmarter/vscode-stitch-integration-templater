@@ -17,6 +17,16 @@ Contributes the following commands, which are available from the *Command Palett
 
     ![Stitch integration templater](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/sit-use-gif.gif)
 
+    When updating an existing integration, it is possible to add new steps to the `*.integration.json` file using the dashboard:
+
+    ![Add steps to existing integration](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/add-steps-to-existing-integration.gif)
+
+    It is possible to load an existing integration (if compatible) to the dashboard by right-clicking the associated `*.integration.json` file and selecting option `Load file to create/update integration panel`:
+
+    ![Load file to create/update integration panel]((https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/load-file-to-create-update-integration-panel.png)
+
+    Note: to enable this button, `.vscode/settings.json` must have setting `stich.integrationtemplater.enabled` = `true`.
+
 ### `Stitch: Create Postman collection`
 - Dashboard for easily generating a postman collection file from an existing scenario.
 
