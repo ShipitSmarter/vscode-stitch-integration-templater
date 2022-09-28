@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes, nameFromPath} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 import { getHeapStatistics } from "v8";
+import { runInThisContext } from "vm";
 
 // fixed fields indices
 const carrierIndex = 0;
@@ -71,7 +72,7 @@ export class CreateIntegrationPanel {
   private _existingScenarioCustomFields: string[] = [];
 
   // constructor
-  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
+  private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext, loadFile:string = '') {
     this._panel = panel;
 
     // predefine some fixed fields
@@ -102,21 +103,27 @@ export class CreateIntegrationPanel {
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
 
+    // if loadFile: load file
+    this._loadFileIfPresent(extensionUri,loadFile);
+
     // get authentication string from setting and save to file (to be used by PowerShell)
     saveAuth();
   }
 
   // METHODS
   // initial rendering
-  public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext) {
+  public static render(extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext, loadFile:string = '') {
     if (CreateIntegrationPanel.currentPanel) {
       CreateIntegrationPanel.currentPanel._panel.reveal(vscode.ViewColumn.One);
+
+      // if loadFile: load file
+      CreateIntegrationPanel.currentPanel._loadFileIfPresent(extensionUri,loadFile);
     } else {
       const panel = vscode.window.createWebviewPanel("create-integration", "Create or update carrier integration", vscode.ViewColumn.One, {
         enableScripts: true
       });
 
-      CreateIntegrationPanel.currentPanel = new CreateIntegrationPanel(panel, extensionUri, nofSteps, context);
+      CreateIntegrationPanel.currentPanel = new CreateIntegrationPanel(panel, extensionUri, nofSteps, context, loadFile);
     }
   }
 
@@ -161,6 +168,18 @@ export class CreateIntegrationPanel {
             vscode.window.showInformationMessage(text);
             break;
 
+          case 'switchsteps':
+            const indices: string[] = text.split('|');
+            this._switchSteps(+indices[0],+indices[1]);
+            this._updateWebview(extensionUri);
+            break;
+
+          case 'removestepindex':
+            const removeIndex = +text;
+            this._removeStepIndex(removeIndex);
+            this._updateWebview(extensionUri);
+            break;
+
           case 'changepackagetype':
             var scenarioIndexValue = text.split('|');
             var scenarioIndex = +scenarioIndexValue[0];
@@ -189,22 +208,7 @@ export class CreateIntegrationPanel {
                 this._fieldValues[index] = value;
                 switch (index) {
                   case nofStepsIndex :
-                    for (let ii = 0; ii < value; ii++) {
-                      // pre-fill empty step names
-                      if (!this._stepFieldValues[ii]) {
-                        this._stepFieldValues[ii] = [this._fieldValues[carrierIndex]].concat(this._stepOptions)[ii % (this._stepOptions.length + 1)];
-                      }
-
-                      // pre-fill empty step types
-                      if (!this._stepTypes[ii]) {
-                        this._stepTypes[ii] = this._stepTypeOptions[0];
-                      }
-
-                      // pre-fill empty step methods
-                      if (!this._stepMethods[ii]) {
-                        this._stepMethods[ii] = this._stepMethodOptions[0];
-                      }
-                    }
+                    this._stepsPrefillAndCrop(+value);
                     this._updateWebview(extensionUri);
                     break;
 
@@ -262,6 +266,82 @@ export class CreateIntegrationPanel {
     );
   }
 
+  private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
+    if (!isEmpty(loadFile)) {
+      // get paths
+      let modulePath = parentPath(cleanPath(loadFile));
+      let apiPath = parentPath(modulePath);
+      let carrierPath = parentPath(apiPath);
+
+      // update fields
+      this._fieldValues[carrierIndex] = nameFromPath(carrierPath);
+      this._fieldValues[apiIndex] = nameFromPath(apiPath);
+      this._fieldValues[moduleIndex] = nameFromPath(modulePath);
+      
+      // check button
+      this._checkIntegrationExists(extensionUri, 'check');
+    }
+  }
+
+  private _stepsPrefillAndCrop(newLength: number) {
+    // prefill if larger than before
+    for (let ii = 0; ii < newLength; ii++) {
+      // pre-fill empty step names
+      if (!this._stepFieldValues[ii]) {
+        this._stepFieldValues[ii] = [this._fieldValues[carrierIndex]].concat(this._stepOptions)[ii % (this._stepOptions.length + 1)];
+      }
+
+      // pre-fill empty step types
+      if (!this._stepTypes[ii]) {
+        this._stepTypes[ii] = this._stepTypeOptions[0];
+      }
+
+      // pre-fill empty step methods
+      if (!this._stepMethods[ii]) {
+        this._stepMethods[ii] = this._stepMethodOptions[0];
+      }
+    }
+
+    // crop if smaller than before
+    this._stepFieldValues.slice(0,newLength);
+    this._stepTypes.slice(0,newLength);
+    this._stepMethods.slice(0,newLength);
+  }
+
+  private _switchSteps(index1:number, index2:number) {
+    // save values of index 1
+    const stepName1 = this._stepFieldValues[index1];
+    const stepType1 = this._stepTypes[index1];
+    const stepMethod1 = this._stepMethods[index1];
+
+    // replace with values of index 2
+    this._stepFieldValues[index1] = this._stepFieldValues[index2];
+    this._stepTypes[index1] = this._stepTypes[index2];
+    this._stepMethods[index1] = this._stepMethods[index2];
+
+    // replace values of index 2 with originals of index 1
+    this._stepFieldValues[index2] = stepName1;
+    this._stepTypes[index2] = stepType1;
+    this._stepMethods[index2] = stepMethod1;
+
+  }
+
+  private _removeStepIndex(removeIndex:number) {
+    let nofSteps = +this._fieldValues[nofStepsIndex];
+    for (let index = removeIndex; index < (nofSteps -1); index++) {
+      // replace with values of next index
+      this._stepFieldValues[index] = this._stepFieldValues[index + 1];
+      this._stepTypes[index] = this._stepTypes[index + 1];
+      this._stepMethods[index] = this._stepMethods[index + 1];
+    }
+
+    // update nofSteps
+    this._fieldValues[nofStepsIndex] = (nofSteps-1).toString();
+
+    // crop associated arrays
+    this._stepsPrefillAndCrop(nofSteps-1);
+  }
+
   private _updatePackageTypes(index:number) {
     // crop package types array
     this._scenarioPackageTypes = this._scenarioPackageTypes.slice(0, +this._fieldValues[nofScenariosIndex]);
@@ -305,7 +385,7 @@ export class CreateIntegrationPanel {
       this._existingScenarioCustomFields = this._currentIntegration.validscenarios.map(el => el.name);
 
       // update step info from existing scenario
-      this._fieldValues[nofStepsIndex] = this._currentIntegration.steps.length;
+      this._fieldValues[nofStepsIndex] = this._currentIntegration.steps.length.toString();
       this._stepFieldValues = this._currentIntegration.steps.map(el => el.replace(/:[\s\S]*/,''));
       this._stepTypes = this._currentIntegration.steps.map(el => el.replace(/^[\s\S]*:/,'').replace(/\-[\s\S]*$/,''));
 
@@ -330,6 +410,18 @@ export class CreateIntegrationPanel {
 
     // update panel
     this._updateWebview(extensionUri);
+  }
+
+  private _getStepsArray() : string[] {
+    let steps: string[] = [];
+    for (let index=0; index < +this._fieldValues[nofStepsIndex]; index++) {
+      steps[index] = this._stepFieldValues[index] + ':' + this._stepTypes[index];
+      if (this._stepTypes[index] === 'http') {
+        steps[index] += '-' + this._stepMethods[index];
+      }
+    }
+
+    return steps;
   }
 
   private _createIntegration(terminal: vscode.Terminal, extensionUri: vscode.Uri) {
@@ -374,13 +466,7 @@ export class CreateIntegrationPanel {
       }
 
       // construct steps array
-      let steps: string[] = [];
-      for (let index=0; index < +this._fieldValues[nofStepsIndex]; index++) {
-        steps[index] = this._stepFieldValues[index] + ':' + this._stepTypes[index];
-        if (this._stepTypes[index] === 'http') {
-          steps[index] += '-' + this._stepMethods[index];
-        }
-      }
+      let steps: string[] = this._getStepsArray();
       
       // construct integration element and add to integration objects
       this._currentIntegration = {
@@ -426,6 +512,10 @@ export class CreateIntegrationPanel {
       // replace scenarios in script content
       let newScriptContent: string = scriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
 
+      // replace steps
+      let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"\n';
+      newScriptContent = newScriptContent.replace(/(?<=\$Steps\s*=\s*@\()[^\)]*(?=\))/, stepsString);
+
       // replace CreateOrUpdate value
       newScriptContent = newScriptContent.replace(/\$CreateOrUpdate = '[^']+'/g, '$CreateOrUpdate = \'update\'');
 
@@ -464,6 +554,7 @@ export class CreateIntegrationPanel {
       this._currentIntegration.path = newScriptPath;
       this._currentIntegration.scenarios = this._currentIntegration.scenarios.concat(newScenarios).sort();
       this._currentIntegration.validscenarios = this._currentIntegration.validscenarios.concat(scenarioObjects).sort();
+      this._currentIntegration.steps = this._getStepsArray();
       this._integrationObjects[intIndex] = this._currentIntegration;
 
       // refresh window
@@ -579,23 +670,9 @@ export class CreateIntegrationPanel {
     // scenarios
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
 
-    // steps fields: step name
-    let nofSteps = this._fieldValues[nofStepsIndex];
-    let stepsString: string = '';
-    for (let index = 0; index < +nofSteps; index++) {
-      let step: string = this._stepFieldValues[index] + '';
-      let type: string = this._stepTypes[index] + '';
-      let method: string = this._stepMethods[index] + '';
-      let methodString = (type === 'http') ? ('-' + method) : '';
-
-      // steps
-      stepsString += '\n    "' + step + ':' + type + methodString + '"';
-      if (index !== +nofSteps - 1) {
-        stepsString += ',';
-      }
-    }
-    // replace
-    newScriptContent = newScriptContent.replace('[steps]', stepsString);
+    // steps
+    let stepsString: string = '\n"' + this._getStepsArray().join('",\n"') + '"\n';
+    newScriptContent = newScriptContent.replace(/(?<=\$Steps\s*=\s*@\()[^\)]*(?=\))/, stepsString);
 
     // return script content
     return newScriptContent;
@@ -699,6 +776,9 @@ export class CreateIntegrationPanel {
     // show only available scenarios which are not already in the existing scenarios
     let reducedAvailableScenarios = this._availableScenarios.filter(el => !this._existingScenarioCustomFields.includes(this._getNewScenarioValue(el)));
 
+    // existing step names
+    let existingSteps = this._currentIntegration.steps.map(el => el.replace(/:[\s\S]*/,''));
+
     // Create panel Html object and retrieve html
     let createIntegrationHtmlObject: CreateIntegrationHtmlObject = new CreateIntegrationHtmlObject(
       [toolkitUri,codiconsUri,mainUri,styleUri],
@@ -715,13 +795,14 @@ export class CreateIntegrationPanel {
       this._nofPackages,
       this._scenarioPackageTypes,
       this._moduleOptions,
-      this._stepOptions,
+      this._stepOptions.filter(el => !existingSteps.includes(el)),
       this._stepTypeOptions,
       this._stepTypes,
       this._stepMethodOptions,
       this._stepMethods,
       this._scenarioCustomFields,
-      this._existingScenarioCustomFields
+      this._existingScenarioCustomFields,
+      existingSteps
     );
 
     let html =  createIntegrationHtmlObject.getHtml();

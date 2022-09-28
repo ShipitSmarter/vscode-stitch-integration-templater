@@ -2,7 +2,7 @@
   "name": "stitch-integration-templater",
   "displayName": "Stitch integration templater",
   "description": "Provides dashboard for creating and updating Stitch carrier integrations",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "publisher": "ShipitSmarter",
   "author": {
     "name": "ShipitSmarter",
@@ -32,6 +32,7 @@
   ],
   "activationEvents": [
     "onCommand:stitch.integration-templater",
+    "onCommand:stitch.integration-templater-loadjson",
     "onCommand:stitch.postman-collection",
     "onCommand:stitch.parameters",
     "onCommand:stitch.parameters-loadcsv",
@@ -43,6 +44,10 @@
       {
         "command": "stitch.integration-templater",
         "title": "Stitch: Create or update carrier integration"
+      },
+      {
+        "command": "stitch.integration-templater-loadjson",
+        "title": "Load file to create/update integration panel"
       },
       {
         "command": "stitch.postman-collection",
@@ -63,6 +68,11 @@
     ],
     "menus": {
       "explorer/context": [
+        {
+          "command": "stitch.integration-templater-loadjson",
+          "when": "resourceFilename =~ /^[\\s\\S]*\\.integration\\.json$/ && config.stitch.integrationtemplater.enabled",
+          "group": "stitch"
+        },
         {
           "command": "stitch.parameters-loadcsv",
           "when": "resourceExtname == .csv && config.stitch.parameters.enabled",
