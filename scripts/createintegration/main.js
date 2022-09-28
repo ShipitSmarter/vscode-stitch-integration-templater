@@ -210,6 +210,10 @@ function updateFieldOutlineAndTooltip(fieldId) {
   } else if (['carriername','carriercode'].includes(field.id) && isEmpty(field.value)) {
     updateFieldEmpty(field.id);
     isCorrect = false;
+  } else if (field.id === 'carrierapiname' && isEmpty(field.value) && isCreate()) {
+    // api field may not be empty if 'create'
+    updateFieldEmpty(field.id);
+    isCorrect = false;
   } else {
     updateFieldRight(field.id, fieldType);
   }

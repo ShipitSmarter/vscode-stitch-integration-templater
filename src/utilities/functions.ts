@@ -221,7 +221,6 @@ export async function getIntegration(inputIntegrationJsonPath:string) : Promise<
 			carrier: 	 carrier,
 			api: 		 api,
 			module: 	 module,
-			// carriercode: getFromScript(scriptContent,'CARRIERCODE'),
 			carriercode: '',
 			scenarios:   scenarioNameStructures.map(el => el.name),
 			validscenarios: validScenarios,
@@ -235,8 +234,7 @@ export async function getIntegration(inputIntegrationJsonPath:string) : Promise<
 export async function getAvailableIntegrations(panel:string) : Promise<IntegrationObject[]> {
 	// panel input: 'integration' or 'postman'
 
-	// integration script path array
-	//let integrationScripts: string[] = await getWorkspaceFiles('**/carriers/*/create-*integration*.ps1');
+	// integration json path array
 	let integrationJsons: string[] = await getWorkspaceFiles('**/carriers/**/*.integration.json');
 
 	// pre-allocate output

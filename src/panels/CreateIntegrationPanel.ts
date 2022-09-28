@@ -362,7 +362,6 @@ export class CreateIntegrationPanel {
   }
 
   private async _getIntegrationObject() : Promise<IntegrationObject> {
-    //return this._integrationObjects.filter(el => this._fieldValues[carrierIndex] === el.carrier && this._fieldValues[apiIndex] === el.api  && this._fieldValues[moduleIndex] === el.module)[0] ?? this._emptyIntegrationObject;
     let elements:ElementsObject = {
       carrier: this._fieldValues[carrierIndex],
       api: this._fieldValues[apiIndex],
@@ -422,7 +421,6 @@ export class CreateIntegrationPanel {
 
     // clean existing scenario checkbox values upon clicking 'check' button
     this._existingScenarioCheckboxValues = [];
-
 
     // update panel
     this._updateWebview(extensionUri);
@@ -546,12 +544,10 @@ export class CreateIntegrationPanel {
           structure: newScenarios[index]
         };
       }
-      //let intIndex : number = this._integrationObjects.findIndex(el => el.path === this._currentIntegration.path);
-      //this._currentIntegration.path = newScriptPath;
+
       this._currentIntegration.scenarios = this._currentIntegration.scenarios.concat(newScenarios).sort();
       this._currentIntegration.validscenarios = this._currentIntegration.validscenarios.concat(scenarioObjects).sort();
       this._currentIntegration.steps = this._getStepsArray();
-      //this._integrationObjects[intIndex] = this._currentIntegration;
 
       // refresh window
       this._fieldValues[nofScenariosIndex] = "1";
@@ -652,16 +648,11 @@ export class CreateIntegrationPanel {
     // replace fixed field values
     for (let index = 0; index < this._fieldValues.length; index++) {
       let replaceString = '[fieldValues' + index + ']';
-      if (this._fieldValues[index] !== undefined) {
-        newScriptContent = newScriptContent.replace(replaceString, this._fieldValues[index] + "");
-      }
+      newScriptContent = newScriptContent.replace(replaceString, (this._fieldValues[index] ?? "") + "");
     }
 
     // createupdate
     newScriptContent = newScriptContent.replace('[createupdate]', this._createUpdateValue + "");
-
-    // modular
-    // newScriptContent = newScriptContent.replace('[modular]', this._modularValue + "");
 
     // scenarios
     newScriptContent = newScriptContent.replace(/\$Scenarios = \@\([^\)]+\)/g, this._getScenariosString());
