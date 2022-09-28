@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.3
+- Carrier integration
+  - Fix: not loading integration file due to synchronization issues
+
 ## 1.7.2
 - Carrier integration
   - Now allows updating any integration (also ones which were not generated with the dashboard)
