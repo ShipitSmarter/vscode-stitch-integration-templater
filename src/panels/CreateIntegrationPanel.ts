@@ -83,7 +83,15 @@ export class CreateIntegrationPanel {
     this._stepFieldValues[0] = this._fieldValues[moduleIndex];
 
     // set content
-    this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
+      this._getWebviewContent(this._panel.webview, extensionUri).then(html => {
+        this._panel.webview.html = html;
+
+        // if loadFile: load file
+        if (loadFile !== '') {
+          this._loadFileIfPresent(extensionUri,loadFile);
+        }
+      });
+      
 
     // set message listener
     this._setWebviewMessageListener(extensionUri, this._panel.webview, context);
@@ -103,9 +111,6 @@ export class CreateIntegrationPanel {
 
     // on dispose
     this._panel.onDidDispose(this.dispose, null, this._disposables);
-
-    // if loadFile: load file
-    this._loadFileIfPresent(extensionUri,loadFile);
 
     // get authentication string from setting and save to file (to be used by PowerShell)
     saveAuth();
