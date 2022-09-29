@@ -507,7 +507,7 @@ export class CreateIntegrationPanel {
       this._currentIntegration = await this._getIntegrationObject();
 
       // if current integration is empty: 'create' -> show error and refresh form
-      if (!isEmpty(this._currentIntegration.carrier)) {
+      if (isEmpty(this._currentIntegration.carrier)) {
         vscode.window.showErrorMessage(`Cannot update: integration ${this._getIntegrationName()} does not exist`);
         this._checkIntegrationExists(extensionUri);
         return;
