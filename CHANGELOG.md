@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.4
+- Carrier integration
+  - Fix: directly load integration to dashboard when loading from file (without showing an 'empty' dashboard in between)
+
 ## 1.7.3
 - Carrier integration
   - Fix: not loading integration file due to synchronization issues
