@@ -84,12 +84,8 @@ export class CreateIntegrationPanel {
 
     // set content
       this._getWebviewContent(this._panel.webview, extensionUri).then(html => {
-        this._panel.webview.html = html;
-
-        // if loadFile: load file
-        if (loadFile !== '') {
-          this._loadFileIfPresent(extensionUri,loadFile);
-        }
+        //this._panel.webview.html = html;
+        this._loadFileIfPresent(extensionUri,loadFile);
       });
       
 
@@ -284,6 +280,9 @@ export class CreateIntegrationPanel {
       
       // check button
       this._checkIntegrationExists(extensionUri, 'check');
+    } else {
+      // else: just refresh panel
+      this._updateWebview(extensionUri);
     }
   }
 
