@@ -186,7 +186,7 @@ export function getScenarioAndStructure(path:string) : ScenarioObject {
 }
 
 export async function getIntegration(inputIntegrationJsonPath:string) : Promise<IntegrationObject> {
-	let outIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', scenarios: [], validscenarios: [{name:'', structure:''}], steps: []};
+	let outIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', scenarios: [], validscenarios: [], steps: []};
 
 	if (!isEmpty(inputIntegrationJsonPath)) {
 		const integrationJsonPath: string = cleanPath(inputIntegrationJsonPath);

@@ -54,7 +54,7 @@ export class CreateIntegrationPanel {
   private _existingScenarioCheckboxValues: boolean[] = [];
   private _createUpdateValue: string = 'create';      // pre-allocate with 'create'
   //private _integrationObjects:     IntegrationObject[] = [];
-  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', scenarios: [], validscenarios: [{name:'', structure:''}], steps: []};
+  private _emptyIntegrationObject : IntegrationObject = {path: '', carrier: '', api: '', module: '', carriercode: '', scenarios: [], validscenarios: [], steps: []};
   private _currentIntegration : IntegrationObject = this._emptyIntegrationObject;
   private _availableScenarios: string[] = [];
   private _modularElementsWithParents: ModularElementObject[] = [];
@@ -366,11 +366,7 @@ export class CreateIntegrationPanel {
   }
 
   private async _getIntegrationObject() : Promise<IntegrationObject> {
-    let elements:ElementsObject = {
-      carrier: this._fieldValues[carrierIndex],
-      api: this._fieldValues[apiIndex],
-      module: this._fieldValues[moduleIndex]
-    };
+    let elements:ElementsObject = this._getIntegrationElements();
 
     // if matches to current integration: return current; else: extract from integration json path
     let outIntegrationObject: IntegrationObject = this._currentIntegration;
@@ -395,7 +391,7 @@ export class CreateIntegrationPanel {
     this._currentIntegration = await this._getIntegrationObject();
 
     // if current integration is not empty: exists -> 'update'
-    if (this._currentIntegration !== this._emptyIntegrationObject) {
+    if (!isEmpty(this._currentIntegration.carrier)) {
       // set 'update' if integration path exists
       this._createUpdateValue = 'update';
 
@@ -447,7 +443,7 @@ export class CreateIntegrationPanel {
       this._currentIntegration = await this._getIntegrationObject();
 
       // if current integration is not empty: 'update' -> show error and refresh form
-      if (this._currentIntegration !== this._emptyIntegrationObject) {
+      if (!isEmpty(this._currentIntegration.carrier)) {
         vscode.window.showErrorMessage(`Cannot create: integration ${this._getIntegrationName()} already exists`);
         this._checkIntegrationExists(extensionUri);
         return;
@@ -471,10 +467,11 @@ export class CreateIntegrationPanel {
       // execute powershell
       this._runScript(terminal, this._functionsPath);
 
-      // update integration objects
+      // update integration object
       let scenarios : string[] = this._getNewScenarios();
       let scenarioNames:string[] =  this._scenarioCustomFields.filter(el => !isEmpty(el));
 
+      // construct scenario object array
       let scenarioObjects :  ScenarioObject[] = new Array< ScenarioObject>(scenarios.length);
       for (let index=0; index < scenarios.length; index++) {
         scenarioObjects[index] = {
@@ -482,23 +479,18 @@ export class CreateIntegrationPanel {
           structure: scenarios[index]
         };
       }
-
-      // construct steps array
-      let steps: string[] = this._getStepsArray();
       
-      // construct integration element and add to integration objects
+      // update integration object
       this._currentIntegration = {
         path: this._getIntegrationJsonPath(this._functionsPath),
         carrier: this._fieldValues[carrierIndex], 
         api: this._fieldValues[apiIndex], 
         module: this._fieldValues[moduleIndex], 
         carriercode: this._fieldValues[carrierCodeIndex],
-        scenarios: scenarioNames, 
-        validscenarios: scenarioObjects,
-        steps: steps
+        scenarios: this._currentIntegration.scenarios.concat(scenarioNames).sort(), 
+        validscenarios: this._currentIntegration.validscenarios.concat(scenarioObjects).sort(),
+        steps: this._getStepsArray()
       };
-
-      //this._integrationObjects.push(this._currentIntegration);
 
       // refresh window
       this._fieldValues[nofScenariosIndex] = "1";
@@ -515,7 +507,7 @@ export class CreateIntegrationPanel {
       this._currentIntegration = await this._getIntegrationObject();
 
       // if current integration is empty: 'create' -> show error and refresh form
-      if (this._currentIntegration === this._emptyIntegrationObject) {
+      if (!isEmpty(this._currentIntegration.carrier)) {
         vscode.window.showErrorMessage(`Cannot update: integration ${this._getIntegrationName()} does not exist`);
         this._checkIntegrationExists(extensionUri);
         return;
@@ -531,27 +523,35 @@ export class CreateIntegrationPanel {
       let newScriptContent = this._replaceInScriptTemplate(templateContent);
 
       // save to file
-      let newScriptPath:string = this._getScriptPath(this._functionsPath);
-      fs.writeFileSync(newScriptPath, newScriptContent, 'utf8');
+      fs.writeFileSync(this._getScriptPath(this._functionsPath), newScriptContent, 'utf8');
 
       // execute powershell
       this._runScript(terminal, this._functionsPath);
 
-      // update integration objects
-      let newScenarios : string[] = this._getNewScenarios();
-      let newScenarioNames : string[] =  this._scenarioCustomFields.filter(el => !isEmpty(el));
+      // update integration object
+      let scenarios : string[] = this._getNewScenarios();
+      let scenarioNames : string[] =  this._scenarioCustomFields.filter(el => !isEmpty(el));
 
-      let scenarioObjects :  ScenarioObject[] = new Array<ScenarioObject>(newScenarios.length);
-      for (let index=0; index < newScenarios.length; index++) {
+      // construct scenario object array
+      let scenarioObjects :  ScenarioObject[] = new Array<ScenarioObject>(scenarios.length);
+      for (let index=0; index < scenarios.length; index++) {
         scenarioObjects[index] = {
-          name: newScenarioNames[index],
-          structure: newScenarios[index]
+          name: scenarioNames[index],
+          structure: scenarios[index]
         };
       }
 
-      this._currentIntegration.scenarios = this._currentIntegration.scenarios.concat(newScenarios).sort();
-      this._currentIntegration.validscenarios = this._currentIntegration.validscenarios.concat(scenarioObjects).sort();
-      this._currentIntegration.steps = this._getStepsArray();
+      // update integration object
+      this._currentIntegration = {
+        path: this._getIntegrationJsonPath(this._functionsPath),
+        carrier: this._fieldValues[carrierIndex], 
+        api: this._fieldValues[apiIndex], 
+        module: this._fieldValues[moduleIndex], 
+        carriercode: this._fieldValues[carrierCodeIndex],
+        scenarios: this._currentIntegration.scenarios.concat(scenarioNames).sort(), 
+        validscenarios: this._currentIntegration.validscenarios.concat(scenarioObjects).sort(),
+        steps: this._getStepsArray()
+      };
 
       // refresh window
       this._fieldValues[nofScenariosIndex] = "1";
