@@ -488,7 +488,7 @@ export class CreateIntegrationPanel {
       
       // construct integration element and add to integration objects
       this._currentIntegration = {
-        path: this._getScriptPath(this._functionsPath), 
+        path: this._getIntegrationJsonPath(this._functionsPath),
         carrier: this._fieldValues[carrierIndex], 
         api: this._fieldValues[apiIndex], 
         module: this._fieldValues[moduleIndex], 
@@ -531,7 +531,7 @@ export class CreateIntegrationPanel {
       let newScriptContent = this._replaceInScriptTemplate(templateContent);
 
       // save to file
-      let newScriptPath:string = this._getCarrierPath(this._functionsPath) + '/' + this._getScriptName();
+      let newScriptPath:string = this._getScriptPath(this._functionsPath);
       fs.writeFileSync(newScriptPath, newScriptContent, 'utf8');
 
       // execute powershell
@@ -678,8 +678,7 @@ export class CreateIntegrationPanel {
   }
 
   private _getScriptPath(functionsPath: string): string {
-    let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
-    return filesPath + '/carriers/' + this._fieldValues[carrierIndex] + '/' + this._getScriptName();
+    return this._getCarrierPath(functionsPath) + '/' + this._getScriptName();
   }
 
   private _getTemplatePath(functionsPath: string): string {
@@ -690,6 +689,18 @@ export class CreateIntegrationPanel {
   private _getCarrierPath(functionsPath: string): string {
     let filesPath = parentPath(parentPath(parentPath(cleanPath(functionsPath))));
     return filesPath + '/carriers/' + this._fieldValues[carrierIndex];
+  }
+
+  private _getIntegrationElements() : ElementsObject {
+    return {
+      carrier: this._fieldValues[carrierIndex],
+      api: this._fieldValues[apiIndex],
+      module: this._fieldValues[moduleIndex]
+    };
+  }
+
+  private _getIntegrationJsonPath(functionsPath: string): string {
+    return `${this._getCarrierPath(functionsPath)}/${getIntegrationSubpath(this._getIntegrationElements())}/${this._fieldValues[moduleIndex]}.integration.json`;
   }
 
   private async _getModuleOptions() {
