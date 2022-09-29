@@ -155,11 +155,6 @@ export class CreateIntegrationPanel {
             break;
 
           case 'createintegration':
-            // if (this._createUpdateValue === 'create') {
-            //   this._createIntegration(terminal, extensionUri);
-            // } else {
-            //   this._updateIntegration(terminal, extensionUri);
-            // }
             this._createUpdateIntegration(terminal, extensionUri);
             break;
 
