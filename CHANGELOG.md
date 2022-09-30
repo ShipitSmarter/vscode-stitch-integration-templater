@@ -1,4 +1,8 @@
 # Change Log
+## 1.7.5
+- Carrier integration
+  - Fix: now checks correctly if carrier already exists on `create`
+  - Refactored some code for future maintainability
 
 ## 1.7.4
 - Carrier integration
