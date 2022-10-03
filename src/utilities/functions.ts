@@ -53,13 +53,14 @@ export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) 
   return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList));
 }
 
-export async function getWorkspaceFile(matchString: string): Promise<string> {
+export async function getWorkspaceFile(matchString: string, showErrorMode:string = 'verbose'): Promise<string> {
 	// get path to file in workspace
+	// suppress ui user error output by setting showErrorMode = 'silent'
 	let functionsFiles = await workspace.findFiles(matchString);
 	let outPath = '';
 	if (functionsFiles.length > 0) {
 		outPath = cleanPath(functionsFiles[0].fsPath);
-	} else {
+	} else if (showErrorMode !== 'silent') {
 		vscode.window.showErrorMessage('Could not locate file ' + matchString);
 	}
 	return outPath;

@@ -369,7 +369,7 @@ export class CreateIntegrationPanel {
 
     if (elements.carrier !== this._currentIntegration.carrier || elements.api !== this._currentIntegration.api || elements.module !== this._currentIntegration.module) {
       let subPath: string = getIntegrationSubpath(elements);
-      let integrationJsonPath: string = await getWorkspaceFile('**/carriers/'+ subPath + '/*.integration.json');
+      let integrationJsonPath: string = await getWorkspaceFile('**/carriers/'+ subPath + '/*.integration.json', 'silent');
       
       outIntegrationObject = await getIntegration(integrationJsonPath);
     }
