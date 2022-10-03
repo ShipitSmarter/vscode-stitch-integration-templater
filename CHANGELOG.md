@@ -1,4 +1,9 @@
 # Change Log
+
+## 1.7.6
+- Carrier integration
+  - Fix: don't show error to user in UI when checking for `*.integration.json` existence on `create`/`update` 
+
 ## 1.7.5
 - Carrier integration
   - Fix: now checks correctly if carrier already exists on `create`
