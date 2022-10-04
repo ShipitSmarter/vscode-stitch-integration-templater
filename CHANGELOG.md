@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.7
+- Carrier integration
+  - Add `info` button and functionality to link to documentation in local repo README or URL
+
 ## 1.7.6
 - Carrier integration
   - Fix: don't show error to user in UI when checking for `*.integration.json` existence on `create`/`update` 
