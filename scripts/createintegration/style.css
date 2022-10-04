@@ -8,12 +8,18 @@
 }
 
 #farright {
-  margin-right: 10rem;
+  /* margin-right: 10rem; */
+  vertical-align: middle;
 }
 
 #createintegration {
   width:11rem;
   height:3rem;
+}
+
+#checkintegrationexists {
+  width:8rem;
+  height:2.5rem;
 }
 
 .existingscenariocustomfield {
@@ -40,4 +46,17 @@
 
 .stepup {
   background-color: #AAAA00;
+}
+
+.floatleftrefresh {
+  float:left;
+  /* vertical-align: middle; */
+  padding-top: 0.25rem;
+  padding-left: 10rem;
+  padding-right: 0rem;
+}
+
+.floatleftcreateupdate {
+  float: left;
+  padding-left: 5rem;
 }

@@ -107,7 +107,14 @@ export class CreateIntegrationHtmlObject {
             <vscode-option id="info" title="Click to view documentation">info</vscode-option>
           </section>
           <section id="farright">
-            ${this._getCreateUpdateButton()}
+            <section class="component-example nowrap">
+              <div class="floatleftrefresh">
+              ${getButton("checkintegrationexists","Refresh","codicon-refresh")}
+              </div>
+              <div class="floatleftcreateupdate">
+              ${this._getCreateUpdateButton()}
+              </div>
+            </section>
           </section>
 				</div>
 
@@ -176,13 +183,6 @@ export class CreateIntegrationHtmlObject {
         <vscode-dropdown id="modulename" class="dropdown" index="${moduleIndex}" ${valueString(this._fieldValues[moduleIndex])} position="below">
           ${dropdownOptions(this._moduleOptions)}
         </vscode-dropdown>
-
-        <section class="component-nomargin">
-          <vscode-button id="checkintegrationexists" appearance="primary">
-            Check
-            <span slot="start" class="codicon codicon-refresh"></span>
-          </vscode-button>
-        </section>
       </section>
 
       ${this._ifCreate(this._getCarrierCodeField())}`;
