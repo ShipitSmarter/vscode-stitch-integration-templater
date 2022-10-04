@@ -104,6 +104,7 @@ export class CreateIntegrationHtmlObject {
 				<div class="row11" id="main">
           <section id="farleft">
 					  <h1>Create or update carrier integration</h1> 
+            <vscode-option id="info" title="Click to view documentation">info</vscode-option>
           </section>
           <section id="farright">
             ${this._getCreateUpdateButton()}

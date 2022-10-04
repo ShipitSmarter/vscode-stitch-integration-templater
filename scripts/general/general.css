@@ -224,3 +224,11 @@ h1 {
 #removescenario {
   background-color: red;
 }
+
+#info {
+  background-color: var(--vscode-inputValidation-infoBackground);
+}
+
+h1 {
+  float:left;
+}

@@ -13,6 +13,9 @@ function main() {
   document.getElementById("addstep").addEventListener("click",addStep);
   document.getElementById("removestep").addEventListener("click",removeStep);
 
+  // info onclick
+  document.getElementById("info").addEventListener("click",infoClick);
+
   // step up/down buttons
   for (const field of document.querySelectorAll(".stepup")) {
     field.addEventListener("click",stepUp);
@@ -108,6 +111,10 @@ function fieldChange(event) {
       break;
   }
   
+}
+
+function infoClick(event) {
+  vscodeApi.postMessage({ command: "infoclick", text: "integration" });
 }
 
 function infoMessage(info) {

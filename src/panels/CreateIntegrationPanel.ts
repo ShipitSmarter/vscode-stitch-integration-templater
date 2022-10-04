@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes, nameFromPath, getElementsFromIntegrationPath, getIntegrationSubpath, getIntegration} from "../utilities/functions";
+import { getUri, getWorkspaceFile, getWorkspaceFiles, startScript, cleanPath, parentPath, toBoolean, isEmptyStringArray, isEmpty, getAvailableIntegrations, getModularElements, getModularElementsWithParents, getAvailableScenarios, getFromScript, isModular, saveAuth, getPackageTypes, nameFromPath, getElementsFromIntegrationPath, getIntegrationSubpath, getIntegration, getFileContentFromGlob} from "../utilities/functions";
 import * as fs from 'fs';
 import { CreateIntegrationHtmlObject } from "./CreateIntegrationHtmlObject";
 import { getHeapStatistics } from "v8";
@@ -71,6 +71,9 @@ export class CreateIntegrationPanel {
   private _stepMethods: string[] = [];
   private _scenarioCustomFields: string[] = [];
   private _existingScenarioCustomFields: string[] = [];
+  private _settingsGlob: string = "**/.vscode/settings.json";
+  private _readmeSetting: string = "stitch.integrationtemplater.readmeLocation";
+  private _settings: any;
 
   // constructor
   private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, nofSteps: number, context: vscode.ExtensionContext, loadFile:string = '') {
@@ -186,6 +189,10 @@ export class CreateIntegrationPanel {
             this._scenarioPackageTypes[scenarioIndex][index] = value;
             break;
 
+          case 'infoclick':
+            this._openInfoFile();
+            break;
+
           case "savemultivalue":
             // extract
             var idIndexValue = text.split('|');
@@ -262,6 +269,33 @@ export class CreateIntegrationPanel {
       undefined,
       this._disposables
     );
+  }
+
+  private async _openInfoFile() {
+    let readmeLocation:string = this._settings[this._readmeSetting];
+
+    if (isEmpty(readmeLocation)) {
+      // settting missing
+      vscode.window.showErrorMessage("Missing repo setting " + this._readmeSetting);
+
+    } else if (readmeLocation.startsWith('**')) {
+      // location is a glob 
+      const filePath:string = await getWorkspaceFile(this._settings[this._readmeSetting]);
+      if (!isEmpty(filePath)) {
+        const openPath = vscode.Uri.file(filePath);
+        // const doc = await vscode.workspace.openTextDocument(openPath);
+        // vscode.window.showTextDocument(doc, vscode.ViewColumn.Two);
+        await vscode.commands.executeCommand("markdown.showPreview", openPath);
+      }
+    } else {
+      // location is a URL: try tab in VSCode, else open in browser
+      try {
+        await vscode.commands.executeCommand("simpleBrowser.show",readmeLocation);
+      } catch (err) {
+        await vscode.env.openExternal(vscode.Uri.parse(readmeLocation));
+      }
+    }
+    
   }
 
   private _loadFileIfPresent(extensionUri:vscode.Uri, loadFile:string) {
@@ -689,6 +723,7 @@ export class CreateIntegrationPanel {
   }
 
   private async _refresh() {
+    this._settings = JSON.parse(await getFileContentFromGlob(this._settingsGlob));
     await this._getModuleOptions();
     await this._getStepOptions();
     await this._getStepTypeOptions();

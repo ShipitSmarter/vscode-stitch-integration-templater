@@ -1,9 +1,5 @@
 @import url("../general/general.css");
 
-h1 {
-  float:left;
-}
-
 .newparametercode,
 .newparameterdescription,
 .newparameterexplanation {
@@ -81,10 +77,6 @@ h1 {
 
 .setresponsefieldoption.ok,
 .getresponsefieldoption.ok {
-  background-color: var(--vscode-inputValidation-infoBackground);
-}
-
-#info {
   background-color: var(--vscode-inputValidation-infoBackground);
 }
 
