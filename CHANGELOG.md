@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.8
+- Carrier integration
+  - Renamed `Check` button to `Refresh`, and moved to top of the panel
+
 ## 1.7.7
 - Carrier integration
   - Add `info` button and functionality to link to documentation in local repo README or URL
