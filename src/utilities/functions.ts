@@ -53,16 +53,17 @@ export function getUri(webview: Webview, extensionUri: Uri, pathList: string[]) 
   return webview.asWebviewUri(Uri.joinPath(extensionUri, ...pathList));
 }
 
-export async function getWorkspaceFile(matchString: string, showErrorMode:string = 'verbose'): Promise<string> {
+export async function getWorkspaceFile(matchString: string | vscode.RelativePattern, showErrorMode:string = 'verbose'): Promise<string> {
 	// get path to file in workspace
 	// suppress ui user error output by setting showErrorMode = 'silent'
-	let functionsFiles = await workspace.findFiles(matchString);
 	let outPath = '';
+	let functionsFiles = await workspace.findFiles(matchString);
 	if (functionsFiles.length > 0) {
 		outPath = cleanPath(functionsFiles[0].fsPath);
 	} else if (showErrorMode !== 'silent') {
 		vscode.window.showErrorMessage('Could not locate file ' + matchString);
 	}
+
 	return outPath;
 }
 
@@ -474,7 +475,7 @@ export function backgroundColorString(color:string): string {
 	return bColorString;
 }
 
-export async function getFileContentFromGlob(glob:string) : Promise<string> {
+export async function getFileContentFromGlob(glob:string|vscode.RelativePattern) : Promise<string> {
 	let content: string = '';
 	let path = await getWorkspaceFile(glob);
 	if (!isEmpty(path)) {

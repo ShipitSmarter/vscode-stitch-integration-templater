@@ -71,7 +71,9 @@ export class CreateIntegrationPanel {
   private _stepMethods: string[] = [];
   private _scenarioCustomFields: string[] = [];
   private _existingScenarioCustomFields: string[] = [];
-  private _settingsGlob: string = "**/.vscode/settings.json";
+  private _workspaceRootFolder : vscode.WorkspaceFolder | undefined = vscode.workspace.workspaceFolders?.[0] ;
+  private _settingsRelativeLocation: string = ".vscode/settings.json";
+  private _settingsRelativePattern : vscode.RelativePattern | string = this._workspaceRootFolder ? new vscode.RelativePattern(this._workspaceRootFolder,this._settingsRelativeLocation) : this._settingsRelativeLocation;
   private _readmeSetting: string = "stitch.integrationtemplater.readmeLocation";
   private _settings: any;
 
@@ -723,7 +725,7 @@ export class CreateIntegrationPanel {
   }
 
   private async _getRepoSettings() {
-    let settingsContent = await getFileContentFromGlob(this._settingsGlob);
+    let settingsContent = await getFileContentFromGlob(this._settingsRelativePattern);
     this._settings = JSON.parse(settingsContent);
   }
 
