@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.9
+- Carrier integration
+  - Fix: documentation not loading because multiple `.vscode/settings.json` sub paths present in repo
+
 ## 1.7.8
 - Carrier integration
   - Renamed `Check` button to `Refresh`, and moved to top of the panel
