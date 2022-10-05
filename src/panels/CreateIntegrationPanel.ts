@@ -722,8 +722,13 @@ export class CreateIntegrationPanel {
     this._nofPackages = this._nofPackages.slice(0, +this._fieldValues[nofScenariosIndex]);
   }
 
+  private async _getRepoSettings() {
+    let settingsContent = await getFileContentFromGlob(this._settingsGlob);
+    this._settings = JSON.parse(settingsContent);
+  }
+
   private async _refresh() {
-    this._settings = JSON.parse(await getFileContentFromGlob(this._settingsGlob));
+    await this._getRepoSettings();
     await this._getModuleOptions();
     await this._getStepOptions();
     await this._getStepTypeOptions();

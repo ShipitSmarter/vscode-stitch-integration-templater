@@ -966,9 +966,13 @@ export class ParameterPanel {
     this._environmentOptions = fileContent.split("\n").map(el => el.trim());
   }
 
+  private async _getRepoSettings() {
+    let settingsContent = await getFileContentFromGlob(this._settingsGlob);
+    this._settings = JSON.parse(settingsContent);
+  }
 
   private async _refresh() {
-    this._settings = JSON.parse(await getFileContentFromGlob(this._settingsGlob));
+    await this._getRepoSettings();
     await this._getAPIDetails();
     await this._getEnvironmentOptions();
     this._fieldValues[environmentIndex] = this._environmentOptions[0];
