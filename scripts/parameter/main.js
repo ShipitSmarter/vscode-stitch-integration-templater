@@ -39,8 +39,9 @@ function main() {
   // info onclick
   document.getElementById("info").addEventListener("click",infoClick);
 
-  // previous checkbox
+  // trim, previous checkboxes
   document.getElementById("previous").addEventListener("change", fieldChange);
+  document.getElementById("trim").addEventListener("change", fieldChange);
 
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown");
@@ -367,6 +368,11 @@ function globalKeys(event) {
     // Ctrl + S: save input to file
     saveToFile();
   }
+}
+
+function trimValues() {
+  let trimField = document.getElementById("trim");
+  return trimField.checked;
 }
 
 function addLine(event) {

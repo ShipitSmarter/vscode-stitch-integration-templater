@@ -66,6 +66,7 @@ export class ParameterPanel {
   private _extendedHistoryValues: string[] = [];
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
+  private _trim: boolean = true;
   private _showAuth: boolean = false;
   private _processingSet: boolean = false;
   private _processingGet: boolean = false;
@@ -362,6 +363,9 @@ export class ParameterPanel {
                 break;
               case 'changereasonfield':
                 this._changeReasonValues[index] = value;
+                break;
+              case 'trim':
+                this._trim = toBoolean(value);
                 break;
               case 'previous':
                 this._previous = toBoolean(value);
@@ -1017,6 +1021,7 @@ export class ParameterPanel {
       this._extendedHistoryValues,
       this._getResponseValues,
       this._previous,
+      this._trim,
       this._showAuth,
       this._processingSet,
       this._processingGet,

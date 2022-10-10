@@ -48,6 +48,7 @@ export class ParameterHtmlObject {
     private _extendedHistoryValues: string[],
     private _getResponseValues: ResponseObject[],
     private _previous: boolean,
+    private _trim: boolean,
     private _showAuth: boolean,
     private _processingSet: boolean,
     private _processingGet: boolean,
@@ -257,7 +258,10 @@ export class ParameterHtmlObject {
           </vscode-dropdown>
         </div>
         <div class="floatleft">
-          <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to Previous</vscode-checkbox>
+          <vscode-checkbox id="trim" class="trim" ${checkedString(this._trim)}>Auto-trim values</vscode-checkbox>
+        </div>
+        <div class="floatleft">
+          <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to previous</vscode-checkbox>
         </div>
         <div class="floatleftlesspadding">
           ${getButton('setparameters','Set Parameters','codicon-arrow-right')}
