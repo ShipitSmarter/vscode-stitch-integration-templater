@@ -248,10 +248,10 @@ export class ParameterHtmlObject {
               ${dropdownOptions(this._environmentOptions)}
           </vscode-dropdown>
         </div>
-        <div class="floatleftnopadding">
+        <div class="floatleftnopadding" hidden>
           nofLines:
         </div>
-        <div class="floatleft">
+        <div class="floatleft" hidden>
           <vscode-dropdown id="noflines" class="dropdown" index="${noflinesIndex}" ${valueString(this._fieldValues[noflinesIndex])} position="below">
             ${dropdownOptions(arrayFrom1(100))}
           </vscode-dropdown>
@@ -420,6 +420,7 @@ export class ParameterHtmlObject {
           <div class="responsediv">Set Response</div>
           ${inputGrid}
           <div>
+            ${getButton('removeline','-','','primary')}
             ${getButton('addline','+','','primary')}
           </div>
         </section>

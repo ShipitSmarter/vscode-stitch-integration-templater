@@ -99,3 +99,11 @@
   white-space: nowrap;
 }
 
+#addline,
+#removeline {
+  margin: 0.1rem;
+}
+
+#removeline {
+  background-color: red;
+}

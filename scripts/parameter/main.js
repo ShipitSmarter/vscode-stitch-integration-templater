@@ -11,6 +11,7 @@ function main() {
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
   document.getElementById("addline").addEventListener("click",addLine);
+  document.getElementById("removeline").addEventListener("click",removeLine);
 
   // check new parameter codes button action
   document.getElementById("checknewparametercodes").addEventListener("click",checkParameterCodes);
@@ -381,6 +382,18 @@ function addLine(event) {
 
   if (index === (nofLines-1) || field.id === 'addline') {
     nofLinesField.value = (nofLines + 1).toString();
+    nofLinesField.dispatchEvent(new Event('change'));
+  }
+}
+
+function removeLine(event) {
+  const field = event.target;
+
+  let nofLinesField = document.getElementById("noflines");
+  let nofLines = parseInt(nofLinesField.value);
+
+  if (nofLines > 1) {
+    nofLinesField.value = (nofLines - 1).toString();
     nofLinesField.dispatchEvent(new Event('change'));
   }
 }
