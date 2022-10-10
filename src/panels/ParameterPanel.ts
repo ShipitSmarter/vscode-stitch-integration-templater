@@ -359,7 +359,7 @@ export class ParameterPanel {
                 this._parameterNameValues[index] = value;
                 break;
               case 'newvaluefield':
-                this._newValues[index] = value;
+                this._newValues[index] = this._trim ? value.trim() : value;
                 break;
               case 'changereasonfield':
                 this._changeReasonValues[index] = value;
