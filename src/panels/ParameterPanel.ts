@@ -66,7 +66,7 @@ export class ParameterPanel {
   private _extendedHistoryValues: string[] = [];
   private _getResponseValues: ResponseObject[] = [];
   private _previous: boolean = false;
-  private _trim: boolean = true;
+  private _trim: boolean = vscode.workspace.getConfiguration().get<boolean>('stitch.parametersDefaultAutoTrim') ?? true;
   private _showAuth: boolean = false;
   private _processingSet: boolean = false;
   private _processingGet: boolean = false;

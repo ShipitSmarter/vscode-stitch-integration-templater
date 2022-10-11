@@ -86,11 +86,16 @@
       ]
     },
     "configuration": {
-      "title": "Stitch: API Authentication",
+      "title": "Stitch: Additional settings",
       "properties": {
         "stitch.basicAuthenticationString": {
           "type": "string",
           "default": "Basic ...",
+          "description": ""
+        },
+        "stitch.parametersDefaultAutoTrim": {
+          "type": "boolean",
+          "default": true,
           "description": ""
         }
       }
