@@ -11,6 +11,7 @@ function main() {
   document.getElementById("setparameters").addEventListener("click", setParameters);
   document.getElementById("savetofile").addEventListener("click", saveToFile);
   document.getElementById("addline").addEventListener("click",addLine);
+  document.getElementById("removeline").addEventListener("click",removeLine);
 
   // check new parameter codes button action
   document.getElementById("checknewparametercodes").addEventListener("click",checkParameterCodes);
@@ -38,8 +39,9 @@ function main() {
   // info onclick
   document.getElementById("info").addEventListener("click",infoClick);
 
-  // previous checkbox
+  // trim, previous checkboxes
   document.getElementById("previous").addEventListener("change", fieldChange);
+  document.getElementById("trim").addEventListener("change", fieldChange);
 
   // save dropdowns
   const dropdowns = document.querySelectorAll(".dropdown");
@@ -368,6 +370,11 @@ function globalKeys(event) {
   }
 }
 
+function trimValues() {
+  let trimField = document.getElementById("trim");
+  return trimField.checked;
+}
+
 function addLine(event) {
   const field = event.target;
 
@@ -381,6 +388,18 @@ function addLine(event) {
 
   if (index === (nofLines-1) || field.id === 'addline') {
     nofLinesField.value = (nofLines + 1).toString();
+    nofLinesField.dispatchEvent(new Event('change'));
+  }
+}
+
+function removeLine(event) {
+  const field = event.target;
+
+  let nofLinesField = document.getElementById("noflines");
+  let nofLines = parseInt(nofLinesField.value);
+
+  if (nofLines > 1) {
+    nofLinesField.value = (nofLines - 1).toString();
     nofLinesField.dispatchEvent(new Event('change'));
   }
 }

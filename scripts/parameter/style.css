@@ -92,10 +92,18 @@
 
 .floatleftchangereason {
   float: left;
-  padding-left: 14.5rem;
+  padding-left: 16rem;
 }
 
 .responsediv {
   white-space: nowrap;
 }
 
+#addline,
+#removeline {
+  margin: 0.1rem;
+}
+
+#removeline {
+  background-color: red;
+}

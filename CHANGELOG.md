@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.7.10
+- Parameters
+  - Auto-trim functionality
+    - Added a checkbox to allow auto-trimming of parameter input values
+    - Added setting `Stitch: Parameters Default Auto Trim` to change default setting of mentioned checkbox
+  - Removed `nofLines` dropdown, added `remove line` button
+
 ## 1.7.9
 - Carrier integration
   - Fix: documentation not loading because multiple `.vscode/settings.json` sub paths present in repo

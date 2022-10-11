@@ -2,7 +2,7 @@
   "name": "stitch-integration-templater",
   "displayName": "Stitch integration templater",
   "description": "Provides dashboard for creating and updating Stitch carrier integrations",
-  "version": "1.7.9",
+  "version": "1.7.10",
   "publisher": "ShipitSmarter",
   "author": {
     "name": "ShipitSmarter",
@@ -86,11 +86,16 @@
       ]
     },
     "configuration": {
-      "title": "Stitch: API Authentication",
+      "title": "Stitch: Additional settings",
       "properties": {
         "stitch.basicAuthenticationString": {
           "type": "string",
           "default": "Basic ...",
+          "description": ""
+        },
+        "stitch.parametersDefaultAutoTrim": {
+          "type": "boolean",
+          "default": true,
           "description": ""
         }
       }
