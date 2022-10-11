@@ -59,11 +59,17 @@ Contributes the following commands, which are available from the *Command Palett
 
     Note: to enable this, `.vscode/settings.json` must have setting `stich.sortscriban.enabled` = `true`.
 
-### Setting: `Stitch: Basic Authentication String`
+## Settings
+
+### `Stitch: Basic Authentication String`
 - In order for API calls to SiS APIs from the extension to work, one must update the setting through `Ctrl` + `,` -> `Stitch: Basic Authentication String`: 
 
     ![Stitch Basic Authentication String](https://raw.githubusercontent.com/shipitsmarter/vscode-stitch-integration-templater/main/img/stitch_basic_auth_string_setting.png)
 
+### `Stitch: Parameters Default Auto Trim`
+- When using the parameters tool, there is a checkbox to determine whether input values should be trimmed automatically. This checkbox is by default checked. This setting allows for the user to change the default value of this checkbox:
+
+    ![Stitch: Parameters Default Auto Trim](img/stitch_parameters_default_auto_trim.png)
 
 ## Dependencies
 This dashboard is a graphical frontend for the ShipitSmarter integration automation PowerShell script, and does not function independently without it.
