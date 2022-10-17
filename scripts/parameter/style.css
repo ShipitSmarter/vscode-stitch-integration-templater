@@ -6,10 +6,7 @@
   width: 15rem;
 }
 
-.parameternamefield,
-.parameteroptionsfield,
-.previousvaluefield,
-.newvaluefield {
+.previousvaluefield{
   width: 15rem;
 }
 
@@ -63,7 +60,7 @@
 
 .codecustomeroptionsfield,
 .codecustomerfield {
-  width: 15rem;
+  width: 7rem;
 }
 
 .codecompanyfield {

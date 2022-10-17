@@ -17,6 +17,8 @@ const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
 const saveNameIndex = 8;
+const parameterNameWidthIndex = 9;
+const newValueWidthIndex = 10;
 
 // type defs
 type ParameterObject = {
@@ -97,6 +99,8 @@ export class ParameterPanel {
 
     // set initial values
     this._fieldValues[noflinesIndex] = '1';
+    this._fieldValues[parameterNameWidthIndex] = '15';
+    this._fieldValues[newValueWidthIndex] = '15';
 
     // set content
     this._getWebviewContent(this._panel.webview, extensionUri).then(html => this._panel.webview.html = html);
@@ -340,7 +344,10 @@ export class ParameterPanel {
                     // update webview
                     this._updateWebview(extensionUri);
                     break;
-
+                  case parameterNameWidthIndex:
+                  case newValueWidthIndex:
+                    this._updateWebview(extensionUri);
+                    break;
                 }
                 break;
               case 'newparameterdescription':

@@ -11,6 +11,8 @@ const noflinesIndex = 5;
 const saveIndex = 6;
 const allChangeReasonsIndex = 7;
 const saveNameIndex = 8;
+const parameterNameWidthIndex = 9;
+const newValueWidthIndex = 10;
 
 // type defs
 type ResponseObject = {
@@ -97,6 +99,9 @@ export class ParameterHtmlObject {
             ${this._codeCompanyFields()}
             <vscode-text-field id="focusfield" ${valueString(this._focusField)} hidden></vscode-text-field>
             <vscode-text-field id="missingparametercodes" ${valueString(this._newParameterCodes.join('|'))} hidden></vscode-text-field>
+              <vscode-dropdown id="noflines" class="dropdown" index="${noflinesIndex}" ${valueString(this._fieldValues[noflinesIndex])} position="below" hidden>
+                ${dropdownOptions(arrayFrom1(100))}
+              </vscode-dropdown>
         </section>
 
         ${this._getSaveItems()}
@@ -108,14 +113,16 @@ export class ParameterHtmlObject {
                ${this._getDetailsGrid()}
           </section>
 
-          <section class="component-example">
-            <div class="floatleftgetparameters">
+          <section class="grid1flex">
+            <div>-</div>
+            <div class="component-nomargin">
               ${getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
-            </div>
-            <div class="floatleftnopadding">
-              <vscode-progress-ring id="processingget" ${hiddenString(this._processingGet)}></vscode-progress-ring>
+              <div class="component-nomargin">
+                <vscode-progress-ring id="processingget" ${hiddenString(this._processingGet)}></vscode-progress-ring>
+              </div>
             </div>
           </section>
+           
 
           <section class="rowsingle">
             <section class="component-container">
@@ -240,41 +247,45 @@ export class ParameterHtmlObject {
   private _getDetailsGrid(): string {
 
     let getParametersGrid = /*html*/ `
-      <section class="component-example">
-        <div class="floatleftnopadding">
-          Environment:
-        </div>
-        <div class="floatleft">
+      <section class="grid7flex somemargin">
+        <div class="nowrap">Environment</div>
+        <div class="nowrap">Auto-trim values</div>
+        <div class="nowrap">Revert to previous</div>
+        <div class="nowrap">Param name width</div>
+        <div class="nowrap">New value width</div>
+        <div class="nowrap">Set all change reasons</div>
+        <div>-</div>        
+        <div class="component-nomargin">
           <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${backgroundColorString(this._fieldValues[environmentIndex] === 'PROD' ? 'red' : '')} ${valueString(this._fieldValues[environmentIndex])} position="below">
               ${dropdownOptions(this._environmentOptions)}
           </vscode-dropdown>
         </div>
-        <div class="floatleftnopadding" hidden>
-          nofLines:
+        <div class="component-nomargin">
+          <vscode-checkbox id="trim" class="trim" ${checkedString(this._trim)}></vscode-checkbox>
         </div>
-        <div class="floatleft" hidden>
-          <vscode-dropdown id="noflines" class="dropdown" index="${noflinesIndex}" ${valueString(this._fieldValues[noflinesIndex])} position="below">
-            ${dropdownOptions(arrayFrom1(100))}
+        <div class="component-nomargin">
+          <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}></vscode-checkbox>
+        </div>
+        <div class="component-nomargin">
+          <vscode-dropdown id="parameternamewidth" class="dropdown" index="${parameterNameWidthIndex}" ${valueString(this._fieldValues[parameterNameWidthIndex])} position="below">
+              ${dropdownOptions([15,20,30,40])}
           </vscode-dropdown>
         </div>
-        <div class="floatleft">
-          <vscode-checkbox id="trim" class="trim" ${checkedString(this._trim)}>Auto-trim values</vscode-checkbox>
-        </div>
-        <div class="floatleft">
-          <vscode-checkbox id="previous" class="previous" ${disabledString(this._previousValues.length > 0)} ${checkedString(this._previous)}>Revert to previous</vscode-checkbox>
-        </div>
-        <div class="floatleftlesspadding">
-          ${getButton('setparameters','Set Parameters','codicon-arrow-right')}
-        </div>
-        <div class="floatleftnopadding">
-          <vscode-progress-ring id="processingset" ${hiddenString(this._processingSet)}></vscode-progress-ring>
+        <div class="component-nomargin">
+          <vscode-dropdown id="newvaluewidth" class="dropdown" index="${newValueWidthIndex}" ${valueString(this._fieldValues[newValueWidthIndex])} position="below">
+              ${dropdownOptions([15,20,30,40])}
+          </vscode-dropdown>
         </div>
 
-        <div class="floatleftchangereason">
-          Set all change reasons:
-        </div>
-        <div class="floatleftnopadding">
+        <div class="component-nomargin">
           <vscode-text-field id="allchangereasons" class="field" index="${allChangeReasonsIndex}" ${valueString(this._fieldValues[allChangeReasonsIndex])}></vscode-text-field>
+        </div>
+
+        <div class="component-nomargin">
+          ${getButton('setparameters','Set Parameters','codicon-arrow-right','','','nowrap')}
+          <div class="component-nomargin">
+            <vscode-progress-ring id="processingset" ${hiddenString(this._processingSet)}></vscode-progress-ring>
+          </div>
         </div>
         
       </section>
@@ -380,8 +391,8 @@ export class ParameterHtmlObject {
 
       inputGrid += /*html*/`
         <section class="component-nomargin">
-            <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" tabindex="${row +1}3" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" ${hiddenString(!showSearch)}></vscode-text-field>
-            <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}4" position="below" title="${selectedOption}" ${hiddenString(showSearch)}>
+            <vscode-text-field id="parametername${row}" class="parameternamefield" index="${row}" tabindex="${row +1}3" ${valueString(this._parameterNameValues[row])} placeholder="parameter name" style="width: ${this._fieldValues[parameterNameWidthIndex]}rem;" ${hiddenString(!showSearch)}></vscode-text-field>
+            <select id="parameteroptions${row}" class="parameteroptionsfield" index="${row}" tabindex="${row +1}4" position="below" title="${selectedOption}" style="width: ${this._fieldValues[parameterNameWidthIndex]}rem;" ${hiddenString(showSearch)}>
               ${selectOptions(this._parameterSearchValues[row] ?? [''],selectedOption)}
             </select>
         </section>
@@ -397,7 +408,7 @@ export class ParameterHtmlObject {
       // new parameter value
       inputGrid += /*html*/`
         <section class="component-nomargin">
-          <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" tabindex="${row +1}5" ${valueString(escapeHtml(this._newValues[row]??''))} placeholder="new parameter value"></vscode-text-field>
+          <vscode-text-field id="newvalue${row}" class="newvaluefield" index="${row}" tabindex="${row +1}5" ${valueString(escapeHtml(this._newValues[row]??''))} placeholder="new parameter value" style="width: ${this._fieldValues[newValueWidthIndex]}rem;"></vscode-text-field>
         </section>
       `;
 
