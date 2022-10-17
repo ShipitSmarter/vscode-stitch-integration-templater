@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.11
+- Parameters
+  - Now allows resizing of `parameter name` and `new value` fields through dropdowns to improve ease-of-use
+
 ## 1.7.10
 - Parameters
   - Auto-trim functionality
