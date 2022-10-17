@@ -69,6 +69,11 @@
   flex-wrap: wrap;
 }
 
+.somemargin > * {
+  /* margin-left: 1rem; */
+  margin-right: 1rem;
+}
+
 .nowrap {
   white-space: nowrap;
 }

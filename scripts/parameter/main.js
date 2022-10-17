@@ -179,6 +179,16 @@ function fieldChange(event) {
     case 'createnewparametercheckbox':
       updateNewParameterField(field.getAttribute("index"));
       break;
+    // case 'parameternamewidth':
+    //   for (const field of document.querySelectorAll(".parameternamefield,.parameteroptionsfield")) {
+    //     field.style.width = field.value + "rem";
+    //   }
+    //   break;
+    // case 'newvaluewidth':
+    //   for (const field of document.querySelectorAll(".newvaluefield")) {
+    //     field.style.width = field.value + "rem";
+    //   }
+    //   break;
   }
 }
 
