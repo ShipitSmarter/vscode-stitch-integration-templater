@@ -19,6 +19,8 @@ const allChangeReasonsIndex = 7;
 const saveNameIndex = 8;
 const parameterNameWidthIndex = 9;
 const newValueWidthIndex = 10;
+const allCodeCompaniesIndex = 11;
+const allCodeCustomersIndex = 12;
 
 // type defs
 type ParameterObject = {

@@ -176,6 +176,29 @@ function fieldChange(event) {
       }
       break;
 
+    case 'allcodecompanies':
+      const ccs = document.querySelectorAll(".codecompanyfield");
+      for (const cc of ccs) {
+        cc.value = field.value;
+        saveValue(cc.id);
+        updateFieldOutlineAndTooltip(cc.id);
+      }
+      break;
+
+    case 'allcodecustomers':
+      const custs = document.querySelectorAll(".codecustomerfield");
+      for (const cust of custs) {
+        cust.value = field.value;
+        cust.hidden = false;
+        saveValue(cust.id);
+        updateFieldOutlineAndTooltip(cust.id);
+      }
+
+      for (const custOption of document.querySelectorAll(".codecustomeroptionsfield")) {
+        custOption.hidden = true;
+      }
+      break;
+
     case 'createnewparametercheckbox':
       updateNewParameterField(field.getAttribute("index"));
       break;
