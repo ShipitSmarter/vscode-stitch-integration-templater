@@ -213,7 +213,7 @@ export class ParameterHtmlObject {
       <div class="floatleftcodecustomer">
         <vscode-text-field id="allcodecustomers" class="field" index="${allCodeCustomersIndex}" ${valueString(this._fieldValues[allCodeCustomersIndex])} placeholder="CodeCustomer"></vscode-text-field>
       </div>
-      <div class="floatleftchangereason">
+      <div class="floatleftchangereason" style="padding-left: ${17.2 + (+this._fieldValues[parameterNameWidthIndex] ?? 15) + (+this._fieldValues[newValueWidthIndex] ?? 15)}rem;">
         <vscode-text-field id="allchangereasons" class="field" index="${allChangeReasonsIndex}" ${valueString(this._fieldValues[allChangeReasonsIndex])} placeholder="Change Reason"></vscode-text-field>
       </div>
     `;
@@ -277,13 +277,12 @@ export class ParameterHtmlObject {
   private _getDetailsGrid(): string {
 
     let getParametersGrid = /*html*/ `
-      <section class="grid7flex somemargin">
+      <section class="grid6flex somemargin">
         <div class="nowrap">Environment</div>
         <div class="nowrap">Auto-trim values</div>
         <div class="nowrap">Revert to previous</div>
         <div class="nowrap">Param name width</div>
         <div class="nowrap">New value width</div>
-        <div class="nowrap">Set all change reasons</div>
         <div></div>        
         <div class="component-nomargin">
           <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${backgroundColorString(this._fieldValues[environmentIndex] === 'PROD' ? 'red' : '')} ${valueString(this._fieldValues[environmentIndex])} position="below">
@@ -306,8 +305,6 @@ export class ParameterHtmlObject {
               ${dropdownOptions([15,20,30,40])}
           </vscode-dropdown>
         </div>
-
-        <div> </div>
 
         <div class="component-nomargin">
           ${getButton('setparameters','Set Parameters','codicon-arrow-right','','','nowrap')}
