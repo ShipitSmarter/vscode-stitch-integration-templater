@@ -13,6 +13,8 @@ const allChangeReasonsIndex = 7;
 const saveNameIndex = 8;
 const parameterNameWidthIndex = 9;
 const newValueWidthIndex = 10;
+const allCodeCompaniesIndex = 11;
+const allCodeCustomersIndex = 12;
 
 // type defs
 type ResponseObject = {
@@ -109,17 +111,29 @@ export class ParameterHtmlObject {
         ${this._getCreateParameterCodes()}
         
         <section class="rowflex">
-          <section class="rowsingle">
+          <section class="rowsingle bottompadding">
                ${this._getDetailsGrid()}
           </section>
 
           <section class="grid1flex">
             <div>-</div>
             <div class="component-nomargin">
-              ${getButton('getparameters','Get Parameters','codicon-refresh','secondary')}
+              ${getButton('getparameters','Get Parameters','codicon-refresh','secondary','','nowrap')}
               <div class="component-nomargin">
                 <vscode-progress-ring id="processingget" ${hiddenString(this._processingGet)}></vscode-progress-ring>
               </div>
+            </div>
+          </section>
+
+          <vscode-divider role="separator"></vscode-divider>
+          <vscode-divider role="separator"></vscode-divider>
+
+          <section class="component-example">
+            ${this._getMassUpdateFields()}
+          </section>
+
+          <section class="rowsingle">
+            <div class="floatleft">
             </div>
           </section>
            
@@ -180,7 +194,7 @@ export class ParameterHtmlObject {
           </div>
 
           <div class="floatleft">
-            <p> - </p>
+            <p>-</p>
             ${getButton('savetofile','Save input','codicon-arrow-right','secondary')}
           </div>
         </section>
@@ -189,6 +203,22 @@ export class ParameterHtmlObject {
       <section class="rowsingle">`;
 
       return html;
+  }
+
+  private _getMassUpdateFields() : string {
+    let html: string = /*html*/ `
+      <div class="floatleftcodecompany">
+        <vscode-text-field id="allcodecompanies" class="field" index="${allCodeCompaniesIndex}" ${valueString(this._fieldValues[allCodeCompaniesIndex])} placeholder="CodeCompany"></vscode-text-field>
+      </div>
+      <div class="floatleftcodecustomer">
+        <vscode-text-field id="allcodecustomers" class="field" index="${allCodeCustomersIndex}" ${valueString(this._fieldValues[allCodeCustomersIndex])} placeholder="CodeCustomer"></vscode-text-field>
+      </div>
+      <div class="floatleftchangereason">
+        <vscode-text-field id="allchangereasons" class="field" index="${allChangeReasonsIndex}" ${valueString(this._fieldValues[allChangeReasonsIndex])} placeholder="Change Reason"></vscode-text-field>
+      </div>
+    `;
+
+    return html;
   }
 
   private _getCreateParameterCodes(): string {
@@ -254,7 +284,7 @@ export class ParameterHtmlObject {
         <div class="nowrap">Param name width</div>
         <div class="nowrap">New value width</div>
         <div class="nowrap">Set all change reasons</div>
-        <div>-</div>        
+        <div></div>        
         <div class="component-nomargin">
           <vscode-dropdown id="environment" class="dropdown" index="${environmentIndex}" ${backgroundColorString(this._fieldValues[environmentIndex] === 'PROD' ? 'red' : '')} ${valueString(this._fieldValues[environmentIndex])} position="below">
               ${dropdownOptions(this._environmentOptions)}
@@ -277,9 +307,7 @@ export class ParameterHtmlObject {
           </vscode-dropdown>
         </div>
 
-        <div class="component-nomargin">
-          <vscode-text-field id="allchangereasons" class="field" index="${allChangeReasonsIndex}" ${valueString(this._fieldValues[allChangeReasonsIndex])}></vscode-text-field>
-        </div>
+        <div> </div>
 
         <div class="component-nomargin">
           ${getButton('setparameters','Set Parameters','codicon-arrow-right','','','nowrap')}

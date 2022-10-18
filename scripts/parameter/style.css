@@ -59,11 +59,13 @@
 }
 
 .codecustomeroptionsfield,
-.codecustomerfield {
+.codecustomerfield,
+.floatleftcodecustomer {
   width: 7rem;
 }
 
-.codecompanyfield {
+.codecompanyfield,
+.floatleftcodecompany {
   width: 6rem;
 }
 
@@ -89,7 +91,17 @@
 
 .floatleftchangereason {
   float: left;
-  padding-left: 16rem;
+  padding-left: 47.2rem;
+}
+
+.floatleftcodecompany {
+  float: left;
+  padding-left: 1.8rem;
+}
+
+.floatleftcodecustomer {
+  float: left;
+  padding-left: 0.2rem;
 }
 
 .responsediv {

@@ -56,6 +56,14 @@
   row-gap: 0.3rem;
 }
 
+.grid6flex {
+  display: grid;
+  grid-auto-rows: min-content;
+  grid-template-columns: min-content min-content min-content min-content min-content min-content;
+  column-gap: 0.7rem;
+  row-gap: 0.3rem;
+}
+
 .grid7flex {
   display: grid;
   grid-auto-rows: min-content;
@@ -67,6 +75,14 @@
 .flexwrapper {
   display: flex;
   flex-wrap: wrap;
+}
+
+.bottompadding {
+  padding-bottom: 1rem;
+}
+
+.toppadding {
+  padding-top: 1rem;
 }
 
 .somemargin > * {
