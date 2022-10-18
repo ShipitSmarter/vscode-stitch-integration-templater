@@ -1,5 +1,8 @@
 # Change Log
 
+## 1.7.12
+- Parameters
+  - Now allows mass updates of `code company` and `code customer` fields
 ## 1.7.11
 - Parameters
   - Now allows resizing of `parameter name` and `new value` fields through dropdowns to improve ease-of-use
