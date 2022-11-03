@@ -598,3 +598,15 @@ let button: string = /*html*/ `
 	`;
 return button;
 }
+
+export function forceWriteFileSync(filePath:string, fileContent:string, options:any) {
+	const parentDir = parentPath(cleanPath(filePath));
+	
+	// make parent directory if not exists
+	if(!fs.existsSync(parentDir)) {
+		fs.mkdirSync(parentDir, { recursive: true });
+	}
+	
+	// write file
+	fs.writeFileSync(filePath,fileContent,options);
+}

@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.13
+- Parameters
+  - Now places log files in `/log` subfolder, to clearly distinguish them from template files
+
 ## 1.7.12
 - Parameters
   - Now allows mass updates of `code company` and `code customer` fields

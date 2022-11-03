@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory, getWorkspaceFiles, getAuth, checkAuth, saveAuth, getUserPwdFromAuth } from "../utilities/functions";
+import { getUri, getWorkspaceFile, removeQuotes, toBoolean, isEmpty, cleanPath, parentPath, getFileContentFromGlob, getDateTimeStamp, nameFromPath, isDirectory, getWorkspaceFiles, getAuth, checkAuth, saveAuth, getUserPwdFromAuth, forceWriteFileSync } from "../utilities/functions";
 import { ParameterHtmlObject } from "./ParameterHtmlObject";
 import * as fs from "fs";
 import axios from 'axios';
@@ -81,6 +81,7 @@ export class ParameterPanel {
   private _configGlob: string = "**/templater/parameters/";
   private _settingsGlob: string = "**/.vscode/settings.json";
   private _readmeSetting: string = "stitch.parameters.readmeLocation";
+  private _logFolder: string = 'log';
   private _settings: any;
   private _focusField: string = '';
   private _newParameterCodes: string[] = [];
@@ -702,9 +703,10 @@ export class ParameterPanel {
     this._previous = false;
 
     // save values to file
-    let fileName:string = 'Set_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
+    let fileName:string = 'Log_' + this._codeCompanyValues[0]+'_'+ this._fieldValues[environmentIndex] +'_' + getDateTimeStamp() + '.csv';
     let fileDir: string = isDirectory(this._fieldValues[saveIndex]) ? this._fieldValues[saveIndex] : parentPath(cleanPath(this._fieldValues[saveIndex]));
-    this._writeFile(fileDir + '/'+ fileName);
+    
+    this._writeFile(fileDir + '/' + this._logFolder + '/'+ fileName);
 
     // clear previous responses and update webview
     this._clearResponses();
@@ -927,6 +929,7 @@ export class ParameterPanel {
     }
   }
 
+  
   private _writeFile(filePath:string) {
     // construct file content array
     let fileContentArray: string[][] = [['CodeCompany','CodeCustomer','Name','PreviousValue','NewValue','ChangeReason']];
@@ -950,7 +953,7 @@ export class ParameterPanel {
     );
 
     // write to file
-    fs.writeFileSync(filePath,output,{encoding:'utf8',flag:'w'});
+    forceWriteFileSync(filePath,output,{encoding:'utf8',flag:'w'});
   }
 
   private async _getAPIDetails() {
