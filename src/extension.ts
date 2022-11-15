@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { CreateIntegrationPanel } from "./panels/CreateIntegrationPanel";
 import { CreatePostmanCollectionPanel } from './panels/CreatePostmanCollectionPanel';
 import { ParameterPanel } from './panels/ParameterPanel';
-import { getWorkspaceFile } from './utilities/functions';
+import { executePowershellFunction, getCleanFilePathAndName, getWorkspaceFile } from './utilities/functions';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -36,41 +36,37 @@ export function activate(context: vscode.ExtensionContext) {
 	// Create parameter panel and open CSV file
 	const parameterLoadCommand = vscode.commands.registerCommand("stitch.parameters-loadcsv", (uri,files) => {
 		if(typeof files !== 'undefined' && files.length > 0) {
-			// const filePath: string = files[0].path.substring(1);
 			const filePath = files[0].fsPath;
 			ParameterPanel.render(context.extensionUri, context, filePath);
 		}
 	});
 	context.subscriptions.push(parameterLoadCommand);
 
+	// update parameterconfigs CSV file
+	const updateParameterConfigsFileCommand = vscode.commands.registerCommand("stitch.parameterconfigs-update", (uri,files) => {
+		let filePathName = getCleanFilePathAndName(files);
+
+		let carrier: string = filePathName.filePath.replace(/^.*carriers\//g,'').replace(/\/.*$/g,'');
+
+		let commands:string[] = [`New-UpdateParameterConfigsCSV "${filePathName.filePath}" -Test`];
+		let informationMessage:string = `ParameterConfigs.csv has been updated for carrier ${carrier}`;
+
+		// execute
+		executePowershellFunction(commands, informationMessage);
+
+	});
+	context.subscriptions.push(updateParameterConfigsFileCommand);
+
 	// sort .sbn functions file
 	const sortScribanFunctionsFileCommand = vscode.commands.registerCommand("stitch.scriban-functions-sort", (uri,files) => {
-		// get file name and path
-		let filePath = '';
-		let fileName = '';
+		let filePathName = getCleanFilePathAndName(files);
 
-		if(typeof files !== 'undefined' && files.length > 0) {
-			filePath = files[0].fsPath;
-			fileName = filePath.replace(/\\/g, '/').split('/').pop() ?? '';
-		}
+		let commands:string[] = [`Update-SortScribanFile "${filePathName.filePath}"`];
+		let informationMessage:string = `File ${filePathName.fileName} has been sorted`;
 
-		// get functions.ps1 name and path
-		let functionsFileName = 'functions.ps1';
-		getWorkspaceFile('**/scripts/' + functionsFileName).then((sortFunctionsPath => {
-			let sortFunctionsDirectory = sortFunctionsPath.replace(/\\/g, '/').replace(/\/[^\/]+$/,'');
-
-			// execute sort command in terminal
-			let terminal = vscode.window.createTerminal();
-			terminal.show();
-			terminal.sendText(`cd ${sortFunctionsDirectory}`);
-			terminal.sendText(`. ./${functionsFileName}`);
-			terminal.sendText(`Update-SortScribanFile "${filePath}"`);
-
-			// let user know the sort has been executed
-			vscode.window.showInformationMessage(`File ${fileName} has been sorted`);
-		}));
+		// execute
+		executePowershellFunction(commands, informationMessage);
 
 	});
 	context.subscriptions.push(sortScribanFunctionsFileCommand);
-	
 }
