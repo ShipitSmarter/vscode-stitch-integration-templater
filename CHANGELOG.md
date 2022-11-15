@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.7.14 
+- Carrier integration
+  - Now it is possible to update the `ParameterConfigs.csv` of an existing integration by right-clicking on `*.integration.(metadata.)json` file and selecting `Create/update ParameterConfigs CSV file`
+
 ## 1.7.13
 - Parameters
   - Now places log files in `/log` subfolder, to clearly distinguish them from template files
