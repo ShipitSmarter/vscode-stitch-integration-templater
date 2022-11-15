@@ -36,7 +36,8 @@
     "onCommand:stitch.postman-collection",
     "onCommand:stitch.parameters",
     "onCommand:stitch.parameters-loadcsv",
-    "onCommand:stitch.scriban-functions-sort"
+    "onCommand:stitch.scriban-functions-sort",
+    "onCommand:stitch.parameterconfigs-update"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -62,6 +63,10 @@
         "title": "Load file to 'get/set parameters'"
       },
       {
+        "command": "stitch.parameterconfigs-update",
+        "title": "Create/update ParameterConfigs CSV file"
+      },
+      {
         "command": "stitch.scriban-functions-sort",
         "title": "Sort Scriban functions file"
       }
@@ -76,6 +81,11 @@
         {
           "command": "stitch.parameters-loadcsv",
           "when": "resourceExtname == .csv && config.stitch.parameters.enabled",
+          "group": "stitch"
+        },
+        {
+          "command": "stitch.parameterconfigs-update",
+          "when": "resourceFilename =~ /^[\\s\\S]*\\.integration\\.[^\\/\\\\]*json$/ && config.stitch.integrationtemplater.enabled",
           "group": "stitch"
         },
         {
