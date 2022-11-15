@@ -610,3 +610,37 @@ export function forceWriteFileSync(filePath:string, fileContent:string, options:
 	// write file
 	fs.writeFileSync(filePath,fileContent,options);
 }
+
+export function executePowershellFunction(psCommandArray:string[],informationMessage:string = '') {
+	// get functions.ps1 name and path
+	let functionsFileName = 'functions.ps1';
+	getWorkspaceFile('**/scripts/' + functionsFileName).then( functionsPath => {
+		let functionsDirectory = functionsPath.replace(/\\/g, '/').replace(/\/[^\/]+$/,'');
+
+		// execute commands in new terminal window
+		let terminal = vscode.window.createTerminal();
+		terminal.show();
+
+		terminal.sendText(`cd ${functionsDirectory}`);
+		terminal.sendText(`. ./${functionsFileName}`);
+
+		for (const psCommand of psCommandArray) {
+			terminal.sendText(psCommand);
+		}
+
+		// let user know the commands have been executed
+		if (!isEmpty(informationMessage)) {
+			vscode.window.showInformationMessage(informationMessage);
+		}
+	});
+}
+
+export function getCleanFilePathAndName(files:any[]) : {filePath:string, fileName:string} {
+	// get file name and path
+	let filesValid = (typeof files !== 'undefined') && (files.length > 0);
+
+	return {
+		filePath: filesValid ? files[0].fsPath.replace(/\\/g, '/') : '',
+		fileName: filesValid ? (files[0].fsPath.replace(/\\/g, '/').split('/').pop() ?? '') : ''
+	};
+}
